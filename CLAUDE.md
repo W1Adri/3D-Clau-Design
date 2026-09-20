@@ -16,7 +16,7 @@ repositorio; esto explica **por qué** está como está y **qué falta por decid
 | Huecos sin ninguna aproximación (TBD) | **42** |
 | Números inventados aquí (SUPUESTO) | **28** — se dibujan, no son datos (§2) |
 | Discrepancias entre fuentes | **9** |
-| Tests | **115**, todos en verde |
+| Tests | **120**, todos en verde |
 | Distribución | **CONFIRMADA** el 2026-09-20: dos columnas de 3U, moduladores en la franja lateral |
 | Piezas colocadas | **26**. Todos los componentes de la opción B están dibujados y situados |
 | Geometría real de fabricante | **3** piezas salen de un STEP de AAC (§9); el telescopio tiene sitio reservado para el suyo |

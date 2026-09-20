@@ -231,7 +231,7 @@ data/layout.yaml        distribución dentro del 6U (GENERADO, no editar)
 tools/generar_layout.py genera data/layout.yaml desde el catálogo
 src/clau3d/             modelo de datos, piezas, ensamblaje, análisis, informes
 src/clau3d/visor/       pagina del visor web (clau3d ver)
-tests/                  interferencias, conexiones, integridad de los datos
+tests/                  120 tests: datos, formas, supuestos, keep-outs, STEP, visor
 cad/vendor/             STEP de fabricante, una carpeta por proveedor (no se tocan)
 cad/generated/          STEP generados: uno por pieza, mas el ensamblaje completo
 cad/generated/subsistemas/  un STEP por subsistema, con las coordenadas del conjunto
