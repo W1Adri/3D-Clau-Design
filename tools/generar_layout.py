@@ -124,7 +124,7 @@ def rotacion_de_montaje(componente, normal: str) -> list[int]:
         )
 
 
-def dims_en_mundo(componente, rotacion) -> tuple[float, float, float]:
+def dims_en_mundo(catalogo, componente, rotacion) -> tuple[float, float, float]:
     """Caja envolvente de la pieza YA girada, conectores incluidos.
 
     Se gira el solido de verdad en vez de permutar cotas. Permutar valdria
@@ -141,7 +141,11 @@ def dims_en_mundo(componente, rotacion) -> tuple[float, float, float]:
 
     from clau3d import parts
 
-    solido = parts.solido(componente)
+    # El telescopio es un 'cassegrain': su geometria se deriva tambien de
+    # 'integracion.optica', asi que hay que pasarle el catalogo. Se mide la
+    # ENVOLVENTE porque es lo que la pieza reserva (el modelo detallado es
+    # hueco), y es lo mismo que el analisis usa despues.
+    solido = parts.solido_envolvente(componente, catalogo)
     origen = cq.Vector(0, 0, 0)
     for eje, angulo in zip(
         (cq.Vector(1, 0, 0), cq.Vector(0, 1, 0), cq.Vector(0, 0, 1)), rotacion
@@ -302,7 +306,7 @@ def generar_keep_outs(catalogo, colocaciones, zonas_por_id) -> list[dict]:
             continue
         rotacion = colocacion["rotacion"]
         centro = colocacion["centro"]
-        dims = dims_en_mundo(componente, rotacion)
+        dims = dims_en_mundo(catalogo, componente, rotacion)
         eje_local = {"X": "+X", "Y": "+Y", "Z": "+Z"}[componente.montaje.eje]
         normal = None
         if componente.montaje.cara:
@@ -354,7 +358,7 @@ def generar_keep_outs(catalogo, colocaciones, zonas_por_id) -> list[dict]:
         componente = catalogo[cid]
         rotacion = colocacion["rotacion"]
         centro = colocacion["centro"]
-        dims = dims_en_mundo(componente, rotacion)
+        dims = dims_en_mundo(catalogo, componente, rotacion)
         for conector in componente.conectores:
             if conector.tipo != "coaxial" or conector.dimensiones.es_tbd:
                 continue
@@ -440,13 +444,83 @@ def generar_keep_outs(catalogo, colocaciones, zonas_por_id) -> list[dict]:
             "nota": f"Camino optico {desde} -> {hasta} ({con.get('id')}).",
         })
 
+    salida += _haz_del_telescopio(catalogo, puestas)
     return salida
+
+
+def _haz_del_telescopio(catalogo, puestas) -> list[dict]:
+    """El camino del haz DENTRO del barrilete, con su diametro en cada tramo.
+
+    Son dos tramos y no uno porque el telescopio es un compresor de haz: por
+    delante del primario viaja la apertura entera, y por detras -- entre el
+    secundario y la brida del FSM, atravesando el agujero central -- viaja ya
+    comprimido. Dibujarlo con un solo tubo perderia justamente el dato que
+    importa.
+
+    Van como KEEP-OUT y no como cuerpo solido: ahi no hay material, hay luz. Y
+    llevan 'de_pieza', porque caen enteros dentro de la envolvente del propio
+    telescopio: sin eso el modelo diria que el telescopio invade su propio haz.
+    """
+    from clau3d.optica import parametros
+
+    cid = "telescopio_cassegrain"
+    colocacion = puestas.get((cid, 1))
+    if colocacion is None or not catalogo.existe(cid):
+        return []
+    componente = catalogo[cid]
+    if componente.tipo_forma != "cassegrain":
+        return []
+    m = parametros.mecanica(componente, catalogo)
+    o = m.optica
+    cx, cy, cz = colocacion["centro"]
+
+    fuente = (
+        f"Envolvente del haz dentro del barrilete, derivada de 'optica' en "
+        f"data/components.yaml. SUPUESTO por partida doble: la apertura libre "
+        f"es una decision de ACSAR sin diametro de barrilete que la respalde, y "
+        f"el haz comprimido se dibuja con "
+        f"integracion.optica.diametro_haz_modelado ({o.diametro_haz:.0f} mm) "
+        f"porque 'optica.diametro_haz_comprimido' sigue siendo TBD."
+    )
+
+    def _tubo(lado: float, z0: float, z1: float, sufijo: str, nota: str) -> dict:
+        return {
+            "id": f"haz_telescopio_{sufijo}",
+            "tipo": "haz_libre",
+            "estado": "supuesto",
+            "fuente": fuente,
+            "de_pieza": cid,
+            "min": [round(cx - lado / 2, 3), round(cy - lado / 2, 3), round(cz + z0, 3)],
+            "max": [round(cx + lado / 2, 3), round(cy + lado / 2, 3), round(cz + z1, 3)],
+            "nota": nota,
+        }
+
+    return [
+        _tubo(
+            o.apertura_libre,
+            m.z_vertice_primario,
+            m.z_frontal_exterior,
+            "colimado",
+            f"Haz de entrada, {o.apertura_libre:.0f} mm, de la apertura al "
+            f"primario. Es lo que obliga a que nada estructural entre en el "
+            f"tubo por delante del espejo.",
+        ),
+        _tubo(
+            o.diametro_haz,
+            m.z_trasero_exterior,
+            m.z_vertice_secundario,
+            "comprimido",
+            f"Haz comprimido, {o.diametro_haz:.0f} mm, del secundario a la "
+            f"brida del FSM atravesando el agujero central del primario. "
+            f"Magnificacion derivada M = {o.magnificacion:.2f}.",
+        ),
+    ]
 
 
 def _caja_mundo(catalogo, colocacion):
     """(min, max) de la pieza ya girada y situada."""
     componente = catalogo[colocacion["componente"]]
-    dims = dims_en_mundo(componente, colocacion["rotacion"])
+    dims = dims_en_mundo(catalogo, componente, colocacion["rotacion"])
     centro = colocacion["centro"]
     return (
         [centro[i] - dims[i] / 2 for i in range(3)],
@@ -502,7 +576,7 @@ def generar() -> str:
                 # PC104 de verdad; un pin que atraviesa el BLOQUE MACIZO con el
                 # que se modela una tarjeta cuya altura no se conoce, no. Se
                 # reserva por lo dibujado, que es conservador y cierto.
-                _, _, dz = dims_en_mundo(componente, rotacion)
+                _, _, dz = dims_en_mundo(catalogo, componente, rotacion)
                 ranura = math.ceil(dz / paso) * paso
                 colocaciones.append(
                     {
@@ -589,7 +663,7 @@ def generar() -> str:
             if not componente.modelable:
                 continue
             rotacion = rotacion_de_montaje(componente, "+Y")
-            piezas.append((componente, rotacion, dims_en_mundo(componente, rotacion)))
+            piezas.append((componente, rotacion, dims_en_mundo(catalogo, componente, rotacion)))
         if not piezas:
             continue
         fondo = max(dims[2] for _, _, dims in piezas)
@@ -648,14 +722,14 @@ def generar() -> str:
         )
         # Hacia +X desde el FSM: dicroico y colimador, en orden inverso al de
         # la cadena porque la cadena viene de fuera hacia el espejo.
-        cursor_x = x_eje_telescopio + dims_en_mundo(fsm, GIRO_FSM)[0] / 2
+        cursor_x = x_eje_telescopio + dims_en_mundo(catalogo, fsm, GIRO_FSM)[0] / 2
         x_dicroico = None
         for cid in reversed(CADENA_BANCO):
             componente = catalogo[cid]
             if not componente.modelable:
                 continue
             rotacion = rotacion_de_montaje(componente, "+Y")
-            dx, dy, dz = dims_en_mundo(componente, rotacion)
+            dx, dy, dz = dims_en_mundo(catalogo, componente, rotacion)
             cursor_x += HOLGURA_BANCO
             centro_x = cursor_x + dx / 2
             colocaciones.append(
@@ -680,7 +754,7 @@ def generar() -> str:
                 if not componente.modelable:
                     continue
                 rotacion = rotacion_de_montaje(componente, "+Y")
-                dx, dy, dz = dims_en_mundo(componente, rotacion)
+                dx, dy, dz = dims_en_mundo(catalogo, componente, rotacion)
                 centro_y = signo * (ancho_dicroico / 2 + HOLGURA_BANCO + dy / 2)
                 colocaciones.append(
                     {
@@ -702,7 +776,7 @@ def generar() -> str:
     # alrededor, que es lo que se quiere ver.
     telescopio = catalogo["telescopio_cassegrain"]
     if telescopio.modelable:
-        _, _, l_tubo = dims_en_mundo(telescopio, [0, 0, 0])
+        _, _, l_tubo = dims_en_mundo(catalogo, telescopio, [0, 0, 0])
         colocaciones.append(
             {
                 "componente": "telescopio_cassegrain",
@@ -724,7 +798,7 @@ def generar() -> str:
     # el coste de que apunta al lado contrario que el telescopio.
     antena = catalogo["antena_quasar_wsant"]
     if antena.modelable:
-        _, _, espesor = dims_en_mundo(antena, [0, 0, 0])
+        _, _, espesor = dims_en_mundo(catalogo, antena, [0, 0, 0])
         colocaciones.append(
             {
                 "componente": "antena_quasar_wsant",
@@ -916,8 +990,10 @@ def generar() -> str:
             f"  - id: {k['id']}",
             f"    tipo: {k['tipo']}",
             f"    estado: {k['estado']}",
-            "    fuente: >-",
         ]
+        if k.get("de_pieza"):
+            lineas.append(f"    de_pieza: {k['de_pieza']}")
+        lineas += ["    fuente: >-"]
         lineas += [f"      {t}" for t in _envolver(k["fuente"], 66)]
         lineas += [
             "    caja:",

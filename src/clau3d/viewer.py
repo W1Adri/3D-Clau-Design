@@ -39,7 +39,15 @@ from pathlib import Path
 from . import assembly, gltf, parts, structure
 from .analysis import fit, interference, volume
 from .assembly import Layout, PiezaColocada
-from .datamodel import DIR_CAD, DIR_DATOS, RAIZ, Catalogo, Componente, cargar
+from .datamodel import (
+    DIR_CAD,
+    DIR_DATOS,
+    PARAMETROS_CASSEGRAIN,
+    RAIZ,
+    Catalogo,
+    Componente,
+    cargar,
+)
 
 DIR_VISOR = Path(__file__).resolve().parent / "visor"
 DIR_SALIDA = DIR_CAD / "generated"
@@ -191,6 +199,45 @@ def _sin_geometria(catalogo: Catalogo) -> list[dict]:
     return filas
 
 
+def _telescopio(catalogo: Catalogo) -> dict | None:
+    """Configuracion optica derivada del telescopio, si se dibuja con el modelo.
+
+    Devuelve None cuando el telescopio se dibuja con el STEP del fabricante o
+    con cualquier otra forma: entonces no hay modelo parametrico del que hablar.
+    """
+    if not catalogo.existe("telescopio_cassegrain"):
+        return None
+    componente = catalogo["telescopio_cassegrain"]
+    if componente.tipo_forma != "cassegrain":
+        return None
+
+    from .optica import cassegrain, parametros
+
+    datos = parametros.resumen(componente, catalogo)
+    datos["componente"] = componente.id
+    datos["estado_geometria"] = parts.estado_geometria(componente)
+    datos["desde_step"] = parts.step_disponible(componente)
+    if not datos["desde_step"]:
+        datos["piezas_internas"] = [
+            {
+                "nombre": nombre,
+                "volumen_cm3": volume.a_cm3(solido.Volume()),
+                "caja": _caja(structure.Caja(
+                    solido.BoundingBox().xmin, solido.BoundingBox().ymin,
+                    solido.BoundingBox().zmin, solido.BoundingBox().xmax,
+                    solido.BoundingBox().ymax, solido.BoundingBox().zmax,
+                )),
+            }
+            for nombre, solido in cassegrain.piezas(componente, catalogo)
+        ]
+    datos["parametros"] = {
+        nombre: _magnitud(componente.extras[f"optica.{nombre}"])
+        for nombre in PARAMETROS_CASSEGRAIN
+        if f"optica.{nombre}" in componente.extras
+    }
+    return datos
+
+
 def escena(catalogo: Catalogo, layout: Layout, piezas: list[PiezaColocada]) -> dict:
     """Todo lo que el GLB no sabe decir, en un solo diccionario."""
     envolvente = structure.envolvente(catalogo)
@@ -255,6 +302,12 @@ def escena(catalogo: Catalogo, layout: Layout, piezas: list[PiezaColocada]) -> d
             for nombre, caja in structure.railes(catalogo)
         ],
         "piezas": [_pieza(p) for p in piezas],
+        # El telescopio parametrico: lo declarado, lo derivado y las piezas que
+        # tiene dentro. El GLB lo ensena como un solo cuerpo -- una pieza, un
+        # nodo --, asi que los nombres propios de sus 28 piezas internas y sus
+        # cotas derivadas solo pueden llegar por aqui. El JavaScript no calcula
+        # nada: formatea lo que venga.
+        "telescopio": _telescopio(catalogo),
         "sin_geometria": _sin_geometria(catalogo),
         # Los numeros inventados, uno a uno. El visor los ensena como lista de
         # "esto hay que preguntarlo", que es lo unico que un visor generico no

@@ -1,5 +1,5 @@
 {
- "generado": "2026-09-20T18:00:47+02:00",
+ "generado": "2026-09-20T21:53:58+02:00",
  "glb": "clau_6u.glb",
  "proyecto": "CLAU",
  "layout": {
@@ -70,9 +70,9 @@
    "propulsion",
    "cables_rf_moduladores"
   ],
-  "pendientes_tbd": 42,
-  "pendientes_supuestos": 28,
-  "discrepancias": 9
+  "pendientes_tbd": 45,
+  "pendientes_supuestos": 61,
+  "discrepancias": 10
  },
  "zonas": [
   {
@@ -710,6 +710,60 @@
      10.000000000000007,
      5.0,
      10.0
+    ]
+   }
+  },
+  {
+   "id": "haz_telescopio_colimado",
+   "tipo": "haz_libre",
+   "nota": "Haz de entrada, 90 mm, de la apertura al primario. Es lo que obliga a que nada estructural entre en el tubo por delante del espejo.",
+   "caja": {
+    "min": [
+     -8.15,
+     -45.0,
+     -5.3
+    ],
+    "max": [
+     81.85,
+     45.0,
+     180.7
+    ],
+    "centro": [
+     36.849999999999994,
+     0.0,
+     87.69999999999999
+    ],
+    "dims": [
+     90.0,
+     90.0,
+     186.0
+    ]
+   }
+  },
+  {
+   "id": "haz_telescopio_comprimido",
+   "tipo": "haz_libre",
+   "nota": "Haz comprimido, 10 mm, del secundario a la brida del FSM atravesando el agujero central del primario. Magnificacion derivada M = 9.00.",
+   "caja": {
+    "min": [
+     31.85,
+     -5.0,
+     -19.3
+    ],
+    "max": [
+     41.85,
+     5.0,
+     172.478
+    ],
+    "centro": [
+     36.85,
+     0.0,
+     76.589
+    ],
+    "dims": [
+     10.0,
+     10.0,
+     191.77800000000002
     ]
    }
   }
@@ -3492,7 +3546,7 @@
     "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences",
     "fuente_prevista": "Telescopio Cassegrain de Aperture Optical Sciences, via Oscar (ACSAR). Existe ya un concepto en Telescopio_concepto.SLDPRT (entrega \"Preliminar viability model\" del 2026-09-20), que hay que reexportar a STEP AP214 o AP242 porque el formato nativo de SolidWorks no hay manera de leerlo."
    },
-   "forma": "cilindro",
+   "forma": "cassegrain",
    "montaje": {
     "cara": "-Z",
     "eje": "Z",
@@ -3549,8 +3603,8 @@
      ],
      "unidad": "mm",
      "estado": "supuesto",
-     "fuente": "COTA SUPERIOR, no una medida. El diametro es la altura interior del 6U (95.4 mm): el barrilete no puede pasar de ahi, luego este es el telescopio MAS GRANDE que cabe, no el que hay. La longitud es la ya reservada en el layout ('longitud_reservada', 200 mm, provisional). Dibujarlo asi hace visible lo que dice el chequeo 'apertura_vs_altura': con 90 mm de apertura libre quedan 2.7 mm por lado para barrilete, celda y ajuste, que no da para nada. Si el diametro real bajase, la columna de payload se abriria; si no cabe, el telescopio tendra que ser el propio elemento estructural de esa cara.",
-     "nota": "El brief indica \"aprox. 2U\" y apertura libre 90 mm, pero 2U no fija el contorno. El diametro exterior es el numero critico: ver el chequeo 'apertura_vs_altura' en el analisis. OJO con el \"2U\": la U de longitud de la CDS son 113.5 mm, no 100, asi que \"2U\" son ~227 mm. La longitud real saldra del STEP del telescopio (Oscar), no de esta cifra.",
+     "fuente": "COTA SUPERIOR, no una medida. Es la ENVOLVENTE que el telescopio reserva, y lo que usan el analisis de volumen y el de interferencias: el modelo detallado es hueco por dentro, y meter ese hueco en el analisis diria que dentro del tubo cabe algo, que es falso. El lado de la seccion es la altura interior del 6U (95.4 mm): el barrilete no puede pasar de ahi, luego este es el telescopio MAS GRANDE que cabe, no el que hay. Es una seccion CUADRADA, no un diametro: ver 'optica.seccion_barrilete', que es donde esta el razonamiento. La longitud es la ya reservada en el layout ('longitud_reservada', 200 mm, provisional). Con 90 mm de apertura libre quedan 2.7 mm hasta la cara plana y 22.5 mm hasta la esquina; ver el chequeo 'apertura_telescopio'. Si no cabe, el telescopio tendra que ser el propio elemento estructural de esa cara.",
+     "nota": "El brief indica \"aprox. 2U\" y apertura libre 90 mm, pero 2U no fija el contorno. El contorno exterior es el numero critico: ver el chequeo 'apertura_telescopio' en el analisis. OJO con el \"2U\": la U de longitud de la CDS son 113.5 mm, no 100, asi que \"2U\" son ~227 mm. La longitud real saldra del STEP del telescopio (Oscar), no de esta cifra.",
      "falta": "Diametro exterior del barrilete y longitud optica real. YA EXISTE un concepto en formato nativo SolidWorks (Telescopio_concepto.SLDPRT, entrega \"Preliminar viability model\" del 2026-09-20), ilegible. Hace falta reexportarlo a STEP AP214 o AP242 y dejarlo en la ruta de 'step_esperado'. Ver cad/vendor/MANIFEST.yaml, seccion 'sin_convertir'.",
      "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences",
      "discrepancia": []
@@ -3918,6 +3972,1153 @@
    }
   }
  ],
+ "telescopio": {
+  "configuracion": "afocal_mersenne",
+  "afocal": true,
+  "haz_es_supuesto": true,
+  "haz_estado": "supuesto",
+  "declarado": {
+   "apertura_libre_mm": 90.0,
+   "focal_primario_mm": 200.0,
+   "relacion_focal_primario": 2.2222222222222223,
+   "conica_primario": -1.0,
+   "conica_secundario": -1.0,
+   "diametro_haz_comprimido_mm": 10.0,
+   "seccion_barrilete_mm": 95.4,
+   "longitud_barrilete_mm": 200.0
+  },
+  "derivado": {
+   "magnificacion": 9.0,
+   "focal_secundario_mm": 22.22222222222222,
+   "separacion_mm": 177.77777777777777,
+   "diametro_secundario_mm": 14.0,
+   "diametro_agujero_primario_mm": 18.0,
+   "obstruccion_lineal": 0.15555555555555556,
+   "perdida_obstruccion_dB_amplitud": 0.21276174598156072,
+   "radio_curvatura_primario_mm": 400.0,
+   "radio_curvatura_secundario_mm": 44.44444444444444,
+   "longitud_necesaria_mm": 198.77777777777777,
+   "margen_longitud_mm": 1.2222222222222285,
+   "margen_cara_plana_mm": 2.700000000000003,
+   "margen_esquina_mm": 22.457986925196636,
+   "longitud_baffle_primario_mm": 16.627687752661224,
+   "longitud_baffle_secundario_mm": 13.163586137523467
+  },
+  "foco": {
+   "tipo": "virtual",
+   "nota": "En el afocal el foco comun de las dos conicas es VIRTUAL: entra colimado y sale colimado, y no hay ningun plano donde se forme una imagen real. No se dibuja ningun marcador porque ahi no hay nada."
+  },
+  "componente": "telescopio_cassegrain",
+  "estado_geometria": "supuesto",
+  "desde_step": false,
+  "piezas_internas": [
+   {
+    "nombre": "mamparo_trasero",
+    "volumen_cm3": 26.841665879922303,
+    "caja": {
+     "min": [
+      -47.7,
+      -47.7,
+      -100.0
+     ],
+     "max": [
+      47.7,
+      47.7,
+      -97.0
+     ],
+     "centro": [
+      0.0,
+      0.0,
+      -98.5
+     ],
+     "dims": [
+      95.4,
+      95.4,
+      3.0
+     ]
+    }
+   },
+   {
+    "nombre": "brida_interfaz_fsm",
+    "volumen_cm3": 4.3381858799223005,
+    "caja": {
+     "min": [
+      -20.0,
+      -20.0,
+      -97.0
+     ],
+     "max": [
+      20.0,
+      20.0,
+      -94.0
+     ],
+     "centro": [
+      0.0,
+      0.0,
+      -95.5
+     ],
+     "dims": [
+      40.0,
+      40.0,
+      3.0
+     ]
+    }
+   },
+   {
+    "nombre": "mamparo_frontal",
+    "volumen_cm3": 8.218304629442008,
+    "caja": {
+     "min": [
+      -47.7,
+      -47.7,
+      97.0
+     ],
+     "max": [
+      47.7,
+      47.7,
+      100.0
+     ],
+     "centro": [
+      0.0,
+      0.0,
+      98.5
+     ],
+     "dims": [
+      95.4,
+      95.4,
+      3.0
+     ]
+    }
+   },
+   {
+    "nombre": "barrilete",
+    "volumen_cm3": 109.29959999999997,
+    "caja": {
+     "min": [
+      -47.7,
+      -47.7,
+      -97.0
+     ],
+     "max": [
+      47.7,
+      47.7,
+      97.0
+     ],
+     "centro": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "dims": [
+      95.4,
+      95.4,
+      194.0
+     ]
+    }
+   },
+   {
+    "nombre": "larguero_esquina_1",
+    "volumen_cm3": 27.936,
+    "caja": {
+     "min": [
+      34.2,
+      34.2,
+      -97.0
+     ],
+     "max": [
+      46.2,
+      46.2,
+      97.0
+     ],
+     "centro": [
+      40.2,
+      40.2,
+      0.0
+     ],
+     "dims": [
+      12.0,
+      12.0,
+      194.0
+     ]
+    }
+   },
+   {
+    "nombre": "larguero_esquina_2",
+    "volumen_cm3": 27.936,
+    "caja": {
+     "min": [
+      -46.2,
+      34.2,
+      -97.0
+     ],
+     "max": [
+      -34.2,
+      46.2,
+      97.0
+     ],
+     "centro": [
+      -40.2,
+      40.2,
+      0.0
+     ],
+     "dims": [
+      12.0,
+      12.0,
+      194.0
+     ]
+    }
+   },
+   {
+    "nombre": "larguero_esquina_3",
+    "volumen_cm3": 27.936,
+    "caja": {
+     "min": [
+      -46.2,
+      -46.2,
+      -97.0
+     ],
+     "max": [
+      -34.2,
+      -34.2,
+      97.0
+     ],
+     "centro": [
+      -40.2,
+      -40.2,
+      0.0
+     ],
+     "dims": [
+      12.0,
+      12.0,
+      194.0
+     ]
+    }
+   },
+   {
+    "nombre": "larguero_esquina_4",
+    "volumen_cm3": 27.936,
+    "caja": {
+     "min": [
+      34.2,
+      -46.2,
+      -97.0
+     ],
+     "max": [
+      46.2,
+      -34.2,
+      97.0
+     ],
+     "centro": [
+      40.2,
+      -40.2,
+      0.0
+     ],
+     "dims": [
+      12.0,
+      12.0,
+      194.0
+     ]
+    }
+   },
+   {
+    "nombre": "espejo_primario",
+    "volumen_cm3": 59.92687579004833,
+    "caja": {
+     "min": [
+      -46.0,
+      -46.0,
+      -94.0
+     ],
+     "max": [
+      46.0,
+      46.0,
+      -83.355
+     ],
+     "centro": [
+      0.0,
+      0.0,
+      -88.67750000000001
+     ],
+     "dims": [
+      92.0,
+      92.0,
+      10.644999999999996
+     ]
+    }
+   },
+   {
+    "nombre": "espejo_secundario",
+    "volumen_cm3": 0.5732984339023164,
+    "caja": {
+     "min": [
+      -7.0,
+      -7.0,
+      91.77777777777777
+     ],
+     "max": [
+      7.0,
+      7.0,
+      95.77777777777777
+     ],
+     "centro": [
+      0.0,
+      0.0,
+      93.77777777777777
+     ],
+     "dims": [
+      14.0,
+      14.0,
+      4.0
+     ]
+    }
+   },
+   {
+    "nombre": "buje_secundario",
+    "volumen_cm3": 0.5560618996853934,
+    "caja": {
+     "min": [
+      -10.0,
+      -10.0,
+      91.77777777777777
+     ],
+     "max": [
+      10.0,
+      10.0,
+      95.77777777777777
+     ],
+     "centro": [
+      0.0,
+      0.0,
+      93.77777777777777
+     ],
+     "dims": [
+      20.0,
+      20.0,
+      4.0
+     ]
+    }
+   },
+   {
+    "nombre": "tornillo_colimacion_1",
+    "volumen_cm3": 0.028274333882308145,
+    "caja": {
+     "min": [
+      7.0,
+      -1.5,
+      91.77777777777777
+     ],
+     "max": [
+      10.0,
+      1.5,
+      95.77777777777777
+     ],
+     "centro": [
+      8.5,
+      0.0,
+      93.77777777777777
+     ],
+     "dims": [
+      3.0,
+      3.0,
+      4.0
+     ]
+    }
+   },
+   {
+    "nombre": "tornillo_colimacion_2",
+    "volumen_cm3": 0.02827433388230814,
+    "caja": {
+     "min": [
+      -5.749999999999998,
+      5.861215932167729,
+      91.77777777777777
+     ],
+     "max": [
+      -2.7499999999999982,
+      8.86121593216773,
+      95.77777777777777
+     ],
+     "centro": [
+      -4.249999999999998,
+      7.361215932167729,
+      93.77777777777777
+     ],
+     "dims": [
+      3.0,
+      3.0,
+      4.0
+     ]
+    }
+   },
+   {
+    "nombre": "tornillo_colimacion_3",
+    "volumen_cm3": 0.028274333882308142,
+    "caja": {
+     "min": [
+      -5.7500000000000036,
+      -8.861215932167726,
+      91.77777777777777
+     ],
+     "max": [
+      -2.7500000000000036,
+      -5.861215932167726,
+      95.77777777777777
+     ],
+     "centro": [
+      -4.2500000000000036,
+      -7.361215932167726,
+      93.77777777777777
+     ],
+     "dims": [
+      3.0,
+      3.0,
+      4.0
+     ]
+    }
+   },
+   {
+    "nombre": "vane_1",
+    "volumen_cm3": 0.1703971867805736,
+    "caja": {
+     "min": [
+      10.0,
+      -0.400000000000015,
+      90.77777777777777
+     ],
+     "max": [
+      45.5,
+      0.4000000000000001,
+      96.77777777777777
+     ],
+     "centro": [
+      27.75,
+      -7.466249840604178e-15,
+      93.77777777777777
+     ],
+     "dims": [
+      35.5,
+      0.8000000000000151,
+      6.0
+     ]
+    }
+   },
+   {
+    "nombre": "vane_2",
+    "volumen_cm3": 0.17039718678057297,
+    "caja": {
+     "min": [
+      -0.3999999999999989,
+      10.0,
+      90.77777777777777
+     ],
+     "max": [
+      0.40000000000000663,
+      45.5,
+      96.77777777777777
+     ],
+     "centro": [
+      3.858025010572419e-15,
+      27.75,
+      93.77777777777777
+     ],
+     "dims": [
+      0.8000000000000056,
+      35.5,
+      6.0
+     ]
+    }
+   },
+   {
+    "nombre": "vane_3",
+    "volumen_cm3": 0.1703971867805734,
+    "caja": {
+     "min": [
+      -45.5,
+      -0.3999999999999988,
+      90.77777777777777
+     ],
+     "max": [
+      -10.0,
+      0.4000000000000094,
+      96.77777777777777
+     ],
+     "centro": [
+      -27.75,
+      5.3013149425851225e-15,
+      93.77777777777777
+     ],
+     "dims": [
+      35.5,
+      0.8000000000000083,
+      6.0
+     ]
+    }
+   },
+   {
+    "nombre": "vane_4",
+    "volumen_cm3": 0.17039718678057397,
+    "caja": {
+     "min": [
+      -0.4000000000000122,
+      -45.5,
+      90.77777777777777
+     ],
+     "max": [
+      0.3999999999999978,
+      -10.0,
+      96.77777777777777
+     ],
+     "centro": [
+      -7.188694084447889e-15,
+      -27.75,
+      93.77777777777777
+     ],
+     "dims": [
+      0.80000000000001,
+      35.5,
+      6.0
+     ]
+    }
+   },
+   {
+    "nombre": "flexure_1",
+    "volumen_cm3": 0.10799999999999997,
+    "caja": {
+     "min": [
+      24.041630560342618,
+      24.041630560342615,
+      -97.0
+     ],
+     "max": [
+      32.526911934581186,
+      32.526911934581186,
+      -94.0
+     ],
+     "centro": [
+      28.284271247461902,
+      28.284271247461902,
+      -95.5
+     ],
+     "dims": [
+      8.485281374238568,
+      8.485281374238571,
+      3.0
+     ]
+    }
+   },
+   {
+    "nombre": "flexure_2",
+    "volumen_cm3": 0.108,
+    "caja": {
+     "min": [
+      -42.3112676657375,
+      6.678527189926072,
+      -97.0
+     ],
+     "max": [
+      -34.96279843738796,
+      14.026996418275608,
+      -94.0
+     ],
+     "centro": [
+      -38.63703305156273,
+      10.35276180410084,
+      -95.5
+     ],
+     "dims": [
+      7.348469228349543,
+      7.348469228349536,
+      3.0
+     ]
+    }
+   },
+   {
+    "nombre": "flexure_3",
+    "volumen_cm3": 0.108,
+    "caja": {
+     "min": [
+      6.678527189926045,
+      -42.3112676657375,
+      -97.0
+     ],
+     "max": [
+      14.026996418275578,
+      -34.962798437387974,
+      -94.0
+     ],
+     "centro": [
+      10.352761804100812,
+      -38.63703305156274,
+      -95.5
+     ],
+     "dims": [
+      7.348469228349533,
+      7.348469228349529,
+      3.0
+     ]
+    }
+   },
+   {
+    "nombre": "baffle_principal",
+    "volumen_cm3": 31.14044278937904,
+    "caja": {
+     "min": [
+      -46.1,
+      -46.1,
+      -83.355
+     ],
+     "max": [
+      46.1,
+      46.1,
+      97.00000000000001
+     ],
+     "centro": [
+      0.0,
+      0.0,
+      6.822500000000005
+     ],
+     "dims": [
+      92.2,
+      92.2,
+      180.35500000000002
+     ]
+    }
+   },
+   {
+    "nombre": "diafragma_1",
+    "volumen_cm3": 0.1421570675749381,
+    "caja": {
+     "min": [
+      -45.5,
+      -45.5,
+      -47.784
+     ],
+     "max": [
+      45.5,
+      45.5,
+      -46.784
+     ],
+     "centro": [
+      0.0,
+      0.0,
+      -47.284
+     ],
+     "dims": [
+      91.0,
+      91.0,
+      1.0
+     ]
+    }
+   },
+   {
+    "nombre": "diafragma_2",
+    "volumen_cm3": 0.14215706757493898,
+    "caja": {
+     "min": [
+      -45.5,
+      -45.5,
+      -11.712999999999994
+     ],
+     "max": [
+      45.5,
+      45.5,
+      -10.712999999999994
+     ],
+     "centro": [
+      0.0,
+      0.0,
+      -11.212999999999994
+     ],
+     "dims": [
+      91.0,
+      91.0,
+      1.0
+     ]
+    }
+   },
+   {
+    "nombre": "diafragma_3",
+    "volumen_cm3": 0.14215706757493898,
+    "caja": {
+     "min": [
+      -45.5,
+      -45.5,
+      24.35800000000002
+     ],
+     "max": [
+      45.5,
+      45.5,
+      25.35800000000002
+     ],
+     "centro": [
+      0.0,
+      0.0,
+      24.85800000000002
+     ],
+     "dims": [
+      91.0,
+      91.0,
+      1.0
+     ]
+    }
+   },
+   {
+    "nombre": "diafragma_4",
+    "volumen_cm3": 0.1421570675749381,
+    "caja": {
+     "min": [
+      -45.5,
+      -45.5,
+      60.429000000000016
+     ],
+     "max": [
+      45.5,
+      45.5,
+      61.429000000000016
+     ],
+     "centro": [
+      0.0,
+      0.0,
+      60.929000000000016
+     ],
+     "dims": [
+      91.0,
+      91.0,
+      1.0
+     ]
+    }
+   },
+   {
+    "nombre": "baffle_primario",
+    "volumen_cm3": 0.578930694013371,
+    "caja": {
+     "min": [
+      -9.6,
+      -9.6,
+      -85.8848
+     ],
+     "max": [
+      9.6,
+      9.6,
+      -69.37231224733878
+     ],
+     "centro": [
+      0.0,
+      0.0,
+      -77.6285561236694
+     ],
+     "dims": [
+      19.2,
+      19.2,
+      16.512487752661215
+     ]
+    }
+   },
+   {
+    "nombre": "baffle_secundario",
+    "volumen_cm3": 0.3622665194197714,
+    "caja": {
+     "min": [
+      -7.6,
+      -7.6,
+      78.6141916402543
+     ],
+     "max": [
+      7.6,
+      7.6,
+      91.77777777777777
+     ],
+     "centro": [
+      0.0,
+      0.0,
+      85.19598470901605
+     ],
+     "dims": [
+      15.2,
+      15.2,
+      13.163586137523467
+     ]
+    }
+   }
+  ],
+  "parametros": {
+   "configuracion": {
+    "valor": "afocal_mersenne",
+    "unidad": null,
+    "estado": "decision",
+    "fuente": "DECISION DE ARQUITECTURA de este modelo, no de ACSAR todavia. Afocal tipo Mersenne: primario parabolico concavo y secundario parabolico convexo, confocales, de manera que el telescopio entra colimado y sale colimado y es un puro compresor de haz. El motivo es el banco optico. Un Cassegrain FOCAL clasico (f/12, EFL 1080 mm) pone el foco real a unos 40 mm por detras del vertice del primario, o sea DENTRO de z_payload_banco, y obliga a meter una lente de enfoque en un banco que solo tiene 7.7 mm de margen en la linea que importa (ver 3.7 de CLAUDE.md). El afocal no necesita ningun elemento adicional: cero superficies transmisivas en el camino del canal cuantico, donde cualquier refractivo mete birrefringencia por tension y se come la pureza de polarizacion, que es justamente lo que el enlace mide.",
+    "nota": "Si esto pasara a 'focal_clasico', el modelo dibuja el foco real a 'distancia_focal_trasera' detras del vertice del primario y el chequeo 'configuracion_telescopio' avisa de que cae dentro del banco.",
+    "falta": null,
+    "pedir_a": null,
+    "discrepancia": [
+     {
+      "valor": "focal_clasico",
+      "fuente": "Arquitectura de partida del brief (Cassegrain f/12, EFL 1080 mm)",
+      "nota": "Descartada en este modelo por lo de arriba. Tiene a favor que es la configuracion de catalogo de un Cassegrain comercial; tiene en contra el foco dentro del banco y la lente de enfoque."
+     }
+    ]
+   },
+   "focal_primario": {
+    "valor": 200.0,
+    "unidad": "mm",
+    "estado": "supuesto",
+    "fuente": "SUPUESTO, y ACOTADO POR ARRIBA por la longitud reservada. Con 90 mm de apertura sale f/2.22, que es rapido pero es lo que permite la caja: la separacion entre vertices de un Mersenne es f1 * (1 - 1/M), asi que la focal del primario y la longitud del barrilete son el mismo numero con otro nombre. Con 'longitud_reservada' = 200 mm y los espesores de aqui abajo, 200 mm de focal dejan 1.2 mm de margen: ver el chequeo 'longitud_telescopio'. No es una eleccion optica, es el techo.",
+    "nota": "Un primario a f/2.22 es exigente de fabricar y de alinear, y es consecuencia directa de meter 90 mm de apertura en 2U. Con los ~2U de verdad del brief (227 mm, no 200) la misma optica tendria unos 28 mm de margen en vez de 1.2.",
+    "falta": "Focal real del primario, del diseno optico de Aperture Optical Sciences",
+    "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences",
+    "discrepancia": []
+   },
+   "conica_primario": {
+    "valor": -1.0,
+    "unidad": null,
+    "estado": "supuesto",
+    "fuente": "SUPUESTO impuesto por la configuracion: un afocal confocal solo es afocal si las dos superficies son parabolas (K = -1). No es una eleccion libre mientras 'configuracion' sea afocal_mersenne.",
+    "nota": null,
+    "falta": "Constante conica real del primario del diseno optico",
+    "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences",
+    "discrepancia": []
+   },
+   "conica_secundario": {
+    "valor": -1.0,
+    "unidad": null,
+    "estado": "supuesto",
+    "fuente": "SUPUESTO, por lo mismo que el primario: en el Mersenne las dos conicas son parabolas confocales.",
+    "nota": null,
+    "falta": "Constante conica real del secundario del diseno optico",
+    "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences",
+    "discrepancia": []
+   },
+   "diametro_haz_comprimido": {
+    "valor": null,
+    "unidad": "mm",
+    "estado": "TBD",
+    "fuente": null,
+    "nota": "Mientras falte, el modelo dibuja con 'integracion.optica.diametro_haz_modelado' (10 mm, SUPUESTO), que es el mismo numero con el que se dibujan los keep-outs de haz libre del banco. Se lee de alli y no se copia aqui a proposito: el haz que sale del FSM y el que entra por la brida son el mismo haz. Ver el chequeo 'haz_vs_fsm'.",
+    "falta": "Diametro del haz colimado a la salida del telescopio, que es el mismo que entra por la brida trasera desde el FSM. ES EL PARAMETRO QUE LO ACOPLA TODO: fija la magnificacion (M = apertura_libre / este diametro), y con ella la focal del secundario, la separacion entre vertices y el diametro del secundario; y decide si el FSM elegido vale, porque un haz de d mm sobre un espejo a 45 grados deja una huella de d x d*raiz(2). Es el mismo hueco que 'diametro_haz_mm' en e01..e05 de data/connections.yaml.",
+    "pedir_a": "Equipo de optica de ACSAR",
+    "discrepancia": []
+   },
+   "distancia_focal_trasera": {
+    "valor": 40.0,
+    "unidad": "mm",
+    "estado": "supuesto",
+    "fuente": "SUPUESTO. Solo se usa si 'configuracion' pasa a 'focal_clasico': es donde caeria el foco real, por detras del vertice del primario. El orden de magnitud es el tipico de un Cassegrain de catalogo y es suficiente para lo unico que hace falta saber, que es que ese foco cae dentro de z_payload_banco. En el afocal no se usa para nada.",
+    "nota": null,
+    "falta": "Distancia focal trasera del diseno focal, si se eligiera esa configuracion",
+    "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences",
+    "discrepancia": []
+   },
+   "margen_secundario": {
+    "valor": 1.4,
+    "unidad": null,
+    "estado": "supuesto",
+    "fuente": "SUPUESTO. Factor por el que el secundario es mayor que el haz que intercepta, para cubrir el campo y los errores de alineacion y despace. Un 40 por ciento es lo habitual en un terminal de campo pequeno; el numero real sale del diseno optico con el campo de vista y el presupuesto de alineacion, que no existen todavia.",
+    "nota": null,
+    "falta": "Sobredimensionado real del secundario (campo de vista y alineacion)",
+    "pedir_a": "Equipo de optica de ACSAR",
+    "discrepancia": []
+   },
+   "margen_agujero_primario": {
+    "valor": 4.0,
+    "unidad": "mm",
+    "estado": "supuesto",
+    "fuente": "SUPUESTO. El agujero central del primario es el diametro del secundario mas este margen, para que el haz comprimido pase sin vinetear con la tolerancia de mecanizado y de alineacion.",
+    "nota": null,
+    "falta": "Diametro real del agujero central del primario",
+    "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences",
+    "discrepancia": []
+   },
+   "margen_substrato_primario": {
+    "valor": 1.0,
+    "unidad": "mm",
+    "estado": "supuesto",
+    "fuente": "SUPUESTO, y ACOTADO POR ARRIBA por el barrilete: el sustrato del primario es la apertura libre mas este margen por lado, y tiene que caber en el hueco cuadrado que dejan las paredes, que son 95.4 - 2*espesor_pared_barrilete = 92.4 mm entre caras. Con 1.0 mm quedan 92.0 mm de sustrato y 0.4 mm de holgura de montaje. No hay mas: es el mismo apreton de 4.2 de CLAUDE.md, visto desde dentro.",
+    "nota": null,
+    "falta": "Diametro exterior real del sustrato del primario",
+    "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences",
+    "discrepancia": []
+   },
+   "estabilidad_despace_primario_secundario": {
+    "valor": null,
+    "unidad": "um",
+    "estado": "TBD",
+    "fuente": null,
+    "nota": null,
+    "falta": "Estabilidad exigida a la separacion entre el vertice del primario y el del secundario a lo largo de la orbita, en micras. La sensibilidad a desenfoque de un Cassegrain escala con m^2 (1+m), o sea con el cuadrado de la magnificacion del secundario, asi que unas pocas micras de deriva termica entre los dos espejos se comen el presupuesto de frente de onda entero. ES EL REQUISITO QUE DIMENSIONA el tubo metrico (material, seccion, si hace falta invar o CFRP) y la arana, y hoy no existe: el barrilete y los vanes de este modelo estan dibujados con espesores supuestos, no con una rigidez calculada.",
+    "pedir_a": "Equipo de optica de ACSAR",
+    "discrepancia": []
+   },
+   "seccion_barrilete": {
+    "valor": [
+     95.4,
+     95.4
+    ],
+    "unidad": "mm",
+    "estado": "supuesto",
+    "fuente": "SUPUESTO, y CUADRADA a proposito. Es la altura interior del 6U, o sea la cota superior de 4.2 de CLAUDE.md, pero ahora como LADO de un cuadrado y no como diametro. La diferencia es todo el argumento: con un barrilete de revolucion de 95.4 mm de diametro y 90 mm de apertura quedan 2.7 mm por lado, que no dan ni para la celda del espejo, ni para los flexures, ni para tornilleria. Con seccion cuadrada de 95.4 mm la semidiagonal son 67.5 mm, asi que en las ESQUINAS quedan 22.5 mm radiales, que es donde cabe todo eso. Ademas es lo unico compatible con la salida que ya apunta 4.2: si el telescopio tiene que ser el elemento estructural de esa cara, hacen falta caras planas y bridas, no un tubo redondo.",
+    "nota": "Tiene que coincidir con las dos primeras cotas de 'forma.dimensiones': lo que se reserva se mide sobre lo que se dibuja, y el modelo falla al cargar si dejan de coincidir.",
+    "falta": "Contorno exterior real del barrilete",
+    "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences",
+    "discrepancia": []
+   },
+   "espesor_pared_barrilete": {
+    "valor": 1.5,
+    "unidad": "mm",
+    "estado": "supuesto",
+    "fuente": "SUPUESTO, y ACOTADO POR ARRIBA: entre la apertura libre y la cara plana del barrilete hay (95.4 - 90)/2 = 2.70 mm, y ahi tienen que caber la pared, el baffle y su holgura. Con 1.5 mm de pared quedan 1.2 mm para holgura (0.5) y baffle (0.6), y 0.1 mm de aire. La carga no la llevan estas paredes: la llevan los largueros de esquina, que es donde hay seccion.",
+    "nota": null,
+    "falta": "Espesor y material reales de la pared del barrilete",
+    "pedir_a": "Equipo de estructura de ACSAR / Aperture Optical Sciences",
+    "discrepancia": []
+   },
+   "espesor_mamparo": {
+    "valor": 3.0,
+    "unidad": "mm",
+    "estado": "supuesto",
+    "fuente": "SUPUESTO, y ACOTADO POR ARRIBA por la longitud reservada: los dos mamparos, la celda y los dos espejos tienen que caber en lo que sobra despues de la separacion entre vertices, que son 200 - 177.8 = 22.2 mm. 3 mm por mamparo es el minimo razonable para una placa que lleva la brida de interfaz y la apertura.",
+    "nota": null,
+    "falta": "Espesor real de los mamparos",
+    "pedir_a": "Equipo de estructura de ACSAR / Aperture Optical Sciences",
+    "discrepancia": []
+   },
+   "lado_larguero_esquina": {
+    "valor": 12.0,
+    "unidad": "mm",
+    "estado": "supuesto",
+    "fuente": "SUPUESTO. Lado de los cuatro largueros de esquina que unen los dos mamparos. Son el camino de carga real del barrilete, porque en la cara plana no queda seccion (1.5 mm de pared) y en la esquina hay 22.5 mm radiales. El numero real sale del analisis de rigidez, que depende de 'estabilidad_despace_primario_secundario', que es TBD.",
+    "nota": null,
+    "falta": "Seccion real de los largueros, del analisis de rigidez del tubo",
+    "pedir_a": "Equipo de estructura de ACSAR",
+    "discrepancia": []
+   },
+   "brida_interfaz_fsm": {
+    "valor": [
+     40.0,
+     40.0
+    ],
+    "unidad": "mm",
+    "estado": "supuesto",
+    "fuente": "SUPUESTO. Resalte cuadrado sobre la cara interior del mamparo trasero por el que el telescopio se atornilla al banco optico y por cuyo agujero central le entra el haz desde el FSM. Va HACIA DENTRO y no hacia fuera a proposito: hacia fuera invadiria el hueco que el layout le da al banco (z_payload_banco), y la envolvente declarada dejaria de ser la que se dibuja.",
+    "nota": null,
+    "falta": "Interfaz mecanica real telescopio-banco (patron de taladros y plano de referencia)",
+    "pedir_a": "Oscar (ACSAR) / Equipo de optica de ACSAR",
+    "discrepancia": []
+   },
+   "espesor_brida": {
+    "valor": 3.0,
+    "unidad": "mm",
+    "estado": "supuesto",
+    "fuente": "SUPUESTO. Altura del resalte de interfaz sobre el mamparo trasero.",
+    "nota": null,
+    "falta": "Espesor real de la brida de interfaz",
+    "pedir_a": "Oscar (ACSAR) / Equipo de optica de ACSAR",
+    "discrepancia": []
+   },
+   "margen_agujero_entrada": {
+    "valor": 2.0,
+    "unidad": "mm",
+    "estado": "supuesto",
+    "fuente": "SUPUESTO. El agujero de entrada del mamparo trasero es el diametro del haz comprimido mas este margen por lado, para no vinetear con la tolerancia de montaje del telescopio sobre el banco.",
+    "nota": null,
+    "falta": "Diametro real del agujero de entrada",
+    "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences",
+    "discrepancia": []
+   },
+   "espesor_espejo_primario": {
+    "valor": 8.0,
+    "unidad": "mm",
+    "estado": "supuesto",
+    "fuente": "SUPUESTO, y ACOTADO POR ARRIBA por la longitud reservada (ver 'espesor_mamparo'). 8 mm en el vertice para un sustrato de 92 mm es una relacion de aspecto de 11.5, que es fina: un espejo asi necesitaria aligeramiento y una celda muy cuidada. Que salga tan fino no es una eleccion, es lo que deja la caja.",
+    "nota": null,
+    "falta": "Espesor y material reales del sustrato del primario",
+    "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences",
+    "discrepancia": []
+   },
+   "espesor_espejo_secundario": {
+    "valor": 4.0,
+    "unidad": "mm",
+    "estado": "supuesto",
+    "fuente": "SUPUESTO. Espesor del sustrato del secundario, acotado por la misma pila en Z.",
+    "nota": null,
+    "falta": "Espesor y material reales del sustrato del secundario",
+    "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences",
+    "discrepancia": []
+   },
+   "altura_celda": {
+    "valor": 3.0,
+    "unidad": "mm",
+    "estado": "supuesto",
+    "fuente": "SUPUESTO, y ACOTADO POR ARRIBA por la misma pila en Z. Es la altura de los flexures entre el mamparo trasero y la espalda del primario. 3 mm es poquisimo para un flexure de verdad, y eso es exactamente lo que dice el chequeo 'longitud_telescopio': con 200 mm reservados no hay sitio para una celda como Dios manda.",
+    "nota": null,
+    "falta": "Altura real de la celda isostatica del primario",
+    "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences",
+    "discrepancia": []
+   },
+   "flexures": {
+    "valor": 3,
+    "unidad": null,
+    "estado": "supuesto",
+    "fuente": "SUPUESTO. Tres puntos es lo que hace isostatica una montura: tres puntos definen un plano y no meten esfuerzos en el sustrato al dilatar. Cuatro sobrerrestringen y deforman el espejo con la temperatura.",
+    "nota": null,
+    "falta": "Numero y tipo reales de flexures de la celda",
+    "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences",
+    "discrepancia": []
+   },
+   "radio_circulo_flexures": {
+    "valor": 40.0,
+    "unidad": "mm",
+    "estado": "supuesto",
+    "fuente": "SUPUESTO. Radio del circulo de apoyo de la celda, por detras del sustrato del primario. Se elige el mayor que deja los tres flexures dentro del hueco del barrilete y sin tocar los largueros de esquina.",
+    "nota": null,
+    "falta": "Radio real del circulo de apoyo de la celda",
+    "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences",
+    "discrepancia": []
+   },
+   "angulo_primer_flexure": {
+    "valor": 45.0,
+    "unidad": "deg",
+    "estado": "supuesto",
+    "fuente": "SUPUESTO, y es una decision, no un numero cualquiera: los tres flexures van a 120 grados entre si, y el primero se pone a 45 para que caiga en una ESQUINA del barrilete, que es donde hay radio (22.5 mm frente a 2.7 mm en la cara plana). Es el argumento de la seccion cuadrada aplicado a la celda.",
+    "nota": null,
+    "falta": "Orientacion real de la celda respecto al barrilete",
+    "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences",
+    "discrepancia": []
+   },
+   "seccion_flexure": {
+    "valor": [
+     6.0,
+     6.0
+    ],
+    "unidad": "mm",
+    "estado": "supuesto",
+    "fuente": "SUPUESTO. Seccion del bloque de cada flexure. La de verdad sale del analisis de rigidez, que depende de 'estabilidad_despace_primario_secundario', que es TBD.",
+    "nota": null,
+    "falta": "Seccion real de los flexures",
+    "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences",
+    "discrepancia": []
+   },
+   "margen_buje_secundario": {
+    "valor": 3.0,
+    "unidad": "mm",
+    "estado": "supuesto",
+    "fuente": "SUPUESTO. Anillo de material alrededor del secundario por el que la arana lo sujeta y por el que pasan los tornillos de colimacion.",
+    "nota": null,
+    "falta": "Montura real del secundario",
+    "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences",
+    "discrepancia": []
+   },
+   "tornillos_colimacion": {
+    "valor": 3,
+    "unidad": null,
+    "estado": "supuesto",
+    "fuente": "SUPUESTO. Tres tornillos es lo minimo para colimar un secundario en tip, tilt y despace, y es lo habitual.",
+    "nota": null,
+    "falta": "Mecanismo real de colimacion del secundario",
+    "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences",
+    "discrepancia": []
+   },
+   "diametro_tornillo_colimacion": {
+    "valor": 3.0,
+    "unidad": "mm",
+    "estado": "supuesto",
+    "fuente": "SUPUESTO. Un M3 es lo tipico en una montura de este tamano.",
+    "nota": null,
+    "falta": "Tornilleria real de colimacion",
+    "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences",
+    "discrepancia": []
+   },
+   "vanes": {
+    "valor": 4,
+    "unidad": null,
+    "estado": "supuesto",
+    "fuente": "SUPUESTO. Cuatro vanes en cruz es la arana clasica. Se descarta a proposito la alternativa de sujetar el secundario con una PLACA CORRECTORA, que lo sostendria sin vanes y sin difraccion: es un elemento refractivo en el camino del canal cuantico, y cualquier refractivo mete birrefringencia por tension que estropea la pureza de polarizacion, que es justo lo que el enlace mide.",
+    "nota": null,
+    "falta": "Numero real de vanes de la arana",
+    "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences",
+    "discrepancia": []
+   },
+   "espesor_vane": {
+    "valor": 0.8,
+    "unidad": "mm",
+    "estado": "supuesto",
+    "fuente": "SUPUESTO. Un vane fino reduce el area obstruida y los picos de difraccion, pero tiene que aguantar la rigidez que exige 'estabilidad_despace_primario_secundario', que es TBD. 0.8 mm es un valor tipico; el real sale de ese requisito.",
+    "nota": null,
+    "falta": "Espesor real de los vanes",
+    "pedir_a": "Equipo de estructura de ACSAR / Aperture Optical Sciences",
+    "discrepancia": []
+   },
+   "ancho_vane": {
+    "valor": 6.0,
+    "unidad": "mm",
+    "estado": "supuesto",
+    "fuente": "SUPUESTO. Extension de cada vane a lo largo del eje optico. Acotada por arriba por el mamparo frontal: con la separacion derivada, la arana tiene 6 mm entre el secundario y la apertura.",
+    "nota": null,
+    "falta": "Geometria real de la arana",
+    "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences",
+    "discrepancia": []
+   },
+   "holgura_baffle": {
+    "valor": 0.5,
+    "unidad": "mm",
+    "estado": "supuesto",
+    "fuente": "SUPUESTO, y ACOTADO POR ARRIBA por lo mismo que la pared: entre la apertura y la cara plana hay 2.70 mm para pared + holgura + baffle. Ojo con lo que significa este numero: es lo que los diafragmas knife-edge pueden proyectar hacia dentro sin vinetear el haz. Medio milimetro de cuchilla es lo que da de si un 6U con 90 mm de apertura.",
+    "nota": null,
+    "falta": "Holgura real entre el haz y el baffle, del analisis de luz parasita",
+    "pedir_a": "Equipo de optica de ACSAR",
+    "discrepancia": []
+   },
+   "espesor_baffle": {
+    "valor": 0.6,
+    "unidad": "mm",
+    "estado": "supuesto",
+    "fuente": "SUPUESTO. Pared de chapa fina de los baffles, acotada por lo mismo.",
+    "nota": null,
+    "falta": "Espesor real de los baffles",
+    "pedir_a": "Equipo de optica de ACSAR",
+    "discrepancia": []
+   },
+   "diafragmas_internos": {
+    "valor": 4,
+    "unidad": null,
+    "estado": "supuesto",
+    "fuente": "SUPUESTO. Numero de anillos knife-edge repartidos a lo largo del baffle principal. Cuatro es lo habitual en un tubo de este tamano; el numero y la posicion reales salen de un trazado de luz parasita que no existe.",
+    "nota": null,
+    "falta": "Numero y posicion reales de los diafragmas, del analisis de luz parasita",
+    "pedir_a": "Equipo de optica de ACSAR",
+    "discrepancia": []
+   },
+   "espesor_diafragma": {
+    "valor": 1.0,
+    "unidad": "mm",
+    "estado": "supuesto",
+    "fuente": "SUPUESTO. Espesor de cada anillo knife-edge.",
+    "nota": null,
+    "falta": "Espesor real de los diafragmas",
+    "pedir_a": "Equipo de optica de ACSAR",
+    "discrepancia": []
+   },
+   "angulo_exclusion_solar": {
+    "valor": null,
+    "unidad": "deg",
+    "estado": "TBD",
+    "fuente": null,
+    "nota": null,
+    "falta": "Angulo de exclusion solar del terminal: a que separacion angular del Sol tiene que seguir funcionando el enlace. Es lo que DIMENSIONA el baffle del primario y el del secundario, y con ellos la obstruccion y el presupuesto de luz parasita. Sin el, los dos baffles de este modelo estan dibujados con un angulo supuesto.",
+    "pedir_a": "Equipo de optica de ACSAR",
+    "discrepancia": []
+   },
+   "angulo_exclusion_solar_modelado": {
+    "valor": 30.0,
+    "unidad": "deg",
+    "estado": "supuesto",
+    "fuente": "SUPUESTO. Valor de trabajo para poder dibujar los baffles del primario y del secundario, en el rango de lo que se suele exigir a un terminal optico de LEO. La longitud de cada baffle se saca de una regla de primer orden, r / tan(angulo), que NO es un analisis de luz parasita: dice cuanto tiene que medir un tubo de radio r para que el agujero deje de verse desde fuera por encima de ese angulo. El numero bueno sale de un trazado de rayos con el angulo real.",
+    "nota": null,
+    "falta": "El angulo de verdad, que es 'angulo_exclusion_solar'",
+    "pedir_a": "Equipo de optica de ACSAR",
+    "discrepancia": []
+   }
+  }
+ },
  "sin_geometria": [
   {
    "componente": "radio_uhf_pulsar_vutrx",
@@ -3996,6 +5197,14 @@
    "pedir_a": "Equipo de optica de ACSAR"
   },
   {
+   "componente": "integracion",
+   "magnitud": "integracion.optica.punto_de_adelanto",
+   "estado": "supuesto",
+   "valor_modelado": 50.7,
+   "falta": "Punto de adelanto maximo del enlace, del analisis de mision (orbita y geometria de los pases)",
+   "pedir_a": "Equipo de PAT / de mision de ACSAR"
+  },
+  {
    "componente": "antena_quasar_wsant",
    "magnitud": "antena_quasar_wsant.dimensiones",
    "estado": "supuesto",
@@ -4030,6 +5239,271 @@
    ],
    "falta": "Diametro exterior del barrilete y longitud optica real. YA EXISTE un concepto en formato nativo SolidWorks (Telescopio_concepto.SLDPRT, entrega \"Preliminar viability model\" del 2026-09-20), ilegible. Hace falta reexportarlo a STEP AP214 o AP242 y dejarlo en la ruta de 'step_esperado'. Ver cad/vendor/MANIFEST.yaml, seccion 'sin_convertir'.",
    "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.focal_primario",
+   "estado": "supuesto",
+   "valor_modelado": 200.0,
+   "falta": "Focal real del primario, del diseno optico de Aperture Optical Sciences",
+   "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.conica_primario",
+   "estado": "supuesto",
+   "valor_modelado": -1.0,
+   "falta": "Constante conica real del primario del diseno optico",
+   "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.conica_secundario",
+   "estado": "supuesto",
+   "valor_modelado": -1.0,
+   "falta": "Constante conica real del secundario del diseno optico",
+   "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.distancia_focal_trasera",
+   "estado": "supuesto",
+   "valor_modelado": 40.0,
+   "falta": "Distancia focal trasera del diseno focal, si se eligiera esa configuracion",
+   "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.margen_secundario",
+   "estado": "supuesto",
+   "valor_modelado": 1.4,
+   "falta": "Sobredimensionado real del secundario (campo de vista y alineacion)",
+   "pedir_a": "Equipo de optica de ACSAR"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.margen_agujero_primario",
+   "estado": "supuesto",
+   "valor_modelado": 4.0,
+   "falta": "Diametro real del agujero central del primario",
+   "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.margen_substrato_primario",
+   "estado": "supuesto",
+   "valor_modelado": 1.0,
+   "falta": "Diametro exterior real del sustrato del primario",
+   "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.seccion_barrilete",
+   "estado": "supuesto",
+   "valor_modelado": [
+    95.4,
+    95.4
+   ],
+   "falta": "Contorno exterior real del barrilete",
+   "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.espesor_pared_barrilete",
+   "estado": "supuesto",
+   "valor_modelado": 1.5,
+   "falta": "Espesor y material reales de la pared del barrilete",
+   "pedir_a": "Equipo de estructura de ACSAR / Aperture Optical Sciences"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.espesor_mamparo",
+   "estado": "supuesto",
+   "valor_modelado": 3.0,
+   "falta": "Espesor real de los mamparos",
+   "pedir_a": "Equipo de estructura de ACSAR / Aperture Optical Sciences"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.lado_larguero_esquina",
+   "estado": "supuesto",
+   "valor_modelado": 12.0,
+   "falta": "Seccion real de los largueros, del analisis de rigidez del tubo",
+   "pedir_a": "Equipo de estructura de ACSAR"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.brida_interfaz_fsm",
+   "estado": "supuesto",
+   "valor_modelado": [
+    40.0,
+    40.0
+   ],
+   "falta": "Interfaz mecanica real telescopio-banco (patron de taladros y plano de referencia)",
+   "pedir_a": "Oscar (ACSAR) / Equipo de optica de ACSAR"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.espesor_brida",
+   "estado": "supuesto",
+   "valor_modelado": 3.0,
+   "falta": "Espesor real de la brida de interfaz",
+   "pedir_a": "Oscar (ACSAR) / Equipo de optica de ACSAR"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.margen_agujero_entrada",
+   "estado": "supuesto",
+   "valor_modelado": 2.0,
+   "falta": "Diametro real del agujero de entrada",
+   "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.espesor_espejo_primario",
+   "estado": "supuesto",
+   "valor_modelado": 8.0,
+   "falta": "Espesor y material reales del sustrato del primario",
+   "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.espesor_espejo_secundario",
+   "estado": "supuesto",
+   "valor_modelado": 4.0,
+   "falta": "Espesor y material reales del sustrato del secundario",
+   "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.altura_celda",
+   "estado": "supuesto",
+   "valor_modelado": 3.0,
+   "falta": "Altura real de la celda isostatica del primario",
+   "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.flexures",
+   "estado": "supuesto",
+   "valor_modelado": 3,
+   "falta": "Numero y tipo reales de flexures de la celda",
+   "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.radio_circulo_flexures",
+   "estado": "supuesto",
+   "valor_modelado": 40.0,
+   "falta": "Radio real del circulo de apoyo de la celda",
+   "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.angulo_primer_flexure",
+   "estado": "supuesto",
+   "valor_modelado": 45.0,
+   "falta": "Orientacion real de la celda respecto al barrilete",
+   "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.seccion_flexure",
+   "estado": "supuesto",
+   "valor_modelado": [
+    6.0,
+    6.0
+   ],
+   "falta": "Seccion real de los flexures",
+   "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.margen_buje_secundario",
+   "estado": "supuesto",
+   "valor_modelado": 3.0,
+   "falta": "Montura real del secundario",
+   "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.tornillos_colimacion",
+   "estado": "supuesto",
+   "valor_modelado": 3,
+   "falta": "Mecanismo real de colimacion del secundario",
+   "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.diametro_tornillo_colimacion",
+   "estado": "supuesto",
+   "valor_modelado": 3.0,
+   "falta": "Tornilleria real de colimacion",
+   "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.vanes",
+   "estado": "supuesto",
+   "valor_modelado": 4,
+   "falta": "Numero real de vanes de la arana",
+   "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.espesor_vane",
+   "estado": "supuesto",
+   "valor_modelado": 0.8,
+   "falta": "Espesor real de los vanes",
+   "pedir_a": "Equipo de estructura de ACSAR / Aperture Optical Sciences"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.ancho_vane",
+   "estado": "supuesto",
+   "valor_modelado": 6.0,
+   "falta": "Geometria real de la arana",
+   "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.holgura_baffle",
+   "estado": "supuesto",
+   "valor_modelado": 0.5,
+   "falta": "Holgura real entre el haz y el baffle, del analisis de luz parasita",
+   "pedir_a": "Equipo de optica de ACSAR"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.espesor_baffle",
+   "estado": "supuesto",
+   "valor_modelado": 0.6,
+   "falta": "Espesor real de los baffles",
+   "pedir_a": "Equipo de optica de ACSAR"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.diafragmas_internos",
+   "estado": "supuesto",
+   "valor_modelado": 4,
+   "falta": "Numero y posicion reales de los diafragmas, del analisis de luz parasita",
+   "pedir_a": "Equipo de optica de ACSAR"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.espesor_diafragma",
+   "estado": "supuesto",
+   "valor_modelado": 1.0,
+   "falta": "Espesor real de los diafragmas",
+   "pedir_a": "Equipo de optica de ACSAR"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.optica.angulo_exclusion_solar_modelado",
+   "estado": "supuesto",
+   "valor_modelado": 30.0,
+   "falta": "El angulo de verdad, que es 'angulo_exclusion_solar'",
+   "pedir_a": "Equipo de optica de ACSAR"
   },
   {
    "componente": "fsm_piezo_pi_s331",
@@ -4296,8 +5770,8 @@
    "id": "apertura_telescopio",
    "titulo": "Apertura del telescopio frente a la seccion interior",
    "estado": "atencion",
-   "mensaje": "La apertura de 90 mm deja solo 2.7 mm por lado dentro de los 95 mm interiores. No hay sitio para el barrilete, la celda del espejo ni el ajuste de alineacion. El eje optico NO puede ir paralelo a Y, y en cualquier otra orientacion la seccion util sigue limitada por Y.",
-   "falta": "Diametro exterior del barrilete (la apertura libre no basta)"
+   "mensaje": "Con seccion CUADRADA de 95.4 mm y 90 mm de apertura quedan 2.7 mm hasta la cara plana y 22.5 mm hasta la esquina. Los dos numeros son el mismo problema visto por dos lados: en la cara plana no cabe nada (pared, baffle y holgura ya se comen esos 2.7 mm), y la celda del primario, los flexures y los largueros estructurales tienen que ir en las esquinas. Con un barrilete de REVOLUCION solo existiria el primer numero, en todas las direcciones. El eje optico NO puede ir paralelo a Y, y en cualquier otra orientacion la seccion util sigue limitada por Y. Si la esquina tampoco bastara, la salida es que el barrilete sea el elemento estructural de esa cara.",
+   "falta": "Contorno exterior del barrilete (la apertura libre no basta)"
   },
   {
    "id": "contorno_pc104",
@@ -4342,6 +5816,27 @@
    "falta": null
   },
   {
+   "id": "configuracion_telescopio",
+   "titulo": "Configuracion optica del telescopio",
+   "estado": "ok",
+   "mensaje": "Afocal tipo Mersenne: dos parabolas confocales, M = 9.00. Entra colimado y sale colimado, asi que NO hay foco real dentro del satelite y no hace falta ninguna lente de enfoque en el banco. El foco comun de las dos conicas es VIRTUAL y por eso el modelo no dibuja ningun marcador ahi: no hay nada. Obstruccion lineal 0.156 (secundario de 14.0 mm sobre 90 mm), o sea 0.21 dB en amplitud de campo (0.11 dB en potencia).",
+   "falta": null
+  },
+  {
+   "id": "longitud_telescopio",
+   "titulo": "Longitud del telescopio frente a la reservada",
+   "estado": "atencion",
+   "mensaje": "Con f1 = 200 mm y M = 9.00 la separacion entre vertices es 177.8 mm, que no se puede tocar sin cambiar la optica. Para los 200 mm reservados eso deja 22.2 mm para los dos mamparos, la celda y los dos espejos. Cabe por 1.2 mm, que no es margen: los espesores con los que se dibuja (mamparos de 3 mm, celda de 3 mm, primario de 8 mm) estan todos en su COTA SUPERIOR, no elegidos. Cualquiera de ellos que crezca deja de caber. Con los ~2U de verdad del brief (227 mm, no 200: la U de longitud de la CDS son 113.5 mm) la misma optica tendria 28 mm de margen. Alargar se paga con la bandeja y es decision de ACSAR.",
+   "falta": "Longitud real del telescopio (STEP de Aperture Optical Sciences)"
+  },
+  {
+   "id": "haz_vs_fsm",
+   "titulo": "El haz comprimido frente al espejo del FSM",
+   "estado": "no comprobable",
+   "mensaje": "El espejo del FSM mide 5.0 mm, y un haz a 45 grados deja una huella de d x d*raiz(2), asi que solo admite un haz de 3.54 mm. Con 90 mm de apertura eso exige una magnificacion de al menos 25.5. Con el haz SUPUESTO con el que se dibuja (10 mm, de integracion.optica.diametro_haz_modelado) la huella seria 10 x 14.1 mm y NO CABRIA en el espejo de 5 mm. Si el equipo de optica confirma un haz de ese orden, el MEMS DIP24 queda descartado y hay que ir al 'fsm_piezo_pi_s331' (que pesa 130 g frente a los gramos del MEMS) o subir la magnificacion de 9.0 a 25.5, lo que reduce el secundario y alarga el tubo. Punto de adelanto: 50.7 urad en el cielo son 456 urad opticos en el haz comprimido (228 urad de giro mecanico del espejo) con M = 9.00, porque un afocal comprime los angulos por M. Es poco para cualquiera de las dos tecnologias -- el piezo S-331 da 3 mrad --, asi que el recorrido NO es lo que decide: lo que decide es el tamano del espejo.",
+   "falta": "Diametro del haz comprimido (telescopio_cassegrain.optica.diametro_haz_comprimido y diametro_haz_mm de e01..e05). Es el dato que DECIDE el TBD 'fsm.eleccion_de_tecnologia': sin el no se puede elegir entre el MEMS y el piezo."
+  },
+  {
    "id": "bucles_fibra",
    "titulo": "Radio minimo de curvatura de la fibra",
    "estado": "no comprobable",
@@ -4359,7 +5854,7 @@
    "id": "step_de_fabricante",
    "titulo": "STEP de fabricante frente al manifiesto",
    "estado": "atencion",
-   "mensaje": "4 de 4 CAD de fabricante presentes y con la huella del manifiesto. 1 piezas esperan un STEP que aun no ha llegado; mientras tanto se dibujan con su envolvente aproximada. Dejar el fichero en la ruta indicada basta para que el modelo lo use: telescopio_cassegrain -> cad/vendor/aperture_optical_sciences/telescopio_cassegrain.step (a Oscar (ACSAR) / Aperture Optical Sciences).",
+   "mensaje": "4 de 4 CAD de fabricante presentes y con la huella del manifiesto. 1 pieza espera un STEP que aun no ha llegado; mientras tanto se dibuja con su envolvente aproximada. Dejar el fichero en la ruta indicada basta para que el modelo lo use: telescopio_cassegrain -> cad/vendor/aperture_optical_sciences/telescopio_cassegrain.step (a Oscar (ACSAR) / Aperture Optical Sciences).",
    "falta": "STEP por recibir: telescopio_cassegrain (a Oscar (ACSAR) / Aperture Optical Sciences)"
   }
  ],

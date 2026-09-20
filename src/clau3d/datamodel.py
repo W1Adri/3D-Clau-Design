@@ -493,7 +493,61 @@ class Componente:
             yield conector.dimensiones
 
 
-TIPOS_DE_FORMA = ("caja", "cilindro", "step")
+TIPOS_DE_FORMA = ("caja", "cilindro", "step", "cassegrain")
+
+# Los parametros que un 'cassegrain' tiene que declarar en su bloque 'optica'.
+# Aqui solo estan los NOMBRES: los valores viven en data/components.yaml como
+# cualquier otra magnitud, con su estado y su fuente. Lo que se exige es lo
+# mismo que se le exige a un cilindro con 'forma.eje': sin ellos no hay pieza
+# que dibujar, solo un nombre.
+#
+# Lo que NO esta en esta lista es todo lo que se DERIVA de ella -- la
+# magnificacion, la focal del secundario, la separacion, la obstruccion --,
+# porque escribir dos veces un numero que se puede calcular es la manera
+# segura de que las dos copias dejen de coincidir.
+PARAMETROS_CASSEGRAIN = (
+    # configuracion optica
+    "configuracion",
+    "focal_primario",
+    "conica_primario",
+    "conica_secundario",
+    "diametro_haz_comprimido",
+    "distancia_focal_trasera",
+    "margen_secundario",
+    "margen_agujero_primario",
+    "margen_substrato_primario",
+    "estabilidad_despace_primario_secundario",
+    # barrilete
+    "seccion_barrilete",
+    "espesor_pared_barrilete",
+    "espesor_mamparo",
+    "lado_larguero_esquina",
+    # interfaz al FSM
+    "brida_interfaz_fsm",
+    "espesor_brida",
+    "margen_agujero_entrada",
+    # espejos y sus monturas
+    "espesor_espejo_primario",
+    "espesor_espejo_secundario",
+    "altura_celda",
+    "flexures",
+    "radio_circulo_flexures",
+    "angulo_primer_flexure",
+    "seccion_flexure",
+    "margen_buje_secundario",
+    "tornillos_colimacion",
+    "diametro_tornillo_colimacion",
+    "vanes",
+    "espesor_vane",
+    "ancho_vane",
+    # baffles
+    "holgura_baffle",
+    "espesor_baffle",
+    "diafragmas_internos",
+    "espesor_diafragma",
+    "angulo_exclusion_solar",
+    "angulo_exclusion_solar_modelado",
+)
 
 
 def _componente(bruto: dict) -> Componente:
@@ -524,8 +578,21 @@ def _componente(bruto: dict) -> Componente:
     for clave, valor in bruto.items():
         if clave in reservados:
             continue
-        if isinstance(valor, dict) and ("valor" in valor or "estado" in valor):
+        if not isinstance(valor, dict):
+            continue
+        if "valor" in valor or "estado" in valor:
             extras[clave] = _magnitud(f"{bruto['id']}.{clave}", valor)
+            continue
+        # Un nivel mas de anidamiento, igual que 'integracion.pila_pc104.*' en
+        # el bloque global: un bloque tematico -- hoy 'optica' -- cuyas hojas
+        # SI son magnitudes. Se aplana a 'optica.focal_primario' para que el
+        # resto del modelo (validar, pendientes, informes) las vea como
+        # cualquier otra sin saber que estaban anidadas.
+        for sub, subvalor in valor.items():
+            if isinstance(subvalor, dict) and ("valor" in subvalor or "estado" in subvalor):
+                extras[f"{clave}.{sub}"] = _magnitud(
+                    f"{bruto['id']}.{clave}.{sub}", subvalor
+                )
 
     cantidad_bruta = bruto.get("cantidad", 1)
     if not isinstance(cantidad_bruta, dict):
@@ -875,6 +942,32 @@ def validar(catalogo: Catalogo) -> list[str]:
                 f"{c.id}: cilindro de eje {c.eje_revolucion} con seccion "
                 f"{seccion[0]} x {seccion[1]} mm. Las dos cotas que no son el "
                 f"eje son el diametro y tienen que ser iguales."
+            )
+
+    # Un 'cassegrain' se dibuja a partir de su bloque 'optica', exactamente
+    # igual que un cilindro se dibuja a partir de 'forma.eje': sin el no hay
+    # pieza, solo un nombre. Se exige entero para que anadir un parametro nuevo
+    # al modelo obligue a declararlo con estado y fuente, y no a inventarlo en
+    # el codigo.
+    for c in catalogo.componentes:
+        if c.tipo_forma != "cassegrain":
+            continue
+        if c.dimensiones.es_tbd or not c.dimensiones.esta_declarada:
+            problemas.append(
+                f"{c.id}: forma.tipo es cassegrain pero no declara dimensiones. "
+                f"La envolvente es lo que el telescopio RESERVA, y el modelo "
+                f"parametrico se comprueba contra ella."
+            )
+        faltan = [
+            nombre
+            for nombre in PARAMETROS_CASSEGRAIN
+            if f"optica.{nombre}" not in c.extras
+        ]
+        if faltan:
+            problemas.append(
+                f"{c.id}: forma.tipo es cassegrain y su bloque 'optica' no "
+                f"declara {', '.join(faltan)}. Un cassegrain necesita su optica "
+                f"completa, igual que un cilindro necesita su eje."
             )
 
     # Un conector sobresale de la envolvente del cuerpo, asi que sin cuerpo no

@@ -131,31 +131,51 @@ def chequeo_apertura_telescopio(catalogo: Catalogo) -> Chequeo:
     _, interior_y, _ = _seccion_interior(catalogo)
     exterior_y = catalogo.dims_exteriores[1]
     holgura_radial = (interior_y - diametro) / 2
+    # La semidiagonal de la seccion cuadrada: lo que hay DE VERDAD en la
+    # esquina. Un barrilete de revolucion solo tiene el margen de la cara
+    # plana en todas direcciones; uno de seccion cuadrada tiene esto en cuatro
+    # de ellas, y es donde caben la celda, los flexures y la tornilleria.
+    holgura_esquina = interior_y * math.sqrt(2.0) / 2.0 - diametro / 2.0
 
     numeros = {
         "apertura_libre_mm": diametro,
         "altura_exterior_mm": exterior_y,
         "altura_interior_util_mm": interior_y,
         "holgura_por_lado_mm": holgura_radial,
+        "holgura_cara_plana_mm": holgura_radial,
+        "holgura_esquina_mm": holgura_esquina,
     }
+
+    comun = (
+        f"Con seccion CUADRADA de {interior_y:.1f} mm y {diametro:.0f} mm de "
+        f"apertura quedan {holgura_radial:.1f} mm hasta la cara plana y "
+        f"{holgura_esquina:.1f} mm hasta la esquina. Los dos numeros son el "
+        f"mismo problema visto por dos lados: en la cara plana no cabe nada "
+        f"(pared, baffle y holgura ya se comen esos {holgura_radial:.1f} mm), "
+        f"y la celda del primario, los flexures y los largueros estructurales "
+        f"tienen que ir en las esquinas. Con un barrilete de REVOLUCION solo "
+        f"existiria el primer numero, en todas las direcciones."
+    )
 
     if holgura_radial < 0:
         estado, mensaje = FALLA, (
             f"La apertura de {diametro:.0f} mm NO cabe en los {interior_y:.0f} mm "
-            f"de altura interior: faltan {-holgura_radial * 2:.1f} mm de diametro."
+            f"de altura interior: faltan {-holgura_radial * 2:.1f} mm."
+        )
+    elif holgura_esquina < 5:
+        estado, mensaje = ATENCION, (
+            comun + " Tampoco la esquina da de si: no hay sitio para montar el "
+            "telescopio dentro del chasis."
         )
     elif holgura_radial < 5:
         estado, mensaje = ATENCION, (
-            f"La apertura de {diametro:.0f} mm deja solo {holgura_radial:.1f} mm por "
-            f"lado dentro de los {interior_y:.0f} mm interiores. No hay sitio para "
-            f"el barrilete, la celda del espejo ni el ajuste de alineacion. "
-            f"El eje optico NO puede ir paralelo a Y, y en cualquier otra "
-            f"orientacion la seccion util sigue limitada por Y."
+            comun + f" El eje optico NO puede ir paralelo a Y, y en cualquier "
+            f"otra orientacion la seccion util sigue limitada por Y. Si la "
+            f"esquina tampoco bastara, la salida es que el barrilete sea el "
+            f"elemento estructural de esa cara."
         )
     else:
-        estado, mensaje = OK, (
-            f"La apertura deja {holgura_radial:.1f} mm por lado."
-        )
+        estado, mensaje = OK, comun
 
     return Chequeo(
         id="apertura_telescopio",
@@ -163,7 +183,298 @@ def chequeo_apertura_telescopio(catalogo: Catalogo) -> Chequeo:
         estado=estado,
         mensaje=mensaje,
         numeros=numeros,
-        falta="Diametro exterior del barrilete (la apertura libre no basta)",
+        falta="Contorno exterior del barrilete (la apertura libre no basta)",
+    )
+
+
+def _optica_del_telescopio(catalogo: Catalogo):
+    """(componente, mecanica) del telescopio, o (componente, None) si no aplica.
+
+    Devuelve None en vez de reventar cuando el telescopio no es un 'cassegrain'
+    -- porque llego el STEP del fabricante y se dibuja con el, o porque alguien
+    volvio a la forma de reserva --: un chequeo sin datos sale como no
+    comprobable, nunca como correcto y nunca como una excepcion.
+    """
+    from ..optica import parametros
+
+    if not catalogo.existe("telescopio_cassegrain"):
+        return None, None
+    componente = catalogo["telescopio_cassegrain"]
+    if componente.tipo_forma != "cassegrain":
+        return componente, None
+    return componente, parametros.mecanica(componente, catalogo)
+
+
+def chequeo_longitud_telescopio(catalogo: Catalogo) -> Chequeo:
+    """La pila en Z del telescopio frente a lo que el layout le reserva.
+
+    Es el chequeo que no se ve mirando volumenes: en la columna del telescopio
+    sobra hueco lateral, pero la LONGITUD la fija la optica y no se negocia.
+    La separacion entre vertices de un afocal es f1 (1 - 1/M), y a eso hay que
+    sumarle los dos mamparos, la celda y los dos espejos. Si no cabe, la salida
+    no es afinar espesores: es que ACSAR alargue la reserva -- que se paga con
+    la bandeja -- o que baje la focal del primario.
+    """
+    titulo = "Longitud del telescopio frente a la reservada"
+    componente, m = _optica_del_telescopio(catalogo)
+    if m is None:
+        return Chequeo(
+            id="longitud_telescopio", titulo=titulo, estado=NO_COMPROBABLE,
+            mensaje=(
+                "El telescopio no se dibuja con el modelo parametrico, asi que "
+                "no hay pila optica que comprobar."
+            ),
+            falta="Modelo optico del telescopio (forma.tipo: cassegrain) o su STEP",
+        )
+    o = m.optica
+    estructura = m.longitud - o.separacion
+    numeros = {
+        "longitud_reservada_mm": m.longitud,
+        "separacion_vertices_mm": o.separacion,
+        "estructura_mm": estructura,
+        "longitud_necesaria_mm": m.longitud_necesaria,
+        "margen_mm": m.margen_longitud,
+        "focal_primario_mm": o.focal_primario,
+        "magnificacion": o.magnificacion,
+    }
+    comun = (
+        f"Con f1 = {o.focal_primario:.0f} mm y M = {o.magnificacion:.2f} la "
+        f"separacion entre vertices es {o.separacion:.1f} mm, que no se puede "
+        f"tocar sin cambiar la optica. Para los {m.longitud:.0f} mm reservados "
+        f"eso deja {estructura:.1f} mm para los dos mamparos, la celda y los "
+        f"dos espejos."
+    )
+    if m.margen_longitud < 0:
+        return Chequeo(
+            id="longitud_telescopio", titulo=titulo, estado=FALLA,
+            mensaje=(
+                comun + f" NO CABE: hacen falta {m.longitud_necesaria:.1f} mm y "
+                f"faltan {-m.margen_longitud:.1f} mm. No se aprieta: o baja la "
+                f"focal del primario, o ACSAR alarga 'longitud_reservada' a "
+                f"costa de la bandeja."
+            ),
+            numeros=numeros,
+            falta="Longitud real del telescopio (STEP de Aperture Optical Sciences)",
+        )
+    if m.margen_longitud < HOLGURA_NULA_MM * 10:
+        return Chequeo(
+            id="longitud_telescopio", titulo=titulo, estado=ATENCION,
+            mensaje=(
+                comun + f" Cabe por {m.margen_longitud:.1f} mm, que no es "
+                f"margen: los espesores con los que se dibuja (mamparos de "
+                f"{m.espesor_mamparo:.0f} mm, celda de {m.altura_celda:.0f} mm, "
+                f"primario de {m.espesor_primario:.0f} mm) estan todos en su "
+                f"COTA SUPERIOR, no elegidos. Cualquiera de ellos que crezca "
+                f"deja de caber. Con los ~2U de verdad del brief (227 mm, no "
+                f"200: la U de longitud de la CDS son 113.5 mm) la misma optica "
+                f"tendria {m.margen_longitud + 27.0:.0f} mm de margen. Alargar "
+                f"se paga con la bandeja y es decision de ACSAR."
+            ),
+            numeros=numeros,
+            falta="Longitud real del telescopio (STEP de Aperture Optical Sciences)",
+        )
+    return Chequeo(
+        id="longitud_telescopio", titulo=titulo, estado=OK,
+        mensaje=comun + f" Quedan {m.margen_longitud:.1f} mm de margen.",
+        numeros=numeros,
+    )
+
+
+def chequeo_configuracion_telescopio(catalogo: Catalogo) -> Chequeo:
+    """Afocal o focal, y donde cae el foco si es focal.
+
+    La pregunta no es estetica: un Cassegrain focal deja un foco real por
+    detras del vertice del primario, o sea dentro de z_payload_banco, y obliga
+    a meter una lente de enfoque en la linea que solo tiene 7.7 mm de margen
+    (CLAUDE.md 3.7). El afocal entra colimado y sale colimado.
+    """
+    titulo = "Configuracion optica del telescopio"
+    componente, m = _optica_del_telescopio(catalogo)
+    if m is None:
+        return Chequeo(
+            id="configuracion_telescopio", titulo=titulo, estado=NO_COMPROBABLE,
+            mensaje="El telescopio no se dibuja con el modelo parametrico.",
+            falta="Configuracion optica del telescopio",
+        )
+    o = m.optica
+    numeros = {
+        "magnificacion": o.magnificacion,
+        "focal_primario_mm": o.focal_primario,
+        "focal_secundario_mm": o.focal_secundario,
+        "separacion_mm": o.separacion,
+        "obstruccion_lineal": o.obstruccion_lineal,
+        "perdida_obstruccion_dB_amplitud": o.perdida_obstruccion_db,
+    }
+    obstruccion = (
+        f" Obstruccion lineal {o.obstruccion_lineal:.3f} (secundario de "
+        f"{o.diametro_secundario:.1f} mm sobre {o.apertura_libre:.0f} mm), "
+        f"o sea {o.perdida_obstruccion_db:.2f} dB en amplitud de campo "
+        f"({o.perdida_obstruccion_db / 2:.2f} dB en potencia)."
+    )
+    if o.es_afocal:
+        return Chequeo(
+            id="configuracion_telescopio", titulo=titulo, estado=OK,
+            mensaje=(
+                f"Afocal tipo Mersenne: dos parabolas confocales, M = "
+                f"{o.magnificacion:.2f}. Entra colimado y sale colimado, asi "
+                f"que NO hay foco real dentro del satelite y no hace falta "
+                f"ninguna lente de enfoque en el banco. El foco comun de las "
+                f"dos conicas es VIRTUAL y por eso el modelo no dibuja ningun "
+                f"marcador ahi: no hay nada." + obstruccion
+            ),
+            numeros=numeros,
+        )
+    numeros["z_foco_local_mm"] = m.z_foco_real
+    numeros["distancia_focal_trasera_mm"] = o.distancia_focal_trasera
+    return Chequeo(
+        id="configuracion_telescopio", titulo=titulo, estado=ATENCION,
+        mensaje=(
+            f"Configuracion FOCAL: el foco real cae a "
+            f"{o.distancia_focal_trasera:.0f} mm por detras del vertice del "
+            f"primario, o sea FUERA del barrilete y dentro de "
+            f"z_payload_banco. Eso obliga a una lente de enfoque en la linea "
+            f"que va del eje del telescopio a la pared, que solo tiene 7.7 mm "
+            f"de margen (chequeo 'banco_optico'). La alternativa afocal no "
+            f"necesita ningun elemento adicional." + obstruccion
+        ),
+        numeros=numeros,
+        falta="Confirmar la configuracion optica con el diseno de Aperture Optical Sciences",
+    )
+
+
+def chequeo_haz_vs_fsm(catalogo: Catalogo) -> Chequeo:
+    """El haz comprimido frente al espejo del FSM. Es el dato que decide el FSM.
+
+    Un haz de d mm que incide a 45 grados deja una huella de d x d*raiz(2)
+    sobre el espejo, asi que un espejo circular de D mm solo admite un haz de
+    D*cos(45) = D/raiz(2). Con el espejo de 5 mm del MEMS eso son 3.54 mm, y
+    con 90 mm de apertura obliga a M >= 25.5.
+
+    Sale NO COMPROBABLE mientras 'optica.diametro_haz_comprimido' siga siendo
+    TBD, por mucho que el modelo dibuje con el supuesto: la cifra con la que se
+    dibuja no valida nada. Pero SI se dice lo que esa hipotesis implica,
+    porque es lo que va a decidir el TBD 'eleccion_de_tecnologia' del FSM.
+    """
+    titulo = "El haz comprimido frente al espejo del FSM"
+    componente, m = _optica_del_telescopio(catalogo)
+    if m is None:
+        return Chequeo(
+            id="haz_vs_fsm", titulo=titulo, estado=NO_COMPROBABLE,
+            mensaje="El telescopio no se dibuja con el modelo parametrico.",
+            falta="Configuracion optica del telescopio",
+        )
+    o = m.optica
+
+    if not catalogo.existe("fsm"):
+        return Chequeo(
+            id="haz_vs_fsm", titulo=titulo, estado=NO_COMPROBABLE,
+            mensaje="No hay FSM en el catalogo.", falta="Espejo del FSM",
+        )
+    fsm = catalogo["fsm"]
+    espejo = fsm.extras.get("diametro_espejo")
+    if espejo is None or espejo.es_tbd:
+        return Chequeo(
+            id="haz_vs_fsm", titulo=titulo, estado=NO_COMPROBABLE,
+            mensaje=(
+                "El FSM no declara el diametro de su espejo, que es la mitad de "
+                "esta comprobacion."
+            ),
+            falta="Diametro del espejo del FSM",
+        )
+    d_espejo = espejo.escalar()
+    assert d_espejo is not None
+
+    # Lo que un espejo circular de D mm admite a 45 grados.
+    haz_maximo = d_espejo / math.sqrt(2.0)
+    magnificacion_minima = o.apertura_libre / haz_maximo
+
+    # El punto de adelanto, llevado al haz comprimido: un afocal comprime los
+    # angulos por M, asi que lo que el FSM tiene que mover es M veces mas.
+    adelanto = catalogo.integracion.get("optica.punto_de_adelanto")
+    numeros = {
+        "diametro_espejo_fsm_mm": d_espejo,
+        "haz_maximo_admisible_mm": haz_maximo,
+        "magnificacion_minima": magnificacion_minima,
+        "magnificacion_modelada": o.magnificacion,
+        "haz_modelado_mm": o.diametro_haz,
+        "huella_a_45_mm": o.diametro_haz * math.sqrt(2.0),
+    }
+    texto_adelanto = ""
+    if adelanto is not None and not adelanto.es_tbd:
+        urad = adelanto.escalar() or 0.0
+        optico = o.angulo_en_el_fsm(urad)
+        numeros["punto_de_adelanto_urad"] = urad
+        numeros["recorrido_optico_en_el_fsm_urad"] = optico
+        numeros["giro_mecanico_en_el_fsm_urad"] = optico / 2.0
+        texto_adelanto = (
+            f" Punto de adelanto: {urad:.1f} urad en el cielo son "
+            f"{optico:.0f} urad opticos en el haz comprimido "
+            f"({optico / 2:.0f} urad de giro mecanico del espejo) con M = "
+            f"{o.magnificacion:.2f}, porque un afocal comprime los angulos por "
+            f"M. Es poco para cualquiera de las dos tecnologias -- el piezo "
+            f"S-331 da 3 mrad --, asi que el recorrido NO es lo que decide: lo "
+            f"que decide es el tamano del espejo."
+        )
+
+    comun = (
+        f"El espejo del FSM mide {d_espejo:.1f} mm, y un haz a 45 grados deja "
+        f"una huella de d x d*raiz(2), asi que solo admite un haz de "
+        f"{haz_maximo:.2f} mm. Con {o.apertura_libre:.0f} mm de apertura eso "
+        f"exige una magnificacion de al menos {magnificacion_minima:.1f}."
+    )
+    falta = (
+        "Diametro del haz comprimido (telescopio_cassegrain."
+        "optica.diametro_haz_comprimido y diametro_haz_mm de e01..e05). "
+        "Es el dato que DECIDE el TBD 'fsm.eleccion_de_tecnologia': "
+        "sin el no se puede elegir entre el MEMS y el piezo."
+    )
+
+    declarado = catalogo["telescopio_cassegrain"].extras.get(
+        "optica.diametro_haz_comprimido"
+    )
+    if declarado is None or declarado.es_tbd:
+        cabe = o.diametro_haz <= haz_maximo
+        consecuencia = (
+            f" Con el haz SUPUESTO con el que se dibuja ({o.diametro_haz:.0f} mm, "
+            f"de integracion.optica.diametro_haz_modelado) la huella seria "
+            f"{o.diametro_haz:.0f} x {o.diametro_haz * math.sqrt(2):.1f} mm y "
+            + (
+                "cabria, pero eso no valida nada: es la hipotesis devuelta."
+                if cabe
+                else (
+                    f"NO CABRIA en el espejo de {d_espejo:.0f} mm. Si el equipo "
+                    f"de optica confirma un haz de ese orden, el MEMS DIP24 "
+                    f"queda descartado y hay que ir al 'fsm_piezo_pi_s331' "
+                    f"(que pesa 130 g frente a los gramos del MEMS) o subir la "
+                    f"magnificacion de {o.magnificacion:.1f} a "
+                    f"{magnificacion_minima:.1f}, lo que reduce el secundario y "
+                    f"alarga el tubo."
+                )
+            )
+        )
+        return Chequeo(
+            id="haz_vs_fsm", titulo=titulo, estado=NO_COMPROBABLE,
+            mensaje=comun + consecuencia + texto_adelanto,
+            numeros=numeros,
+            falta=falta,
+        )
+
+    if o.diametro_haz > haz_maximo:
+        return Chequeo(
+            id="haz_vs_fsm", titulo=titulo, estado=FALLA,
+            mensaje=(
+                comun + f" El haz declarado mide {o.diametro_haz:.2f} mm y NO "
+                f"cabe: sobran {o.diametro_haz - haz_maximo:.2f} mm." + texto_adelanto
+            ),
+            numeros=numeros,
+        )
+    return Chequeo(
+        id="haz_vs_fsm", titulo=titulo, estado=OK,
+        mensaje=(
+            comun + f" El haz declarado mide {o.diametro_haz:.2f} mm y cabe con "
+            f"{haz_maximo - o.diametro_haz:.2f} mm de holgura." + texto_adelanto
+        ),
+        numeros=numeros,
     )
 
 
@@ -854,6 +1165,9 @@ def todos(catalogo: Catalogo, layout=None) -> list[Chequeo]:
     salida += [
         chequeo_pila_pc104(catalogo),
         chequeo_banco_optico(catalogo, layout),
+        chequeo_configuracion_telescopio(catalogo),
+        chequeo_longitud_telescopio(catalogo),
+        chequeo_haz_vs_fsm(catalogo),
         chequeo_bucles_fibra(catalogo),
         chequeo_masa(catalogo),
         chequeo_step_de_fabricante(catalogo),

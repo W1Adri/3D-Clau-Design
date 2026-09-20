@@ -282,6 +282,7 @@ function construirInterfaz() {
   arbol();
   sinGeometria();
   supuestos();
+  telescopio();
   leyenda();
   tablaZonas();
   tablaResumen();
@@ -426,6 +427,47 @@ function supuestos() {
     ul.append(li);
   }
   $('#cuenta-supuestos').textContent = (escena.supuestos || []).length + ' magnitudes';
+}
+
+// El telescopio es la unica pieza cuyo cuerpo es un modelo entero y no una
+// envolvente. En pantalla se ve como un solo solido gris, igual que cuando era
+// un cilindro, asi que lo que lo distingue -- la configuracion optica derivada
+// y los nombres de sus 28 piezas internas -- solo puede llegar por aqui. Nada
+// de esto se calcula en el navegador: viene hecho en escena.telescopio.
+function telescopio() {
+  const t = escena.telescopio;
+  if (!t) return;
+  $('#titulo-telescopio').hidden = false;
+  $('#nota-telescopio').hidden = false;
+  const ul = $('#telescopio');
+  ul.innerHTML = '';
+
+  const fila = (texto, valor, ayuda) => {
+    const li = crear('li');
+    li.append(crear('span', 'id', texto));
+    li.append(crear('span', 'pedir', valor));
+    if (ayuda) li.title = ayuda;
+    ul.append(li);
+  };
+
+  fila('configuración', t.configuracion, t.foco.nota);
+  fila('foco común', t.foco.tipo === 'virtual' ? 'virtual (no se dibuja)'
+    : 'real, z = ' + t.foco.z_local_mm.toFixed(1) + ' mm', t.foco.nota);
+  for (const [clave, valor] of Object.entries(t.derivado)) {
+    fila(clave.replace(/_/g, ' '), typeof valor === 'number' ? valor.toFixed(2) : valor,
+      'DERIVADO de los parámetros del catálogo, no escrito en ninguna parte.');
+  }
+  if (t.haz_es_supuesto) {
+    fila('haz comprimido', 'SUPUESTO',
+      'El diámetro de haz real es TBD. Se dibuja con el mismo supuesto que los '
+      + 'keep-outs del banco, porque es el mismo haz.');
+  }
+  for (const pieza of t.piezas_internas || []) {
+    fila('· ' + pieza.nombre, pieza.volumen_cm3.toFixed(2) + ' cm³',
+      'Pieza interna del modelo paramétrico.');
+  }
+  $('#cuenta-telescopio').textContent =
+    (t.piezas_internas || []).length + ' piezas · ' + t.estado_geometria;
 }
 
 function leyenda() {

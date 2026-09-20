@@ -38,7 +38,7 @@ Lo que estas filas estan diciendo, en una frase: **la bandeja de fibra, tal y co
 | keep_out | dicroico | keepout_fibra_colimador_entrada | 6.08 | dicroico invade el keep-out 'fibra_colimador_entrada' (fibra) en 6.08 cm3, con el keep-out dibujado a partir de un valor SUPUESTO |
 | keep_out | camara_beacon | keepout_fibra_colimador_entrada | 27.00 | camara_beacon invade el keep-out 'fibra_colimador_entrada' (fibra) en 27.00 cm3, con el keep-out dibujado a partir de un valor SUPUESTO |
 
-## Los keep-outs que hay (18)
+## Los keep-outs que hay (20)
 
 | id | tipo | estado | dims mm | en que se basa |
 |---|---|---|---|---|
@@ -60,4 +60,6 @@ Lo que estas filas estan diciendo, en una frase: **la bandeja de fibra, tal y co
 | haz_e02 | haz_libre | supuesto | 5 x 10 x 10 | Tubo de 10 mm de lado (integracion.optica.diametro_haz_modelado, SUPUESTO) en el hueco que queda entre las dos piezas. El diametro de haz de cada tram |
 | haz_e03 | haz_libre | supuesto | 10 x 10 x 16 | Tubo de 10 mm de lado (integracion.optica.diametro_haz_modelado, SUPUESTO) en el hueco que queda entre las dos piezas. El diametro de haz de cada tram |
 | haz_e04 | haz_libre | supuesto | 10 x 5 x 10 | Tubo de 10 mm de lado (integracion.optica.diametro_haz_modelado, SUPUESTO) en el hueco que queda entre las dos piezas. El diametro de haz de cada tram |
+| haz_telescopio_colimado | haz_libre | supuesto | 90 x 90 x 186 | Envolvente del haz dentro del barrilete, derivada de 'optica' en data/components.yaml. SUPUESTO por partida doble: la apertura libre es una decision d |
+| haz_telescopio_comprimido | haz_libre | supuesto | 10 x 10 x 192 | Envolvente del haz dentro del barrilete, derivada de 'optica' en data/components.yaml. SUPUESTO por partida doble: la apertura libre es una decision d |
 

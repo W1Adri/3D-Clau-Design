@@ -290,12 +290,20 @@ def _solido_conector(componente: Componente, conector: Conector) -> cq.Solid | N
     return Caja.centrada(dims, tuple(centro)).solido()
 
 
-def solido(componente: Componente) -> cq.Solid | cq.Compound:
+def solido(
+    componente: Componente, catalogo: Catalogo | None = None
+) -> cq.Solid | cq.Compound:
     """Solido del componente en su propio sistema de ejes, centrado en el origen.
 
-    Con STEP de fabricante, el STEP. Sin el, la envolvente declarada -- caja o
-    cilindro -- mas los conectores que sobresalgan de ella. Los conectores no
-    son decoracion: son lo que decide si la pieza cabe con el cable puesto.
+    Con STEP de fabricante, el STEP. Sin el, la envolvente declarada -- caja,
+    cilindro o el modelo parametrico del Cassegrain -- mas los conectores que
+    sobresalgan de ella. Los conectores no son decoracion: son lo que decide si
+    la pieza cabe con el cable puesto.
+
+    ``catalogo`` solo hace falta para las formas que se derivan de mas de un
+    componente. Hoy es el ``cassegrain``, que necesita el diametro de haz
+    SUPUESTO de ``integracion.optica`` -- el mismo con el que se dibujan los
+    keep-outs del banco, porque es el mismo haz.
     """
     ruta = ruta_step(componente)
     if ruta is not None:
@@ -312,6 +320,16 @@ def solido(componente: Componente) -> cq.Solid | cq.Compound:
         raise ErrorDeDatos(
             f"{componente.id}: sin dimensiones y sin STEP. No se puede dibujar."
         )
+    if componente.tipo_forma == "cassegrain":
+        from .optica import cassegrain
+
+        if catalogo is None:
+            raise ErrorDeDatos(
+                f"{componente.id}: es un 'cassegrain' y su geometria se deriva "
+                f"tambien de 'integracion.optica' del catalogo. Llama a "
+                f"parts.solido(componente, catalogo)."
+            )
+        return cassegrain.solido(componente, catalogo)
     cuerpo = _cuerpo(componente)
     conectores = [
         solido_conector
@@ -323,6 +341,40 @@ def solido(componente: Componente) -> cq.Solid | cq.Compound:
     return cq.Compound.makeCompound([cuerpo, *conectores])
 
 
+def tiene_envolvente_propia(componente: Componente) -> bool:
+    """True si lo que se analiza NO es lo mismo que lo que se dibuja.
+
+    Solo el modelo parametrico del Cassegrain, y solo mientras se dibuje con el:
+    en cuanto llega el STEP del fabricante, el solido vuelve a ser uno solo.
+    """
+    return componente.tipo_forma == "cassegrain" and not step_disponible(componente)
+
+
+def solido_envolvente(
+    componente: Componente, catalogo: Catalogo | None = None
+) -> cq.Solid | cq.Compound:
+    """El solido con el que se ANALIZA, que no siempre es el que se dibuja.
+
+    Para casi todas las piezas es el mismo: una caja es maciza y un STEP de
+    fabricante trae la pieza entera. La excepcion es el modelo parametrico del
+    Cassegrain, que es HUECO: un barrilete con dos espejos dentro y aire en
+    medio. Si ese hueco entrara en el analisis de volumen, el interior del tubo
+    saldria como sitio libre donde meter algo, y no lo es -- ahi va el haz --;
+    y si entrara en la booleana de interferencias, una pieza vecina podria
+    meterse dentro del tubo sin que nadie se quejara.
+
+    Lo que se reserva se mide sobre lo que se dibuja (CLAUDE.md 2), y lo que el
+    telescopio reserva es el prisma entero. Quien pide un solido dice cual de
+    los dos quiere: el visor y el export STEP piden ``solido``, el analisis
+    pide este.
+    """
+    if tiene_envolvente_propia(componente):
+        from .optica import cassegrain
+
+        return cassegrain.envolvente(componente)
+    return solido(componente, catalogo)
+
+
 def _girado(forma: Shape, grados: tuple[float, float, float]) -> Shape:
     """Gira alrededor de X, Y y Z en ese orden, sobre el origen del STEP."""
     ejes = (cq.Vector(1, 0, 0), cq.Vector(0, 1, 0), cq.Vector(0, 0, 1))
@@ -332,12 +384,14 @@ def _girado(forma: Shape, grados: tuple[float, float, float]) -> Shape:
     return forma
 
 
-def caja_local(componente: Componente) -> Caja | None:
+def caja_local(
+    componente: Componente, catalogo: Catalogo | None = None
+) -> Caja | None:
     """Caja envolvente del componente en sus ejes locales, conectores incluidos."""
     if not componente.modelable:
         return None
     if step_disponible(componente) or componente.conectores:
-        return caja_de_solidos(solido(componente), componente.id)
+        return caja_de_solidos(solido(componente, catalogo), componente.id)
     dims = componente.dimensiones.como_vector()
     assert dims is not None
     return Caja.centrada(dims)
@@ -368,6 +422,6 @@ def exportar_generados(catalogo: Catalogo, destino: Path | None = None) -> list[
             # una pieza que el modelo ya dibuja con su geometria real.
             ruta.unlink(missing_ok=True)
             continue
-        cq.exporters.export(solido(componente), str(ruta))
+        cq.exporters.export(solido(componente, catalogo), str(ruta))
         escritos.append(ruta)
     return escritos
