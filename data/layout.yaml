@@ -16,6 +16,8 @@
 # Reparto: dos columnas a lo largo de TODO Z.
 #   X < -10.85 mm -> plataforma (100.0 mm de ancho)
 #   X > -10.85 mm -> payload (121.7 mm de ancho)
+# En la zona del telescopio el payload se parte otra vez en X:
+#   X > +84.55 mm -> franja de moduladores (26.3 mm)
 # =====================================================================
 
 meta:
@@ -23,11 +25,13 @@ meta:
   fecha: 2026-09-20
   nota: >-
     Dos columnas de 3U a lo largo de todo Z. La pila PC104 queda holgada:
-    259 mm usados de 361 mm. A cambio la columna de payload mide
-    121.7 mm de ancho, donde los 130 mm de recorrido recto de
-    cada modulador no caben segun X, asi que van segun Z. Y PCB-2 queda
-    en la otra columna, con lo que el coaxial RF a los moduladores cruza
-    el satelite a lo ancho.
+    259 mm usados de 361 mm. La columna de payload mide
+    121.7 mm de ancho y se parte en dos a lo largo del telescopio:
+    95.4 mm para el barrilete y 26.3 mm de franja lateral, donde van
+    los dos moduladores tumbados segun Z. Asi la bandeja se queda sin
+    cuerpos dentro y el telescopio puede reservar 200 mm. PCB-2 sigue
+    en la otra columna, con lo que el coaxial RF cruza el satelite a lo
+    ancho.
 
 zonas:
   - id: z_plataforma
@@ -46,19 +50,34 @@ zonas:
   - id: z_payload_telescopio
     nombre: "Telescopio"
     caja:
-      min: [-10.85, -47.70, 20.70]
+      min: [-10.85, -47.70, -19.30]
+      max: [84.55, 47.70, 180.70]
+    nota: >-
+      Telescopio Cassegrain apuntando por +Z. 200 mm RESERVADOS en Z (dato
+      'longitud_reservada', estado decision, provisional hasta el STEP).
+      OJO: los "~2U" del brief son ~227 mm con la U de longitud de la CDS
+      (113.5 mm), no 200. Esta zona mide 95.4 mm en X, que es el mayor
+      diametro de barrilete que cabe en la altura interior. Su envolvente
+      es TBD y no se dibuja.
+
+  - id: z_payload_franja
+    nombre: "Franja lateral - moduladores"
+    caja:
+      min: [84.55, -47.70, -19.30]
       max: [110.85, 47.70, 180.70]
     nota: >-
-      Telescopio Cassegrain apuntando por +Z. 160 mm de longitud
-      reservados, menos que los ~2U del brief: en esta distribucion la
-      bandeja necesita recorrido en Z y sale de aqui. Su envolvente es TBD
-      y no se dibuja.
+      Los 26.3 mm de X que quedan al lado del telescopio, a lo largo de
+      toda su longitud. Aqui van los dos moduladores tumbados (9.7 mm por
+      X, 15 mm por Y, 110 mm por Z), pegados al extremo -Z para acortar la
+      fibra hasta la bandeja. El ancho no se ha elegido: el barrilete no
+      puede pasar de los 95.4 mm de altura interior, asi que esta franja
+      existe para cualquier diametro que permita montar el telescopio.
 
   - id: z_payload_banco
     nombre: "Banco optico de espacio libre"
     caja:
-      min: [-10.85, -47.70, -34.30]
-      max: [110.85, 47.70, 20.70]
+      min: [-10.85, -47.70, -74.30]
+      max: [110.85, 47.70, -19.30]
     nota: >-
       Colimador, dicroico, FSM y camara de beacon. Camino: colimador ->
       dicroico -> FSM -> telescopio, y dicroico -> camara.
@@ -67,12 +86,13 @@ zonas:
     nombre: "Bandeja optica de fibra"
     caja:
       min: [-10.85, -47.70, -180.70]
-      max: [110.85, 47.70, -34.30]
+      max: [110.85, 47.70, -74.30]
     nota: >-
-      Los dos moduladores van tumbados a lo largo de Z: con 121.7 mm de
-      ancho de columna no caben los 130 mm de recorrido recto segun X.
-      Zona con control termico propio: 0 a +70 C por la extincion del
-      modulador.
+      106.4 mm de Z con los 121.7 mm de ancho enteros, ya sin cuerpos de
+      modulador dentro: los bucles de fibra pueden curvar en toda la
+      anchura. Aqui se queda el laser DFB, que con sus 4.1 W es la
+      principal fuente de calor del payload y no debe ir junto al
+      barrilete. Zona con control termico propio.
 
 # Vacio hasta que lleguen los diametros de haz, el radio de curvatura de
 # la fibra y las holguras de conector. Declarar un keep-out con medidas
@@ -112,11 +132,11 @@ colocaciones:
     zona: z_plataforma
   - componente: mod_intensidad_mxer_ln_10
     instancia: 1
-    centro: [20.0, -37.85, -107.5]
-    rotacion: [0, 90, 90]
-    zona: z_payload_bandeja
+    centro: [91.125, 0.0, 45.7]
+    rotacion: [0, 90, 0]
+    zona: z_payload_franja
   - componente: mod_fase_mpz_ln_10
     instancia: 1
-    centro: [45.0, -37.85, -107.5]
-    rotacion: [0, 90, 90]
-    zona: z_payload_bandeja
+    centro: [104.275, 0.0, 45.7]
+    rotacion: [0, 90, 0]
+    zona: z_payload_franja

@@ -434,10 +434,28 @@ componentes:
         estado: TBD
         falta: Diametro exterior del barrilete y longitud optica del tubo
         pedir_a: Aperture Optical Sciences / equipo de optica de ACSAR
+        falta_tambien: STEP del telescopio
         nota: >-
           El brief indica "aprox. 2U" y apertura libre 90 mm, pero 2U no fija el
           contorno. El diametro exterior es el numero critico: ver el chequeo
-          'apertura_vs_altura' en el analisis.
+          'apertura_vs_altura' en el analisis. OJO con el "2U": la U de longitud
+          de la CDS son 113.5 mm, no 100, asi que "2U" son ~227 mm. La longitud
+          real saldra del STEP del telescopio (Oscar), no de esta cifra.
+    longitud_reservada:
+      valor: 200.0
+      unidad: mm
+      estado: decision
+      fuente: >-
+        Decision de reparto ACSAR del 2026-09-20, al pasar los moduladores a la
+        franja lateral. Es el hueco que se le RESERVA al telescopio en Z dentro
+        de la columna de payload, no una longitud medida.
+      nota: >-
+        PROVISIONAL. Valor de trabajo mientras no llegue el STEP. No confundir
+        con los "~2U" del brief: con la U de longitud de la CDS (113.5 mm) esos
+        2U son 227 mm, no 200. La distribucion admite hasta 306.4 mm vaciando la
+        bandeja; con 200 mm quedan 106.4 mm de bandeja y con 227 mm quedan
+        79.4 mm. Cambiar este valor y regenerar el layout es todo lo que hace
+        falta para reasignar el reparto.
     apertura_libre:
       valor: 90.0
       unidad: mm

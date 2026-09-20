@@ -12,7 +12,7 @@ Resumen: **27** no comprobable, **5** ok
 | id | familia | desde | hasta | tipo | estado | recorrido mm | detalle |
 |---|---|---|---|---|---|---|---|
 | f01 | opticas_fibra | laser_dfb_1550 | mod_intensidad_mxer_ln_10 | fibra_pm | no comprobable | - | Sin colocar: laser_dfb_1550. No se puede medir el recorrido ni comprobar la holgura. |
-| f02 | opticas_fibra | mod_intensidad_mxer_ln_10 | mod_fase_mpz_ln_10 | fibra_pm | no comprobable | 25 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
+| f02 | opticas_fibra | mod_intensidad_mxer_ln_10 | mod_fase_mpz_ln_10 | fibra_pm | no comprobable | 13 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
 | f03 | opticas_fibra | mod_fase_mpz_ln_10 | voa | fibra_pm | no comprobable | - | Sin colocar: voa. No se puede medir el recorrido ni comprobar la holgura. |
 | f04 | opticas_fibra | voa | aislador | fibra_pm | no comprobable | - | Sin colocar: voa, aislador. No se puede medir el recorrido ni comprobar la holgura. |
 | f05 | opticas_fibra | aislador | filtro_espectral | fibra_pm | no comprobable | - | Sin colocar: aislador, filtro_espectral. No se puede medir el recorrido ni comprobar la holgura. |

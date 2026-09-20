@@ -34,8 +34,8 @@ No editar a mano: los numeros salen de `data/components.yaml`.
 | eps_starbuck_nano_plus | AAC Clyde Space Starbuck-Nano-PLUS | plataforma | confirmado | 1 | 180.0 | (-61, 0, 74) | si |
 | radio_banda_s_quasar_strx | AAC Clyde Space Quasar-STRX (transceptor banda S) | plataforma | referencia | 1 | 146.0 | (-61, 0, 44) | si |
 | obc_kryten_m3_plus | AAC Clyde Space Kryten-M3-PLUS (OBC con GNSS) | plataforma | confirmado | 1 | 47.6 | (-61, 0, 97) | si |
-| mod_fase_mpz_ln_10 | Exail MPZ-LN-10 (modulador de fase, codificador de polarizacion) | payload_bandeja | referencia | 1 | 16.0 | (45, -38, -108) | si |
-| mod_intensidad_mxer_ln_10 | Exail MXER-LN-10 (modulador de intensidad, grado espacial EM/NS-FM/FM) | payload_bandeja | confirmado | 1 | 16.0 | (20, -38, -108) | si |
+| mod_fase_mpz_ln_10 | Exail MPZ-LN-10 (modulador de fase, codificador de polarizacion) | payload_bandeja | referencia | 1 | 16.0 | (104, 0, 46) | si |
+| mod_intensidad_mxer_ln_10 | Exail MXER-LN-10 (modulador de intensidad, grado espacial EM/NS-FM/FM) | payload_bandeja | confirmado | 1 | 16.0 | (91, 0, 46) | si |
 | qrng_idq20mc1_s3 | QRNG ID Quantique IDQ20MC1-S3 | payload_pcb | confirmado | 4 | 0.1 | - | no |
 | acoplador_monitor | Acoplador de monitorizacion + fotodiodo | payload_bandeja | TBD | 1 | - | - | no |
 | aislador | Aislador optico | payload_bandeja | TBD | 1 | - | - | no |
@@ -62,9 +62,10 @@ No editar a mano: los numeros salen de `data/components.yaml`.
 | zona | nombre | total cm3 | ocupado cm3 | libre cm3 | libre L | % ocupado |
 |---|---|---|---|---|---|---|
 | z_plataforma | Columna de plataforma - pila PC104 a lo largo de todo Z | 3447.8 | 1362.1 | 2085.7 | 2.09 | 40% |
-| z_payload_telescopio | Telescopio | 1857.6 | 0.0 | 1857.6 | 1.86 | 0% |
+| z_payload_telescopio | Telescopio | 1820.2 | 0.0 | 1820.2 | 1.82 | 0% |
+| z_payload_franja | Franja lateral - moduladores | 501.8 | 32.0 | 469.8 | 0.47 | 6% |
 | z_payload_banco | Banco optico de espacio libre | 638.6 | 0.0 | 638.6 | 0.64 | 0% |
-| z_payload_bandeja | Bandeja optica de fibra | 1699.7 | 32.0 | 1667.7 | 1.67 | 2% |
+| z_payload_bandeja | Bandeja optica de fibra | 1235.3 | 0.0 | 1235.3 | 1.24 | 0% |
 
 ## Mapa del hueco libre
 
@@ -72,8 +73,8 @@ Vista desde +Y (planta). Eje horizontal Z (-Z izquierda, +Z derecha),
 eje vertical X (+X arriba). De ` ` (vacio) a `@` (lleno).
 
 ```
-                                    
-                                    
+                 ...........        
+                 ...........        
                                     
                                     
                                     

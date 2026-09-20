@@ -7,7 +7,9 @@ una dimension nueva, se regenera la distribucion en vez de recalcularla a ojo:
     uv run python tools/generar_layout.py
 
 Distribucion elegida el 2026-09-20: DOS COLUMNAS a lo largo de todo Z,
-plataforma en -X y payload en +X.
+plataforma en -X y payload en +X. Revisada el mismo dia: los moduladores pasan
+de la bandeja a la FRANJA lateral que queda junto al telescopio, para que el
+telescopio pueda crecer en Z.
 """
 
 from __future__ import annotations
@@ -18,12 +20,10 @@ from pathlib import Path
 from clau3d.datamodel import RAIZ, cargar
 
 # --- unicas decisiones de reparto, todas justificadas en CLAUDE.md -----
+# La longitud del telescopio NO esta aqui: es 'longitud_reservada' del
+# telescopio en data/components.yaml, con estado 'decision' y valor provisional.
 ANCHO_PLATAFORMA = 100.0   # >= 95.9 mm del iADCS400, con holgura de montaje
-L_TELESCOPIO = 160.0       # menos que los ~2U del brief: la bandeja necesita Z
 L_BANCO = 55.0             # banco de espacio libre
-ALTURA_BANDEJA = 5.0       # espesor reservado a la placa de la bandeja
-SEPARACION_MODULADORES = 25.0
-X_PRIMER_MODULADOR = 20.0
 
 # Orden de la pila, de +Z hacia -Z. El ADCS arriba del todo para que el star
 # tracker mire por la misma cara que el telescopio; las baterias al final de -Z
@@ -47,10 +47,23 @@ def generar() -> str:
     paso = catalogo.integracion["pila_pc104.paso_apilamiento_modelado"].escalar()
     assert paso is not None
 
+    l_telescopio = catalogo["telescopio_cassegrain"].extras[
+        "longitud_reservada"
+    ].escalar()
+    assert l_telescopio is not None
+
     x_sep = -X + ANCHO_PLATAFORMA
     x_pila = -X + ANCHO_PLATAFORMA / 2
-    z_tel_min = Z - L_TELESCOPIO
+    z_tel_min = Z - l_telescopio
     z_banco_min = z_tel_min - L_BANCO
+
+    # Ancho de la franja lateral. NO se elige: el barrilete no puede pasar de
+    # la altura interior (iy), que es la dimension pequena del 6U, asi que lo
+    # que queda al lado del telescopio es al menos ancho_payload - iy. Tomar
+    # ese minimo hace que la franja no dependa del diametro, que es TBD.
+    ancho_payload = ix - ANCHO_PLATAFORMA
+    ancho_franja = ancho_payload - iy
+    x_franja_min = X - ancho_franja
 
     colocaciones: list[dict] = []
     reservas: list[str] = []
@@ -82,25 +95,34 @@ def generar() -> str:
             cursor -= ranura
 
     usado = Z - cursor
-    z_bandeja_centro = (-Z + z_banco_min) / 2
 
-    for indice, cid in enumerate(
-        ("mod_intensidad_mxer_ln_10", "mod_fase_mpz_ln_10")
-    ):
-        _, _, alto = catalogo[cid].dimensiones.como_vector()
+    # Los moduladores van TUMBADOS en la franja: el lado de 9.7 mm por X, que es
+    # el eje escaso, y el de 15 mm por Y, donde sobra sitio. Asi el conector RF
+    # lateral (6.1 x 10 mm) sobresale hacia +-Y y no hacia la franja. Los dos
+    # caben en paralelo, y se reparten el ancho de la franja a partes iguales.
+    #
+    # En Z se pegan al extremo -Z de la franja: es el lado del banco y de la
+    # bandeja, y asi los tramos extra de fibra salen lo mas cortos posible.
+    moduladores = ("mod_intensidad_mxer_ln_10", "mod_fase_mpz_ln_10")
+    for indice, cid in enumerate(moduladores):
+        recorrido = catalogo[cid].extras["longitud_con_fibras"].escalar()
+        assert recorrido is not None
         colocaciones.append(
             {
                 "componente": cid,
                 "instancia": 1,
-                # [0, 90, 90] lleva [110, 15, 9.7] a [15, 9.7, 110]: los 110 mm
-                # por Z y el cuerpo plano apoyado sobre la bandeja.
+                # [0, 90, 0] lleva [110, 15, 9.7] a [9.7, 15, 110].
                 "centro": [
-                    X_PRIMER_MODULADOR + indice * SEPARACION_MODULADORES,
-                    round(-Y + ALTURA_BANDEJA + alto / 2, 3),
-                    round(z_bandeja_centro, 3),
+                    round(
+                        x_franja_min
+                        + ancho_franja * (indice + 0.5) / len(moduladores),
+                        3,
+                    ),
+                    0.0,
+                    round(z_tel_min + recorrido / 2, 3),
                 ],
-                "rotacion": [0, 90, 90],
-                "zona": "z_payload_bandeja",
+                "rotacion": [0, 90, 0],
+                "zona": "z_payload_franja",
             }
         )
 
@@ -119,11 +141,25 @@ def generar() -> str:
         (
             "z_payload_telescopio",
             "Telescopio",
-            (x_sep, -Y, z_tel_min), (X, Y, Z),
-            f"Telescopio Cassegrain apuntando por +Z. {L_TELESCOPIO:.0f} mm de "
-            f"longitud reservados, menos que los ~2U del brief: en esta "
-            f"distribucion la bandeja necesita recorrido en Z y sale de aqui. "
-            f"Su envolvente es TBD y no se dibuja.",
+            (x_sep, -Y, z_tel_min), (x_franja_min, Y, Z),
+            f"Telescopio Cassegrain apuntando por +Z. {l_telescopio:.0f} mm "
+            f"RESERVADOS en Z (dato 'longitud_reservada', estado decision, "
+            f"provisional hasta el STEP). OJO: los \"~2U\" del brief son ~227 mm "
+            f"con la U de longitud de la CDS (113.5 mm), no 200. Esta zona mide "
+            f"{iy:.1f} mm en X, que es el mayor diametro de barrilete que cabe "
+            f"en la altura interior. Su envolvente es TBD y no se dibuja.",
+        ),
+        (
+            "z_payload_franja",
+            "Franja lateral - moduladores",
+            (x_franja_min, -Y, z_tel_min), (X, Y, Z),
+            f"Los {ancho_franja:.1f} mm de X que quedan al lado del telescopio, "
+            f"a lo largo de toda su longitud. Aqui van los dos moduladores "
+            f"tumbados (9.7 mm por X, 15 mm por Y, 110 mm por Z), pegados al "
+            f"extremo -Z para acortar la fibra hasta la bandeja. El ancho no se "
+            f"ha elegido: el barrilete no puede pasar de los {iy:.1f} mm de "
+            f"altura interior, asi que esta franja existe para cualquier "
+            f"diametro que permita montar el telescopio.",
         ),
         (
             "z_payload_banco",
@@ -136,10 +172,12 @@ def generar() -> str:
             "z_payload_bandeja",
             "Bandeja optica de fibra",
             (x_sep, -Y, -Z), (X, Y, z_banco_min),
-            f"Los dos moduladores van tumbados a lo largo de Z: con "
-            f"{ix - ANCHO_PLATAFORMA:.1f} mm de ancho de columna no caben los "
-            f"130 mm de recorrido recto segun X. Zona con control termico "
-            f"propio: 0 a +70 C por la extincion del modulador.",
+            f"{iz - l_telescopio - L_BANCO:.1f} mm de Z con los "
+            f"{ancho_payload:.1f} mm de ancho enteros, ya sin cuerpos de "
+            f"modulador dentro: los bucles de fibra pueden curvar en toda la "
+            f"anchura. Aqui se queda el laser DFB, que con sus 4.1 W es la "
+            f"principal fuente de calor del payload y no debe ir junto al "
+            f"barrilete. Zona con control termico propio.",
         ),
     ]
 
@@ -161,7 +199,9 @@ def generar() -> str:
         "#",
         "# Reparto: dos columnas a lo largo de TODO Z.",
         f"#   X < {x_sep:+.2f} mm -> plataforma ({ANCHO_PLATAFORMA:.1f} mm de ancho)",
-        f"#   X > {x_sep:+.2f} mm -> payload ({ix - ANCHO_PLATAFORMA:.1f} mm de ancho)",
+        f"#   X > {x_sep:+.2f} mm -> payload ({ancho_payload:.1f} mm de ancho)",
+        f"# En la zona del telescopio el payload se parte otra vez en X:",
+        f"#   X > {x_franja_min:+.2f} mm -> franja de moduladores ({ancho_franja:.1f} mm)",
         "# =====================================================================",
         "",
         "meta:",
@@ -169,11 +209,13 @@ def generar() -> str:
         "  fecha: 2026-09-20",
         "  nota: >-",
         f"    Dos columnas de 3U a lo largo de todo Z. La pila PC104 queda holgada:",
-        f"    {usado:.0f} mm usados de {iz:.0f} mm. A cambio la columna de payload mide",
-        f"    {ix - ANCHO_PLATAFORMA:.1f} mm de ancho, donde los 130 mm de recorrido recto de",
-        "    cada modulador no caben segun X, asi que van segun Z. Y PCB-2 queda",
-        "    en la otra columna, con lo que el coaxial RF a los moduladores cruza",
-        "    el satelite a lo ancho.",
+        f"    {usado:.0f} mm usados de {iz:.0f} mm. La columna de payload mide",
+        f"    {ancho_payload:.1f} mm de ancho y se parte en dos a lo largo del telescopio:",
+        f"    {iy:.1f} mm para el barrilete y {ancho_franja:.1f} mm de franja lateral, donde van",
+        "    los dos moduladores tumbados segun Z. Asi la bandeja se queda sin",
+        f"    cuerpos dentro y el telescopio puede reservar {l_telescopio:.0f} mm. PCB-2 sigue",
+        "    en la otra columna, con lo que el coaxial RF cruza el satelite a lo",
+        "    ancho.",
         "",
         "zonas:",
     ]
