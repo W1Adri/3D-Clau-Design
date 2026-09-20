@@ -281,6 +281,7 @@ function construirInterfaz() {
   capas();
   arbol();
   sinGeometria();
+  supuestos();
   leyenda();
   tablaZonas();
   tablaResumen();
@@ -409,6 +410,22 @@ function sinGeometria() {
     ul.append(li);
   }
   $('#cuenta-sin').textContent = escena.sin_geometria.length + ' componentes';
+}
+
+// Los supuestos no se ven mirando la geometría: un cuerpo gris se ve igual de
+// sólido que los demás. Esta lista es lo único que dice cuáles de los cuerpos
+// que hay en pantalla están ahí porque alguien se inventó una cota.
+function supuestos() {
+  const ul = $('#supuestos');
+  ul.innerHTML = '';
+  for (const s of escena.supuestos || []) {
+    const li = crear('li');
+    li.append(crear('span', 'id', s.componente + ' · ' + s.magnitud.split('.').pop()));
+    li.append(crear('span', 'pedir', s.pedir_a ? '→ ' + s.pedir_a : '→ sin asignar'));
+    li.title = (s.falta || 'sin describir') + '\nvalor modelado: ' + JSON.stringify(s.valor_modelado);
+    ul.append(li);
+  }
+  $('#cuenta-supuestos').textContent = (escena.supuestos || []).length + ' magnitudes';
 }
 
 function leyenda() {
