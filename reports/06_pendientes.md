@@ -5,23 +5,28 @@ No editar a mano: los numeros salen de `data/components.yaml`.
 
 - Mision: CLAU - CubeSat Laser per a Aplicacions Ultrasegures
 - Norma: CubeSat Design Specification Rev. 14.1, The CubeSat Program, Cal Poly SLO
-- Estado del layout: **confirmada** (20 piezas colocadas)
+- Estado del layout: **confirmada** (26 piezas colocadas)
 
-Total de huecos abiertos: **62**, de los cuales **43** son TBD sin ninguna aproximacion y **19** son SUPUESTOS: numeros que se ha inventado este repositorio para poder dibujar y colocar la pieza.
+Total de huecos abiertos: **66**, de los cuales **42** son TBD sin ninguna aproximacion y **24** son SUPUESTOS: numeros que se ha inventado este repositorio para poder dibujar y colocar la pieza.
 
 > **Un supuesto no es un dato.** No suma en los presupuestos de masa ni de potencia, se dibuja en gris y aparece aqui hasta que alguien lo sustituya por una cifra con fuente. La lista de abajo es, literalmente, lo que hay que preguntar.
 
-## AAC Clyde Space (7)
+## AAC Clyde Space (6)
 
 | componente | magnitud | estado | valor modelado | que falta |
 |---|---|---|---|---|
 | adcs_iadcs400 | adcs_iadcs400.masa | TBD | - | Masa exacta de la configuracion elegida |
 | adcs_iadcs420 | adcs_iadcs420.masa | TBD | - | Masa del iADCS4-20. No hay ficha publica de este producto. |
-| antena_quasar_wsant | antena_quasar_wsant.dimensiones | TBD | - | Dimensiones y cara de montaje de la antena |
+| antena_quasar_wsant | antena_quasar_wsant.dimensiones | supuesto | `[82.0, 82.0, 10.0]` | Dimensiones reales, ganancia, diagrama de radiacion y cara de montaje |
 | antena_quasar_wsant | antena_quasar_wsant.masa | TBD | - | Masa |
 | radio_uhf_pulsar_vutrx | radio_uhf_pulsar_vutrx.dimensiones | TBD | - | Dimensiones |
 | radio_uhf_pulsar_vutrx | radio_uhf_pulsar_vutrx.masa | TBD | - | Masa |
-| paneles_photon_side | paneles_photon_side.dimensiones | TBD | - | Dimensiones de cada panel segun la cara elegida (1U/2U/3U/6U) |
+
+## AAC Clyde Space / Equipo de potencia de ACSAR (1)
+
+| componente | magnitud | estado | valor modelado | que falta |
+|---|---|---|---|---|
+| paneles_photon_side | paneles_photon_side.dimensiones | supuesto | `[209.3, 3.5, 349.0]` | Contorno real de cada tamano de PHOTON-SIDE (1U/2U/3U/6U) y cual de ellos se monta en cada cara |
 
 ## ACSAR (decision de mision aun abierta) (2)
 
@@ -46,17 +51,21 @@ Total de huecos abiertos: **62**, de los cuales **43** son TBD sin ninguna aprox
 | laser_beacon_bajada | laser_beacon_bajada.dimensiones | supuesto | `[25.0, 30.0, 25.0]` | Longitud de onda, potencia optica y envolvente del modulo elegido |
 | laser_beacon_bajada | laser_beacon_bajada.masa | TBD | - | Masa del laser de beacon elegido |
 
-## Equipo de electronica de ACSAR (7)
+## Equipo de electronica de ACSAR (11)
 
 | componente | magnitud | estado | valor modelado | que falta |
 |---|---|---|---|---|
 | integracion | integracion.holgura_conector | TBD | - | Holgura de insercion por tipo de conector (coaxial RF, AVIM optico, conectores de datos) |
-| pcb1_control_qkd | pcb1_control_qkd.dimensiones | TBD | - | Altura de la tarjeta (contorno PC104 propuesto, altura por disenar) |
+| pcb1_control_qkd | pcb1_control_qkd.dimensiones | supuesto | `[95.89, 90.17, 15.0]` | Altura real de la tarjeta, que la fija el componente mas alto (la FPGA y su disipador, si lleva). Y confirmar el contorno PC104. |
 | pcb1_control_qkd | pcb1_control_qkd.masa | TBD | - | Masa de la tarjeta poblada |
-| pcb2_drivers_opticos | pcb2_drivers_opticos.dimensiones | TBD | - | Altura de la tarjeta |
+| pcb2_drivers_opticos | pcb2_drivers_opticos.dimensiones | supuesto | `[95.89, 90.17, 15.0]` | Altura real de la tarjeta. Los drivers RF y el del Peltier son los candidatos a componente mas alto. Y confirmar el contorno PC104. |
 | pcb2_drivers_opticos | pcb2_drivers_opticos.masa | TBD | - | Masa de la tarjeta poblada |
-| pcb3_pat | pcb3_pat.dimensiones | TBD | - | Altura de la tarjeta, y si el driver del FSM es de alta tension |
+| pcb3_pat | pcb3_pat.dimensiones | supuesto | `[95.89, 90.17, 15.0]` | Altura real de la tarjeta, y si el driver del FSM es de alta tension (un driver piezo de 120 V ocupa bastante mas que uno de MEMS). Es el mismo dato que bloquea la eleccion del FSM. Y confirmar el contorno. |
 | pcb3_pat | pcb3_pat.masa | TBD | - | Masa de la tarjeta poblada |
+| cables_rf_moduladores | cables_rf_moduladores.dimensiones | TBD | - | Un cable no tiene envolvente hasta que se encamina. Lo que hace falta es el diametro del coaxial elegido y su radio minimo de curvatura; con esos dos, el recorrido se dibuja como KEEP-OUT entre PCB-2 y cada modulador, no como un cuerpo. |
+| cables_rf_moduladores | cables_rf_moduladores.masa | TBD | - | Masa por metro del coaxial elegido, y longitud una vez encaminado |
+| cables_rf_moduladores | cables_rf_moduladores.diametro_coaxial | TBD | - | Diametro exterior del coaxial elegido (con su cubierta) |
+| cables_rf_moduladores | cables_rf_moduladores.radio_minimo_curvatura | TBD | - | Radio minimo de curvatura del coaxial. Es lo que fija el volumen que hay que reservar, y para un coaxial semirrigido no es pequeno. |
 
 ## Equipo de estructura de ACSAR (3)
 
@@ -163,12 +172,14 @@ Total de huecos abiertos: **62**, de los cuales **43** son TBD sin ninguna aprox
 |---|---|---|---|---|
 | fsm_piezo_pi_s331 | fsm_piezo_pi_s331.dimensiones | supuesto | `[50.0, 50.0, 22.0]` | Cotas exteriores del S-331 (plano acotado o STEP) |
 
-## Solo los supuestos, para sustituirlos (19)
+## Solo los supuestos, para sustituirlos (24)
 
 Cada fila es un numero que hoy sostiene el modelo sin sostenerse en nada.
 
 | componente | magnitud | valor modelado | que falta | pedir a |
 |---|---|---|---|---|
+| antena_quasar_wsant | antena_quasar_wsant.dimensiones | `[82.0, 82.0, 10.0]` | Dimensiones reales, ganancia, diagrama de radiacion y cara de montaje | AAC Clyde Space |
+| paneles_photon_side | paneles_photon_side.dimensiones | `[209.3, 3.5, 349.0]` | Contorno real de cada tamano de PHOTON-SIDE (1U/2U/3U/6U) y cual de ellos se monta en cada cara | AAC Clyde Space / Equipo de potencia de ACSAR |
 | telescopio_cassegrain | telescopio_cassegrain.dimensiones | `[95.4, 95.4, 200.0]` | Diametro exterior del barrilete y longitud optica real. YA EXISTE un concepto en formato nativo SolidWorks (Telescopio_concepto.SLDPRT, entrega "Preliminar viability model" del 2026-09-20), ilegible. Hace falta reexportarlo a STEP AP214 o AP242 y dejarlo en la ruta de 'step_esperado'. Ver cad/vendor/MANIFEST.yaml, seccion 'sin_convertir'. | Oscar (ACSAR) / Aperture Optical Sciences |
 | fsm_piezo_pi_s331 | fsm_piezo_pi_s331.dimensiones | `[50.0, 50.0, 22.0]` | Cotas exteriores del S-331 (plano acotado o STEP) | Physik Instrumente |
 | dicroico | dicroico.dimensiones | `[23.0, 23.0, 23.0]` | Diametro del haz colimado (del que sale el tamano del sustrato), longitudes de onda de corte y envolvente del soporte | Equipo de optica de ACSAR |
@@ -188,6 +199,9 @@ Cada fila es un numero que hoy sostiene el modelo sin sostenerse en nada.
 | aislador | aislador.dimensiones | `[35.0, 5.5, 5.5]` | Modelo de aislador elegido y su envolvente | Equipo de payload de ACSAR |
 | filtro_espectral | filtro_espectral.dimensiones | `[40.0, 5.5, 5.5]` | Modelo de filtro elegido, su ancho de banda y su envolvente | Equipo de payload de ACSAR |
 | acoplador_monitor | acoplador_monitor.dimensiones | `[60.0, 20.0, 12.0]` | Modelo de acoplador y de fotodiodo, y si el fotodiodo va en la bandeja o montado en PCB-2 | Equipo de payload de ACSAR |
+| pcb1_control_qkd | pcb1_control_qkd.dimensiones | `[95.89, 90.17, 15.0]` | Altura real de la tarjeta, que la fija el componente mas alto (la FPGA y su disipador, si lleva). Y confirmar el contorno PC104. | Equipo de electronica de ACSAR |
+| pcb2_drivers_opticos | pcb2_drivers_opticos.dimensiones | `[95.89, 90.17, 15.0]` | Altura real de la tarjeta. Los drivers RF y el del Peltier son los candidatos a componente mas alto. Y confirmar el contorno PC104. | Equipo de electronica de ACSAR |
+| pcb3_pat | pcb3_pat.dimensiones | `[95.89, 90.17, 15.0]` | Altura real de la tarjeta, y si el driver del FSM es de alta tension (un driver piezo de 120 V ocupa bastante mas que uno de MEMS). Es el mismo dato que bloquea la eleccion del FSM. Y confirmar el contorno. | Equipo de electronica de ACSAR |
 
 ## Discrepancias entre fuentes (9)
 

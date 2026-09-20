@@ -101,6 +101,11 @@ _ROTACION_DE_MONTAJE = {
     # El telescopio no se atornilla a un suelo: se atornilla por su brida
     # trasera a un mamparo que mira a +Z, que es por donde le entra el haz.
     ("-Z", "+Z"): [0, 0, 0],
+    # La antena de parche: se sujeta por +Z local y radia por -Z local, hacia
+    # fuera del satelite por la cara -Z.
+    ("+Z", "-Z"): [0, 0, 0],
+    # Los paneles de cuerpo, uno por cada cara grande. El de -Y va del reves.
+    ("-Y", "-Y"): [180, 0, 0],
 }
 
 
@@ -179,10 +184,22 @@ def generar() -> str:
         componente = catalogo[cid]
         for instancia in range(1, unidades + 1):
             if componente.modelable:
-                dx, dy, dz = componente.dimensiones.como_vector()
+                fx, fy, _ = componente.dimensiones.como_vector()
                 # El iADCS400 no es cuadrado: su lado corto va por Y, que es el
                 # eje con menos margen de los tres.
-                rotacion = [0, 0, 90] if dx < dy else [0, 0, 0]
+                rotacion = [0, 0, 90] if fx < fy else [0, 0, 0]
+                # La ranura se mide sobre lo que SE DIBUJA, no sobre la altura
+                # de ficha. No es lo mismo: las fichas de AAC miden "from top
+                # PCB to lowest component" y no incluyen el conector PC104
+                # pasante, que baja 12.45 mm por debajo de la tarjeta. Mientras
+                # la tarjeta vecina era un hueco TBD daba igual -- los pines no
+                # chocaban con nada --, pero en cuanto la vecina se dibuja, sus
+                # 2.91 cm3 de solape aparecen en el informe. Un pin que
+                # atraviesa el conector de la vecina es correcto en una pila
+                # PC104 de verdad; un pin que atraviesa el BLOQUE MACIZO con el
+                # que se modela una tarjeta cuya altura no se conoce, no. Se
+                # reserva por lo dibujado, que es conservador y cierto.
+                _, _, dz = dims_en_mundo(componente, rotacion)
                 ranura = math.ceil(dz / paso) * paso
                 colocaciones.append(
                     {
@@ -395,6 +412,53 @@ def generar() -> str:
             }
         )
 
+    # ------------------------------------------------------------ antena
+    # Es la pieza que peor lo tiene: necesita ver la Tierra y no hay cara
+    # libre. +Z la ocupan el telescopio y el star tracker; contra las caras
+    # +-X y +-Y la pila PC104 deja 2-3 mm; y sus 10 mm de espesor no caben en
+    # los 6.5 mm de protrusion que permite la CDS, asi que tampoco puede ir
+    # pegada por fuera. Queda -Z, que es el hueco que dejan las baterias, con
+    # el coste de que apunta al lado contrario que el telescopio.
+    antena = catalogo["antena_quasar_wsant"]
+    if antena.modelable:
+        _, _, espesor = dims_en_mundo(antena, [0, 0, 0])
+        colocaciones.append(
+            {
+                "componente": "antena_quasar_wsant",
+                "instancia": 1,
+                "centro": [round(x_pila, 3), 0.0, round(-Z + espesor / 2, 3)],
+                "rotacion": rotacion_de_montaje(antena, "-Z"),
+                "zona": "z_plataforma",
+            }
+        )
+
+    # ------------------------------------------------------- paneles solares
+    # Van POR FUERA, sobre las dos caras grandes. Se salen de la envolvente a
+    # proposito: la CDS 14.1 req 2.2.3 concede 6.5 mm de protrusion y el panel
+    # mide 3.5. El detector de desbordes lo sabe porque el catalogo los marca
+    # 'exterior'. No pertenecen a ninguna zona interior: llevan zona
+    # 'exterior', que no es una de las cinco que embaldosan el hueco util.
+    paneles = catalogo["paneles_photon_side"]
+    if paneles.modelable and paneles.n_unidades:
+        ex, ey, ez = catalogo.dims_exteriores
+        _, espesor_panel, _ = paneles.dimensiones.como_vector()
+        for instancia, (signo, normal) in enumerate(
+            ((+1, "+Y"), (-1, "-Y"))[: paneles.n_unidades], start=1
+        ):
+            colocaciones.append(
+                {
+                    "componente": "paneles_photon_side",
+                    "instancia": instancia,
+                    "centro": [
+                        0.0,
+                        round(signo * (ey / 2 + espesor_panel / 2), 3),
+                        0.0,
+                    ],
+                    "rotacion": rotacion_de_montaje(paneles, normal),
+                    "zona": "exterior",
+                }
+            )
+
     zonas = [
         (
             "z_plataforma",
@@ -403,9 +467,13 @@ def generar() -> str:
             f"ADCS en +Z, para que el star tracker ST200 mire por la misma cara "
             f"que el telescopio. Despues OBC, EPS, radio banda S, PCB-3, PCB-1 y "
             f"PCB-2, y las baterias al final de -Z, que equilibran en Z la masa "
-            f"del telescopio. La pila usa {usado:.0f} mm de los {iz:.0f} mm "
-            f"disponibles. Las tres PCBs propias tienen posicion de separador "
-            f"reservada pero no se dibujan: su altura es TBD.",
+            f"del telescopio, y la antena de banda S detras de ellas, contra "
+            f"la pared -Z, que es la unica cara con hueco. La pila usa "
+            f"{usado:.0f} mm de los {iz:.0f} mm disponibles. Cada ranura se "
+            f"mide sobre la geometria DIBUJADA, no sobre la altura de ficha: "
+            f"las fichas AAC no incluyen el conector PC104 pasante y los STEP "
+            f"si. Las tres PCBs propias se dibujan con una altura SUPUESTA de "
+            f"15 mm.",
         ),
         (
             "z_payload_telescopio",

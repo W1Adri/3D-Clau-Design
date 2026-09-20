@@ -130,6 +130,8 @@ zona_util_interior:
 componentes:
 
   - id: estructura_6u
+    id_drive: PLAT-08
+    referencia_comercial: null
     nombre: Estructura 6U (chasis)
     categoria: estructura
     subsistema: estructura
@@ -150,6 +152,8 @@ componentes:
       pedir_a: Equipo de estructura de ACSAR
 
   - id: adcs_iadcs400
+    id_drive: PLAT-04
+    referencia_comercial: AAC Clyde Space iADCS400 (incluye star tracker ST200)
     nombre: AAC Clyde Space iADCS400
     formato: pc104
     categoria: plataforma
@@ -192,6 +196,8 @@ componentes:
     nota_vista: El star tracker ST200 necesita linea de vision libre al exterior.
 
   - id: adcs_iadcs420
+    id_drive: PLAT-04-ALT
+    referencia_comercial: AAC Clyde Space iADCS4-20 (part number IADCS420-ASM-ST-1.0)
     nombre: AAC Clyde Space iADCS4-20 (alternativa, solo STEP)
     formato: pc104
     categoria: plataforma
@@ -258,6 +264,8 @@ componentes:
       porque la alternativa hay que poder verla.
 
   - id: obc_kryten_m3_plus
+    id_drive: PLAT-01
+    referencia_comercial: AAC Clyde Space Kryten-M3-PLUS
     nombre: AAC Clyde Space Kryten-M3-PLUS (OBC con GNSS)
     formato: pc104
     categoria: plataforma
@@ -335,7 +343,15 @@ componentes:
       fuente: https://www.aac-clyde.space/wp-content/uploads/2021/10/AAC_DataSheet_Kryten.pdf
 
   - id: eps_starbuck_nano_plus
-    nombre: AAC Clyde Space Starbuck-Nano-PLUS
+    id_drive: PLAT-05
+    referencia_comercial: AAC Clyde Space Starbuck-Nano-PLUS
+    nombre: AAC Clyde Space Starbuck-Nano-PLUS (EPS)
+    nota_hoja_drive: >-
+      OJO CON LA HOJA DE DRIVE: la lista de componentes etiqueta PLAT-05 como
+      "Bateria Starbuck-Nano-PLUS" y PLAT-06 como "EPS Optimus-30". Estan
+      cambiados: el Starbuck-Nano-PLUS es el EPS y el Optimus-30 es la bateria.
+      Aqui el id_drive se asigna por PRODUCTO, no por la etiqueta, asi que
+      PLAT-05 es este EPS. Corregir los nombres en la hoja.
     formato: pc104
     categoria: plataforma
     subsistema: EPS
@@ -360,7 +376,12 @@ componentes:
       final de paneles.
 
   - id: bateria_optimus_30
-    nombre: AAC Clyde Space Optimus-30
+    id_drive: PLAT-06
+    referencia_comercial: AAC Clyde Space Optimus-30
+    nombre: AAC Clyde Space Optimus-30 (bateria)
+    nota_hoja_drive: >-
+      Ver la nota de eps_starbuck_nano_plus: en la hoja de Drive PLAT-05 y
+      PLAT-06 llevan los nombres intercambiados. Este es el modulo de bateria.
     formato: pc104
     categoria: plataforma
     subsistema: EPS
@@ -442,6 +463,8 @@ componentes:
       nota: Restriccion termica mas estrecha de la plataforma. Condiciona la ubicacion.
 
   - id: radio_banda_s_quasar_strx
+    id_drive: PLAT-02
+    referencia_comercial: AAC Clyde Space Quasar-STRX
     nombre: AAC Clyde Space Quasar-STRX (transceptor banda S)
     formato: pc104
     categoria: plataforma
@@ -472,18 +495,37 @@ componentes:
       nota: La ficha del Pulsar-STX indica "<5 W".
 
   - id: antena_quasar_wsant
+    id_drive: PLAT-03
+    referencia_comercial: AAC Clyde Space Quasar-WSANT
     nombre: AAC Clyde Space Quasar-WSANT (antena banda S)
     categoria: plataforma
     subsistema: comunicaciones
     cantidad: 1
+    montaje:
+      cara: "+Z"
+      nota: >-
+        Parche: radia por la cara opuesta a la de montaje. Se atornilla por +Z
+        local y radia hacia -Z local, o sea hacia fuera del satelite por la
+        cara -Z.
     forma:
       tipo: caja
       dimensiones:
-        valor: null
+        valor: [82.0, 82.0, 10.0]
         unidad: mm
-        estado: TBD
-        falta: Dimensiones y cara de montaje de la antena
+        estado: supuesto
+        fuente: >-
+          SUPUESTO. AAC no publica las cotas del Quasar-WSANT. 82 x 82 x 10 mm
+          es el orden de magnitud de una antena de parche de banda S para
+          cubesat, que a 2.2 GHz necesita del orden de 80 mm de lado con
+          sustrato ceramico. NO es la ficha de este producto.
+        falta: Dimensiones reales, ganancia, diagrama de radiacion y cara de montaje
         pedir_a: AAC Clyde Space
+        nota: >-
+          Los 10 mm de espesor PASAN de los 6.5 mm de protrusion que permite la
+          CDS 14.1 req 2.2.3, asi que esta antena NO puede ir pegada por fuera:
+          va por dentro, contra la pared -Z, radiando a traves de ella. Eso es
+          una consecuencia de un numero supuesto; si el espesor real fuera
+          menor de 6.5 mm, podria ir por fuera y liberar volumen interior.
     masa:
       valor: null
       unidad: g
@@ -491,10 +533,29 @@ componentes:
       falta: Masa
       pedir_a: AAC Clyde Space
     requiere_vista_exterior: true
-    nota_vista: Debe apuntar a tierra. Compite por superficie con el telescopio y los paneles.
+    nota_vista: >-
+      Debe apuntar a tierra. Compite por superficie con el telescopio y los
+      paneles, y pierde: el telescopio ocupa el eje de +Z y el star tracker
+      mira por la misma cara, y las caras +-X y +-Y no tienen hueco interior
+      (la pila PC104 deja 2-3 mm contra la pared).
+    nota: >-
+      COLOCADA EN -Z, Y ESO TIENE UN COSTE QUE HAY QUE DECIDIR. Es el unico
+      sitio con hueco: el extremo -Z de la columna de plataforma esta libre
+      desde el final de las baterias. Pero -Z es la cara que entra primero en
+      el dispensador y, sobre todo, apunta al lado CONTRARIO que el telescopio.
+      Con el satelite apuntando +Z a la estacion optica durante un pase de QKD,
+      esta antena mira al cenit. El canal clasico de post-procesado no tiene
+      por que ser simultaneo al pase optico, asi que puede no ser un problema;
+      pero es una decision de operaciones, no de mecanica, y esta sin tomar.
 
   - id: radio_uhf_pulsar_vutrx
+    id_drive: null
+    referencia_comercial: AAC Clyde Space Pulsar-VUTRX
     nombre: AAC Clyde Space Pulsar-VUTRX (UHF, TT&C de respaldo)
+    nota_hoja_drive: >-
+      NO esta en la hoja indice de Drive. Es opcional y solo se integra si
+      queda volumen tras cerrar el payload; si se decide llevarlo, anadir la
+      fila a la hoja.
     formato: pc104
     categoria: plataforma
     subsistema: comunicaciones
@@ -517,23 +578,50 @@ componentes:
     nota: Opcional. Solo se integra si queda volumen tras cerrar el payload.
 
   - id: paneles_photon_side
+    id_drive: PLAT-07
+    referencia_comercial: AAC Clyde Space PHOTON-SIDE
     nombre: AAC Clyde Space PHOTON-SIDE (paneles de montaje en cuerpo)
     categoria: plataforma
     subsistema: EPS
+    exterior: true
     cantidad:
       valor: null
       estado: TBD
       falta: Numero de caras pobladas y tamano de cada una
       pedir_a: Equipo de potencia de ACSAR
+    cantidad_modelada:
+      valor: 2
+      estado: decision
+      fuente: >-
+        Hipotesis de trabajo: las dos caras grandes (+-Y, 226.3 x 366 mm), que
+        son las que mas area dan. NO es una eleccion cerrada; sale del mismo
+        hueco que 'cantidad'.
+      nota: >-
+        Se modelan 2 paneles SOLO para ver que ocupan y comprobar que no se
+        pasan de la protrusion permitida. El reparto real de caras depende del
+        presupuesto de energia y del modo de apuntado, los dos abiertos.
+    montaje:
+      cara: "-Y"
+      nota: >-
+        Panel plano. Se pega por su cara interior a la pared del chasis.
     forma:
       tipo: caja
       dimensiones:
-        valor: null
+        valor: [209.3, 3.5, 349.0]
         unidad: mm
-        estado: TBD
-        falta: Dimensiones de cada panel segun la cara elegida (1U/2U/3U/6U)
-        pedir_a: AAC Clyde Space
-        nota: La ficha solo publica la altura plegada, no el contorno de cada tamano.
+        estado: supuesto
+        fuente: >-
+          El ESPESOR, 3.5 mm, es dato de ficha (altura plegada; ver
+          'altura_plegada' abajo) y cabe de sobra en los 6.5 mm de protrusion
+          que permite la CDS 14.1 req 2.2.3. El CONTORNO esta derivado, no
+          copiado: es la cara +-Y del 6U (226.3 x 366 mm) menos el ancho de
+          rail confirmado (8.5 mm, req 2.2.5) por cada borde. AAC no publica el
+          contorno de cada tamano de PHOTON, asi que el bloque entero va como
+          supuesto.
+        falta: >-
+          Contorno real de cada tamano de PHOTON-SIDE (1U/2U/3U/6U) y cual de
+          ellos se monta en cada cara
+        pedir_a: AAC Clyde Space / Equipo de potencia de ACSAR
     altura_plegada:
       valor: 3.5
       unidad: mm
@@ -564,7 +652,13 @@ componentes:
       pedir_a: Equipo de potencia de ACSAR
 
   - id: propulsion
+    id_drive: null
+    referencia_comercial: null
     nombre: Modulo de propulsion (opcional)
+    nota_hoja_drive: >-
+      NO esta en la hoja indice de Drive. La decision de mision sigue abierta.
+      Hay un 1U_propulsion_module.sldprt en la entrega del 2026-09-20, en
+      formato nativo SolidWorks e ilegible.
     categoria: plataforma
     subsistema: propulsion
     cantidad: 1
@@ -1481,23 +1575,50 @@ componentes:
 # ---------------------------------------------------------------------
 
   - id: pcb1_control_qkd
+    id_drive: ELEC-01
+    referencia_comercial: null
     nombre: PCB-1 Control QKD (FPGA, QRNG, memoria, reloj)
     formato: pc104
     categoria: payload_pcb
     subsistema: control_qkd
     cantidad: 1
+    montaje:
+      cara: "-Z"
+      nota: >-
+        Tarjeta de la pila PC104: se apila por separadores segun Z, que es el
+        eje de la pila en este layout. No declara eje de senal.
     forma:
       tipo: caja
       dimensiones:
-        valor: null
+        valor: [95.89, 90.17, 15.0]
         unidad: mm
-        estado: TBD
-        falta: Altura de la tarjeta (contorno PC104 propuesto, altura por disenar)
+        estado: supuesto
+        fuente: >-
+          SUPUESTO en la altura. El CONTORNO si sale del catalogo: es el
+          contorno PC104 comun a la gama AAC que usa CLAU
+          (integracion.pila_pc104.contorno, 95.89 x 90.17 mm), y esta
+          PROPUESTO, no confirmado. La ALTURA, 15.0 mm, esta inventada: es la
+          posicion de separador PC/104 (15.24 mm) menos holgura, o sea lo que
+          el layout ya le reserva a esta tarjeta.
+
+          OJO CON LA CIRCULARIDAD: comprobar que esta tarjeta cabe en SU
+          posicion de separador devuelve la hipotesis, no un resultado, por el
+          mismo motivo que el chequeo 'seccion_componentes' sale como no
+          comprobable. Lo que si comprueba de verdad es que no choca con las
+          tarjetas vecinas ni se sale de la columna, y eso depende de las
+          alturas de las OTRAS, que si son datos. En cuanto llegue la altura
+          real, si pasa de 15.24 mm la tarjeta ocupara dos posiciones y la pila
+          crecera 15.24 mm; hay 102 mm de margen.
+        falta: >-
+          Altura real de la tarjeta, que la fija el componente mas alto (la
+          FPGA y su disipador, si lleva). Y confirmar el contorno PC104.
         pedir_a: Equipo de electronica de ACSAR
-        nota: >-
-          El contorno PC104 (95.89 x 90.17 mm) esta PROPUESTO, no confirmado.
-          La altura depende del componente mas alto, aun sin elegir.
-    nota: FPGA, 4 x QRNG, memoria no volatil >=32 GB, reloj disciplinado por el PPS del GNSS.
+    nota: >-
+      FPGA, 4 x QRNG, memoria no volatil >=32 GB, reloj disciplinado por el PPS
+      del GNSS. Va en la pila de plataforma, no en la columna de payload: es la
+      tarjeta que mas habla con el OBC (bus de datos y PPS del GNSS del
+      Kryten-M3-PLUS), y en la columna de payload no hay formato PC104 ni sitio
+      entre el banco y la bandeja.
     masa:
       valor: null
       unidad: g
@@ -1506,23 +1627,50 @@ componentes:
       pedir_a: Equipo de electronica de ACSAR
 
   - id: pcb2_drivers_opticos
+    id_drive: ELEC-02
+    referencia_comercial: null
     nombre: PCB-2 Drivers opticos
     formato: pc104
     categoria: payload_pcb
     subsistema: drivers_opticos
     cantidad: 1
+    montaje:
+      cara: "-Z"
+      nota: Tarjeta de la pila PC104, apilada segun Z.
     forma:
       tipo: caja
       dimensiones:
-        valor: null
+        valor: [95.89, 90.17, 15.0]
         unidad: mm
-        estado: TBD
-        falta: Altura de la tarjeta
+        estado: supuesto
+        fuente: >-
+          SUPUESTO en la altura. El CONTORNO si sale del catalogo: es el
+          contorno PC104 comun a la gama AAC que usa CLAU
+          (integracion.pila_pc104.contorno, 95.89 x 90.17 mm), y esta
+          PROPUESTO, no confirmado. La ALTURA, 15.0 mm, esta inventada: es la
+          posicion de separador PC/104 (15.24 mm) menos holgura, o sea lo que
+          el layout ya le reserva a esta tarjeta.
+
+          OJO CON LA CIRCULARIDAD: comprobar que esta tarjeta cabe en SU
+          posicion de separador devuelve la hipotesis, no un resultado, por el
+          mismo motivo que el chequeo 'seccion_componentes' sale como no
+          comprobable. Lo que si comprueba de verdad es que no choca con las
+          tarjetas vecinas ni se sale de la columna, y eso depende de las
+          alturas de las OTRAS, que si son datos. En cuanto llegue la altura
+          real, si pasa de 15.24 mm la tarjeta ocupara dos posiciones y la pila
+          crecera 15.24 mm; hay 102 mm de margen.
+        falta: >-
+          Altura real de la tarjeta. Los drivers RF y el del Peltier son los
+          candidatos a componente mas alto. Y confirmar el contorno PC104.
         pedir_a: Equipo de electronica de ACSAR
     nota: >-
       Pulsos del laser y su Peltier, 2 drivers RF de moduladores, lazo de punto
-      de trabajo del modulador, control termico de la bandeja. Debe quedar cerca
-      de la bandeja optica: los coaxiales RF a los moduladores han de ser cortos.
+      de trabajo del modulador, control termico de la bandeja. Es la tarjeta de
+      la pila que va MAS HACIA -Z de las tres propias, que es el extremo mas
+      cercano a la bandeja: el coaxial RF a los moduladores es el cable critico
+      del payload. Aun asi cruza el satelite a lo ancho, porque los moduladores
+      estan en la franja de +X desde el 2026-09-20 (ver CLAUDE.md 3.6); en
+      distancia de Manhattan la tirada apenas cambio.
     masa:
       valor: null
       unidad: g
@@ -1531,22 +1679,49 @@ componentes:
       pedir_a: Equipo de electronica de ACSAR
 
   - id: pcb3_pat
+    id_drive: ELEC-03
+    referencia_comercial: null
     nombre: PCB-3 PAT (apuntado, adquisicion y seguimiento)
     formato: pc104
     categoria: payload_pcb
     subsistema: pat
     cantidad: 1
+    montaje:
+      cara: "-Z"
+      nota: Tarjeta de la pila PC104, apilada segun Z.
     forma:
       tipo: caja
       dimensiones:
-        valor: null
+        valor: [95.89, 90.17, 15.0]
         unidad: mm
-        estado: TBD
-        falta: Altura de la tarjeta, y si el driver del FSM es de alta tension
+        estado: supuesto
+        fuente: >-
+          SUPUESTO en la altura. El CONTORNO si sale del catalogo: es el
+          contorno PC104 comun a la gama AAC que usa CLAU
+          (integracion.pila_pc104.contorno, 95.89 x 90.17 mm), y esta
+          PROPUESTO, no confirmado. La ALTURA, 15.0 mm, esta inventada: es la
+          posicion de separador PC/104 (15.24 mm) menos holgura, o sea lo que
+          el layout ya le reserva a esta tarjeta.
+
+          OJO CON LA CIRCULARIDAD: comprobar que esta tarjeta cabe en SU
+          posicion de separador devuelve la hipotesis, no un resultado, por el
+          mismo motivo que el chequeo 'seccion_componentes' sale como no
+          comprobable. Lo que si comprueba de verdad es que no choca con las
+          tarjetas vecinas ni se sale de la columna, y eso depende de las
+          alturas de las OTRAS, que si son datos. En cuanto llegue la altura
+          real, si pasa de 15.24 mm la tarjeta ocupara dos posiciones y la pila
+          crecera 15.24 mm; hay 102 mm de margen.
+        falta: >-
+          Altura real de la tarjeta, y si el driver del FSM es de alta tension
+          (un driver piezo de 120 V ocupa bastante mas que uno de MEMS). Es el
+          mismo dato que bloquea la eleccion del FSM. Y confirmar el contorno.
         pedir_a: Equipo de electronica de ACSAR
     nota: >-
       Lectura de la camara, driver del FSM, driver del laser de beacon, lazo de
-      apuntado fino. Debe quedar cerca del banco de espacio libre.
+      apuntado fino. Es la primera de las tres propias en la pila viniendo de
+      +Z, o sea la mas cercana al ADCS (del que recibe la actitud para el
+      traspaso de apuntado grueso a fino) y a la altura del banco optico, que
+      es donde estan la camara, el FSM y el laser de beacon.
     masa:
       valor: null
       unidad: g
@@ -1554,7 +1729,61 @@ componentes:
       falta: Masa de la tarjeta poblada
       pedir_a: Equipo de electronica de ACSAR
 
+  - id: cables_rf_moduladores
+    id_drive: ELEC-04
+    referencia_comercial: null
+    nombre: Coaxiales RF de PCB-2 a los dos moduladores
+    categoria: payload_pcb
+    subsistema: drivers_opticos
+    cantidad: 2
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: null
+        unidad: mm
+        estado: TBD
+        falta: >-
+          Un cable no tiene envolvente hasta que se encamina. Lo que hace falta
+          es el diametro del coaxial elegido y su radio minimo de curvatura;
+          con esos dos, el recorrido se dibuja como KEEP-OUT entre PCB-2 y cada
+          modulador, no como un cuerpo.
+        pedir_a: Equipo de electronica de ACSAR
+        nota: >-
+          Esta pieza NO se dibuja como solido a proposito. Un coaxial ocupa el
+          tubo que barre al curvarse, y ese tubo es un volumen reservado por el
+          que no puede pasar nada, que es justo lo que es un keep-out. Mientras
+          falte el radio de curvatura no se dibuja nada: inventarlo daria una
+          falsa sensacion de comprobacion, igual que con los bucles de fibra.
+    diametro_coaxial:
+      valor: null
+      unidad: mm
+      estado: TBD
+      falta: Diametro exterior del coaxial elegido (con su cubierta)
+      pedir_a: Equipo de electronica de ACSAR
+    radio_minimo_curvatura:
+      valor: null
+      unidad: mm
+      estado: TBD
+      falta: >-
+        Radio minimo de curvatura del coaxial. Es lo que fija el volumen que
+        hay que reservar, y para un coaxial semirrigido no es pequeno.
+      pedir_a: Equipo de electronica de ACSAR
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa por metro del coaxial elegido, y longitud una vez encaminado
+      pedir_a: Equipo de electronica de ACSAR
+    nota: >-
+      Los dos coaxiales criticos del payload: llevan la senal de modulacion de
+      PCB-2 (en la pila de plataforma, -X) a los moduladores (en la franja,
+      +X), asi que CRUZAN el satelite a lo ancho. La topologia esta en
+      data/connections.yaml (r02 y r03) y sus conectores de destino SI son dato
+      (6.1 x 10 mm, plano de Exail); lo que falta es el cable.
+
   - id: qrng_idq20mc1_s3
+    id_drive: ELEC-01.1
+    referencia_comercial: ID Quantique IDQ20MC1-S3
     nombre: QRNG ID Quantique IDQ20MC1-S3
     categoria: payload_pcb
     subsistema: control_qkd

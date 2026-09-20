@@ -395,6 +395,12 @@ class Componente:
     potencia_nominal: Magnitud
     potencia_pico: Magnitud
     opcional: bool
+    # Pieza montada POR FUERA del chasis: panel de cuerpo, antena de parche.
+    # La CDS le permite sobresalir del plano del rail hasta 'protrusion_maxima'
+    # (6.5 mm, req 2.2.3), asi que salirse de la envolvente no es un error
+    # mientras no pase de ahi. Sin esta marca, el detector de desbordes la
+    # tratatia como cualquier otra pieza y daria un fallo que no lo es.
+    exterior: bool
     requiere_vista_exterior: bool
     montado_en: str | None
     alternativa_de: str | None
@@ -511,7 +517,8 @@ def _componente(bruto: dict) -> Componente:
         "subsistema", "cantidad", "forma",
         "masa", "potencia_nominal", "potencia_pico", "opcional",
         "requiere_vista_exterior", "nota_vista", "montado_en", "nota",
-        "prioridad", "alternativa_de", "montaje",
+        "prioridad", "alternativa_de", "montaje", "exterior",
+        "nota_hoja_drive",
     }
     extras: dict[str, Magnitud] = {}
     for clave, valor in bruto.items():
@@ -551,6 +558,7 @@ def _componente(bruto: dict) -> Componente:
             f"{bruto['id']}.potencia_pico", bruto.get("potencia_pico")
         ),
         opcional=bool(bruto.get("opcional", False)),
+        exterior=bool(bruto.get("exterior", False)),
         requiere_vista_exterior=bool(bruto.get("requiere_vista_exterior", False)),
         montado_en=bruto.get("montado_en"),
         alternativa_de=bruto.get("alternativa_de"),

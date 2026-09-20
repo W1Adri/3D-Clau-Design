@@ -5,7 +5,7 @@ No editar a mano: los numeros salen de `data/components.yaml`.
 
 - Mision: CLAU - CubeSat Laser per a Aplicacions Ultrasegures
 - Norma: CubeSat Design Specification Rev. 14.1, The CubeSat Program, Cal Poly SLO
-- Estado del layout: **confirmada** (20 piezas colocadas)
+- Estado del layout: **confirmada** (26 piezas colocadas)
 
 Comprobaciones que no dependen de donde se coloque cada pieza.
 
@@ -13,17 +13,17 @@ Comprobaciones que no dependen de donde se coloque cada pieza.
 
 **Estado: ATENCION**
 
-Los 19 componentes con envolvente conocida ocupan 3335 cm3 de los 7644 cm3 interiores (44%). Quedan 7 componentes sin envolvente: el dato real sera mayor.
+Los 24 componentes con envolvente conocida ocupan 4302 cm3 de los 7644 cm3 interiores (56%). Quedan 3 componentes sin envolvente: el dato real sera mayor.
 
 | magnitud | valor |
 |---|---|
 | interior_cm3 | 7643.68 |
-| ocupado_conocido_cm3 | 3334.83 |
-| libre_si_nada_mas_creciera_cm3 | 4308.85 |
-| fraccion_ocupada | 0.44 |
-| componentes_sin_volumen | 7 |
+| ocupado_conocido_cm3 | 4302.48 |
+| libre_si_nada_mas_creciera_cm3 | 3341.20 |
+| fraccion_ocupada | 0.56 |
+| componentes_sin_volumen | 3 |
 
-Falta: Envolvente de: antena_quasar_wsant, radio_uhf_pulsar_vutrx, paneles_photon_side, propulsion, pcb1_control_qkd, pcb2_drivers_opticos, pcb3_pat
+Falta: Envolvente de: radio_uhf_pulsar_vutrx, propulsion, cables_rf_moduladores
 
 ## Apertura del telescopio frente a la seccion interior
 
@@ -105,18 +105,18 @@ Los 130 mm de recorrido recto solo caben orientados segun X, Z. Esto ya fija la 
 
 **Estado: OK**
 
-Con el paso estandar PC/104 de 15.24 mm, las 6 tarjetas de altura conocida ocupan 14 posiciones de separador, o sea 213 mm. Reservando una posicion por cada una de las 4 tarjetas sin altura (61 mm mas), la pila suma 274 mm frente a 361 mm interiores. El paso REAL del chasis sigue siendo TBD: este numero es una estimacion con el paso de la norma, no el del chasis elegido.
+Con el paso estandar PC/104 de 15.24 mm, las 9 tarjetas de altura conocida ocupan 20 posiciones de separador, o sea 305 mm. Reservando una posicion por cada una de las 1 tarjetas sin altura (15 mm mas), la pila suma 320 mm frente a 361 mm interiores. El paso REAL del chasis sigue siendo TBD: este numero es una estimacion con el paso de la norma, no el del chasis elegido.
 
 | magnitud | valor |
 |---|---|
-| tarjetas_con_altura | 6.00 |
-| suma_alturas_mm | 153.63 |
+| tarjetas_con_altura | 9.00 |
+| suma_alturas_mm | 246.15 |
 | interior_Z_mm | 361.40 |
-| tarjetas_sin_altura | 4.00 |
+| tarjetas_sin_altura | 1.00 |
 | paso_modelado_mm | 15.24 |
-| posiciones_de_separador | 14.00 |
-| longitud_modelada_mm | 213.36 |
-| reserva_tarjetas_sin_altura_mm | 60.96 |
+| posiciones_de_separador | 20.00 |
+| longitud_modelada_mm | 304.80 |
+| reserva_tarjetas_sin_altura_mm | 15.24 |
 
 Falta: Paso de apilamiento PC104 del chasis elegido
 
@@ -147,16 +147,16 @@ Falta: Radio minimo de curvatura de la fibra elegida
 
 **Estado: ATENCION**
 
-Masa conocida 846 g de un limite de 12000 g (CDS 14.1). Faltan 24 componentes por pesar, incluido el chasis y el telescopio, que son de los mas pesados.
+Masa conocida 846 g de un limite de 12000 g (CDS 14.1). Faltan 25 componentes por pesar, incluido el chasis y el telescopio, que son de los mas pesados.
 
 | magnitud | valor |
 |---|---|
 | masa_conocida_g | 845.90 |
 | limite_g | 12000.00 |
 | margen_g | 11154.10 |
-| componentes_sin_masa | 24.00 |
+| componentes_sin_masa | 25.00 |
 
-Falta: Masa de: estructura_6u, adcs_iadcs400, antena_quasar_wsant, radio_uhf_pulsar_vutrx, paneles_photon_side, propulsion, telescopio_cassegrain, fsm, dicroico, camara_beacon, laser_beacon_bajada, colimador, bandeja_optica, laser_dfb_1550, mod_intensidad_mxer_ln_10, mod_fase_mpz_ln_10, voa, aislador, filtro_espectral, acoplador_monitor, pcb1_control_qkd, pcb2_drivers_opticos, pcb3_pat, qrng_idq20mc1_s3
+Falta: Masa de: estructura_6u, adcs_iadcs400, antena_quasar_wsant, radio_uhf_pulsar_vutrx, paneles_photon_side, propulsion, telescopio_cassegrain, fsm, dicroico, camara_beacon, laser_beacon_bajada, colimador, bandeja_optica, laser_dfb_1550, mod_intensidad_mxer_ln_10, mod_fase_mpz_ln_10, voa, aislador, filtro_espectral, acoplador_monitor, pcb1_control_qkd, pcb2_drivers_opticos, pcb3_pat, cables_rf_moduladores, qrng_idq20mc1_s3
 
 ## STEP de fabricante frente al manifiesto
 

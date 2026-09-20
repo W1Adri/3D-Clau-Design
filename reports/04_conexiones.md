@@ -5,9 +5,9 @@ No editar a mano: los numeros salen de `data/components.yaml`.
 
 - Mision: CLAU - CubeSat Laser per a Aplicacions Ultrasegures
 - Norma: CubeSat Design Specification Rev. 14.1, The CubeSat Program, Cal Poly SLO
-- Estado del layout: **confirmada** (20 piezas colocadas)
+- Estado del layout: **confirmada** (26 piezas colocadas)
 
-Resumen: **25** no comprobable, **7** ok
+Resumen: **16** no comprobable, **16** ok
 
 | id | familia | desde | hasta | tipo | estado | recorrido mm | detalle |
 |---|---|---|---|---|---|---|---|
@@ -23,24 +23,24 @@ Resumen: **25** no comprobable, **7** ok
 | e03 | opticas_espacio_libre | fsm | telescopio_cassegrain | haz_libre | no comprobable | 127 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
 | e04 | opticas_espacio_libre | dicroico | camara_beacon | haz_libre | no comprobable | 32 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
 | e05 | opticas_espacio_libre | telescopio_cassegrain | EXTERIOR | apertura | ok | - | Extremos colocados y holgura declarada |
-| r01 | rf_coaxial | pcb2_drivers_opticos | laser_dfb_1550 | coaxial | no comprobable | - | Sin colocar: pcb2_drivers_opticos. No se puede medir el recorrido ni comprobar la holgura. |
-| r02 | rf_coaxial | pcb2_drivers_opticos | mod_intensidad_mxer_ln_10 | coaxial | no comprobable | - | Sin colocar: pcb2_drivers_opticos. No se puede medir el recorrido ni comprobar la holgura. |
-| r03 | rf_coaxial | pcb2_drivers_opticos | mod_fase_mpz_ln_10 | coaxial | no comprobable | - | Sin colocar: pcb2_drivers_opticos. No se puede medir el recorrido ni comprobar la holgura. |
-| d01 | datos | obc_kryten_m3_plus | pcb1_control_qkd | bus_datos | no comprobable | - | Sin colocar: pcb1_control_qkd. No se puede medir el recorrido ni comprobar la holgura. |
-| d02 | datos | obc_kryten_m3_plus | radio_banda_s_quasar_strx | bus_datos | ok | 53 | Extremos colocados y holgura declarada, recorrido 53 mm |
-| d03 | datos | obc_kryten_m3_plus | pcb1_control_qkd | pps | no comprobable | - | Sin colocar: pcb1_control_qkd. No se puede medir el recorrido ni comprobar la holgura. |
-| d04 | datos | pcb1_control_qkd | pcb2_drivers_opticos | bus_datos | no comprobable | - | Sin colocar: pcb1_control_qkd, pcb2_drivers_opticos. No se puede medir el recorrido ni comprobar la holgura. |
-| d05 | datos | pcb1_control_qkd | pcb3_pat | bus_datos | no comprobable | - | Sin colocar: pcb1_control_qkd, pcb3_pat. No se puede medir el recorrido ni comprobar la holgura. |
-| d06 | datos | adcs_iadcs400 | pcb3_pat | bus_datos | no comprobable | - | Sin colocar: pcb3_pat. No se puede medir el recorrido ni comprobar la holgura. |
-| p01 | potencia | bateria_optimus_30 | eps_starbuck_nano_plus | potencia | ok | 107 | Extremos colocados y holgura declarada, recorrido 107 mm |
-| p02 | potencia | paneles_photon_side | eps_starbuck_nano_plus | potencia | no comprobable | - | Sin colocar: paneles_photon_side. No se puede medir el recorrido ni comprobar la holgura. |
-| p03 | potencia | eps_starbuck_nano_plus | obc_kryten_m3_plus | potencia | ok | 23 | Extremos colocados y holgura declarada, recorrido 23 mm |
-| p04 | potencia | eps_starbuck_nano_plus | adcs_iadcs400 | potencia | ok | 69 | Extremos colocados y holgura declarada, recorrido 69 mm |
+| r01 | rf_coaxial | pcb2_drivers_opticos | laser_dfb_1550 | coaxial | no comprobable | 174 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
+| r02 | rf_coaxial | pcb2_drivers_opticos | mod_intensidad_mxer_ln_10 | coaxial | no comprobable | 168 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
+| r03 | rf_coaxial | pcb2_drivers_opticos | mod_fase_mpz_ln_10 | coaxial | no comprobable | 180 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
+| d01 | datos | obc_kryten_m3_plus | pcb1_control_qkd | bus_datos | ok | 99 | Extremos colocados y holgura declarada, recorrido 99 mm |
+| d02 | datos | obc_kryten_m3_plus | radio_banda_s_quasar_strx | bus_datos | ok | 61 | Extremos colocados y holgura declarada, recorrido 61 mm |
+| d03 | datos | obc_kryten_m3_plus | pcb1_control_qkd | pps | ok | 99 | Extremos colocados y holgura declarada, recorrido 99 mm |
+| d04 | datos | pcb1_control_qkd | pcb2_drivers_opticos | bus_datos | ok | 15 | Extremos colocados y holgura declarada, recorrido 15 mm |
+| d05 | datos | pcb1_control_qkd | pcb3_pat | bus_datos | ok | 15 | Extremos colocados y holgura declarada, recorrido 15 mm |
+| d06 | datos | adcs_iadcs400 | pcb3_pat | bus_datos | ok | 137 | Extremos colocados y holgura declarada, recorrido 137 mm |
+| p01 | potencia | bateria_optimus_30 | eps_starbuck_nano_plus | potencia | ok | 114 | Extremos colocados y holgura declarada, recorrido 114 mm |
+| p02 | potencia | paneles_photon_side | eps_starbuck_nano_plus | potencia | ok | 99 | Extremos colocados y holgura declarada, recorrido 99 mm |
+| p03 | potencia | eps_starbuck_nano_plus | obc_kryten_m3_plus | potencia | ok | 30 | Extremos colocados y holgura declarada, recorrido 30 mm |
+| p04 | potencia | eps_starbuck_nano_plus | adcs_iadcs400 | potencia | ok | 84 | Extremos colocados y holgura declarada, recorrido 84 mm |
 | p05 | potencia | eps_starbuck_nano_plus | radio_banda_s_quasar_strx | potencia | ok | 30 | Extremos colocados y holgura declarada, recorrido 30 mm |
-| p06 | potencia | eps_starbuck_nano_plus | pcb1_control_qkd | potencia | no comprobable | - | Sin colocar: pcb1_control_qkd. No se puede medir el recorrido ni comprobar la holgura. |
-| p07 | potencia | eps_starbuck_nano_plus | pcb2_drivers_opticos | potencia | no comprobable | - | Sin colocar: pcb2_drivers_opticos. No se puede medir el recorrido ni comprobar la holgura. |
-| p08 | potencia | eps_starbuck_nano_plus | pcb3_pat | potencia | no comprobable | - | Sin colocar: pcb3_pat. No se puede medir el recorrido ni comprobar la holgura. |
-| p09 | potencia | eps_starbuck_nano_plus | laser_dfb_1550 | potencia | ok | 256 | Extremos colocados y holgura declarada, recorrido 256 mm |
+| p06 | potencia | eps_starbuck_nano_plus | pcb1_control_qkd | potencia | ok | 69 | Extremos colocados y holgura declarada, recorrido 69 mm |
+| p07 | potencia | eps_starbuck_nano_plus | pcb2_drivers_opticos | potencia | ok | 84 | Extremos colocados y holgura declarada, recorrido 84 mm |
+| p08 | potencia | eps_starbuck_nano_plus | pcb3_pat | potencia | ok | 53 | Extremos colocados y holgura declarada, recorrido 53 mm |
+| p09 | potencia | eps_starbuck_nano_plus | laser_dfb_1550 | potencia | ok | 243 | Extremos colocados y holgura declarada, recorrido 243 mm |
 | t01 | termico | bandeja_optica | pcb2_drivers_opticos | termico | no comprobable | - | Zona termica declarada pero sin ubicacion de sensores ni calefactores. |
 | t02 | termico | baterias | eps_starbuck_nano_plus | termico | no comprobable | - | Zona termica declarada pero sin ubicacion de sensores ni calefactores. |
 

@@ -393,7 +393,17 @@ def chequeo_longitud_moduladores(catalogo: Catalogo) -> list[Chequeo]:
 
 
 def chequeo_pila_pc104(catalogo: Catalogo) -> Chequeo:
-    """Longitud de la pila PC104. Sin el paso de apilamiento solo hay una cota."""
+    """Longitud de la pila PC104. Sin el paso de apilamiento solo hay una cota.
+
+    La altura de cada tarjeta se mide sobre LO QUE SE DIBUJA, no sobre la ficha.
+    Las fichas de AAC dan la altura "from top PCB to lowest component" y no
+    incluyen el conector PC104 pasante, que baja 12.45 mm por debajo de la
+    tarjeta; el STEP de fabricante si lo trae. Si la pila se reserva por la
+    ficha y se dibuja por el STEP, los dos numeros dejan de hablar de lo mismo,
+    y la diferencia no es pequena: 259 mm contra 305 mm.
+    """
+    from .. import parts
+
     paso = catalogo.integracion.get("pila_pc104.paso_apilamiento")
     tarjetas: list[tuple[str, float, int]] = []
     sin_altura: list[str] = []
@@ -407,10 +417,11 @@ def chequeo_pila_pc104(catalogo: Catalogo) -> Chequeo:
         if componente.bruto.get("formato") != "pc104":
             continue
         n = componente.n_unidades
-        if dims.es_tbd or not dims.esta_declarada or n is None:
+        caja = parts.caja_local(componente) if componente.modelable else None
+        if caja is None or n is None:
             sin_altura.append(componente.id)
             continue
-        altura = dims.como_vector()[2]  # type: ignore[index]
+        altura = caja.dims[2]
         tarjetas.append((componente.id, altura, n))
 
     suma = sum(altura * n for _, altura, n in tarjetas)
