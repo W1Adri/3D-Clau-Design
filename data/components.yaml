@@ -81,20 +81,27 @@ envolvente_6u:
 # Se aisla aqui como unico parametro para no esparcir hipotesis por el codigo.
 zona_util_interior:
   espesor_pared:
-    valor: 4.9
+    valor: 2.3
     unidad: mm
     estado: decision
     fuente: >-
-      Cota superior derivada de datos confirmados: el contorno PC104 de la gama
-      AAC (90.17 mm) tiene que caber en los 100.0 mm exteriores del 6U, luego
-      el espesor no puede pasar de (100.0 - 90.17) / 2 = 4.915 mm.
+      Cota superior derivada de datos confirmados. El componente que mas aprieta
+      es el iADCS400. Es una tarjeta apilada, asi que no se puede tumbar: su
+      altura (67.3 mm) va por el eje de la pila y su contorno de 95.4 x 95.9 mm
+      ocupa la seccion transversal. El lado corto, 95.4 mm, tiene que caber en
+      los 100.0 mm exteriores del 6U, luego el espesor no puede pasar de
+      (100.0 - 95.4) / 2 = 2.30 mm. El contorno PC104 desnudo (90.17 mm) daba
+      una cota mas holgada, de 4.915 mm, que no manda.
     nota: >-
-      Valor UNICO de trabajo mientras no llegue el chasis real. Es el CASO MAS
-      DESFAVORABLE compatible con las tarjetas PC104: un chasis real tendra
-      paredes mas finas y MAS zona util, asi que todo informe de volumen libre
-      que salga de aqui se queda corto, nunca se pasa. No procede de ninguna
-      ficha. Al sustituir el chasis por el STEP del equipo, la zona util se
-      derivara de la geometria real y este parametro desaparece.
+      Valor UNICO de trabajo mientras no llegue el chasis real. Es el mayor
+      espesor compatible con TODOS los componentes de envolvente conocida, asi
+      que da el MENOR volumen util posible: todo informe de volumen libre que
+      salga de aqui se queda corto, nunca se pasa. El chequeo
+      'seccion_componentes' recalcula esta cota desde el catalogo y avisa si
+      este valor deja de ser compatible al anadir una pieza nueva.
+      No procede de ninguna ficha. Al sustituir el chasis por el STEP del
+      equipo, la zona util se derivara de la geometria real y este parametro
+      desaparece.
     falta: Chasis 6U del equipo en STEP, o plano con espesores y zona util
     pedir_a: Equipo de estructura de ACSAR
 
@@ -920,6 +927,16 @@ integracion:
         El paso NO es la altura de la ficha: las fichas AAC dan la altura "from
         top PCB to lowest component". El paso lo fijan los separadores.
         Sin este dato no se puede cerrar la longitud de la pila.
+    paso_apilamiento_modelado:
+      valor: 15.24
+      unidad: mm
+      estado: referencia
+      fuente: https://pc104.org/wp-content/uploads/2015/02/PC104_Spec_v2_6.pdf
+      nota: >-
+        Paso estandar PC/104: 0.600 in = 15.24 mm, con separadores de
+        0.600 in +/-0.005 in. Se usa para modelar la pila mientras no llegue el
+        paso real del chasis. Una tarjeta mas alta que el paso ocupa varias
+        posiciones de separador: ceil(altura / paso) posiciones.
   fibra:
     radio_minimo_curvatura:
       valor: null

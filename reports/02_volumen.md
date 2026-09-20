@@ -5,37 +5,35 @@ No editar a mano: los numeros salen de `data/components.yaml`.
 
 - Mision: CLAU - CubeSat Laser per a Aplicacions Ultrasegures
 - Norma: CubeSat Design Specification Rev. 14.1, The CubeSat Program, Cal Poly SLO
-- Estado del layout: **propuesta**
-
-> **La distribucion aun NO esta confirmada.** Las posiciones de este informe son una propuesta pendiente de validar por el equipo. El analisis de interferencias solo es concluyente sobre las piezas realmente colocadas.
+- Estado del layout: **confirmada** (8 piezas colocadas)
 
 ## Resumen
 
 | Concepto | cm3 | U |
 |---|---|---|
 | Envolvente exterior 6U | 8282.6 | 8.28 |
-| Zona util interior | 6956.0 | 6.96 |
-| Ocupado por piezas colocadas | 0.0 | 0.00 |
+| Zona util interior | 7643.7 | 7.64 |
+| Ocupado por piezas colocadas | 1394.1 | 1.39 |
 | Ocupado segun catalogo (con o sin colocar) | 1394.1 | 1.39 |
-| Libre dentro de la zona util | 6956.0 | 6.96 |
+| Libre dentro de la zona util | 6249.6 | 6.25 |
 
 > **El volumen libre de arriba NO es el volumen libre real.**
 
 > Sin envolvente conocida (19): `antena_quasar_wsant`, `radio_uhf_pulsar_vutrx`, `paneles_photon_side`, `propulsion`, `telescopio_cassegrain`, `fsm`, `dicroico`, `camara_beacon`, `laser_beacon_bajada`, `colimador`, `bandeja_optica`, `laser_dfb_1550`, `voa`, `aislador`, `filtro_espectral`, `acoplador_monitor`, `pcb1_control_qkd`, `pcb2_drivers_opticos`, `pcb3_pat`.
 
-> Sin colocar (26): `adcs_iadcs400`, `obc_kryten_m3_plus`, `eps_starbuck_nano_plus`, `bateria_optimus_30`, `radio_banda_s_quasar_strx`, `antena_quasar_wsant`, `radio_uhf_pulsar_vutrx`, `paneles_photon_side`, `propulsion`, `telescopio_cassegrain`, `fsm`, `dicroico`, `camara_beacon`, `laser_beacon_bajada`, `colimador`, `bandeja_optica`, `laser_dfb_1550`, `mod_intensidad_mxer_ln_10`, `mod_fase_mpz_ln_10`, `voa`, `aislador`, `filtro_espectral`, `acoplador_monitor`, `pcb1_control_qkd`, `pcb2_drivers_opticos`, `pcb3_pat`.
+> Sin colocar (19): `antena_quasar_wsant`, `radio_uhf_pulsar_vutrx`, `paneles_photon_side`, `propulsion`, `telescopio_cassegrain`, `fsm`, `dicroico`, `camara_beacon`, `laser_beacon_bajada`, `colimador`, `bandeja_optica`, `laser_dfb_1550`, `voa`, `aislador`, `filtro_espectral`, `acoplador_monitor`, `pcb1_control_qkd`, `pcb2_drivers_opticos`, `pcb3_pat`.
 
 ## Por componente
 
 | id | componente | categoria | estado del dato | uds | volumen cm3 | centro (x, y, z) mm | colocado |
 |---|---|---|---|---|---|---|---|
-| adcs_iadcs400 | AAC Clyde Space iADCS400 | plataforma | confirmado | 1 | 615.7 | - | no |
-| bateria_optimus_30 | AAC Clyde Space Optimus-30 | plataforma | confirmado | 2 | 372.7 | - | no |
-| eps_starbuck_nano_plus | AAC Clyde Space Starbuck-Nano-PLUS | plataforma | confirmado | 1 | 180.0 | - | no |
-| radio_banda_s_quasar_strx | AAC Clyde Space Quasar-STRX (transceptor banda S) | plataforma | referencia | 1 | 146.0 | - | no |
-| obc_kryten_m3_plus | AAC Clyde Space Kryten-M3-PLUS (OBC con GNSS) | plataforma | confirmado | 1 | 47.6 | - | no |
-| mod_fase_mpz_ln_10 | Exail MPZ-LN-10 (modulador de fase, codificador de polarizacion) | payload_bandeja | referencia | 1 | 16.0 | - | no |
-| mod_intensidad_mxer_ln_10 | Exail MXER-LN-10 (modulador de intensidad, grado espacial EM/NS-FM/FM) | payload_bandeja | confirmado | 1 | 16.0 | - | no |
+| adcs_iadcs400 | AAC Clyde Space iADCS400 | plataforma | confirmado | 1 | 615.7 | (-61, 0, 143) | si |
+| bateria_optimus_30 | AAC Clyde Space Optimus-30 | plataforma | confirmado | 2 | 372.7 | (-61, 0, -33) | si |
+| eps_starbuck_nano_plus | AAC Clyde Space Starbuck-Nano-PLUS | plataforma | confirmado | 1 | 180.0 | (-61, 0, 74) | si |
+| radio_banda_s_quasar_strx | AAC Clyde Space Quasar-STRX (transceptor banda S) | plataforma | referencia | 1 | 146.0 | (-61, 0, 44) | si |
+| obc_kryten_m3_plus | AAC Clyde Space Kryten-M3-PLUS (OBC con GNSS) | plataforma | confirmado | 1 | 47.6 | (-61, 0, 97) | si |
+| mod_fase_mpz_ln_10 | Exail MPZ-LN-10 (modulador de fase, codificador de polarizacion) | payload_bandeja | referencia | 1 | 16.0 | (45, -38, -108) | si |
+| mod_intensidad_mxer_ln_10 | Exail MXER-LN-10 (modulador de intensidad, grado espacial EM/NS-FM/FM) | payload_bandeja | confirmado | 1 | 16.0 | (20, -38, -108) | si |
 | qrng_idq20mc1_s3 | QRNG ID Quantique IDQ20MC1-S3 | payload_pcb | confirmado | 4 | 0.1 | - | no |
 | acoplador_monitor | Acoplador de monitorizacion + fotodiodo | payload_bandeja | TBD | 1 | - | - | no |
 | aislador | Aislador optico | payload_bandeja | TBD | 1 | - | - | no |
@@ -61,10 +59,38 @@ No editar a mano: los numeros salen de `data/components.yaml`.
 
 | zona | nombre | total cm3 | ocupado cm3 | libre cm3 | libre U | % ocupado |
 |---|---|---|---|---|---|---|
-| z_telescopio | Telescopio y apertura de salida | 1786.9 | 0.0 | 1786.9 | 1.79 | 0% |
-| z_pila_pc104 | Pila PC104 de plataforma | 1786.9 | 0.0 | 1786.9 | 1.79 | 0% |
-| z_mazo_cables | Canal central de cableado | 294.8 | 0.0 | 294.8 | 0.29 | 0% |
-| z_banco_libre | Banco optico de espacio libre | 1171.7 | 0.0 | 1171.7 | 1.17 | 0% |
-| z_bandeja_optica | Bandeja optica de fibra | 851.7 | 0.0 | 851.7 | 0.85 | 0% |
-| z_pcb_payload | Cubierta de electronica del payload | 1064.1 | 0.0 | 1064.1 | 1.06 | 0% |
+| z_plataforma | Columna de plataforma - pila PC104 a lo largo de todo Z | 3447.8 | 1362.1 | 2085.7 | 2.09 | 40% |
+| z_payload_telescopio | Telescopio | 1857.6 | 0.0 | 1857.6 | 1.86 | 0% |
+| z_payload_banco | Banco optico de espacio libre | 638.6 | 0.0 | 638.6 | 0.64 | 0% |
+| z_payload_bandeja | Bandeja optica de fibra | 1699.7 | 32.0 | 1667.7 | 1.67 | 2% |
+
+## Mapa del hueco libre
+
+Vista desde +Y (planta). Eje horizontal Z (-Z izquierda, +Z derecha),
+eje vertical X (+X arriba). De ` ` (vacio) a `@` (lleno).
+
+```
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+           @@ @@     @@ @@ @ @@@@@@@
+           @@ @@     @@ @@ @ @@@@@@@
+           @@ @@     @@ @@ @ @@@@@@@
+           @@ @@     @@ @@ @ @@@@@@@
+           @@ @@     @@ @@ @ @@@@@@@
+           @@ @@     @@ @@ @ @@@@@@@
+           @@ @@     @@ @@ @ @@@@@@@
+           @@ @@     @@ @@ @ @@@@@@@
+           @@ @@     @@ @@ @ @@@@@@@
+           @@ @@     @@ @@ @ @@@@@@@
+```
 

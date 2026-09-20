@@ -7,6 +7,8 @@ nunca como correcto.
 
 from __future__ import annotations
 
+import math
+
 from dataclasses import dataclass, field
 
 from ..datamodel import Catalogo
@@ -195,6 +197,96 @@ def chequeo_contorno_pc104(catalogo: Catalogo) -> Chequeo:
     )
 
 
+def chequeo_seccion_componentes(catalogo: Catalogo) -> Chequeo:
+    """Cada pieza con envolvente conocida tiene que caber en la seccion interior.
+
+    Recalcula desde el catalogo el mayor espesor de pared compatible con TODAS
+    las piezas. Es la comprobacion que mantiene honesta la hipotesis de espesor:
+    al anadir una pieza nueva mas grande, esta cota baja sola.
+    """
+    exterior = catalogo.dims_exteriores
+    interior = _seccion_interior(catalogo)
+    espesor = catalogo.zona_util["espesor_pared"].escalar()
+
+    no_caben: list[str] = []
+    espesor_maximo = float("inf")
+    critico = None
+
+    for componente in catalogo.componentes:
+        if componente.categoria == "estructura" or componente.montado_en:
+            continue
+        if not componente.modelable or componente.desde_step:
+            continue
+        dx, dy, dz = componente.dimensiones.como_vector()  # type: ignore[misc]
+
+        if componente.bruto.get("formato") == "pc104":
+            # Una tarjeta apilada no se puede tumbar: su altura va por el eje de
+            # la pila (Z) y el contorno ocupa la seccion transversal. Se le deja
+            # elegir cual de los dos lados del contorno va por Y.
+            transversal = sorted((dx, dy))
+            hueco = sorted((interior[0], interior[1]))
+            exterior_transversal = sorted((exterior[0], exterior[1]))
+            cabe = (
+                all(d <= h + 1e-9 for d, h in zip(transversal, hueco))
+                and dz <= interior[2] + 1e-9
+            )
+            cota = min(
+                (e - d) / 2 for d, e in zip(transversal, exterior_transversal)
+            )
+        else:
+            # El resto puede orientarse libremente: ordenando ambas ternas se
+            # comprueba la mejor orientacion posible.
+            dims = sorted((dx, dy, dz))
+            cabe = all(d <= h + 1e-9 for d, h in zip(dims, sorted(interior)))
+            cota = min((e - d) / 2 for d, e in zip(dims, sorted(exterior)))
+
+        if not cabe:
+            no_caben.append(componente.id)
+        if cota < espesor_maximo:
+            espesor_maximo = cota
+            critico = componente.id
+
+    numeros = {
+        "espesor_supuesto_mm": espesor if espesor is not None else float("nan"),
+        "espesor_maximo_compatible_mm": espesor_maximo,
+        "interior_X_mm": interior[0],
+        "interior_Y_mm": interior[1],
+        "interior_Z_mm": interior[2],
+        "piezas_que_no_caben": float(len(no_caben)),
+    }
+
+    if no_caben:
+        estado = FALLA
+        mensaje = (
+            f"No caben en la seccion interior: {', '.join(no_caben)}. "
+            f"El espesor de pared no puede pasar de {espesor_maximo:.2f} mm, "
+            f"y el que manda es '{critico}'."
+        )
+    elif espesor is not None and espesor > espesor_maximo + 1e-9:
+        estado = FALLA
+        mensaje = (
+            f"El espesor supuesto ({espesor:.2f} mm) es mayor que el maximo "
+            f"compatible ({espesor_maximo:.2f} mm), que fija '{critico}'."
+        )
+    else:
+        estado = ATENCION
+        mensaje = (
+            f"Todas las piezas con envolvente conocida caben. El espesor de "
+            f"pared no puede pasar de {espesor_maximo:.2f} mm, cota que fija "
+            f"'{critico}'. Las tarjetas PC104 se cuentan sin poder tumbarse: su "
+            f"altura va por el eje de la pila. Sigue siendo una hipotesis: "
+            f"manda el chasis real."
+        )
+    return Chequeo(
+        id="seccion_componentes",
+        titulo="Seccion interior frente a todas las piezas",
+        estado=estado,
+        mensaje=mensaje,
+        numeros=numeros,
+        falta="Zona util real del chasis 6U del equipo",
+    )
+
+
 def chequeo_longitud_moduladores(catalogo: Catalogo) -> list[Chequeo]:
     """Cada modulador necesita un recorrido recto largo dentro de la bandeja."""
     salida: list[Chequeo] = []
@@ -271,6 +363,37 @@ def chequeo_pila_pc104(catalogo: Catalogo) -> Chequeo:
         "interior_Z_mm": interior_z,
         "tarjetas_sin_altura": float(len(sin_altura)),
     }
+
+    modelado = catalogo.integracion.get("pila_pc104.paso_apilamiento_modelado")
+    if (paso is None or paso.es_tbd) and modelado is not None and not modelado.es_tbd:
+        paso_mm = modelado.escalar()
+        assert paso_mm is not None
+        posiciones = sum(math.ceil(altura / paso_mm) * n for _, altura, n in tarjetas)
+        total = posiciones * paso_mm
+        numeros["paso_modelado_mm"] = paso_mm
+        numeros["posiciones_de_separador"] = float(posiciones)
+        numeros["longitud_modelada_mm"] = total
+        reserva = len(sin_altura) * paso_mm
+        numeros["reserva_tarjetas_sin_altura_mm"] = reserva
+        estado = OK if total + reserva <= interior_z else FALLA
+        return Chequeo(
+            id="pila_pc104",
+            titulo="Longitud de la pila PC104",
+            estado=estado,
+            mensaje=(
+                f"Con el paso estandar PC/104 de {paso_mm:.2f} mm, las "
+                f"{n_tarjetas} tarjetas de altura conocida ocupan {posiciones} "
+                f"posiciones de separador, o sea {total:.0f} mm. Reservando una "
+                f"posicion por cada una de las {len(sin_altura)} tarjetas sin "
+                f"altura ({reserva:.0f} mm mas), la pila suma "
+                f"{total + reserva:.0f} mm frente a {interior_z:.0f} mm "
+                f"interiores. El paso REAL del chasis sigue siendo TBD: este "
+                f"numero es una estimacion con el paso de la norma, no el del "
+                f"chasis elegido."
+            ),
+            numeros=numeros,
+            falta="Paso de apilamiento PC104 del chasis elegido",
+        )
 
     if paso is None or paso.es_tbd:
         return Chequeo(
@@ -363,6 +486,7 @@ def todos(catalogo: Catalogo) -> list[Chequeo]:
         chequeo_volumen_total(catalogo),
         chequeo_apertura_telescopio(catalogo),
         chequeo_contorno_pc104(catalogo),
+        chequeo_seccion_componentes(catalogo),
     ]
     salida += chequeo_longitud_moduladores(catalogo)
     salida += [

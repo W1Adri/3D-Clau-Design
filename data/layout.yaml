@@ -1,107 +1,122 @@
 # =====================================================================
 # CLAU - Distribucion dentro del 6U
 # ---------------------------------------------------------------------
-# ESTADO: PROPUESTA. Las zonas de abajo son una propuesta razonada y todavia
-# NO estan confirmadas por el equipo. La lista 'colocaciones' esta VACIA a
-# proposito: no se coloca ninguna pieza hasta que la distribucion se apruebe.
+# ESTADO: CONFIRMADA (opcion "dos columnas de 3U", elegida el 2026-09-20).
+#
+# GENERADO por tools/generar_layout.py. No editar a mano: ninguna
+# coordenada se escribe, todas salen de data/components.yaml.
+#   uv run python tools/generar_layout.py
 #
 # Coordenadas CDS Rev 14.1: origen en el centro geometrico del 6U.
 #   X: +-113.15 mm (ancho, 226.3)
 #   Y: +-50.00  mm (alto,  100.0)
-#   Z: +-183.00 mm (largo, 366.0). La cara -Z entra primero en el dispensador.
-# Zona util interior con el espesor de pared declarado: 216.5 x 90.2 x 356.2 mm.
+#   Z: +-183.00 mm (largo, 366.0). La cara -Z entra primero.
+# Zona util interior: 221.7 x 95.4 x 361.4 mm.
+#
+# Reparto: dos columnas a lo largo de TODO Z.
+#   X < -10.85 mm -> plataforma (100.0 mm de ancho)
+#   X > -10.85 mm -> payload (121.7 mm de ancho)
 # =====================================================================
 
 meta:
-  estado: propuesta          # propuesta | confirmada
-  fecha: 2026-09-19
+  estado: confirmada
+  fecha: 2026-09-20
   nota: >-
-    Reparto en tres bandas a lo largo de Z, con la banda de +Z dividida en dos
-    columnas en X. Razonamiento completo en CLAUDE.md, seccion "Distribucion
-    propuesta". Al confirmarla: poner estado 'confirmada' y rellenar
-    'colocaciones'.
+    Dos columnas de 3U a lo largo de todo Z. La pila PC104 queda holgada:
+    259 mm usados de 361 mm. A cambio la columna de payload mide
+    121.7 mm de ancho, donde los 130 mm de recorrido recto de
+    cada modulador no caben segun X, asi que van segun Z. Y PCB-2 queda
+    en la otra columna, con lo que el coaxial RF a los moduladores cruza
+    el satelite a lo ancho.
 
-# ---------------------------------------------------------------------
-# ZONAS (reserva de volumen, no piezas)
-# ---------------------------------------------------------------------
 zonas:
-  - id: z_telescopio
-    nombre: Telescopio y apertura de salida
+  - id: z_plataforma
+    nombre: "Columna de plataforma - pila PC104 a lo largo de todo Z"
     caja:
-      min: [8.25, -45.1, -20.0]
-      max: [108.25, 45.1, 178.1]
+      min: [-110.85, -47.70, -180.70]
+      max: [-10.85, 47.70, 180.70]
     nota: >-
-      Telescopio Cassegrain apuntando por la cara +Z. Ocupa toda la altura util.
-      Su diametro exterior es TBD: si supera ~90 mm deja de caber (ver el
-      chequeo 'apertura_telescopio').
+      ADCS en +Z, para que el star tracker ST200 mire por la misma cara
+      que el telescopio. Despues OBC, EPS, radio banda S, PCB-3, PCB-1 y
+      PCB-2, y las baterias al final de -Z, que equilibran en Z la masa
+      del telescopio. La pila usa 259 mm de los 361 mm disponibles. Las
+      tres PCBs propias tienen posicion de separador reservada pero no se
+      dibujan: su altura es TBD.
 
-  - id: z_pila_pc104
-    nombre: Pila PC104 de plataforma
+  - id: z_payload_telescopio
+    nombre: "Telescopio"
     caja:
-      min: [-108.25, -45.1, -20.0]
-      max: [-8.25, 45.1, 178.1]
+      min: [-10.85, -47.70, 20.70]
+      max: [110.85, 47.70, 180.70]
     nota: >-
-      Tarjetas apiladas a lo largo de Z: ADCS (el mas alto, junto a +Z para que
-      el star tracker ST200 mire por la misma cara que el telescopio), EPS, OBC,
-      radio banda S, baterias y PCB-1. 198 mm de longitud de pila disponibles.
+      Telescopio Cassegrain apuntando por +Z. 160 mm de longitud
+      reservados, menos que los ~2U del brief: en esta distribucion la
+      bandeja necesita recorrido en Z y sale de aqui. Su envolvente es TBD
+      y no se dibuja.
 
-  - id: z_mazo_cables
-    nombre: Canal central de cableado
+  - id: z_payload_banco
+    nombre: "Banco optico de espacio libre"
     caja:
-      min: [-8.25, -45.1, -20.0]
-      max: [8.25, 45.1, 178.1]
+      min: [-10.85, -47.70, -34.30]
+      max: [110.85, 47.70, 20.70]
     nota: >-
-      16.5 mm de pasillo entre las dos columnas, para el mazo que une la pila
-      con el payload sin cruzar por delante del telescopio.
+      Colimador, dicroico, FSM y camara de beacon. Camino: colimador ->
+      dicroico -> FSM -> telescopio, y dicroico -> camara.
 
-  - id: z_banco_libre
-    nombre: Banco optico de espacio libre
+  - id: z_payload_bandeja
+    nombre: "Bandeja optica de fibra"
     caja:
-      min: [-108.25, -45.1, -80.0]
-      max: [108.25, 45.1, -20.0]
+      min: [-10.85, -47.70, -180.70]
+      max: [110.85, 47.70, -34.30]
     nota: >-
-      Colimador, dicroico, FSM y camara de beacon, mas PCB-3 (PAT), que va aqui
-      para que el driver del FSM y la lectura de camara sean recorridos cortos.
-      Camino: colimador -> dicroico -> FSM -> telescopio, y dicroico -> camara.
+      Los dos moduladores van tumbados a lo largo de Z: con 121.7 mm de
+      ancho de columna no caben los 130 mm de recorrido recto segun X.
+      Zona con control termico propio: 0 a +70 C por la extincion del
+      modulador.
 
-  - id: z_bandeja_optica
-    nombre: Bandeja optica de fibra
-    caja:
-      min: [-108.25, -45.1, -178.1]
-      max: [108.25, -5.0, -80.0]
-    nota: >-
-      Placa mecanica en la mitad -Y de la banda de -Z. Los dos moduladores se
-      orientan segun X: necesitan 130 mm rectos cada uno (cota de plano de Exail
-      con protectores de fibra) y solo X y Z los admiten. Zona con control
-      termico propio: 0 a +70 C por la extincion del modulador.
-
-  - id: z_pcb_payload
-    nombre: Cubierta de electronica del payload
-    caja:
-      min: [-108.25, -5.0, -178.1]
-      max: [108.25, 45.1, -80.0]
-    nota: >-
-      PCB-2 (drivers opticos) montada como cubierta sobre la bandeja, para que
-      los coaxiales RF a los moduladores bajen en vertical y sean lo mas cortos
-      posible. Tambien aloja las baterias si el presupuesto de energia pide mas
-      de dos modulos, por quedar lejos del laser y del telescopio.
-
-# ---------------------------------------------------------------------
-# KEEP-OUTS (volumenes reservados)
-# ---------------------------------------------------------------------
-# Vacio hasta que se confirme la distribucion y lleguen los diametros de haz,
-# el radio de curvatura de la fibra y las holguras de conector. Declarar un
-# keep-out con medidas inventadas daria una falsa sensacion de comprobacion.
+# Vacio hasta que lleguen los diametros de haz, el radio de curvatura de
+# la fibra y las holguras de conector. Declarar un keep-out con medidas
+# inventadas daria una falsa sensacion de comprobacion.
 keep_out: []
 
-# ---------------------------------------------------------------------
-# COLOCACIONES
-# ---------------------------------------------------------------------
-# VACIO A PROPOSITO. Se rellena cuando el equipo confirme la distribucion.
-# Formato:
-#   - componente: adcs_iadcs400
-#     instancia: 1
-#     centro: [x, y, z]          # mm, centro de la pieza
-#     rotacion: [rx, ry, rz]     # grados, aplicados en orden X, Y, Z
-#     zona: z_pila_pc104
-colocaciones: []
+colocaciones:
+  - componente: adcs_iadcs400
+    instancia: 1
+    centro: [-60.85, 0.0, 142.6]
+    rotacion: [0, 0, 90]
+    zona: z_plataforma
+  - componente: obc_kryten_m3_plus
+    instancia: 1
+    centro: [-60.85, 0.0, 96.88]
+    rotacion: [0, 0, 0]
+    zona: z_plataforma
+  - componente: eps_starbuck_nano_plus
+    instancia: 1
+    centro: [-60.85, 0.0, 74.02]
+    rotacion: [0, 0, 0]
+    zona: z_plataforma
+  - componente: radio_banda_s_quasar_strx
+    instancia: 1
+    centro: [-60.85, 0.0, 43.54]
+    rotacion: [0, 0, 0]
+    zona: z_plataforma
+  - componente: bateria_optimus_30
+    instancia: 1
+    centro: [-60.85, 0.0, -32.66]
+    rotacion: [0, 0, 0]
+    zona: z_plataforma
+  - componente: bateria_optimus_30
+    instancia: 2
+    centro: [-60.85, 0.0, -63.14]
+    rotacion: [0, 0, 0]
+    zona: z_plataforma
+  - componente: mod_intensidad_mxer_ln_10
+    instancia: 1
+    centro: [20.0, -37.85, -107.5]
+    rotacion: [0, 90, 90]
+    zona: z_payload_bandeja
+  - componente: mod_fase_mpz_ln_10
+    instancia: 1
+    centro: [45.0, -37.85, -107.5]
+    rotacion: [0, 90, 90]
+    zona: z_payload_bandeja

@@ -16,12 +16,17 @@ repositorio; esto explica **por qué** está como está y **qué falta por decid
 | Datos pendientes (TBD) | **49** |
 | Discrepancias entre fuentes | **4** |
 | Tests | **40**, todos en verde |
-| Distribución | **PROPUESTA, sin confirmar**. `data/layout.yaml` tiene 6 zonas y `colocaciones: []` |
+| Distribución | **CONFIRMADA** el 2026-09-20: dos columnas de 3U |
+| Piezas colocadas | **8 de 27**. Las otras 19 tienen geometría TBD |
+| Zona útil | 221.7 × 95.4 × 361.4 mm = **7.64 U**, de la que quedan **6.25 U** libres |
 
-Lo que funciona de punta a punta: catálogo validado, piezas y ensamblaje
-exportados a STEP, chequeos de viabilidad, presupuestos, vistas SVG e informes.
-Lo que **no** puede funcionar todavía: interferencias y recorridos reales, porque
-no hay ninguna pieza colocada.
+Funciona de punta a punta: catálogo validado, layout generado, ensamblaje
+exportado a STEP, interferencias, conexiones, volumen, presupuestos, vistas e
+informes. Sin interferencias ni desbordes con las 8 piezas colocadas.
+
+La limitación real no es el modelo, son los datos: **19 de 27 componentes no
+tienen envolvente**, así que el volumen libre de 6.25 U es un techo, no una
+cifra de diseño.
 
 ---
 
@@ -42,91 +47,106 @@ no hay ninguna pieza colocada.
 
 ---
 
-## 3. Distribución propuesta (PENDIENTE DE CONFIRMAR)
+## 3. Distribución confirmada (2026-09-20)
+
+Elegida entre dos opciones: **dos columnas de 3U a lo largo de todo Z**.
 
 ### Sistema de coordenadas
 
 Origen en el centro geométrico (CDS 14.1 req 2.2.1).
 X = ±113.15 (ancho, 226.3) · Y = ±50.00 (alto, 100.0) · Z = ±183.00 (largo, 366.0).
 La cara **−Z entra primero** en el dispensador. Zona útil interior con el espesor
-declarado: **216.5 × 90.2 × 356.2 mm** ≈ 6.96 U.
+declarado: **221.7 × 95.4 × 361.4 mm** ≈ 7.64 U.
 
 ### El reparto
 
-Tres bandas a lo largo de Z; la banda de +Z partida en dos columnas en X.
-
 ```
-        −Z ←─────────────── Z (366 mm) ───────────────→ +Z
-        (entra primero)                          (apunta a tierra)
+        −Z ←────────────────── Z (361.4 mm útiles) ──────────────────→ +Z
+        (entra primero)                                    (apunta a tierra)
 
-  +X  ┌──────────────────┬──────────────┬─────────────────────┐
-      │                  │              │  z_telescopio       │
-      │ z_bandeja_optica │ z_banco      │  telescopio →→ +Z    │
-      │   (mitad −Y)     │   _libre     │  (100 × 90 × 198)   │
-      │ ──────────────── │              ├─────────────────────┤
-      │ z_pcb_payload    │  colimador   │  z_mazo_cables      │
-      │   (mitad +Y)     │  dicroico    │  (16.5 mm)          │
-      │   PCB-2          │  FSM, cámara ├─────────────────────┤
-      │                  │  PCB-3       │  z_pila_pc104       │
-  −X  │                  │              │  ADCS·EPS·OBC·radio │
-      └──────────────────┴──────────────┴─────────────────────┘
-         98.1 mm            60 mm            198.1 mm
+ +110.85 ┌──────────────────────┬─────────────┬─────────────────────────┐
+         │ z_payload_bandeja    │ z_payload   │ z_payload_telescopio    │
+         │ 1.70 U               │  _banco     │ 1.86 U                  │
+  PAYLOAD│ moduladores según Z  │ 0.64 U      │ telescopio →→ +Z        │
+  121.7  │ (130 mm no caben     │ colimador   │ 160 mm reservados       │
+   mm    │  en 121.7 mm de X)   │ dicroico    │                         │
+         │                      │ FSM, cámara │                         │
+  −10.85 ├──────────────────────┴─────────────┴─────────────────────────┤
+         │ z_plataforma  3.45 U                                         │
+  PLATAF.│ pila PC104 a lo largo de todo Z — 274 mm usados de 361 mm     │
+  100 mm │ −Z ← baterías·baterías·PCB-2·PCB-1·PCB-3·radio·EPS·OBC·ADCS → │
+ −110.85 └──────────────────────────────────────────────────────────────┘
+             146.4 mm             55 mm            160 mm
 ```
 
-| zona | volumen | contenido |
-|---|---|---|
-| `z_telescopio` | 1.79 U | Telescopio Cassegrain, apertura por +Z |
-| `z_pila_pc104` | 1.79 U | ADCS, EPS, OBC, radio banda S, baterías, PCB-1 |
-| `z_mazo_cables` | 0.29 U | Pasillo central de cableado |
-| `z_banco_libre` | 1.17 U | Colimador, dicroico, FSM, cámara, PCB-3 |
-| `z_bandeja_optica` | 0.85 U | Bandeja de fibra (mitad −Y de la banda −Z) |
-| `z_pcb_payload` | 1.06 U | PCB-2 como cubierta sobre la bandeja (mitad +Y) |
-| | **6.96 U** | Las zonas embaldosan exactamente la zona útil (hay un test) |
+| zona | volumen | libre | contenido |
+|---|---|---|---|
+| `z_plataforma` | 3.45 U | 2.09 U | Pila PC104 completa |
+| `z_payload_telescopio` | 1.86 U | 1.86 U | Telescopio (TBD, sin dibujar) |
+| `z_payload_banco` | 0.64 U | 0.64 U | Colimador, dicroico, FSM, cámara |
+| `z_payload_bandeja` | 1.70 U | 1.67 U | Bandeja de fibra, 2 moduladores colocados |
+
+Las cuatro zonas **embaldosan exactamente** la zona útil; hay un test que lo
+comprueba.
+
+### Orden de la pila, de +Z a −Z
+
+Con el paso estándar PC/104 de 15.24 mm; una tarjeta más alta ocupa
+`ceil(altura / paso)` posiciones de separador.
+
+| # | tarjeta | altura | posiciones | por qué ahí |
+|---|---|---|---|---|
+| 1 | iADCS400 | 67.3 mm | 5 | En +Z, para que el ST200 mire por la misma cara que el telescopio |
+| 2 | Kryten-M3-PLUS | 5.51 mm | 1 | Junto al ADCS y al payload |
+| 3 | Starbuck-Nano-PLUS | 20.82 mm | 2 | |
+| 4 | Quasar-STRX | 16.9 mm (ref) | 2 | |
+| 5 | PCB-3 PAT | TBD | 1 reservada | A la altura del banco de espacio libre |
+| 6 | PCB-1 Control QKD | TBD | 1 reservada | |
+| 7 | PCB-2 Drivers | TBD | 1 reservada | Lo más cerca posible de la bandeja |
+| 8-9 | Optimus-30 ×2 | 21.55 mm | 2 cada una | En −Z, equilibran la masa del telescopio |
+| | **total** | | | **274 mm de 361 mm** |
 
 ### Por qué así
 
-1. **El telescopio manda, y va en +Z.** La apertura necesita vista despejada al
-   exterior. Poniéndola en la cara +Z se aleja del dispensador (−Z entra primero)
-   y se libera toda la superficie lateral para los paneles.
-2. **El ADCS va en la misma banda que el telescopio, en la otra columna.** El
-   star tracker ST200 también necesita ver fuera, y le conviene mirar por la
-   misma cara que el telescopio: cuanto más cerca y más rígida la unión entre los
-   dos, menos error de coalineación en el traspaso de apuntado grueso a fino.
-3. **La bandeja de fibra va en −Z, y a lo ancho.** Cada modulador de grado
-   espacial necesita **130 mm rectos** (§4). En la zona útil solo X (216.5) y Z
-   (356.2) los admiten; Y (90.2) no. Poniendo la bandeja en la banda de −Z y los
-   moduladores según X caben los dos holgadamente, y queda sitio para bucles.
-4. **PCB-2 va justo encima de la bandeja.** Los coaxiales RF a los moduladores
-   bajan en vertical, que es el recorrido más corto posible. Si PCB-2 fuera en la
-   pila PC104 el coaxial mediría más de 100 mm.
-5. **PCB-3 va en el banco de espacio libre**, por lo mismo: el driver del FSM y
-   la lectura de la cámara son lazos rápidos y no conviene alargarlos.
-6. **Las baterías van en −Z.** Equilibran en Z la masa del telescopio, que está
-   en +Z, y quedan lejos del láser: son lo más delicado térmicamente de la
-   plataforma (−10 a +50 °C, la ventana más estrecha).
-7. **Columna de plataforma en −X, telescopio en +X.** Equilibra el centro de
-   gravedad en X, que la norma limita a ±45 mm.
+1. **El telescopio manda, y va en +Z.** La apertura necesita vista despejada, y
+   poniéndola en +Z se aleja del dispensador (−Z entra primero) y deja libre
+   toda la superficie lateral para los paneles.
+2. **El ADCS arriba de la pila.** El ST200 también necesita ver fuera, y le
+   conviene mirar por la misma cara que el telescopio: cuanto más cerca y más
+   rígida la unión, menos error de coalineación en el traspaso grueso a fino.
+3. **Las baterías al final de −Z.** Equilibran en Z la masa del telescopio (el
+   CdG está limitado a ±70 mm en Z) y quedan lejos del láser: son lo más
+   delicado térmicamente de la plataforma, −10 a +50 °C.
+4. **La columna de plataforma mide 100 mm** porque el iADCS400 necesita 95.9 mm
+   de contorno, más holgura de montaje. El resto, 121.7 mm, es el payload.
 
-### Lo que hay que decidir antes de fijarla
+### Las dos contrapartidas, asumidas al elegir esta opción
 
-- **Diámetro exterior del barrilete del telescopio.** Es lo que decide si el
-  payload cabe. Ver §4.
-- **Paso de apilamiento PC104.** La pila tiene 198.1 mm; las 6 tarjetas con
-  altura conocida suman 153.6 mm, pero eso es una **cota inferior**.
-- **Radio mínimo de curvatura de la fibra.** Sin él no se puede dimensionar la
-  bandeja ni comprobar un solo bucle.
+- **Los moduladores van según Z, no según X.** Sus 130 mm de recorrido recto no
+  caben en los 121.7 mm de ancho de la columna de payload. Funciona, pero los
+  bucles de fibra tienen que girar hacia los lados, y eso **no se puede
+  comprobar** hasta tener el radio mínimo de curvatura.
+- **PCB-2 queda en la otra columna que los moduladores.** El coaxial RF cruza el
+  satélite a lo ancho, unos 100 mm. Es el precio de tener toda la pila junta.
 
-### Alternativas si no cuadra
+### Lo bueno que compra
 
-- **Partir el 6U en dos columnas de 3U a lo largo de todo Z** (payload en +X,
-  plataforma en −X). Da 340 mm de pila pero deja solo ~113 mm de ancho para la
-  bandeja, y ahí los moduladores de 130 mm ya no caben en X: habría que
-  orientarlos según Z y alargar la bandeja.
-- **Acortar el telescopio.** El brief lo admite ("se puede acortar un poco si
-  hace falta volumen"). Cada 10 mm recortados son 10 mm más de pila PC104.
-- **Bajar a un módulo de batería.** Libera 21.55 mm de pila, a costa de 30 Wh.
+La pila PC104 deja de ser el problema: **274 mm usados de 361 mm**, con 87 mm de
+margen para que las tres PCBs propias crezcan más de una posición de separador.
+En la otra opción la pila tenía 198 mm y ya iba justa.
 
----
+### Cómo se regenera
+
+`data/layout.yaml` **no se edita a mano**. Todas las coordenadas salen del
+catálogo:
+
+```bash
+uv run python tools/generar_layout.py
+```
+
+Las únicas decisiones de reparto están en la cabecera de ese script:
+ancho de la columna de plataforma, longitud del telescopio y del banco, y el
+orden de la pila.
 
 ## 4. Hallazgos que contradicen el brief de partida
 
@@ -161,8 +181,8 @@ fase). Como referencia se usa el encapsulado de grado espacial del
 ### 4.2 La apertura de 90 mm está en el límite físico del 6U
 
 El 6U mide **100 mm** en Y, y es su dimensión pequeña. Con el espesor supuesto la
-altura interior es **90.2 mm**, así que una apertura libre de 90 mm deja
-**0.1 mm por lado**. Sin sitio para barrilete, celda de espejo ni ajuste.
+altura interior es **95.4 mm**, así que una apertura libre de 90 mm deja
+**2.7 mm por lado**. Sin sitio para barrilete, celda de espejo ni ajuste.
 
 Y no se arregla girando el telescopio: si el eje óptico va según Y, la longitud
 del tubo (~2U) tiene que caber en 90 mm, que es peor. En cualquier otra
@@ -177,7 +197,20 @@ exterior del barrilete de Aperture Optical Sciences**, no la apertura libre.
 Si el diámetro exterior supera los ~96 mm, las salidas son: bajar la apertura,
 pasar a un diseño fuera de eje, o aceptar que el telescopio sea estructura.
 
-### 4.3 Otras discrepancias registradas
+### 4.3 El iADCS400 aprieta más que el contorno PC104
+
+El contorno PC/104 desnudo son 95.89 × 90.17 mm, y con el lado corto por Y
+permitiría paredes de hasta 4.91 mm. Pero el **iADCS400 mide 95.4 × 95.9 mm** de
+contorno: su envolvente se sale de la tarjeta. Como es una tarjeta apilada, su
+altura (67.3 mm) va obligatoriamente por el eje de la pila y **no se puede
+tumbar**, así que su lado corto de 95.4 mm tiene que caber en los 100 mm
+exteriores. De ahí sale el espesor máximo de **2.30 mm**, menos de la mitad.
+
+El chequeo `seccion_componentes` recalcula esta cota desde el catálogo y dice qué
+componente la fija, así que al añadir una pieza nueva más grande la cota baja
+sola en vez de quedarse obsoleta.
+
+### 4.4 Otras discrepancias registradas
 
 - **iADCS400, potencia de pico**: 4 W (web AAC) frente a 5 W (satsearch).
 - **PHOTON, potencia por cara de 3U**: 9 W (ficha, "up to 9W") frente a 9.25 W
@@ -205,18 +238,23 @@ pasar a un diseño fuera de eje, o aceptar que el telescopio sea estructura.
 
 ## 6. Qué haría falta a continuación
 
-1. **Confirmar la distribución** (§3). Sin eso no hay interferencias ni
-   recorridos reales.
-2. Rellenar `colocaciones` en `data/layout.yaml` y poner `estado: confirmada`.
-3. Conseguir los tres datos que bloquean más cosas: **diámetro exterior del
-   telescopio**, **paso de apilamiento PC104** y **radio mínimo de curvatura de
-   la fibra**.
-4. Declarar los *keep-out* del haz óptico. Ahora `keep_out: []` a propósito:
-   inventar medidas de haz daría una falsa sensación de comprobación.
-5. Sustituir el chasis genérico por el STEP del equipo, con lo que desaparece la
-   hipótesis de espesor de pared.
-
----
+1. **Los tres datos que bloquean más cosas**:
+   - **Diámetro exterior del barrilete del telescopio** (Aperture Optical
+     Sciences). Decide si el payload cabe, y si los 160 mm reservados bastan.
+   - **Radio mínimo de curvatura de la fibra** (equipo de payload). Sin él no se
+     puede comprobar ni un bucle de la bandeja, que es justo donde esta
+     distribución tiene su punto flojo.
+   - **Paso de apilamiento real del chasis** (equipo de estructura). Ahora se usa
+     el estándar PC/104; el real puede cambiar los 274 mm de pila.
+2. **Alturas de PCB-1, PCB-2 y PCB-3.** Con ellas las tres dejan de ser reservas
+   y pasan a ser piezas colocadas.
+3. **Declarar los keep-out del haz óptico**, cuando lleguen los diámetros de haz.
+   Ahora `keep_out: []` a propósito: inventar medidas daría una falsa sensación
+   de comprobación.
+4. **Sustituir el chasis genérico por el STEP del equipo**, con lo que desaparece
+   la hipótesis de espesor de pared y la zona útil pasa a ser real.
+5. **Cerrar el encaminamiento de los 4.1 W del láser**: directo del bus del EPS o
+   a través de PCB-2.
 
 ## 7. Notas de implementación
 

@@ -84,6 +84,7 @@ uv sync
 
 | Orden | Qué hace |
 |---|---|
+| `uv run python tools/generar_layout.py` | Regenera `data/layout.yaml` desde el catálogo. |
 | `uv run clau3d validar` | Comprueba la integridad del catálogo (estados, fuentes, TBD, conexiones). |
 | `uv run clau3d piezas` | Exporta cada pieza generada a `cad/generated/*.step`. |
 | `uv run clau3d ensamblar` | Exporta el ensamblaje completo a `cad/generated/clau_6u.step`. |
@@ -146,7 +147,8 @@ camino, y además desaparece la hipótesis de espesor de pared (ver más abajo).
 ```
 data/components.yaml    dimensiones, masas, consumos, fuentes y estado
 data/connections.yaml   conexiones ópticas, RF, datos, potencia y térmicas
-data/layout.yaml        distribución dentro del 6U (zonas y colocaciones)
+data/layout.yaml        distribución dentro del 6U (GENERADO, no editar)
+tools/generar_layout.py genera data/layout.yaml desde el catálogo
 src/clau3d/             modelo de datos, piezas, ensamblaje, análisis, informes
 tests/                  interferencias, conexiones, integridad de los datos
 cad/vendor/             STEP de fabricante (no se tocan)
@@ -163,17 +165,23 @@ CLAUDE.md               estado, decisiones y razonamiento de la distribución
 - **28 componentes** en el catálogo. Solo **9 tienen envolvente conocida**: el
   resto está en TBD y no se dibuja.
 - **49 datos pendientes** y **4 discrepancias** entre fuentes.
-- **La distribución aún NO está confirmada.** `data/layout.yaml` propone seis
-  zonas razonadas, pero la lista `colocaciones` está vacía a propósito.
+- **Distribución confirmada** (2026-09-20): **dos columnas de 3U** a lo largo de
+  todo Z — plataforma en −X, payload en +X. `data/layout.yaml` no se escribe a
+  mano: lo genera `tools/generar_layout.py` desde el catálogo.
+- **8 piezas colocadas**, sin interferencias, todas dentro de la envolvente.
+  Las otras 19 no se pueden colocar porque su geometría es TBD.
+- Zona útil interior **221.7 × 95.4 × 361.4 mm = 7.64 U**, de la que hay
+  **6.25 U libres** — cifra que bajará conforme lleguen las 19 envolventes que
+  faltan.
 
 ### Lo que ya aprieta, con números
 
 | Hallazgo | Número |
 |---|---|
-| La apertura de 90 mm del telescopio contra la altura interior | Deja **0.1 mm por lado**. El eje óptico no puede ir paralelo a Y, y en cualquier otra orientación la sección sigue limitada por Y. Falta el **diámetro exterior del barrilete**, que es lo que decide si cabe. |
-| El contorno PC104 (90.17 mm) dentro de los 100 mm exteriores | El espesor de pared no puede pasar de **4.91 mm**. |
-| Moduladores Exail de **grado espacial** | **130 mm** de recorrido recto cada uno, protectores de fibra incluidos. Solo caben orientados según X o Z. Es **45 mm más largo** que la cifra del encapsulado comercial. |
-| Longitud de la pila PC104 | **No comprobable**: falta el paso de apilamiento. Las fichas AAC dan la altura "from top PCB to lowest component", que no es el paso. |
+| La apertura de 90 mm del telescopio contra la altura interior | Deja **2.7 mm por lado**. El eje óptico no puede ir paralelo a Y, y en cualquier otra orientación la sección sigue limitada por Y. Falta el **diámetro exterior del barrilete**, que es lo que decide si cabe. |
+| El **iADCS400** (95.4 mm de lado corto) dentro de los 100 mm exteriores | El espesor de pared no puede pasar de **2.30 mm**. Es la pieza que más aprieta, por delante del contorno PC104 desnudo, que daba 4.91 mm. |
+| Moduladores Exail de **grado espacial** | **130 mm** de recorrido recto cada uno, protectores de fibra incluidos. Es **45 mm más largo** que la cifra del encapsulado comercial. En la columna de payload, de 121.7 mm de ancho, **no caben según X**: van según Z. |
+| Longitud de la pila PC104 | **274 mm de 361 mm**, con el paso estándar PC/104 de 15.24 mm y reservando una posición por cada tarjeta de altura TBD. El paso **real** del chasis sigue siendo TBD. |
 | Bucles de fibra | **No comprobable**: falta el radio mínimo de curvatura, que es lo que más área consume de la bandeja. |
 
 ## Decisiones de diseño tomadas
@@ -185,10 +193,23 @@ CLAUDE.md               estado, decisiones y razonamiento de la distribución
   `data/layout.yaml`; el modelo, los tests y los informes se recalculan solos.
 - **El estado del dato manda sobre la categoría** en el color de los renders: lo
   que falta se ve antes que lo que está.
-- **Espesor de pared = 4.9 mm** como hipótesis única de trabajo, y es el **caso
-  más desfavorable** compatible con las tarjetas PC104: `(100.0 − 90.17)/2 =
-  4.915 mm`. Todo volumen libre que salga de aquí **se queda corto, nunca se
-  pasa**. Desaparece en cuanto llegue el chasis del equipo.
+- **Distribución: dos columnas de 3U** a lo largo de todo Z (2026-09-20).
+  Plataforma en −X con la pila PC104 completa; payload en +X repartido en
+  telescopio / banco de espacio libre / bandeja de fibra. Razonamiento y
+  contrapartidas en `CLAUDE.md` §3.
+- **El layout se genera, no se escribe.** `tools/generar_layout.py` calcula cada
+  coordenada desde `data/components.yaml` y el paso PC/104. Cuando llegue una
+  dimensión nueva, se regenera; no se recalcula a ojo.
+- **Espesor de pared = 2.3 mm** como hipótesis única de trabajo, y es el **mayor
+  espesor compatible con todas las piezas conocidas**: lo fija el iADCS400, que
+  al ser tarjeta apilada no se puede tumbar y necesita 95.4 mm de los 100 mm
+  exteriores. Da el **menor volumen útil posible**, así que todo volumen libre
+  que salga de aquí **se queda corto, nunca se pasa**. El chequeo
+  `seccion_componentes` recalcula esta cota desde el catálogo y avisa si deja de
+  ser válida. Desaparece en cuanto llegue el chasis del equipo.
+- **Paso de apilamiento modelado = 15.24 mm**, el estándar PC/104 (0.600 in).
+  Una tarjeta más alta que el paso ocupa `ceil(altura / paso)` posiciones de
+  separador. El paso real del chasis sigue siendo TBD.
 - **Para los moduladores se usa la cifra de grado espacial**, no la comercial:
   es el encapsulado que vuela. La comercial queda registrada como alternativa.
 - **Se modelan 2 baterías Optimus-30** solo para reservar volumen. El número real
@@ -196,9 +217,10 @@ CLAUDE.md               estado, decisiones y razonamiento de la distribución
 
 ## Decisiones que siguen abiertas
 
-- **La distribución dentro del 6U.** Propuesta razonada en `CLAUDE.md`, pendiente
-  de confirmar.
 - **Diámetro exterior y longitud del telescopio.** Decide si el payload cabe.
+  La distribución le reserva 160 mm de longitud, menos que los ~2U del brief.
+- **Cómo se encamina la potencia del láser** (4.1 W): directa del bus del EPS o
+  a través de PCB-2.
 - **FSM**: MEMS tipo Mirrorcle (herencia CLICK-A) frente a piezo PI S-331. Las
   dos familias tienen envolventes muy distintas.
 - **Formato PC104 para las tres PCBs propias.** Está propuesto, no confirmado.
