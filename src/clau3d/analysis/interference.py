@@ -15,7 +15,8 @@ TOLERANCIA_MM = 0.05
 
 @dataclass
 class Interferencia:
-    tipo: str          # solape | fuera_envolvente | fuera_zona_util | keep_out
+    # solape | fuera_envolvente | fuera_zona_util | fuera_de_zona | keep_out
+    tipo: str
     a: str
     b: str
     volumen_mm3: float
@@ -101,6 +102,45 @@ def fuera_de_envolvente(
     return salida
 
 
+def fuera_de_su_zona(
+    layout: Layout, piezas: list[PiezaColocada]
+) -> list[Interferencia]:
+    """Piezas que se salen de la zona a la que el layout dice que pertenecen.
+
+    Las cinco zonas embaldosan la zona util, asi que una pieza que se sale de la
+    suya se mete en la de al lado. Eso puede no ser una interferencia todavia
+    -- la vecina quiza este vacia -- pero si es un error del reparto, y se ve
+    antes de que llegue la pieza que si iba a ocupar ese hueco.
+
+    Es el chequeo que salta cuando cambia la longitud reservada al telescopio:
+    la bandeja se estrecha y lo que habia dentro deja de caber.
+    """
+    por_id = {zona.id: zona for zona in layout.zonas}
+    salida: list[Interferencia] = []
+    for pieza in piezas:
+        zona = por_id.get(pieza.colocacion.zona or "")
+        if zona is None:
+            continue
+        caja = pieza.caja_mundo
+        if zona.caja.contiene_a(caja):
+            continue
+        dx, dy, dz = zona.caja.desbordamiento(caja)
+        salida.append(
+            Interferencia(
+                tipo="fuera_de_zona",
+                a=pieza.colocacion.etiqueta,
+                b=zona.id,
+                volumen_mm3=caja.volumen_mm3 - zona.caja.volumen_solape(caja),
+                detalle=(
+                    f"{pieza.colocacion.etiqueta} se sale de la zona "
+                    f"'{zona.id}' que tiene asignada: X {dx:.1f} mm, "
+                    f"Y {dy:.1f} mm, Z {dz:.1f} mm"
+                ),
+            )
+        )
+    return salida
+
+
 def invasion_keep_out(
     layout: Layout, piezas: list[PiezaColocada]
 ) -> list[Interferencia]:
@@ -133,5 +173,6 @@ def todas(
     return (
         entre_piezas(piezas)
         + fuera_de_envolvente(catalogo, piezas)
+        + fuera_de_su_zona(layout, piezas)
         + invasion_keep_out(layout, piezas)
     )

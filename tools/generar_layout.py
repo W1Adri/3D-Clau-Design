@@ -39,6 +39,81 @@ ORDEN_PILA = [
     ("bateria_optimus_30", 2),
 ]
 
+# --- la bandeja de fibra ----------------------------------------------
+# Las piezas de la bandeja se montan sobre una placa horizontal, en filas que
+# avanzan segun Z. Dentro de cada fila van en hilera segun X, que es la
+# direccion ancha (121.7 mm) y la del eje de fibra de todas ellas.
+#
+# El ORDEN ES EL DE LA CADENA OPTICA, y el sentido tambien: el laser al extremo
+# -Z, lo mas lejos posible del barrilete del telescopio, porque con sus 4.1 W es
+# la principal fuente de calor del payload; y la salida hacia el colimador al
+# extremo +Z, que es por donde se sale al banco. Los dos moduladores NO estan
+# aqui: van en la franja lateral (ver CLAUDE.md 3.6), asi que la fibra sale de
+# la bandeja hacia la franja y vuelve.
+FILAS_BANDEJA = [
+    ("laser_dfb_1550",),
+    ("voa", "aislador"),
+    ("filtro_espectral", "acoplador_monitor"),
+]
+# Holgura entre filas y contra los bordes de la zona. No es una cota de nada:
+# es sitio para el tramo recto de fibra que sale de cada pieza antes de curvar.
+HOLGURA_BANDEJA = 8.0
+MARGEN_BANDEJA = 6.0
+
+
+# La cara de montaje de cada pieza (montaje.cara, en sus ejes locales) contra la
+# normal de la superficie sobre la que se atornilla. De aqui sale la rotacion, en
+# vez de escribirla a mano colocacion por colocacion: asi una pieza que cambie de
+# cara de montaje en el catalogo se recoloca sola, y el STEP que llegue manana se
+# orienta por la misma regla que el aproximado al que sustituye.
+_ROTACION_DE_MONTAJE = {
+    # (cara local que se atornilla, normal de la superficie) -> giros [gx, gy, gz]
+    ("-Y", "+Y"): [0, 0, 0],
+    ("-Z", "+Y"): [-90, 0, 0],
+    ("+Z", "+Y"): [90, 0, 0],
+    ("-X", "+Y"): [0, 0, 90],
+    ("-Y", "+X"): [0, 0, -90],
+    ("-Z", "+X"): [0, 90, 0],
+}
+
+
+def rotacion_de_montaje(componente, normal: str) -> list[int]:
+    """Giros que llevan la cara de montaje de la pieza contra la superficie."""
+    montaje = componente.montaje
+    if montaje is None or montaje.cara is None:
+        return [0, 0, 0]
+    try:
+        return _ROTACION_DE_MONTAJE[(montaje.cara, normal)]
+    except KeyError:
+        raise SystemExit(
+            f"{componente.id}: no se sabe como montar la cara {montaje.cara} "
+            f"contra una superficie {normal}. Anade el caso a "
+            f"_ROTACION_DE_MONTAJE en tools/generar_layout.py."
+        )
+
+
+def dims_en_mundo(componente, rotacion: list[int]) -> tuple[float, float, float]:
+    """Caja envolvente de la pieza YA girada, conectores incluidos.
+
+    Se pide a parts.caja_local, no a 'dimensiones': una pieza con conectores
+    ocupa mas que su cuerpo, y colocarla por el cuerpo la haria chocar con la
+    vecina justo por donde sale el cable.
+    """
+    from clau3d import parts
+
+    caja = parts.caja_local(componente)
+    assert caja is not None, componente.id
+    dx, dy, dz = caja.dims
+    # Los tres giros del diccionario son multiplos de 90 grados, asi que girar
+    # es permutar cotas. Se hace a mano para no tener que construir el solido.
+    if rotacion[0] in (90, -90):
+        dy, dz = dz, dy
+    if rotacion[1] in (90, -90):
+        dx, dz = dz, dx
+    if rotacion[2] in (90, -90):
+        dx, dy = dy, dx
+    return dx, dy, dz
+
 
 def generar() -> str:
     catalogo = cargar()
@@ -126,6 +201,82 @@ def generar() -> str:
             }
         )
 
+    # ---------------------------------------------------------------- bandeja
+    # La placa, al fondo de la zona, y encima las piezas de la cadena de fibra.
+    # Todo se mide desde los limites de la zona, no desde numeros escritos: al
+    # cambiar la longitud reservada al telescopio, la bandeja se estrecha y las
+    # filas se recolocan solas (o el chequeo avisa de que ya no caben).
+    bandeja = catalogo["bandeja_optica"]
+    x_bandeja = (x_sep + X) / 2
+    z_bandeja = (-Z + z_banco_min) / 2
+    y_placa = -Y
+    if bandeja.modelable:
+        _, espesor_placa, _ = bandeja.dimensiones.como_vector()
+        colocaciones.append(
+            {
+                "componente": "bandeja_optica",
+                "instancia": 1,
+                "centro": [
+                    round(x_bandeja, 3), round(-Y + espesor_placa / 2, 3),
+                    round(z_bandeja, 3),
+                ],
+                "rotacion": rotacion_de_montaje(bandeja, "+Y"),
+                "zona": "z_payload_bandeja",
+            }
+        )
+        y_placa = -Y + espesor_placa
+
+    # Las filas avanzan segun Z desde el extremo -Z de la zona. Dentro de cada
+    # fila, las piezas se reparten el ancho util en hilera segun X, que es el eje
+    # de fibra de todas ellas.
+    ancho_util = ancho_payload - 2 * MARGEN_BANDEJA
+    cursor_z = -Z + MARGEN_BANDEJA
+    for fila in FILAS_BANDEJA:
+        piezas = []
+        for cid in fila:
+            componente = catalogo[cid]
+            if not componente.modelable:
+                continue
+            rotacion = rotacion_de_montaje(componente, "+Y")
+            piezas.append((componente, rotacion, dims_en_mundo(componente, rotacion)))
+        if not piezas:
+            continue
+        fondo = max(dims[2] for _, _, dims in piezas)
+        ancho_total = sum(dims[0] for _, _, dims in piezas)
+        if ancho_total > ancho_util:
+            # Antes un error que un layout que se apana. Apretando las piezas
+            # hasta que entren saldrian solapes de decimas de milimetro, que el
+            # informe de interferencias marcaria sin que se entendiera por que.
+            raise SystemExit(
+                f"la fila {fila} de la bandeja suma {ancho_total:.1f} mm y solo "
+                f"hay {ancho_util:.1f} mm utiles. Parte la fila en dos en "
+                f"FILAS_BANDEJA, o baja MARGEN_BANDEJA."
+            )
+        hueco = (
+            (ancho_util - ancho_total) / (len(piezas) - 1) if len(piezas) > 1 else 0.0
+        )
+        # Una fila de una sola pieza se centra; varias se reparten el ancho.
+        cursor_x = x_sep + MARGEN_BANDEJA + (
+            (ancho_util - ancho_total) / 2 if len(piezas) == 1 else 0.0
+        )
+        for componente, rotacion, (dx, dy, dz) in piezas:
+            colocaciones.append(
+                {
+                    "componente": componente.id,
+                    "instancia": 1,
+                    "centro": [
+                        round(cursor_x + dx / 2, 3),
+                        round(y_placa + dy / 2, 3),
+                        round(cursor_z + fondo / 2, 3),
+                    ],
+                    "rotacion": rotacion,
+                    "zona": "z_payload_bandeja",
+                }
+            )
+            cursor_x += dx + hueco
+        cursor_z += fondo + HOLGURA_BANDEJA
+    z_libre_bandeja = z_banco_min - (cursor_z - HOLGURA_BANDEJA)
+
     zonas = [
         (
             "z_plataforma",
@@ -174,10 +325,14 @@ def generar() -> str:
             (x_sep, -Y, -Z), (X, Y, z_banco_min),
             f"{iz - l_telescopio - L_BANCO:.1f} mm de Z con los "
             f"{ancho_payload:.1f} mm de ancho enteros, ya sin cuerpos de "
-            f"modulador dentro: los bucles de fibra pueden curvar en toda la "
-            f"anchura. Aqui se queda el laser DFB, que con sus 4.1 W es la "
-            f"principal fuente de calor del payload y no debe ir junto al "
-            f"barrilete. Zona con control termico propio.",
+            f"modulador dentro. La cadena va en filas que avanzan segun Z, en "
+            f"el orden y el sentido de la cadena optica: el laser DFB al "
+            f"extremo -Z, lo mas lejos posible del barrilete porque con sus "
+            f"4.1 W es la principal fuente de calor del payload, y la salida "
+            f"hacia el colimador en +Z. Quedan {z_libre_bandeja:.1f} mm de Z "
+            f"libres al final para los bucles, mas los huecos entre filas. "
+            f"Cuanta fibra cabe ahi NO se puede decir: falta el radio minimo de "
+            f"curvatura. Zona con control termico propio.",
         ),
     ]
 

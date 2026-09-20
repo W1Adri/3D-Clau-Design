@@ -5,7 +5,7 @@ No editar a mano: los numeros salen de `data/components.yaml`.
 
 - Mision: CLAU - CubeSat Laser per a Aplicacions Ultrasegures
 - Norma: CubeSat Design Specification Rev. 14.1, The CubeSat Program, Cal Poly SLO
-- Estado del layout: **confirmada** (8 piezas colocadas)
+- Estado del layout: **confirmada** (14 piezas colocadas)
 
 Comprobaciones que no dependen de donde se coloque cada pieza.
 
@@ -13,17 +13,17 @@ Comprobaciones que no dependen de donde se coloque cada pieza.
 
 **Estado: ATENCION**
 
-Los 7 componentes con envolvente conocida ocupan 1394 cm3 de los 7644 cm3 interiores (18%). Quedan 19 componentes sin envolvente: el dato real sera mayor.
+Los 13 componentes con envolvente conocida ocupan 1452 cm3 de los 7644 cm3 interiores (19%). Quedan 13 componentes sin envolvente: el dato real sera mayor.
 
 | magnitud | valor |
 |---|---|
 | interior_cm3 | 7643.68 |
-| ocupado_conocido_cm3 | 1394.06 |
-| libre_si_nada_mas_creciera_cm3 | 6249.61 |
-| fraccion_ocupada | 0.18 |
-| componentes_sin_volumen | 19 |
+| ocupado_conocido_cm3 | 1451.65 |
+| libre_si_nada_mas_creciera_cm3 | 6192.02 |
+| fraccion_ocupada | 0.19 |
+| componentes_sin_volumen | 13 |
 
-Falta: Envolvente de: antena_quasar_wsant, radio_uhf_pulsar_vutrx, paneles_photon_side, propulsion, telescopio_cassegrain, fsm, dicroico, camara_beacon, laser_beacon_bajada, colimador, bandeja_optica, laser_dfb_1550, voa, aislador, filtro_espectral, acoplador_monitor, pcb1_control_qkd, pcb2_drivers_opticos, pcb3_pat
+Falta: Envolvente de: antena_quasar_wsant, radio_uhf_pulsar_vutrx, paneles_photon_side, propulsion, telescopio_cassegrain, fsm, dicroico, camara_beacon, laser_beacon_bajada, colimador, pcb1_control_qkd, pcb2_drivers_opticos, pcb3_pat
 
 ## Apertura del telescopio frente a la seccion interior
 
@@ -156,4 +156,6 @@ Falta: Masa de: estructura_6u, adcs_iadcs400, antena_quasar_wsant, radio_uhf_pul
 | ausentes | 0.00 |
 | huella_distinta | 0.00 |
 | sin_declarar | 0.00 |
+| esperando_step | 0.00 |
+| aparecidos_sin_verificar | 0.00 |
 

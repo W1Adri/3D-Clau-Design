@@ -89,10 +89,14 @@ zonas:
       max: [110.85, 47.70, -74.30]
     nota: >-
       106.4 mm de Z con los 121.7 mm de ancho enteros, ya sin cuerpos de
-      modulador dentro: los bucles de fibra pueden curvar en toda la
-      anchura. Aqui se queda el laser DFB, que con sus 4.1 W es la
-      principal fuente de calor del payload y no debe ir junto al
-      barrilete. Zona con control termico propio.
+      modulador dentro. La cadena va en filas que avanzan segun Z, en el
+      orden y el sentido de la cadena optica: el laser DFB al extremo -Z,
+      lo mas lejos posible del barrilete porque con sus 4.1 W es la
+      principal fuente de calor del payload, y la salida hacia el
+      colimador en +Z. Quedan 15.6 mm de Z libres al final para los
+      bucles, mas los huecos entre filas. Cuanta fibra cabe ahi NO se
+      puede decir: falta el radio minimo de curvatura. Zona con control
+      termico propio.
 
 # Vacio hasta que lleguen los diametros de haz, el radio de curvatura de
 # la fibra y las holguras de conector. Declarar un keep-out con medidas
@@ -140,3 +144,33 @@ colocaciones:
     centro: [104.275, 0.0, 45.7]
     rotacion: [0, 90, 0]
     zona: z_payload_franja
+  - componente: bandeja_optica
+    instancia: 1
+    centro: [50.0, -46.2, -127.5]
+    rotacion: [0, 0, 0]
+    zona: z_payload_bandeja
+  - componente: laser_dfb_1550
+    instancia: 1
+    centro: [50.0, -40.8, -153.05]
+    rotacion: [-90, 0, 0]
+    zona: z_payload_bandeja
+  - componente: voa
+    instancia: 1
+    centro: [12.65, -41.95, -120.65]
+    rotacion: [-90, 0, 0]
+    zona: z_payload_bandeja
+  - componente: aislador
+    instancia: 1
+    centro: [87.35, -41.95, -120.65]
+    rotacion: [-90, 0, 0]
+    zona: z_payload_bandeja
+  - componente: filtro_espectral
+    instancia: 1
+    centro: [15.15, -41.95, -99.9]
+    rotacion: [-90, 0, 0]
+    zona: z_payload_bandeja
+  - componente: acoplador_monitor
+    instancia: 1
+    centro: [74.85, -38.7, -99.9]
+    rotacion: [-90, 0, 0]
+    zona: z_payload_bandeja

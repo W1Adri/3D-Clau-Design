@@ -8,10 +8,23 @@
 #   confirmado  -> ficha tecnica / norma del componente elegido
 #   referencia  -> dato de un componente parecido, NO el elegido
 #   decision    -> decision de diseno de ACSAR (no viene de ninguna ficha)
-#   TBD         -> falta el dato. valor: null. Obliga a 'falta' y 'pedir_a'.
+#   supuesto    -> numero INVENTADO aqui para poder dibujar la pieza. No sale de
+#                  ninguna fuente. 'fuente' lleva el razonamiento, no una ficha,
+#                  y obliga ademas a 'falta' y 'pedir_a' como un TBD, porque el
+#                  dato de verdad sigue sin estar. No suma en los presupuestos.
+#   TBD         -> falta el dato Y no hay aproximacion defendible. valor: null.
+#                  Obliga a 'falta' y 'pedir_a'.
+#
+# La diferencia entre 'supuesto' y 'TBD' es si la pieza se puede dibujar, no si
+# el dato esta. Los dos salen en reports/06_pendientes.md.
 #
 # 'alternativas' guarda cifras discrepantes entre fuentes (no se elige una).
 # Ejes locales de cada pieza: valor: [dx, dy, dz] en mm.
+#
+# 'id_drive' cruza con la hoja indice del equipo (OPT-xx, ELEC-xx, PLAT-xx).
+# 'montaje' declara con que cara se atornilla la pieza y por que eje entra la
+# senal: es lo que hace que un STEP de fabricante, cuando llegue, se coloque
+# igual que el modelo aproximado al que sustituye.
 # =====================================================================
 
 meta:
@@ -749,21 +762,44 @@ componentes:
 # ---------------------------------------------------------------------
 
   - id: bandeja_optica
+    id_drive: OPT-14
+    referencia_comercial: null
     nombre: Bandeja optica (placa mecanica, no PCB)
     categoria: payload_bandeja
     subsistema: bandeja_optica
     cantidad: 1
+    montaje:
+      cara: "-Y"
+      nota: >-
+        Placa horizontal: se atornilla por su cara -Y al chasis y los
+        componentes de fibra se fijan encima, en +Y. No declara eje de senal:
+        no es un componente optico, es el soporte de todos los demas.
     forma:
       tipo: caja
       dimensiones:
-        valor: null
+        valor: [117.7, 3.0, 102.4]
         unidad: mm
-        estado: TBD
-        falta: Contorno definitivo, que sale de la distribucion una vez confirmada
-        pedir_a: Este repositorio, tras fijar el layout
+        estado: supuesto
+        fuente: >-
+          El CONTORNO si esta derivado: es la zona z_payload_bandeja del layout
+          confirmado (121.7 x 106.4 mm en X y Z) menos 2 mm por lado de holgura
+          de montaje. El ESPESOR de 3 mm esta inventado, y la holgura de 2 mm
+          tambien: no hay ni material elegido ni analisis estructural. Como la
+          magnitud es una sola, el bloque entero va como supuesto, que es lo
+          honesto: dos de las tres cotas dependen de un numero sin respaldo.
+        falta: >-
+          Material, espesor y patron de taladros de la placa, del analisis
+          estructural y termico
+        pedir_a: Equipo de estructura de ACSAR
+        nota: >-
+          Al cambiar el reparto (por ejemplo cuando llegue la longitud real del
+          telescopio) esta cota deja de cuadrar con su zona. El chequeo
+          'bandeja_en_su_zona' lo detecta.
     nota: >-
       Necesita control termico propio: la extincion garantizada del modulador de
       intensidad solo cubre 0 a +70 C. Reservar espacio para sensores y calefactores.
+      Los dos moduladores NO van encima: desde el 2026-09-20 van en la franja
+      lateral, junto al telescopio (ver CLAUDE.md 3.6).
     masa:
       valor: null
       unidad: g
@@ -772,19 +808,72 @@ componentes:
       pedir_a: Este repositorio, tras fijar el layout
 
   - id: laser_dfb_1550
+    id_drive: OPT-01
+    referencia_comercial: Gooch & Housego, modulo DFB 1550 nm ESCC-23201
     nombre: Laser DFB 1550 nm, Gooch & Housego (modulo validado para espacio)
     categoria: payload_bandeja
     subsistema: bandeja_optica
     cantidad: 1
+    montaje:
+      cara: "-Z"
+      eje: X
+      tipo_eje: fibra
+      nota: >-
+        Butterfly de montaje en superficie: se atornilla por su base (-Z local)
+        a la bandeja, que le hace de disipador. La fibra de salida sale por +X.
     forma:
       tipo: caja
       dimensiones:
-        valor: null
+        valor: [37.4, 12.7, 7.8]
         unidad: mm
-        estado: TBD
-        falta: Envolvente del encapsulado butterfly con Peltier (y del disipador)
-        pedir_a: Gooch & Housego
-        nota: Formato butterfly con TEC. Calificacion ESCC-23201.
+        estado: referencia
+        fuente: https://www.phix.com/wp-content/uploads/2025/10/PHIX-BTF14-Design-Guidelines.pdf
+        nota: >-
+          Contorno del encapsulado BUTTERFLY DE 14 PINES estandar (seccion
+          "BTF14 dimensions": bulk external sin pines 37.4 x 12.7 x 7.8 mm,
+          tolerancia +/-0.2). NO es el plano de Gooch & Housego: es la cota del
+          formato en el que viene el modulo. G&H no publica plano mecanico del
+          ESCC-23201. Sirve para reservar volumen con una cifra real de un
+          encapsulado real; el contorno exacto de ESTE modulo sigue pendiente,
+          y sobre todo falta el DISIPADOR, que con 4.1 W no es opcional y no
+          esta en ninguna de estas cotas.
+        falta: >-
+          Plano mecanico del modulo G&H ESCC-23201 y, sobre todo, el disipador
+          o la interfaz termica que necesitan sus 4.1 W.
+        pedir_a: Gooch & Housego / Equipo termico de ACSAR
+        alternativas:
+          - valor: [37.4, 43.3, 7.8]
+            fuente: https://www.phix.com/wp-content/uploads/2025/10/PHIX-BTF14-Design-Guidelines.pdf
+            nota: >-
+              "Envelope external dimensions (with pins and ports)". Los pines
+              salen por los dos lados y llevan el ancho de 12.7 a 43.3 mm. Es la
+              cota que manda para el hueco en la bandeja, no para el cuerpo.
+      conectores:
+        - id: pines_btf14
+          tipo: electrico
+          cara: "+Y"
+          dimensiones:
+            valor: [30.0, 15.3, 4.0]
+            unidad: mm
+            estado: supuesto
+            fuente: >-
+              El saliente de 15.3 mm por lado sale de las dos cotas del plano
+              BTF14: (43.3 - 12.7) / 2. Las otras dos, 30 mm de largo y 4 mm de
+              alto, estan INVENTADAS: el plano no acota la fila de pines, solo
+              el envolvente total.
+            falta: Cotas de la fila de pines del modulo elegido
+            pedir_a: Gooch & Housego
+          nota: 7 pines por lado. El lado opuesto lleva la fila simetrica.
+        - id: pines_btf14_b
+          tipo: electrico
+          cara: "-Y"
+          dimensiones:
+            valor: [30.0, 15.3, 4.0]
+            unidad: mm
+            estado: supuesto
+            fuente: Simetrico de 'pines_btf14'. Mismas cotas y mismo origen.
+            falta: Cotas de la fila de pines del modulo elegido
+            pedir_a: Gooch & Housego
     potencia_nominal:
       valor: 4.1
       unidad: W
@@ -807,10 +896,22 @@ componentes:
       pedir_a: Gooch & Housego
 
   - id: mod_intensidad_mxer_ln_10
+    id_drive: OPT-02
+    referencia_comercial: Exail MXER-LN-10, encapsulado de grado espacial EM/NS-FM/FM
     nombre: Exail MXER-LN-10 (modulador de intensidad, grado espacial EM/NS-FM/FM)
     categoria: payload_bandeja
     subsistema: bandeja_optica
     cantidad: 1
+    montaje:
+      cara: "-Z"
+      eje: X
+      tipo_eje: fibra
+      nota: >-
+        Se atornilla por su base (-Z local) por las dos bridas de los extremos.
+        El eje de fibra recorre X, a 4.8 mm de la base (dato 'altura_eje_fibra').
+        En el layout va TUMBADO: la rotacion [0, 90, 0] lleva el eje de fibra a
+        Z del satelite y la altura del cuerpo a X, que es el eje escaso de la
+        franja. Asi el conector RF sale hacia +-Y, donde sobra sitio.
     forma:
       tipo: caja
       dimensiones:
@@ -829,6 +930,48 @@ componentes:
               "Housing #A" de la serie comercial MPX/MPZ, que es la cifra que
               recoge el brief. El encapsulado de GRADO ESPACIAL es mas largo.
               Para el analisis se usa el de grado espacial, que es el que vuela.
+      conectores:
+        - id: rf
+          tipo: coaxial
+          cara: "+Y"
+          dimensiones:
+            valor: [6.1, 10.0, 6.1]
+            unidad: mm
+            estado: supuesto
+            fuente: >-
+              Dos de las tres cotas SI son del plano (Exail 03_2026_ED2 / 00025851-B p.9): 6.1 mm de ancho
+              y 10 mm de saliente sobre el cuerpo. La tercera, 6.1 mm, esta
+              inventada: se toma igual al ancho porque el plano no la acota.
+              Es el saliente de 10 mm el que manda, y ese es dato.
+            falta: Profundidad del conector RF, y holgura de insercion del coaxial
+            pedir_a: Exail / Equipo de electronica de ACSAR
+          nota: >-
+            Este conector es la razon de que el modulador vaya tumbado. Con el
+            cuerpo de pie, sus 10 mm saldrian hacia la franja, que tiene 26.3 mm
+            para los dos moduladores.
+        - id: fibra_entrada
+          tipo: fibra
+          cara: "-X"
+          dimensiones:
+            valor: [10.0, 3.0, 3.0]
+            unidad: mm
+            estado: supuesto
+            fuente: >-
+              Los 10 mm de saliente salen de restar las dos cotas del plano:
+              (130 con protectores - 110 con bridas) / 2. La seccion de 3 mm
+              esta inventada; es un boot de fibra tipico.
+            falta: Diametro del protector de fibra del encapsulado de grado espacial
+            pedir_a: Exail
+        - id: fibra_salida
+          tipo: fibra
+          cara: "+X"
+          dimensiones:
+            valor: [10.0, 3.0, 3.0]
+            unidad: mm
+            estado: supuesto
+            fuente: Simetrico de 'fibra_entrada'. Mismas cotas y mismo origen.
+            falta: Diametro del protector de fibra del encapsulado de grado espacial
+            pedir_a: Exail
     longitud_con_fibras:
       valor: 130.0
       unidad: mm
@@ -866,10 +1009,17 @@ componentes:
       nota: Altura del eje optico sobre la base. Fija el plano de los bucles de fibra.
 
   - id: mod_fase_mpz_ln_10
+    id_drive: OPT-03
+    referencia_comercial: Exail MPZ-LN-10 (grado espacial sin ficha publica)
     nombre: Exail MPZ-LN-10 (modulador de fase, codificador de polarizacion)
     categoria: payload_bandeja
     subsistema: bandeja_optica
     cantidad: 1
+    montaje:
+      cara: "-Z"
+      eje: X
+      tipo_eje: fibra
+      nota: Identico al MXER-LN-10; va tumbado en la franja por el mismo motivo.
     forma:
       tipo: caja
       dimensiones:
@@ -887,6 +1037,48 @@ componentes:
             fuente: https://www.exail.com/media-file/7739/datasheet-mpxmpz-ln-series.pdf
             nota: >-
               Housing #A comercial. El MPZ-LN-10-LVP usa el Housing #C, de 105 mm.
+      conectores:
+        - id: rf
+          tipo: coaxial
+          cara: "+Y"
+          dimensiones:
+            valor: [6.1, 10.0, 6.1]
+            unidad: mm
+            estado: supuesto
+            fuente: >-
+              Dos de las tres cotas SI son del plano (Exail 03_2026_ED3 / 00025631-B p.9, NIR-MPX-LN): 6.1 mm de ancho
+              y 10 mm de saliente sobre el cuerpo. La tercera, 6.1 mm, esta
+              inventada: se toma igual al ancho porque el plano no la acota.
+              Es el saliente de 10 mm el que manda, y ese es dato.
+            falta: Profundidad del conector RF, y holgura de insercion del coaxial
+            pedir_a: Exail / Equipo de electronica de ACSAR
+          nota: >-
+            Este conector es la razon de que el modulador vaya tumbado. Con el
+            cuerpo de pie, sus 10 mm saldrian hacia la franja, que tiene 26.3 mm
+            para los dos moduladores.
+        - id: fibra_entrada
+          tipo: fibra
+          cara: "-X"
+          dimensiones:
+            valor: [10.0, 3.0, 3.0]
+            unidad: mm
+            estado: supuesto
+            fuente: >-
+              Los 10 mm de saliente salen de restar las dos cotas del plano:
+              (130 con protectores - 110 con bridas) / 2. La seccion de 3 mm
+              esta inventada; es un boot de fibra tipico.
+            falta: Diametro del protector de fibra del encapsulado de grado espacial
+            pedir_a: Exail
+        - id: fibra_salida
+          tipo: fibra
+          cara: "+X"
+          dimensiones:
+            valor: [10.0, 3.0, 3.0]
+            unidad: mm
+            estado: supuesto
+            fuente: Simetrico de 'fibra_entrada'. Mismas cotas y mismo origen.
+            falta: Diametro del protector de fibra del encapsulado de grado espacial
+            pedir_a: Exail
     longitud_con_fibras:
       valor: 130.0
       unidad: mm
@@ -901,19 +1093,37 @@ componentes:
     nota: Esquema ICFO de codificacion de polarizacion con un solo modulador de fase.
 
   - id: voa
+    id_drive: OPT-04
+    referencia_comercial: null
     nombre: Atenuador optico variable (VOA)
     categoria: payload_bandeja
     subsistema: bandeja_optica
     cantidad: 1
+    montaje:
+      cara: "-Z"
+      eje: X
+      tipo_eje: fibra
+      nota: Componente en linea. Se fija con abrazadera a la bandeja.
     forma:
-      tipo: caja
+      tipo: cilindro
+      eje: X
       dimensiones:
-        valor: null
+        valor: [35.0, 5.5, 5.5]
         unidad: mm
-        estado: TBD
-        falta: Modelo y envolvente
+        estado: supuesto
+        fuente: >-
+          SUPUESTO. Encapsulado cilindrico en linea tipico de los componentes
+          pasivos de fibra de telecomunicaciones (del orden de 5.5 mm de
+          diametro por 35-40 mm de cuerpo). NO es ningun producto: no hay
+          candidato elegido, asi que no hay ficha que copiar. Sirve para
+          reservar un volumen del orden correcto en la bandeja y para que el
+          recorrido de fibra tenga extremos donde apoyarse. La cifra real
+          cambiara, y puede cambiar mucho si se elige un encapsulado en caja.
+        falta: Modelo de VOA elegido y su envolvente
         pedir_a: Equipo de payload de ACSAR
-    nota: Lleva el flujo al nivel de fotones por pulso exigido por BB84 con decoy.
+    nota: >-
+      Lleva el flujo al nivel de fotones por pulso exigido por BB84 con decoy.
+      SIN CANDIDATO: la envolvente que se dibuja es una reserva, no una pieza.
     masa:
       valor: null
       unidad: g
@@ -922,18 +1132,36 @@ componentes:
       pedir_a: Equipo de payload de ACSAR
 
   - id: aislador
+    id_drive: OPT-05
+    referencia_comercial: null
     nombre: Aislador optico
     categoria: payload_bandeja
     subsistema: bandeja_optica
     cantidad: 1
+    montaje:
+      cara: "-Z"
+      eje: X
+      tipo_eje: fibra
+      nota: Componente en linea. Tiene sentido de paso; orientar segun la cadena.
     forma:
-      tipo: caja
+      tipo: cilindro
+      eje: X
       dimensiones:
-        valor: null
+        valor: [35.0, 5.5, 5.5]
         unidad: mm
-        estado: TBD
-        falta: Modelo y envolvente
+        estado: supuesto
+        fuente: >-
+          SUPUESTO. Encapsulado cilindrico en linea tipico de los componentes
+          pasivos de fibra de telecomunicaciones (del orden de 5.5 mm de
+          diametro por 35-40 mm de cuerpo). NO es ningun producto: no hay
+          candidato elegido, asi que no hay ficha que copiar. Sirve para
+          reservar un volumen del orden correcto en la bandeja y para que el
+          recorrido de fibra tenga extremos donde apoyarse. La cifra real
+          cambiara, y puede cambiar mucho si se elige un encapsulado en caja.
+        falta: Modelo de aislador elegido y su envolvente
         pedir_a: Equipo de payload de ACSAR
+    nota: >-
+      SIN CANDIDATO: la envolvente que se dibuja es una reserva, no una pieza.
     masa:
       valor: null
       unidad: g
@@ -942,18 +1170,36 @@ componentes:
       pedir_a: Equipo de payload de ACSAR
 
   - id: filtro_espectral
+    id_drive: OPT-06
+    referencia_comercial: null
     nombre: Filtro espectral
     categoria: payload_bandeja
     subsistema: bandeja_optica
     cantidad: 1
+    montaje:
+      cara: "-Z"
+      eje: X
+      tipo_eje: fibra
+      nota: Componente en linea.
     forma:
-      tipo: caja
+      tipo: cilindro
+      eje: X
       dimensiones:
-        valor: null
+        valor: [40.0, 5.5, 5.5]
         unidad: mm
-        estado: TBD
-        falta: Modelo y envolvente
+        estado: supuesto
+        fuente: >-
+          SUPUESTO. Encapsulado cilindrico en linea tipico de los componentes
+          pasivos de fibra de telecomunicaciones (del orden de 5.5 mm de
+          diametro por 35-40 mm de cuerpo). NO es ningun producto: no hay
+          candidato elegido, asi que no hay ficha que copiar. Sirve para
+          reservar un volumen del orden correcto en la bandeja y para que el
+          recorrido de fibra tenga extremos donde apoyarse. La cifra real
+          cambiara, y puede cambiar mucho si se elige un encapsulado en caja.
+        falta: Modelo de filtro elegido, su ancho de banda y su envolvente
         pedir_a: Equipo de payload de ACSAR
+    nota: >-
+      SIN CANDIDATO: la envolvente que se dibuja es una reserva, no una pieza.
     masa:
       valor: null
       unidad: g
@@ -962,18 +1208,39 @@ componentes:
       pedir_a: Equipo de payload de ACSAR
 
   - id: acoplador_monitor
-    nombre: Acoplador de monitorizacion + fotodiodo
+    id_drive: OPT-07
+    referencia_comercial: null
+    nombre: Acoplador de monitorizacion + fotodiodo tap
     categoria: payload_bandeja
     subsistema: bandeja_optica
     cantidad: 1
+    montaje:
+      cara: "-Z"
+      eje: X
+      tipo_eje: fibra
+      nota: >-
+        Son DOS cosas en una envolvente: el acoplador (un tubo de empalme en
+        linea) y el fotodiodo con su encapsulado. Se modelan juntas porque van
+        juntas; al elegir modelo habra que separarlas.
     forma:
       tipo: caja
       dimensiones:
-        valor: null
+        valor: [60.0, 20.0, 12.0]
         unidad: mm
-        estado: TBD
-        falta: Modelo y envolvente
+        estado: supuesto
+        fuente: >-
+          SUPUESTO. Reserva para un acoplador de derivacion en linea (tubo de
+          unos 60 mm) mas el encapsulado de un fotodiodo InGaAs con su
+          transimpedancia. NO es ningun producto: no hay candidato elegido.
+          Es la pieza de la bandeja con el supuesto mas flojo de todos, porque
+          la geometria depende por completo de si el fotodiodo va en la bandeja
+          o en PCB-2.
+        falta: >-
+          Modelo de acoplador y de fotodiodo, y si el fotodiodo va en la bandeja
+          o montado en PCB-2
         pedir_a: Equipo de payload de ACSAR
+    nota: >-
+      SIN CANDIDATO: la envolvente que se dibuja es una reserva, no una pieza.
     masa:
       valor: null
       unidad: g
