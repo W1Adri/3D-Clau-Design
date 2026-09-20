@@ -257,6 +257,26 @@ def informe_presupuestos(catalogo: Catalogo, layout: Layout) -> str:
                 f"El total real sera mayor; no se rellena ningun hueco.",
                 "",
             ]
+        if presupuesto.supuestas:
+            lineas += [
+                f"### Supuestos, FUERA del total ({len(presupuesto.supuestas)})",
+                "",
+                f"Suman **{presupuesto.total_supuesto:.2f} {presupuesto.unidad}**, "
+                f"que NO estan en la cifra contabilizada de arriba: son numeros "
+                f"inventados por este repositorio para poder dibujar la pieza, no "
+                f"cifras de ninguna ficha. Se listan porque saber cuanto ocupa lo "
+                f"que falta por saber tambien sirve para decidir.",
+                "",
+            ]
+            lineas += _tabla(
+                ["id", "componente", "uds", f"unitario {presupuesto.unidad}",
+                 f"total {presupuesto.unidad}", "en que se basa"],
+                [
+                    [f.id, f.nombre, "-" if f.unidades is None else str(f.unidades),
+                     _n(f.valor_unitario, 2), _n(f.total, 2), (f.fuente or "-")[:110]]
+                    for f in presupuesto.supuestas
+                ],
+            )
         lineas += _tabla(
             ["id", "componente", "subsistema", "uds", f"unitario {presupuesto.unidad}",
              f"total {presupuesto.unidad}", "estado", "fuente"],
@@ -286,9 +306,22 @@ def informe_presupuestos(catalogo: Catalogo, layout: Layout) -> str:
 
 
 def informe_pendientes(catalogo: Catalogo, layout: Layout) -> str:
-    lineas = _cabecera("Lista de pendientes (TBD)", catalogo, layout)
+    lineas = _cabecera("Lista de pendientes", catalogo, layout)
     pendientes = catalogo.pendientes()
-    lineas += [f"Total de datos pendientes: **{len(pendientes)}**.", ""]
+    tbd = catalogo.tbd()
+    supuestos = catalogo.supuestos()
+    lineas += [
+        f"Total de huecos abiertos: **{len(pendientes)}**, de los cuales "
+        f"**{len(tbd)}** son TBD sin ninguna aproximacion y **{len(supuestos)}** "
+        f"son SUPUESTOS: numeros que se ha inventado este repositorio para poder "
+        f"dibujar y colocar la pieza.",
+        "",
+        "> **Un supuesto no es un dato.** No suma en los presupuestos de masa ni "
+        "de potencia, se dibuja en gris y aparece aqui hasta que alguien lo "
+        "sustituya por una cifra con fuente. La lista de abajo es, literalmente, "
+        "lo que hay que preguntar.",
+        "",
+    ]
 
     por_responsable: dict[str, list[dict]] = {}
     for fila in pendientes:
@@ -298,9 +331,33 @@ def informe_pendientes(catalogo: Catalogo, layout: Layout) -> str:
         filas = por_responsable[responsable]
         lineas += [f"## {responsable} ({len(filas)})", ""]
         lineas += _tabla(
-            ["componente", "magnitud", "que falta"],
-            [[f["componente"], f["magnitud"], f["falta"]] for f in filas],
+            ["componente", "magnitud", "estado", "valor modelado", "que falta"],
+            [
+                [
+                    f["componente"],
+                    f["magnitud"],
+                    f["estado"],
+                    "-" if f["valor_modelado"] is None else f"`{f['valor_modelado']}`",
+                    f["falta"],
+                ]
+                for f in filas
+            ],
         )
+
+    lineas += [
+        f"## Solo los supuestos, para sustituirlos ({len(supuestos)})",
+        "",
+        "Cada fila es un numero que hoy sostiene el modelo sin sostenerse en nada.",
+        "",
+    ]
+    lineas += _tabla(
+        ["componente", "magnitud", "valor modelado", "que falta", "pedir a"],
+        [
+            [f["componente"], f["magnitud"], f"`{f['valor_modelado']}`",
+             f["falta"], f["pedir_a"]]
+            for f in supuestos
+        ],
+    )
 
     discrepancias = catalogo.discrepancias()
     lineas += [f"## Discrepancias entre fuentes ({len(discrepancias)})", ""]

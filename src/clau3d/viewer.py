@@ -193,7 +193,8 @@ def escena(catalogo: Catalogo, layout: Layout, piezas: list[PiezaColocada]) -> d
             "componentes": len(catalogo.componentes),
             "sin_envolvente": resumen.sin_envolvente,
             "no_colocados": resumen.no_colocados,
-            "pendientes_tbd": len(catalogo.pendientes()),
+            "pendientes_tbd": len(catalogo.tbd()),
+            "pendientes_supuestos": len(catalogo.supuestos()),
             "discrepancias": len(catalogo.discrepancias()),
         },
         "zonas": [
@@ -223,6 +224,10 @@ def escena(catalogo: Catalogo, layout: Layout, piezas: list[PiezaColocada]) -> d
         ],
         "piezas": [_pieza(p) for p in piezas],
         "sin_geometria": _sin_geometria(catalogo),
+        # Los numeros inventados, uno a uno. El visor los ensena como lista de
+        # "esto hay que preguntarlo", que es lo unico que un visor generico no
+        # puede decir de un solido que se ve igual de solido que los demas.
+        "supuestos": catalogo.supuestos(),
         "chequeos": [
             {
                 "id": c.id,

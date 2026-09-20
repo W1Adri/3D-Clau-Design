@@ -275,7 +275,7 @@ function construirInterfaz() {
     `zona útil <b>${num(r.volumen_interior_l, 2)} L</b> · ` +
     `libre <b>${num(r.volumen_libre_l, 2)} L</b>${r.fiable ? '' : ' (techo)'} · ` +
     `piezas <b>${r.piezas_colocadas}</b>/${dibujables + escena.sin_geometria.length} · ` +
-    `<b>${r.pendientes_tbd}</b> TBD`;
+    `<b>${r.pendientes_tbd}</b> TBD · <b>${r.pendientes_supuestos}</b> supuestos`;
   $('#generado').textContent = 'generado ' + escena.generado.replace('T', ' ').slice(0, 16);
 
   capas();
@@ -415,7 +415,9 @@ function leyenda() {
   const ul = $('#leyenda');
   const nombres = {
     confirmado: 'dato confirmado', referencia: 'dato de un componente parecido',
-    decision: 'decisión de diseño de ACSAR', TBD: 'falta el dato',
+    decision: 'decisión de diseño de ACSAR',
+    supuesto: 'número inventado aquí: solo reserva sitio',
+    TBD: 'falta el dato',
   };
   const filas = [
     ...Object.entries(escena.colores.por_estado).map(([k, v]) => [nombres[k] || k, v]),
@@ -621,7 +623,8 @@ function tablaResumen() {
   fila('componentes', String(r.componentes));
   fila('colocados', String(r.piezas_colocadas));
   fila('sin envolvente', String(r.sin_envolvente.length));
-  fila('datos pendientes', String(r.pendientes_tbd) + ' TBD');
+  fila('datos pendientes', r.pendientes_tbd + ' TBD, sin aproximación');
+  fila('supuestos', r.pendientes_supuestos + ' números inventados aquí');
   fila('discrepancias entre fuentes', String(r.discrepancias));
 }
 

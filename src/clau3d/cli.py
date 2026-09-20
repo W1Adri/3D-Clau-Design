@@ -34,11 +34,11 @@ def cmd_validar(_: argparse.Namespace) -> int:
         for p in problemas:
             print(f"  - {p}")
         return 1
-    pendientes = catalogo.pendientes()
     print("Catalogo integro.")
     print(f"  componentes: {len(catalogo.componentes)}")
     print(f"  modelables : {len(parts.modelables(catalogo))}")
-    print(f"  pendientes : {len(pendientes)} TBD")
+    print(f"  TBD        : {len(catalogo.tbd())} (sin dato y sin aproximacion)")
+    print(f"  supuestos  : {len(catalogo.supuestos())} (dibujados, pero inventados)")
     print(f"  discrepancias entre fuentes: {len(catalogo.discrepancias())}")
     return 0
 

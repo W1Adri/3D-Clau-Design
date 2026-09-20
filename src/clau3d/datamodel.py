@@ -18,18 +18,39 @@ import yaml
 CONFIRMADO = "confirmado"
 REFERENCIA = "referencia"
 DECISION = "decision"
+# "supuesto" es un numero que NO viene de ninguna fuente: se lo ha inventado
+# este repositorio para poder dibujar y colocar una pieza cuya envolvente real
+# todavia no se conoce. Existe porque un modelo con 19 huecos no se puede
+# comprobar contra nada, y reservar un volumen aproximado es mas util que no
+# reservar ninguno. No es un dato, y el catalogo no deja que lo parezca:
+#
+#   - Exige 'fuente', igual que los demas, pero ahi va el RAZONAMIENTO del que
+#     sale el numero, no una ficha. Y exige ademas 'falta' y 'pedir_a', igual
+#     que un TBD, porque el dato de verdad sigue sin estar.
+#   - No suma en los presupuestos de masa ni de potencia: se cuenta aparte.
+#   - Sale en la lista de pendientes junto a los TBD.
+#   - Se dibuja en su propio color, distinto del de 'referencia', que SI es la
+#     cifra de la ficha de un producto real aunque no sea el elegido.
+#
+# La diferencia con TBD esta solo en si la pieza se puede dibujar. Un TBD no
+# tiene ni una aproximacion defendible; un supuesto, si.
+SUPUESTO = "supuesto"
 TBD = "TBD"
 # "ausente" no es un estado del catalogo: marca un campo que el componente
 # simplemente no declara (p. ej. el consumo de una bateria). No es un hueco
 # que haya que perseguir, y por eso no entra en la lista de pendientes.
 AUSENTE = "ausente"
-ESTADOS = (CONFIRMADO, REFERENCIA, DECISION, TBD)
+ESTADOS = (CONFIRMADO, REFERENCIA, DECISION, SUPUESTO, TBD)
 
 # Magnitudes que TODO componente debe declarar, aunque sea como TBD.
 MAGNITUDES_OBLIGATORIAS = ("dimensiones", "masa")
 
 # Los estados que NO son un dato firme del componente elegido.
-ESTADOS_NO_FIRMES = (REFERENCIA, DECISION, TBD)
+ESTADOS_NO_FIRMES = (REFERENCIA, DECISION, SUPUESTO, TBD)
+
+# Los estados que dejan un hueco por rellenar, y que por tanto obligan a decir
+# que falta y a quien pedirselo.
+ESTADOS_CON_HUECO = (SUPUESTO, TBD)
 
 RAIZ = Path(__file__).resolve().parents[2]
 DIR_DATOS = RAIZ / "data"
@@ -46,7 +67,10 @@ class Magnitud:
     """Un valor del catalogo con su procedencia.
 
     ``valor`` es None exactamente cuando el estado es TBD. Nunca se rellena un
-    hueco con un valor razonable: un TBD se propaga hasta el informe.
+    hueco con un valor razonable *en silencio*: un TBD se propaga hasta el
+    informe. Cuando hace falta un numero con el que dibujar y no hay fuente
+    ninguna, el estado es SUPUESTO, que obliga a declarar el razonamiento en
+    'fuente' y a seguir diciendo que falta y a quien pedirlo.
     """
 
     nombre: str
@@ -63,6 +87,16 @@ class Magnitud:
     @property
     def es_tbd(self) -> bool:
         return self.estado == TBD
+
+    @property
+    def es_supuesto(self) -> bool:
+        """Numero inventado por este repositorio para poder dibujar la pieza."""
+        return self.estado == SUPUESTO
+
+    @property
+    def deja_hueco(self) -> bool:
+        """El dato de verdad sigue faltando, haya o no un valor con el que dibujar."""
+        return self.estado in ESTADOS_CON_HUECO
 
     @property
     def esta_declarada(self) -> bool:
@@ -98,7 +132,10 @@ class Magnitud:
         if self.es_tbd:
             return "TBD"
         unidad = f" {self.unidad}" if self.unidad else ""
-        return f"{self.valor}{unidad}"
+        # Un supuesto no se imprime nunca pelado: alla donde salga el numero
+        # sale tambien que es inventado.
+        sufijo = " (SUPUESTO)" if self.es_supuesto else ""
+        return f"{self.valor}{unidad}{sufijo}"
 
 
 def _magnitud(nombre: str, bruto: Any) -> Magnitud:
@@ -193,6 +230,15 @@ class Componente:
     nombre: str
     categoria: str
     subsistema: str
+    # Identificador de la hoja indice de Drive (OPT-01, PLAT-04, ELEC-02...).
+    # No sustituye al 'id': el id es legible y dice que es la pieza, y el de
+    # Drive dice en que fila de la hoja esta. Los dos tienen que existir para
+    # poder actualizar la hoja desde reports/components_status.csv sin cruzar
+    # nombres a mano.
+    id_drive: str | None
+    # Fabricante y part number del producto elegido o candidato, tal cual se
+    # pide. Cuando no hay candidato, None: escribir uno seria inventarlo.
+    referencia_comercial: str | None
     cantidad: Magnitud
     dimensiones: Magnitud
     step: FuenteStep | None
@@ -294,7 +340,8 @@ def _componente(bruto: dict) -> Componente:
 
     # Campos reservados que ya tienen su propio atributo.
     reservados = {
-        "id", "nombre", "categoria", "subsistema", "cantidad", "forma",
+        "id", "id_drive", "referencia_comercial", "nombre", "categoria",
+        "subsistema", "cantidad", "forma",
         "masa", "potencia_nominal", "potencia_pico", "opcional",
         "requiere_vista_exterior", "nota_vista", "montado_en", "nota",
         "prioridad", "alternativa_de",
@@ -319,6 +366,8 @@ def _componente(bruto: dict) -> Componente:
         nombre=bruto["nombre"],
         categoria=bruto["categoria"],
         subsistema=bruto.get("subsistema", ""),
+        id_drive=bruto.get("id_drive"),
+        referencia_comercial=bruto.get("referencia_comercial"),
         cantidad=_magnitud(f"{bruto['id']}.cantidad", cantidad_bruta),
         dimensiones=_magnitud(f"{bruto['id']}.dimensiones", dims_brutas),
         step=step,
@@ -393,35 +442,45 @@ class Catalogo:
 
     # ---- pendientes ------------------------------------------------
     def pendientes(self) -> list[dict]:
-        """Todos los TBD del catalogo, con que falta y a quien pedirlo."""
+        """Todo hueco del catalogo, con que falta y a quien pedirlo.
+
+        Incluye los TBD y tambien los SUPUESTO: que se haya inventado un numero
+        para poder dibujar la pieza no cierra el hueco. La fila lleva su
+        'estado' para que el informe pueda separarlos.
+        """
         filas: list[dict] = []
         globales = {
             **{f"envolvente_6u.{k}": v for k, v in self.envolvente.items()},
             **{f"zona_util_interior.{k}": v for k, v in self.zona_util.items()},
             **{f"integracion.{k}": v for k, v in self.integracion.items()},
         }
+
+        def _fila(componente: str, magnitud: Magnitud, nombre: str) -> dict:
+            return {
+                "componente": componente,
+                "magnitud": nombre,
+                "estado": magnitud.estado,
+                "valor_modelado": magnitud.valor if magnitud.es_supuesto else None,
+                "falta": magnitud.falta or "(sin describir)",
+                "pedir_a": magnitud.pedir_a or "(sin asignar)",
+            }
+
         for clave, magnitud in globales.items():
-            if magnitud.es_tbd:
-                filas.append(
-                    {
-                        "componente": clave.split(".")[0],
-                        "magnitud": clave,
-                        "falta": magnitud.falta or "(sin describir)",
-                        "pedir_a": magnitud.pedir_a or "(sin asignar)",
-                    }
-                )
+            if magnitud.deja_hueco:
+                filas.append(_fila(clave.split(".")[0], magnitud, clave))
         for c in self.componentes:
             for magnitud in c.magnitudes():
-                if magnitud.es_tbd:
-                    filas.append(
-                        {
-                            "componente": c.id,
-                            "magnitud": magnitud.nombre,
-                            "falta": magnitud.falta or "(sin describir)",
-                            "pedir_a": magnitud.pedir_a or "(sin asignar)",
-                        }
-                    )
+                if magnitud.deja_hueco:
+                    filas.append(_fila(c.id, magnitud, magnitud.nombre))
         return filas
+
+    def supuestos(self) -> list[dict]:
+        """Solo los numeros inventados por este repositorio, para sustituirlos."""
+        return [f for f in self.pendientes() if f["estado"] == SUPUESTO]
+
+    def tbd(self) -> list[dict]:
+        """Solo los huecos sin ninguna aproximacion: no se pueden ni dibujar."""
+        return [f for f in self.pendientes() if f["estado"] == TBD]
 
     def discrepancias(self) -> list[dict]:
         """Magnitudes con cifras distintas entre fuentes. No se elige ninguna."""
@@ -491,10 +550,21 @@ def validar(catalogo: Catalogo) -> list[str]:
     problemas: list[str] = []
 
     vistos: set[str] = set()
+    vistos_drive: dict[str, str] = {}
     for c in catalogo.componentes:
         if c.id in vistos:
             problemas.append(f"id duplicado: {c.id}")
         vistos.add(c.id)
+        if c.id_drive is not None:
+            # La hoja de Drive es la lista maestra del equipo. Dos piezas con el
+            # mismo identificador ahi significan que reports/components_status.csv
+            # pisaria una fila con la otra al actualizarla.
+            if c.id_drive in vistos_drive:
+                problemas.append(
+                    f"{c.id}: id_drive '{c.id_drive}' ya lo usa "
+                    f"'{vistos_drive[c.id_drive]}'"
+                )
+            vistos_drive[c.id_drive] = c.id
         if c.montado_en and not catalogo.existe(c.montado_en):
             problemas.append(
                 f"{c.id}: montado_en apunta a '{c.montado_en}', que no existe"
@@ -527,7 +597,9 @@ def validar(catalogo: Catalogo) -> list[str]:
             if m.valor is not None:
                 problemas.append(
                     f"{m.nombre}: estado TBD pero tiene valor {m.valor!r}. "
-                    f"Un hueco no se rellena."
+                    f"Un hueco no se rellena. Si ese numero es una aproximacion "
+                    f"defendible con la que dibujar, el estado es "
+                    f"'{SUPUESTO}', que ademas exige decir de donde sale."
                 )
             if not m.falta:
                 problemas.append(f"{m.nombre}: TBD sin decir que falta")
@@ -541,6 +613,20 @@ def validar(catalogo: Catalogo) -> list[str]:
                 )
             if not m.fuente:
                 problemas.append(f"{m.nombre}: estado '{m.estado}' sin fuente")
+            # Un supuesto lleva la carga de los dos mundos: el razonamiento del
+            # que sale el numero Y el hueco que sigue abierto. Sin 'falta' y
+            # 'pedir_a' se convertiria en un dato mas con el paso del tiempo,
+            # que es exactamente lo que este catalogo existe para impedir.
+            if m.estado == SUPUESTO:
+                if not m.falta:
+                    problemas.append(
+                        f"{m.nombre}: {SUPUESTO} sin decir que falta. Un numero "
+                        f"inventado no cierra el hueco, solo permite dibujar."
+                    )
+                if not m.pedir_a:
+                    problemas.append(
+                        f"{m.nombre}: {SUPUESTO} sin decir a quien pedir el dato real"
+                    )
 
     # Toda pieza declara dimensiones y masa, aunque sean TBD: si no, el hueco
     # desaparece del informe en vez de aparecer como pendiente.

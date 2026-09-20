@@ -36,6 +36,7 @@ from .datamodel import (
     CONFIRMADO,
     DECISION,
     REFERENCIA,
+    SUPUESTO,
     TBD,
     Catalogo,
     Componente,
@@ -48,8 +49,14 @@ from .structure import Caja
 COLOR_POR_ESTADO = {
     REFERENCIA: (1.00, 0.55, 0.00),   # naranja: dato de un componente parecido
     DECISION: (0.20, 0.45, 0.90),     # azul: decision de diseno de ACSAR
+    SUPUESTO: (0.62, 0.62, 0.66),     # gris: numero inventado, solo reserva sitio
     TBD: (1.00, 0.00, 0.80),          # magenta: falta el dato
 }
+
+# Un supuesto se dibuja MAS transparente que lo demas. No es decoracion: es la
+# unica pista que tiene quien mira el visor de que ese cuerpo no esta ahi porque
+# nadie haya medido nada, sino para que el hueco no parezca vacio.
+TRANSPARENCIA_SUPUESTO = 0.78
 
 # Solo se aplica cuando el dato esta confirmado.
 COLOR_POR_CATEGORIA = {
@@ -93,7 +100,8 @@ def color(componente: Componente) -> cq.Color:
         rgb = COLOR_POR_CATEGORIA.get(componente.categoria, (0.7, 0.7, 0.7))
     else:
         rgb = COLOR_POR_ESTADO.get(estado, (0.7, 0.7, 0.7))
-    return cq.Color(*rgb, TRANSPARENCIA)
+    alfa = TRANSPARENCIA_SUPUESTO if estado == SUPUESTO else TRANSPARENCIA
+    return cq.Color(*rgb, alfa)
 
 
 def ruta_step(componente: Componente) -> Path | None:
