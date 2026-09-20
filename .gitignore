@@ -34,6 +34,15 @@ cad/vendor/*.zip
 cad/generated/clau_6u.step
 cad/generated/clau_6u.glb
 
+# Los STEP por subsistema siguen la misma regla, pero el que decide cual es
+# cual es el exportador, no esta lista: assembly.exportar_por_subsistema() le
+# pone el sufijo a los que ha metido geometria de fabricante dentro. Asi, el
+# dia que llegue el STEP del telescopio, terminal_optico pasa solo al lado de
+# los que no se publican, sin que nadie tenga que acordarse.
+# El sufijo esta en assembly.SUFIJO_CAD_DE_FABRICANTE: cambiarlo alli sin
+# cambiarlo aqui publica CAD de AAC.
+cad/generated/subsistemas/*_con_cad_de_fabricante.step
+
 # Cache de importacion de STEP. Importar el CAD del ADCS tarda minutos; el
 # BREP cacheado se lee en menos de un segundo. Se rehace solo.
 .cache/

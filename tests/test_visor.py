@@ -111,3 +111,77 @@ def test_cada_pieza_tiene_su_nodo_en_el_glb(tmp_path, escena):
 def test_el_visor_estatico_esta_donde_lo_busca_el_servidor():
     for nombre in ("index.html", "visor.css", "visor.js"):
         assert (viewer.DIR_VISOR / nombre).exists(), nombre
+
+
+# --- las salidas para el equipo -------------------------------------------
+
+def test_el_csv_de_estado_tiene_una_fila_por_componente(catalogo, layout, piezas):
+    """Incluidas las que no tienen geometria: lo que falta tambien es estado."""
+    import csv
+    import io
+
+    from clau3d import report
+
+    filas = list(csv.DictReader(io.StringIO(
+        report.csv_estado(catalogo, layout, piezas)
+    )))
+    assert len(filas) == len(catalogo.componentes)
+    assert {f["id"] for f in filas} == {c.id for c in catalogo.componentes}
+
+
+def test_el_csv_no_llama_dato_a_un_supuesto(catalogo, layout, piezas):
+    import csv
+    import io
+
+    from clau3d import report
+    from clau3d.datamodel import SUPUESTO
+
+    filas = {
+        f["id"]: f
+        for f in csv.DictReader(io.StringIO(
+            report.csv_estado(catalogo, layout, piezas)
+        ))
+    }
+    for componente in catalogo.componentes:
+        assert filas[componente.id]["estado_cotas"] == componente.dimensiones.estado
+        if componente.dimensiones.estado == SUPUESTO:
+            # Un supuesto siempre dice que falta y a quien pedirselo, tambien
+            # en la hoja que va a acabar en Drive.
+            assert filas[componente.id]["que_falta"], componente.id
+            assert filas[componente.id]["pedir_a"], componente.id
+
+
+def test_los_id_de_drive_no_se_repiten(catalogo):
+    """Dos piezas con el mismo id_drive pisarian la misma fila de la hoja."""
+    vistos = [c.id_drive for c in catalogo.componentes if c.id_drive]
+    assert len(vistos) == len(set(vistos)), sorted(vistos)
+
+
+def test_un_step_de_subsistema_con_cad_de_fabricante_se_llama_distinto(
+    catalogo, layout, tmp_path
+):
+    """El repositorio es publico: el nombre tiene que delatar lo que lleva dentro.
+
+    Y el sufijo lo pone el exportador mirando lo que ha metido, no una lista
+    escrita a mano que se quedaria obsoleta con el siguiente STEP de proveedor.
+    """
+    from clau3d import assembly, parts
+
+    escritos = assembly.exportar_por_subsistema(catalogo, layout, tmp_path)
+    for subsistema, ruta in escritos.items():
+        lleva_fabricante = any(
+            parts.step_disponible(p.componente)  # type: ignore[arg-type]
+            for p in assembly.construir(catalogo, layout)
+            if getattr(p.componente, "subsistema", "") == subsistema
+        )
+        marcado = assembly.SUFIJO_CAD_DE_FABRICANTE in ruta.name
+        assert marcado == lleva_fabricante, ruta.name
+
+
+def test_el_gitignore_conoce_el_sufijo():
+    """Cambiarlo en assembly.py sin cambiarlo aqui publicaria CAD de AAC."""
+    from clau3d import assembly
+    from clau3d.datamodel import RAIZ
+
+    texto = (RAIZ / ".gitignore").read_text(encoding="utf-8")
+    assert assembly.SUFIJO_CAD_DE_FABRICANTE in texto

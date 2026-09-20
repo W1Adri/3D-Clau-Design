@@ -18,6 +18,12 @@ from .datamodel import DIR_DATOS, Catalogo, ErrorDeDatos
 from .structure import Caja
 
 
+# Sufijo que este modulo le pone a un STEP de subsistema que lleva CAD de
+# fabricante dentro. El .gitignore lo mira, asi que cambiarlo aqui sin cambiarlo
+# alli publicaria CAD de AAC en un repositorio publico.
+SUFIJO_CAD_DE_FABRICANTE = "_con_cad_de_fabricante"
+
+
 @dataclass
 class Colocacion:
     """Una instancia de un componente situada dentro del 6U."""
@@ -231,6 +237,57 @@ def ensamblaje(
         )
 
     return raiz
+
+
+def exportar_por_subsistema(
+    catalogo: Catalogo, layout: Layout, destino: Path
+) -> dict[str, Path]:
+    """Un STEP por subsistema, con las piezas en su sitio del ensamblaje.
+
+    No es un despiece: cada fichero lleva las coordenadas del satelite
+    completo, asi que abrir dos de ellos a la vez los ensena encajados. Sirve
+    para mirar un subsistema sin cargar los 550 solidos del conjunto, y para
+    mandarle a alguien SOLO su parte.
+
+    **El nombre del fichero dice si se puede versionar.** Un STEP de subsistema
+    que contenga una pieza dibujada con CAD de fabricante CONTIENE ese CAD, y
+    el repositorio es publico. Los que salen solo de cajas envolventes propias
+    se suben; los otros, no. Para que esa distincion no dependa de que alguien
+    mantenga una lista a mano -- y se quede obsoleta en cuanto llegue el
+    siguiente STEP de proveedor --, el sufijo lo pone este exportador mirando
+    lo que ha metido dentro, y el .gitignore ignora ese sufijo. Hoy son el EPS
+    (141 MB, con la bateria de AAC) y el OBC (32 MB); manana seran los que
+    sean.
+    """
+    destino.mkdir(parents=True, exist_ok=True)
+    por_subsistema: dict[str, list[PiezaColocada]] = {}
+    for pieza in construir(catalogo, layout):
+        componente = pieza.componente
+        clave = getattr(componente, "subsistema", "") or "sin_subsistema"
+        por_subsistema.setdefault(clave, []).append(pieza)
+
+    escritos: dict[str, Path] = {}
+    for subsistema, piezas in sorted(por_subsistema.items()):
+        montaje = cq.Assembly(name=f"CLAU_{subsistema}")
+        con_fabricante = False
+        for pieza in piezas:
+            con_fabricante = con_fabricante or parts.step_disponible(
+                pieza.componente  # type: ignore[arg-type]
+            )
+            montaje.add(
+                pieza.solido,
+                name=pieza.colocacion.etiqueta,
+                color=parts.color(pieza.componente),  # type: ignore[arg-type]
+            )
+        sufijo = SUFIJO_CAD_DE_FABRICANTE if con_fabricante else ""
+        ruta = destino / f"{subsistema}{sufijo}.step"
+        # Si el subsistema cambio de lado (llego un STEP de proveedor, o se
+        # quito), el fichero con el otro nombre se queda mintiendo en disco.
+        otro = destino / f"{subsistema}{'' if sufijo else SUFIJO_CAD_DE_FABRICANTE}.step"
+        otro.unlink(missing_ok=True)
+        montaje.export(str(ruta))
+        escritos[subsistema] = ruta
+    return escritos
 
 
 def exportar_step(

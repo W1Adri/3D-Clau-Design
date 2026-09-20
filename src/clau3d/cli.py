@@ -64,6 +64,12 @@ def cmd_ensamblar(args: argparse.Namespace) -> int:
     print(f"Ensamblaje escrito en {destino}")
     print(f"  estado del layout: {layout.estado}")
     print(f"  piezas colocadas : {len(piezas)}")
+    subsistemas = assembly.exportar_por_subsistema(
+        catalogo, layout, destino.parent / "subsistemas"
+    )
+    print(f"  {len(subsistemas)} STEP por subsistema en {destino.parent / 'subsistemas'}")
+    for nombre in sorted(subsistemas):
+        print(f"    - {nombre}.step")
     if not layout.confirmado:
         print("  AVISO: la distribucion aun no esta confirmada.")
     return 0

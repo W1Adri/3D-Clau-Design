@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
+import csv
+import io
 from datetime import date
 from pathlib import Path
 
-from . import render
+from . import parts, render
 from .analysis import budgets, connections, fit, interference, volume
 from .assembly import Layout, PiezaColocada
-from .datamodel import CONFIRMADO, Catalogo, validar
+from .datamodel import CONFIRMADO, SUPUESTO, TBD, Catalogo, Componente, validar
 from .structure import zona_util
 
 NOTA_UNIDADES = (
@@ -108,18 +110,40 @@ def informe_volumen(
                 "",
             ]
 
+    cajas_mundo = {
+        p.colocacion.componente_id: p.caja_mundo for p in piezas
+    }
+    keep_outs_por_pieza: dict[str, int] = {}
+    for keep_out in layout.keep_outs:
+        for cid in cajas_mundo:
+            if cid in keep_out.id:
+                keep_outs_por_pieza[cid] = keep_outs_por_pieza.get(cid, 0) + 1
+
     lineas += ["## Por componente", ""]
+    lineas += [
+        "`fuente` dice de donde sale el solido que se dibuja; `estado` de donde "
+        "salen sus cotas. No siempre coinciden: una pieza con ficha confirmada "
+        "y STEP de referencia se dibuja como referencia, porque lo que se esta "
+        "viendo es el STEP. `envolvente` es la caja que ocupa YA GIRADA Y "
+        "COLOCADA, conectores incluidos, que es lo que ve el detector de "
+        "interferencias.",
+        "",
+    ]
     lineas += _tabla(
-        ["id", "componente", "categoria", "estado del dato", "uds",
-         "volumen cm3", "centro (x, y, z) mm", "colocado"],
+        ["id drive", "id", "componente", "fuente", "estado", "uds",
+         "volumen cm3", "envolvente mm", "keep-outs", "centro mm", "colocado"],
         [
             [
+                catalogo[fila.id].id_drive or "-",
                 fila.id,
                 fila.nombre,
-                fila.categoria,
+                _origen_geometria(catalogo[fila.id]),
                 fila.estado_dato,
                 "-" if fila.unidades is None else str(fila.unidades),
                 _n(fila.volumen_cm3),
+                " x ".join(f"{v:.0f}" for v in cajas_mundo[fila.id].dims)
+                if fila.id in cajas_mundo else "-",
+                str(keep_outs_por_pieza.get(fila.id, 0)),
                 "-" if fila.centro is None
                 else "(" + ", ".join(f"{v:.0f}" for v in fila.centro) + ")",
                 "si" if fila.colocado else "no",
@@ -129,15 +153,75 @@ def informe_volumen(
     )
 
     if layout.zonas:
+        por_zona = volume.libre_por_zona(layout, piezas)
+
+        # --- por columna ---------------------------------------------
+        # Las cinco zonas se agrupan en las dos columnas de 3U de la
+        # distribucion. Es la cifra que se mira para decidir que hacer con el
+        # reparto, y no sale de ninguna zona por separado.
+        columnas = {
+            "Plataforma (pila PC104)": ["z_plataforma"],
+            "Payload (telescopio, franja, banco y bandeja)": [
+                "z_payload_telescopio", "z_payload_franja",
+                "z_payload_banco", "z_payload_bandeja",
+            ],
+        }
+        filas = []
+        for nombre, ids in columnas.items():
+            trozos = [f for f in por_zona if f["zona"] in ids]
+            if not trozos:
+                continue
+            total = sum(f["total_cm3"] for f in trozos)
+            ocupado = sum(f["ocupado_cm3"] for f in trozos)
+            filas.append([
+                nombre, _n(total), _n(ocupado), _n(total - ocupado),
+                _n((total - ocupado) / 1000, 2),
+                f"{ocupado / total:.0%}" if total else "-",
+            ])
+        lineas += ["## Hueco libre por columna", ""]
+        lineas += _tabla(
+            ["columna", "total cm3", "ocupado cm3", "libre cm3", "libre L",
+             "% ocupado"],
+            filas,
+        )
+        lineas += [
+            "> El **ocupado** son cajas envolventes, no volumen de material: "
+            "un cilindro cuenta por su cilindro, pero una caja con un conector "
+            "cuenta el hueco entero. Y el **libre** es un techo mientras quede "
+            "un solo componente sin colocar o sin envolvente.",
+            "",
+        ]
+
         lineas += ["## Hueco libre por zona", ""]
         lineas += _tabla(
             ["zona", "nombre", "total cm3", "ocupado cm3", "libre cm3", "libre L", "% ocupado"],
             [
                 [f["zona"], f["nombre"], _n(f["total_cm3"]), _n(f["ocupado_cm3"]),
                  _n(f["libre_cm3"]), _n(f["libre_L"], 2), f"{f['fraccion_ocupada']:.0%}"]
-                for f in volume.libre_por_zona(layout, piezas)
+                for f in por_zona
             ],
         )
+
+    # --- lo que sostiene el modelo sin sostenerse en nada -------------
+    supuestos = catalogo.supuestos()
+    lineas += [
+        f"## Supuestos pendientes de sustituir ({len(supuestos)})",
+        "",
+        "Cada fila es un numero que este repositorio se ha inventado para poder "
+        "dibujar algo. Ninguno suma en los presupuestos de masa ni de potencia, "
+        "y todos se dibujan en gris. Sustituir cualquiera de ellos por una cifra "
+        "con fuente es, literalmente, todo lo que hay que hacer para que esta "
+        "parte del modelo deje de ser una reserva y pase a ser un dato.",
+        "",
+    ]
+    lineas += _tabla(
+        ["componente", "magnitud", "valor modelado", "que falta", "pedir a"],
+        [
+            [f["componente"], f["magnitud"], f"`{f['valor_modelado']}`",
+             f["falta"], f["pedir_a"]]
+            for f in supuestos
+        ],
+    )
 
     if piezas:
         lineas += [
@@ -431,6 +515,85 @@ def informe_pendientes(catalogo: Catalogo, layout: Layout) -> str:
 
 
 # ---------------------------------------------------------------------
+def _origen_geometria(componente: Componente) -> str:
+    """De donde sale el solido que se dibuja. Es la columna 'fuente' del CSV."""
+    fuente = parts.fuente_step(componente)
+    if fuente is not None:
+        if componente.step is not None:
+            return "STEP de fabricante"
+        return "STEP de fabricante (aparecido en step_esperado)"
+    if not componente.modelable:
+        return "sin geometria"
+    esperado = componente.step_esperado
+    pendiente = " (esperando STEP)" if esperado is not None else ""
+    return f"aproximado propio: {componente.tipo_forma}{pendiente}"
+
+
+def csv_estado(
+    catalogo: Catalogo, layout: Layout, piezas: list[PiezaColocada]
+) -> str:
+    """Estado de cada componente, en CSV, para actualizar la hoja de Drive.
+
+    Una fila por componente del catalogo, incluidas las alternativas en estudio
+    y las piezas sin geometria: lo que falta tambien es estado. La columna
+    'id_drive' vacia significa que esa pieza NO esta en la hoja y hay que
+    anadirla.
+    """
+    colocadas: dict[str, list[PiezaColocada]] = {}
+    for pieza in piezas:
+        colocadas.setdefault(pieza.colocacion.componente_id, []).append(pieza)
+
+    salida = io.StringIO()
+    escritor = csv.writer(salida, lineterminator="\n")
+    escritor.writerow([
+        "id_drive", "id", "nombre", "categoria", "subsistema",
+        "referencia_comercial", "fuente_geometria", "estado_cotas",
+        "dimensiones_mm", "fuente_cotas", "uds", "masa_g", "estado_masa",
+        "colocado", "zona", "centro_mm", "conectores", "keep_outs",
+        "que_falta", "pedir_a",
+    ])
+
+    keep_outs_por_pieza: dict[str, list[str]] = {}
+    for keep_out in layout.keep_outs:
+        for pieza in piezas:
+            cid = pieza.colocacion.componente_id
+            if cid in keep_out.id:
+                keep_outs_por_pieza.setdefault(cid, []).append(keep_out.id)
+
+    for componente in catalogo.componentes:
+        dims = componente.dimensiones
+        instancias = colocadas.get(componente.id, [])
+        centro = instancias[0].caja_mundo.centro if instancias else None
+        escritor.writerow([
+            componente.id_drive or "",
+            componente.id,
+            componente.nombre,
+            componente.categoria,
+            componente.subsistema,
+            componente.referencia_comercial or "",
+            _origen_geometria(componente),
+            dims.estado,
+            "" if dims.valor is None else " x ".join(str(v) for v in dims.valor)
+            if isinstance(dims.valor, list) else str(dims.valor),
+            (dims.fuente or "").replace("\n", " ")[:300],
+            "" if componente.n_unidades is None else componente.n_unidades,
+            "" if componente.masa.valor is None else componente.masa.valor,
+            componente.masa.estado,
+            "si" if instancias else "no",
+            instancias[0].colocacion.zona if instancias else "",
+            "" if centro is None
+            else ", ".join(f"{v:.1f}" for v in centro),
+            "; ".join(
+                f"{k.id}({k.tipo}, {k.dimensiones.estado})"
+                for k in componente.conectores
+            ),
+            "; ".join(keep_outs_por_pieza.get(componente.id, [])),
+            (dims.falta or "").replace("\n", " ")[:300],
+            dims.pedir_a or "",
+        ])
+    return salida.getvalue()
+
+
 def generar_todos(
     catalogo: Catalogo,
     layout: Layout,
@@ -466,6 +629,10 @@ def generar_todos(
         ]
     ruta = dir_destino / "00_integridad.md"
     ruta.write_text("\n".join(integridad) + "\n", encoding="utf-8")
+    escritos.append(ruta)
+
+    ruta = dir_destino / "components_status.csv"
+    ruta.write_text(csv_estado(catalogo, layout, piezas), encoding="utf-8")
     escritos.append(ruta)
 
     escritos += render.todas_las_vistas(catalogo, layout, dir_destino / "vistas")

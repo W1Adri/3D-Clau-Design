@@ -139,7 +139,13 @@ El FSM va sobre el eje optico del telescopio (X = +36.85 mm) porque es el que do
 
 **Estado: NO COMPROBABLE**
 
-Sin radio minimo de curvatura no se puede dimensionar la bandeja optica ni comprobar ningun bucle. Es el parametro que mas area consume de toda la bandeja.
+Sin radio minimo de curvatura no se puede dimensionar la bandeja optica ni comprobar ningun bucle. Es el parametro que mas area consume de toda la bandeja. Mientras tanto, los keep-outs se dibujan con un radio SUPUESTO de 30 mm y un tramo recto de 20 mm, o sea 50 mm reservados por puerto. Con esa hipotesis la bandeja NO cumple: ver las invasiones de keep-out en el informe de interferencias. Eso no es un fallo del reparto, es lo que cuesta no tener el dato: si el radio real resulta ser la mitad, la mayoria de esas invasiones desaparecen solas.
+
+| magnitud | valor |
+|---|---|
+| radio_supuesto_mm | 30.00 |
+| boot_supuesto_mm | 20.00 |
+| reserva_por_puerto_mm | 50.00 |
 
 Falta: Radio minimo de curvatura de la fibra elegida
 
