@@ -151,6 +151,309 @@ def dims_en_mundo(componente, rotacion) -> tuple[float, float, float]:
     return parts.caja_de_solidos(solido, componente.id).dims
 
 
+# Direcciones de las seis caras, en ejes locales.
+_VECTOR_CARA = {
+    "+X": (1, 0, 0), "-X": (-1, 0, 0),
+    "+Y": (0, 1, 0), "-Y": (0, -1, 0),
+    "+Z": (0, 0, 1), "-Z": (0, 0, -1),
+}
+
+
+def _gira_vector(v, rotacion):
+    """Gira un vector unitario por los mismos giros que la pieza."""
+    import math as _m
+
+    x, y, z = v
+    gx, gy, gz = (_m.radians(a) for a in rotacion)
+    # X
+    y, z = y * _m.cos(gx) - z * _m.sin(gx), y * _m.sin(gx) + z * _m.cos(gx)
+    # Y
+    z, x = z * _m.cos(gy) - x * _m.sin(gy), z * _m.sin(gy) + x * _m.cos(gy)
+    # Z
+    x, y = x * _m.cos(gz) - y * _m.sin(gz), x * _m.sin(gz) + y * _m.cos(gz)
+    return (x, y, z)
+
+
+def _caja_saliente(centro, direccion, largo, radio, normal_montaje=None):
+    """Volumen que barre un cable al salir de un puerto y dar su primer codo.
+
+    Sale del punto en 'direccion' una longitud 'largo' (tramo recto mas el
+    envolvente del codo) y tiene 'radio' a cada lado, porque el codo puede irse
+    a un lado o al otro.
+
+    En el eje perpendicular al montaje NO es simetrico: un cable que sale de
+    una pieza atornillada a una bandeja puede subir, pero no atravesar la
+    bandeja. Con 'normal_montaje' el volumen crece solo hacia ese lado, que es
+    la diferencia entre un keep-out util y uno que se hunde en la placa y
+    ensucia el informe con invasiones que no significan nada.
+    """
+    eje = max(range(3), key=lambda i: abs(direccion[i]))
+    signo = 1.0 if direccion[eje] >= 0 else -1.0
+    eje_normal = (
+        max(range(3), key=lambda i: abs(normal_montaje[i]))
+        if normal_montaje is not None
+        else None
+    )
+    minimo = [0.0, 0.0, 0.0]
+    maximo = [0.0, 0.0, 0.0]
+    for i in range(3):
+        if i == eje:
+            a, b = centro[i], centro[i] + signo * largo
+            minimo[i], maximo[i] = min(a, b), max(a, b)
+        elif i == eje_normal:
+            # Solo hacia fuera de la superficie de montaje.
+            if normal_montaje[i] >= 0:
+                minimo[i], maximo[i] = centro[i], centro[i] + 2 * radio
+            else:
+                minimo[i], maximo[i] = centro[i] - 2 * radio, centro[i]
+        else:
+            minimo[i], maximo[i] = centro[i] - radio, centro[i] + radio
+    return minimo, maximo
+
+
+def _recortado(minimo, maximo, util):
+    """Recorta el volumen a la zona util. Devuelve None si se queda en nada.
+
+    Un keep-out no puede reservar sitio fuera del satelite: lo que queda al
+    otro lado de la pared no es volumen que nadie vaya a invadir, es ruido en
+    el informe.
+    """
+    caja = (util.xmin, util.ymin, util.zmin, util.xmax, util.ymax, util.zmax)
+    nuevo_min = [max(minimo[i], caja[i]) for i in range(3)]
+    nuevo_max = [min(maximo[i], caja[i + 3]) for i in range(3)]
+    if any(nuevo_max[i] - nuevo_min[i] <= 1e-6 for i in range(3)):
+        return None
+    return nuevo_min, nuevo_max
+
+
+def generar_keep_outs(catalogo, colocaciones, zonas_por_id) -> list[dict]:
+    """Los volumenes reservados que se pueden dibujar hoy, y solo esos.
+
+    Tres familias, y las tres salen de un numero SUPUESTO, porque las tres
+    cotas de verdad -- el radio minimo de curvatura de la fibra, el del
+    coaxial y el diametro de haz -- siguen siendo TBD:
+
+    * **fibra**: el tramo recto de salida (boot) mas el envolvente del primer
+      codo, en cada puerto QUE TENGA UNA CONEXION DECLARADA. No en los dos
+      extremos de todo: el laser solo tiene fibra por un lado y el colimador
+      tambien, y dibujarles un keep-out en la cara que no lleva fibra inventa
+      un encaminamiento que nadie ha decidido.
+    * **coaxial**: lo mismo a la salida del conector RF de cada modulador.
+    * **haz libre**: el tubo que queda ENTRE dos piezas del banco, sin contar
+      los cuerpos de las dos: un keep-out que se come a sus propios extremos
+      genera invasiones que no significan nada.
+
+    Cada volumen se recorta a la zona de su pieza. Un keep-out de la bandeja
+    que se cuela en la columna de plataforma no esta diciendo que la fibra
+    pase por ahi: esta diciendo que este generador no sabe por donde pasa. Y no
+    lo sabe: el encaminamiento es una decision abierta.
+
+    Si alguno de los tres parametros llegara a existir de verdad, el keep-out
+    correspondiente pasaria de 'supuesto' a 'confirmado' sin tocar este codigo.
+
+    Lo que NO se genera es el cono de la apertura del telescopio hacia fuera:
+    sin semiangulo, un cono es una medida inventada de las gordas.
+    """
+    from clau3d import parts, structure
+
+    util = structure.zona_util(catalogo)
+    puestas = {
+        (c["componente"], c["instancia"]): c for c in colocaciones
+    }
+    radio = catalogo.integracion["fibra.radio_curvatura_modelado"].escalar()
+    boot = catalogo.integracion["fibra.longitud_boot_modelada"].escalar()
+    radio_coax = catalogo.integracion["coaxial.radio_curvatura_modelado"].escalar()
+    haz = catalogo.integracion["optica.diametro_haz_modelado"].escalar()
+
+    def _recinto(colocacion):
+        """La zona de la pieza, o la util si esta fuera de toda zona."""
+        zona = zonas_por_id.get(colocacion.get("zona"))
+        return zona if zona is not None else util
+
+    salida: list[dict] = []
+
+    # --- fibra: solo los puertos con conexion declarada -------------------
+    fuente_fibra = (
+        f"Tramo recto de {boot:.0f} mm (integracion.fibra.longitud_boot_modelada) "
+        f"mas el envolvente de un codo de {radio:.0f} mm "
+        f"(integracion.fibra.radio_curvatura_modelado). Los dos son SUPUESTOS: "
+        f"el radio de verdad es integracion.fibra.radio_minimo_curvatura, que "
+        f"sigue siendo TBD. La DIRECCION tampoco es un dato: se toma el eje de "
+        f"fibra que declara 'montaje', porque el encaminamiento real esta sin "
+        f"decidir."
+    )
+    puertos: dict[str, set[str]] = {}
+    for familia, con in catalogo.todas_las_conexiones():
+        if familia != "opticas_fibra":
+            continue
+        if con.get("desde"):
+            puertos.setdefault(con["desde"], set()).add("salida")
+        if con.get("hasta"):
+            puertos.setdefault(con["hasta"], set()).add("entrada")
+
+    for cid, lados in puertos.items():
+        if not catalogo.existe(cid):
+            continue
+        componente = catalogo[cid]
+        colocacion = puestas.get((cid, 1))
+        if colocacion is None or componente.montaje is None:
+            continue
+        if componente.montaje.eje is None:
+            continue
+        rotacion = colocacion["rotacion"]
+        centro = colocacion["centro"]
+        dims = dims_en_mundo(componente, rotacion)
+        eje_local = {"X": "+X", "Y": "+Y", "Z": "+Z"}[componente.montaje.eje]
+        normal = None
+        if componente.montaje.cara:
+            # La cara del catalogo es la que SE APOYA; el cable crece al otro
+            # lado, asi que no puede atravesar la placa de montaje.
+            normal = tuple(
+                -k for k in _gira_vector(
+                    _VECTOR_CARA[componente.montaje.cara], rotacion
+                )
+            )
+        for lado in sorted(lados):
+            signo = 1 if lado == "salida" else -1
+            direccion = _gira_vector(
+                tuple(signo * k for k in _VECTOR_CARA[eje_local]), rotacion
+            )
+            eje_mundo = max(range(3), key=lambda i: abs(direccion[i]))
+            punto = list(centro)
+            mitad = dims[eje_mundo] / 2
+            punto[eje_mundo] += mitad if direccion[eje_mundo] >= 0 else -mitad
+            recorte = _recortado(
+                *_caja_saliente(punto, direccion, boot + radio, radio, normal),
+                _recinto(colocacion),
+            )
+            if recorte is None:
+                continue
+            salida.append({
+                "id": f"fibra_{cid}_{lado}",
+                "tipo": "fibra",
+                "estado": "supuesto",
+                "fuente": fuente_fibra,
+                "min": [round(v, 3) for v in recorte[0]],
+                "max": [round(v, 3) for v in recorte[1]],
+                "nota": (
+                    f"Puerto de {lado} de fibra de {cid}, recortado a la zona "
+                    f"{colocacion.get('zona')}."
+                ),
+            })
+
+    # --- coaxial: el conector RF de cada modulador ------------------------
+    fuente_coax = (
+        f"Envolvente de un codo de {radio_coax:.0f} mm a la salida del conector "
+        f"RF (integracion.coaxial.radio_curvatura_modelado, SUPUESTO). El "
+        f"conector SI es dato: 6.1 x 10 mm del plano de Exail."
+    )
+    for cid in ("mod_intensidad_mxer_ln_10", "mod_fase_mpz_ln_10"):
+        colocacion = puestas.get((cid, 1))
+        if colocacion is None or not catalogo.existe(cid):
+            continue
+        componente = catalogo[cid]
+        rotacion = colocacion["rotacion"]
+        centro = colocacion["centro"]
+        dims = dims_en_mundo(componente, rotacion)
+        for conector in componente.conectores:
+            if conector.tipo != "coaxial" or conector.dimensiones.es_tbd:
+                continue
+            direccion = _gira_vector(_VECTOR_CARA[conector.cara], rotacion)
+            eje_mundo = max(range(3), key=lambda i: abs(direccion[i]))
+            # El cable sale de la PUNTA del conector, no del borde de la caja
+            # envolvente de la pieza. No es lo mismo: la envolvente crece hacia
+            # el conector pero el centro de la pieza sigue siendo el del
+            # cuerpo, asi que centro + media envolvente se queda CORTO y el
+            # keep-out se solapa con su propio conector. Se mide desde el
+            # cuerpo, que es simetrico, y se le suma el saliente declarado.
+            eje_local = "XYZ".index(conector.cara[1])
+            cuerpo = componente.dimensiones.como_vector()
+            saliente = conector.dimensiones.como_vector()
+            mitad = cuerpo[eje_local] / 2 + saliente[eje_local]
+            punto = list(centro)
+            punto[eje_mundo] += mitad if direccion[eje_mundo] >= 0 else -mitad
+            recorte = _recortado(
+                *_caja_saliente(punto, direccion, radio_coax, radio_coax),
+                _recinto(colocacion),
+            )
+            if recorte is None:
+                continue
+            salida.append({
+                "id": f"coaxial_{cid}",
+                "tipo": "coaxial",
+                "estado": "supuesto",
+                "fuente": fuente_coax,
+                "min": [round(v, 3) for v in recorte[0]],
+                "max": [round(v, 3) for v in recorte[1]],
+                "nota": f"Salida del conector RF de {cid} hacia PCB-2.",
+            })
+
+    # --- haz libre: el hueco ENTRE dos piezas del banco -------------------
+    fuente_haz = (
+        f"Tubo de {haz:.0f} mm de lado "
+        f"(integracion.optica.diametro_haz_modelado, SUPUESTO) en el hueco que "
+        f"queda entre las dos piezas. El diametro de haz de cada tramo es TBD "
+        f"en data/connections.yaml."
+    )
+    for familia, con in catalogo.todas_las_conexiones():
+        if familia != "opticas_espacio_libre" or not con.get("keep_out"):
+            continue
+        desde, hasta = con.get("desde"), con.get("hasta")
+        a, b = puestas.get((desde, 1)), puestas.get((hasta, 1))
+        if a is None or b is None:
+            continue
+        caja_a = _caja_mundo(catalogo, a)
+        caja_b = _caja_mundo(catalogo, b)
+        # El eje del tramo es aquel en el que las dos cajas NO se solapan: es
+        # por donde hay hueco entre ellas.
+        tramo = None
+        for i in range(3):
+            hueco_min = max(caja_a[0][i], caja_b[0][i])
+            hueco_max = min(caja_a[1][i], caja_b[1][i])
+            if hueco_max < hueco_min:  # separadas en este eje
+                bajo, alto = (caja_a, caja_b) if caja_a[1][i] < caja_b[0][i] else (caja_b, caja_a)
+                tramo = (i, bajo[1][i], alto[0][i])
+                break
+        if tramo is None:
+            continue
+        eje, z0, z1 = tramo
+        centro_a = [(caja_a[0][k] + caja_a[1][k]) / 2 for k in range(3)]
+        centro_b = [(caja_b[0][k] + caja_b[1][k]) / 2 for k in range(3)]
+        minimo = [0.0, 0.0, 0.0]
+        maximo = [0.0, 0.0, 0.0]
+        for i in range(3):
+            if i == eje:
+                minimo[i], maximo[i] = z0, z1
+            else:
+                medio = (centro_a[i] + centro_b[i]) / 2
+                minimo[i], maximo[i] = medio - haz / 2, medio + haz / 2
+        recorte = _recortado(minimo, maximo, _recinto(a))
+        if recorte is None:
+            continue
+        salida.append({
+            "id": f"haz_{con.get('id')}",
+            "tipo": "haz_libre",
+            "estado": "supuesto",
+            "fuente": fuente_haz,
+            "min": [round(v, 3) for v in recorte[0]],
+            "max": [round(v, 3) for v in recorte[1]],
+            "nota": f"Camino optico {desde} -> {hasta} ({con.get('id')}).",
+        })
+
+    return salida
+
+
+def _caja_mundo(catalogo, colocacion):
+    """(min, max) de la pieza ya girada y situada."""
+    componente = catalogo[colocacion["componente"]]
+    dims = dims_en_mundo(componente, colocacion["rotacion"])
+    centro = colocacion["centro"]
+    return (
+        [centro[i] - dims[i] / 2 for i in range(3)],
+        [centro[i] + dims[i] / 2 for i in range(3)],
+    )
+
+
 def generar() -> str:
     catalogo = cargar()
     ix, iy, iz = catalogo.dims_interiores
@@ -459,6 +762,21 @@ def generar() -> str:
                 }
             )
 
+    # ----------------------------------------------------------- keep-outs
+    # Las zonas se construyen mas abajo, pero los keep-outs se recortan a
+    # ellas, asi que aqui hace falta su geometria. Es la misma que usa la
+    # tabla 'zonas'.
+    from clau3d.structure import Caja as _Caja
+
+    recintos = {
+        "z_plataforma": _Caja(-X, -Y, -Z, x_sep, Y, Z),
+        "z_payload_telescopio": _Caja(x_sep, -Y, z_tel_min, x_franja_min, Y, Z),
+        "z_payload_franja": _Caja(x_franja_min, -Y, z_tel_min, X, Y, Z),
+        "z_payload_banco": _Caja(x_sep, -Y, z_banco_min, X, Y, z_tel_min),
+        "z_payload_bandeja": _Caja(x_sep, -Y, -Z, X, Y, z_banco_min),
+    }
+    keep_outs = generar_keep_outs(catalogo, colocaciones, recintos)
+
     zonas = [
         (
             "z_plataforma",
@@ -586,10 +904,29 @@ def generar() -> str:
         lineas.append("")
 
     lineas += [
-        "# Vacio hasta que lleguen los diametros de haz, el radio de curvatura de",
-        "# la fibra y las holguras de conector. Declarar un keep-out con medidas",
-        "# inventadas daria una falsa sensacion de comprobacion.",
-        "keep_out: []",
+        "# Volumenes reservados. TODOS salen de numeros SUPUESTOS: el radio",
+        "# minimo de curvatura de la fibra, el del coaxial y el diametro de haz",
+        "# siguen siendo TBD. Por eso cada uno lleva su estado y su fuente, y",
+        "# por eso invadir uno NO tumba el codigo de salida de `clau3d informe`:",
+        "# no es un choque de geometrias, es la consecuencia de una hipotesis.",
+        "keep_out:" if keep_outs else "keep_out: []",
+    ]
+    for k in keep_outs:
+        lineas += [
+            f"  - id: {k['id']}",
+            f"    tipo: {k['tipo']}",
+            f"    estado: {k['estado']}",
+            "    fuente: >-",
+        ]
+        lineas += [f"      {t}" for t in _envolver(k["fuente"], 66)]
+        lineas += [
+            "    caja:",
+            f"      min: [{k['min'][0]}, {k['min'][1]}, {k['min'][2]}]",
+            f"      max: [{k['max'][0]}, {k['max'][1]}, {k['max'][2]}]",
+            "    nota: >-",
+        ]
+        lineas += [f"      {t}" for t in _envolver(k["nota"], 66)]
+    lineas += [
         "",
         "colocaciones:",
     ]

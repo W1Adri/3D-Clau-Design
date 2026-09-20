@@ -44,10 +44,26 @@ class Zona:
 
 @dataclass
 class KeepOut:
+    """Un volumen reservado por el que no puede pasar nada.
+
+    Lleva 'estado' y 'fuente' por el mismo motivo que los lleva un numero: casi
+    todos salen de cotas que hoy no existen -- el radio minimo de curvatura de
+    la fibra, el del coaxial, el diametro de haz -- y estan dibujados con
+    valores SUPUESTOS. Una pieza que invada un keep-out supuesto no es un fallo
+    del diseno: es una consecuencia de una hipotesis, y el informe tiene que
+    poder decir cual de las dos cosas esta pasando.
+    """
+
     id: str
     tipo: str
     caja: Caja
     nota: str | None = None
+    estado: str = "supuesto"
+    fuente: str | None = None
+
+    @property
+    def es_supuesto(self) -> bool:
+        return self.estado == "supuesto"
 
 
 @dataclass
@@ -120,6 +136,8 @@ def cargar_layout(ruta: Path | None = None) -> Layout:
             tipo=k.get("tipo", "generico"),
             caja=_caja_desde(k["caja"], f"keep_out {k['id']}"),
             nota=k.get("nota"),
+            estado=k.get("estado", "supuesto"),
+            fuente=k.get("fuente"),
         )
         for k in (bruto.get("keep_out") or [])
     ]
@@ -207,7 +225,9 @@ def ensamblaje(
         raiz.add(
             keep_out.caja.solido(),
             name=f"keepout_{keep_out.id}",
-            color=cq.Color(1.0, 0.1, 0.1, 0.18),
+            # Casi transparente si sale de un numero inventado: ocupa sitio en
+            # la pantalla, pero no tanto como para que parezca una pieza.
+            color=cq.Color(1.0, 0.1, 0.1, 0.10 if keep_out.es_supuesto else 0.22),
         )
 
     return raiz

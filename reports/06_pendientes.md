@@ -7,7 +7,7 @@ No editar a mano: los numeros salen de `data/components.yaml`.
 - Norma: CubeSat Design Specification Rev. 14.1, The CubeSat Program, Cal Poly SLO
 - Estado del layout: **confirmada** (26 piezas colocadas)
 
-Total de huecos abiertos: **66**, de los cuales **42** son TBD sin ninguna aproximacion y **24** son SUPUESTOS: numeros que se ha inventado este repositorio para poder dibujar y colocar la pieza.
+Total de huecos abiertos: **70**, de los cuales **42** son TBD sin ninguna aproximacion y **28** son SUPUESTOS: numeros que se ha inventado este repositorio para poder dibujar y colocar la pieza.
 
 > **Un supuesto no es un dato.** No suma en los presupuestos de masa ni de potencia, se dibuja en gris y aparece aqui hasta que alguien lo sustituya por una cifra con fuente. La lista de abajo es, literalmente, lo que hay que preguntar.
 
@@ -51,10 +51,11 @@ Total de huecos abiertos: **66**, de los cuales **42** son TBD sin ninguna aprox
 | laser_beacon_bajada | laser_beacon_bajada.dimensiones | supuesto | `[25.0, 30.0, 25.0]` | Longitud de onda, potencia optica y envolvente del modulo elegido |
 | laser_beacon_bajada | laser_beacon_bajada.masa | TBD | - | Masa del laser de beacon elegido |
 
-## Equipo de electronica de ACSAR (11)
+## Equipo de electronica de ACSAR (12)
 
 | componente | magnitud | estado | valor modelado | que falta |
 |---|---|---|---|---|
+| integracion | integracion.coaxial.radio_curvatura_modelado | supuesto | `25.0` | Radio minimo de curvatura del coaxial elegido. Es el mismo hueco que 'cables_rf_moduladores.radio_minimo_curvatura'. |
 | integracion | integracion.holgura_conector | TBD | - | Holgura de insercion por tipo de conector (coaxial RF, AVIM optico, conectores de datos) |
 | pcb1_control_qkd | pcb1_control_qkd.dimensiones | supuesto | `[95.89, 90.17, 15.0]` | Altura real de la tarjeta, que la fija el componente mas alto (la FPGA y su disipador, si lleva). Y confirmar el contorno PC104. |
 | pcb1_control_qkd | pcb1_control_qkd.masa | TBD | - | Masa de la tarjeta poblada |
@@ -75,10 +76,11 @@ Total de huecos abiertos: **66**, de los cuales **42** son TBD sin ninguna aprox
 | estructura_6u | estructura_6u.masa | TBD | - | Masa del chasis 6U elegido |
 | bandeja_optica | bandeja_optica.dimensiones | supuesto | `[117.7, 3.0, 102.4]` | Material, espesor y patron de taladros de la placa, del analisis estructural y termico |
 
-## Equipo de optica de ACSAR (6)
+## Equipo de optica de ACSAR (7)
 
 | componente | magnitud | estado | valor modelado | que falta |
 |---|---|---|---|---|
+| integracion | integracion.optica.diametro_haz_modelado | supuesto | `10.0` | Diametro de haz de cada tramo (e01 a e05 en data/connections.yaml) y el semiangulo del cono de la apertura |
 | fsm | fsm.eleccion_de_tecnologia | TBD | - | Elegir entre MEMS (Mirrorcle, herencia CLICK-A, espejo de 5 mm) y piezo (PI S-331). Se modela el MEMS porque es el que tiene cota publicada clara; eso NO es la eleccion. La alternativa piezo esta en el catalogo como 'fsm_piezo_pi_s331'. |
 | fsm | fsm.soporte | TBD | - | Soporte de vuelo del MEMS: el encapsulado DIP24 no se atornilla solo a un banco optico. Es lo que decide el volumen real de esta pieza. |
 | dicroico | dicroico.dimensiones | supuesto | `[23.0, 23.0, 23.0]` | Diametro del haz colimado (del que sale el tamano del sustrato), longitudes de onda de corte y envolvente del soporte |
@@ -86,11 +88,13 @@ Total de huecos abiertos: **66**, de los cuales **42** son TBD sin ninguna aprox
 | colimador | colimador.dimensiones | supuesto | `[28.0, 12.0, 12.0]` | Diametro del haz colimado y modelo de colimador. Es el mismo dato que bloquea los keep-outs del camino optico. |
 | colimador | colimador.masa | TBD | - | Masa del colimador elegido |
 
-## Equipo de payload de ACSAR (9)
+## Equipo de payload de ACSAR (11)
 
 | componente | magnitud | estado | valor modelado | que falta |
 |---|---|---|---|---|
 | integracion | integracion.fibra.radio_minimo_curvatura | TBD | - | Radio minimo de curvatura de la fibra elegida (probablemente PM a 1550 nm) |
+| integracion | integracion.fibra.radio_curvatura_modelado | supuesto | `30.0` | Radio minimo de curvatura real, que es 'radio_minimo_curvatura' |
+| integracion | integracion.fibra.longitud_boot_modelada | supuesto | `20.0` | Tipo de conector o protector y su tramo recto de salida |
 | voa | voa.dimensiones | supuesto | `[35.0, 5.5, 5.5]` | Modelo de VOA elegido y su envolvente |
 | voa | voa.masa | TBD | - | Masa del VOA elegido |
 | aislador | aislador.dimensiones | supuesto | `[35.0, 5.5, 5.5]` | Modelo de aislador elegido y su envolvente |
@@ -172,12 +176,16 @@ Total de huecos abiertos: **66**, de los cuales **42** son TBD sin ninguna aprox
 |---|---|---|---|---|
 | fsm_piezo_pi_s331 | fsm_piezo_pi_s331.dimensiones | supuesto | `[50.0, 50.0, 22.0]` | Cotas exteriores del S-331 (plano acotado o STEP) |
 
-## Solo los supuestos, para sustituirlos (24)
+## Solo los supuestos, para sustituirlos (28)
 
 Cada fila es un numero que hoy sostiene el modelo sin sostenerse en nada.
 
 | componente | magnitud | valor modelado | que falta | pedir a |
 |---|---|---|---|---|
+| integracion | integracion.fibra.radio_curvatura_modelado | `30.0` | Radio minimo de curvatura real, que es 'radio_minimo_curvatura' | Equipo de payload de ACSAR |
+| integracion | integracion.fibra.longitud_boot_modelada | `20.0` | Tipo de conector o protector y su tramo recto de salida | Equipo de payload de ACSAR |
+| integracion | integracion.coaxial.radio_curvatura_modelado | `25.0` | Radio minimo de curvatura del coaxial elegido. Es el mismo hueco que 'cables_rf_moduladores.radio_minimo_curvatura'. | Equipo de electronica de ACSAR |
+| integracion | integracion.optica.diametro_haz_modelado | `10.0` | Diametro de haz de cada tramo (e01 a e05 en data/connections.yaml) y el semiangulo del cono de la apertura | Equipo de optica de ACSAR |
 | antena_quasar_wsant | antena_quasar_wsant.dimensiones | `[82.0, 82.0, 10.0]` | Dimensiones reales, ganancia, diagrama de radiacion y cara de montaje | AAC Clyde Space |
 | paneles_photon_side | paneles_photon_side.dimensiones | `[209.3, 3.5, 349.0]` | Contorno real de cada tamano de PHOTON-SIDE (1U/2U/3U/6U) y cual de ellos se monta en cada cara | AAC Clyde Space / Equipo de potencia de ACSAR |
 | telescopio_cassegrain | telescopio_cassegrain.dimensiones | `[95.4, 95.4, 200.0]` | Diametro exterior del barrilete y longitud optica real. YA EXISTE un concepto en formato nativo SolidWorks (Telescopio_concepto.SLDPRT, entrega "Preliminar viability model" del 2026-09-20), ilegible. Hace falta reexportarlo a STEP AP214 o AP242 y dejarlo en la ruta de 'step_esperado'. Ver cad/vendor/MANIFEST.yaml, seccion 'sin_convertir'. | Oscar (ACSAR) / Aperture Optical Sciences |

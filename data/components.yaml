@@ -1849,7 +1849,64 @@ integracion:
       pedir_a: Equipo de payload de ACSAR
       nota: >-
         Es el parametro que mas area consume en la bandeja optica. Sin el no se
-        puede dimensionar la bandeja ni comprobar los bucles.
+        puede dimensionar la bandeja ni comprobar los bucles. Mientras falte,
+        los keep-outs se dibujan con 'radio_curvatura_modelado', que es un
+        numero inventado.
+    radio_curvatura_modelado:
+      valor: 30.0
+      unidad: mm
+      estado: supuesto
+      fuente: >-
+        SUPUESTO. Valor provisional acordado para poder dibujar los keep-outs
+        de fibra. Esta en el rango conservador de lo que se suele exigir a
+        fibra monomodo de 1550 nm (del orden de 10 a 30 mm segun fabricante y
+        segun si el criterio es perdida por macrocurvatura o vida en
+        fatiga), pero NO sale de ninguna ficha: la fibra no esta elegida.
+        Con este valor la bandeja NO cumple; ver el chequeo 'bucles_fibra' y
+        las invasiones de keep-out del informe de interferencias.
+      falta: Radio minimo de curvatura real, que es 'radio_minimo_curvatura'
+      pedir_a: Equipo de payload de ACSAR
+      nota: >-
+        Mismo patron que 'paso_apilamiento_modelado': un valor de trabajo al
+        lado del hueco de verdad, no en su lugar.
+    longitud_boot_modelada:
+      valor: 20.0
+      unidad: mm
+      estado: supuesto
+      fuente: >-
+        SUPUESTO. Tramo RECTO que hay que dejar a la salida de cada conector o
+        protector de fibra antes de empezar a curvar. Valor provisional
+        acordado; no sale de ninguna ficha porque no hay conector elegido.
+      falta: Tipo de conector o protector y su tramo recto de salida
+      pedir_a: Equipo de payload de ACSAR
+  coaxial:
+    radio_curvatura_modelado:
+      valor: 25.0
+      unidad: mm
+      estado: supuesto
+      fuente: >-
+        SUPUESTO. Reserva para curvar el coaxial RF a la salida del conector
+        del modulador. No sale de ninguna ficha: el cable no esta elegido, y
+        para un coaxial semirrigido el radio real puede ser bastante mayor.
+      falta: >-
+        Radio minimo de curvatura del coaxial elegido. Es el mismo hueco que
+        'cables_rf_moduladores.radio_minimo_curvatura'.
+      pedir_a: Equipo de electronica de ACSAR
+  optica:
+    diametro_haz_modelado:
+      valor: 10.0
+      unidad: mm
+      estado: supuesto
+      fuente: >-
+        SUPUESTO. Diametro del tubo que se reserva libre para los haces en
+        espacio libre del banco. No sale de ningun calculo optico: el diametro
+        de haz colimado es TBD en cada tramo de data/connections.yaml. Se toma
+        un valor unico y generoso para que el keep-out se vea y estorbe si algo
+        se mete en el camino; el de verdad saldra del diseno optico.
+      falta: >-
+        Diametro de haz de cada tramo (e01 a e05 en data/connections.yaml) y el
+        semiangulo del cono de la apertura
+      pedir_a: Equipo de optica de ACSAR
   holgura_conector:
     valor: null
     unidad: mm

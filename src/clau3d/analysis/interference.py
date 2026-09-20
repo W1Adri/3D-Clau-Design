@@ -22,6 +22,12 @@ class Interferencia:
     b: str
     volumen_mm3: float
     detalle: str
+    # True cuando el hallazgo depende de un numero que este repositorio se ha
+    # inventado -- tipicamente un keep-out dibujado con el radio de curvatura
+    # supuesto. No es un choque de geometrias: es la consecuencia de una
+    # hipotesis, y mezclarlo con un solape de verdad haria que el informe
+    # dejara de significar nada. Por eso tampoco tumba el codigo de salida.
+    basada_en_supuesto: bool = False
 
     @property
     def volumen_cm3(self) -> float:
@@ -200,7 +206,12 @@ def invasion_keep_out(
                         f"{pieza.colocacion.etiqueta} invade el keep-out "
                         f"'{keep_out.id}' ({keep_out.tipo}) en "
                         f"{volumen / 1000:.2f} cm3"
+                        + (
+                            ", con el keep-out dibujado a partir de un valor "
+                            "SUPUESTO" if keep_out.es_supuesto else ""
+                        )
                     ),
+                    basada_en_supuesto=keep_out.es_supuesto,
                 )
             )
     return salida

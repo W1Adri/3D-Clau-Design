@@ -80,9 +80,23 @@ def cmd_informe(_: argparse.Namespace) -> int:
 
     criticos = [c for c in fit.todos(catalogo, layout) if c.critico]
     hallazgos = interference.todas(catalogo, layout, piezas)
-    if criticos or hallazgos:
-        print(f"\n{len(criticos)} chequeos fallidos, {len(hallazgos)} interferencias.")
+    # Una invasion de keep-out dibujado con un numero inventado NO tumba el
+    # codigo de salida. Es informacion util -- dice que con esa hipotesis la
+    # cosa no cabe -- pero no es un choque de geometrias, y si hiciera fallar a
+    # CI, la manera de arreglarlo seria bajar el radio de curvatura supuesto,
+    # que es exactamente lo que no se quiere que nadie haga.
+    duros = [h for h in hallazgos if not h.basada_en_supuesto]
+    blandos = len(hallazgos) - len(duros)
+    if criticos or duros:
+        print(f"\n{len(criticos)} chequeos fallidos, {len(duros)} interferencias.")
+        if blandos:
+            print(f"(y {blandos} invasiones de keep-outs SUPUESTOS, que no cuentan)")
         return 1
+    if blandos:
+        print(
+            f"\nSin interferencias reales. {blandos} invasiones de keep-outs "
+            f"dibujados con numeros SUPUESTOS: ver reports/03_interferencias.md."
+        )
     return 0
 
 

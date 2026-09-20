@@ -499,6 +499,28 @@ def chequeo_pila_pc104(catalogo: Catalogo) -> Chequeo:
 def chequeo_bucles_fibra(catalogo: Catalogo) -> Chequeo:
     radio = catalogo.integracion.get("fibra.radio_minimo_curvatura")
     if radio is None or radio.es_tbd:
+        modelado = catalogo.integracion.get("fibra.radio_curvatura_modelado")
+        boot = catalogo.integracion.get("fibra.longitud_boot_modelada")
+        extra = ""
+        numeros: dict[str, float] = {}
+        if modelado is not None and not modelado.es_tbd:
+            r_sup = modelado.escalar() or 0.0
+            l_boot = (boot.escalar() if boot is not None else None) or 0.0
+            numeros = {
+                "radio_supuesto_mm": r_sup,
+                "boot_supuesto_mm": l_boot,
+                "reserva_por_puerto_mm": l_boot + r_sup,
+            }
+            extra = (
+                f" Mientras tanto, los keep-outs se dibujan con un radio "
+                f"SUPUESTO de {r_sup:.0f} mm y un tramo recto de "
+                f"{l_boot:.0f} mm, o sea {l_boot + r_sup:.0f} mm reservados por "
+                f"puerto. Con esa hipotesis la bandeja NO cumple: ver las "
+                f"invasiones de keep-out en el informe de interferencias. Eso "
+                f"no es un fallo del reparto, es lo que cuesta no tener el "
+                f"dato: si el radio real resulta ser la mitad, la mayoria de "
+                f"esas invasiones desaparecen solas."
+            )
         return Chequeo(
             id="bucles_fibra",
             titulo="Radio minimo de curvatura de la fibra",
@@ -506,8 +528,9 @@ def chequeo_bucles_fibra(catalogo: Catalogo) -> Chequeo:
             mensaje=(
                 "Sin radio minimo de curvatura no se puede dimensionar la bandeja "
                 "optica ni comprobar ningun bucle. Es el parametro que mas area "
-                "consume de toda la bandeja."
+                "consume de toda la bandeja." + extra
             ),
+            numeros=numeros,
             falta="Radio minimo de curvatura de la fibra elegida",
         )
     r = radio.escalar()

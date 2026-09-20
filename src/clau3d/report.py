@@ -185,8 +185,12 @@ def informe_interferencias(
 ) -> str:
     lineas = _cabecera("Interferencias", catalogo, layout)
     hallazgos = interference.todas(catalogo, layout, piezas)
+    duros = [h for h in hallazgos if not h.basada_en_supuesto]
+    blandos = [h for h in hallazgos if h.basada_en_supuesto]
     lineas += [
-        f"Piezas colocadas: **{len(piezas)}**. Interferencias: **{len(hallazgos)}**.",
+        f"Piezas colocadas: **{len(piezas)}**. Choques de geometria: "
+        f"**{len(duros)}**. Invasiones de keep-outs dibujados con numeros "
+        f"SUPUESTOS: **{len(blandos)}**.",
         "",
     ]
     if not piezas:
@@ -195,13 +199,62 @@ def informe_interferencias(
             "> Confirma la distribucion y rellena `data/layout.yaml`.",
             "",
         ]
+
+    lineas += [
+        "## Choques de geometria",
+        "",
+        "Dos solidos que ocupan el mismo sitio, o una pieza que se sale de "
+        "donde tiene que estar. Esto si es un error del modelo o del reparto, y "
+        "hace que `clau3d informe` devuelva codigo 1.",
+        "",
+    ]
     lineas += _tabla(
         ["tipo", "a", "b", "volumen cm3", "detalle"],
-        [
-            [h.tipo, h.a, h.b, _n(h.volumen_cm3, 2), h.detalle]
-            for h in hallazgos
-        ],
+        [[h.tipo, h.a, h.b, _n(h.volumen_cm3, 2), h.detalle] for h in duros],
     )
+
+    lineas += [
+        f"## Invasiones de keep-outs SUPUESTOS ({len(blandos)})",
+        "",
+        "> **Esto no es una lista de errores.** Son piezas que se meten en un "
+        "volumen reservado que esta dibujado a partir de un numero que se ha "
+        "inventado este repositorio: el radio minimo de curvatura de la fibra, "
+        "el del coaxial y el diametro de haz siguen siendo **TBD**. Lo que "
+        "dicen estas filas es *con la hipotesis de hoy, aqui no cabe*, y la "
+        "manera de resolverlas NO es bajar el radio supuesto hasta que "
+        "desaparezcan: es conseguir el dato. Por eso no tumban el codigo de "
+        "salida.",
+        "",
+    ]
+    if blandos:
+        lineas += [
+            "Lo que estas filas estan diciendo, en una frase: **la bandeja de "
+            "fibra, tal y como esta repartida, no respeta un radio de "
+            "curvatura de 30 mm**, y el colimador no tiene por donde sacar su "
+            "latiguillo. Las dos cosas se deciden con el mismo dato.",
+            "",
+        ]
+    lineas += _tabla(
+        ["tipo", "pieza", "keep-out", "volumen cm3", "detalle"],
+        [[h.tipo, h.a, h.b, _n(h.volumen_cm3, 2), h.detalle] for h in blandos],
+    )
+
+    if layout.keep_outs:
+        lineas += [
+            f"## Los keep-outs que hay ({len(layout.keep_outs)})",
+            "",
+        ]
+        lineas += _tabla(
+            ["id", "tipo", "estado", "dims mm", "en que se basa"],
+            [
+                [
+                    k.id, k.tipo, k.estado,
+                    " x ".join(f"{v:.0f}" for v in k.caja.dims),
+                    (k.fuente or "-")[:150],
+                ]
+                for k in layout.keep_outs
+            ],
+        )
     return "\n".join(lineas)
 
 

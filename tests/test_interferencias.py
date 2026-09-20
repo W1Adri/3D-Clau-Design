@@ -36,9 +36,31 @@ def test_todo_dentro_de_la_envolvente(catalogo, piezas):
     assert hallazgos == [], "\n".join(h.detalle for h in hallazgos)
 
 
-def test_sin_invasion_de_keep_outs(layout, piezas):
-    hallazgos = interference.invasion_keep_out(layout, piezas)
+def test_sin_invasion_de_keep_outs_que_salgan_de_un_dato(layout, piezas):
+    """Los keep-outs SUPUESTOS si se invaden, y eso no es un fallo del reparto.
+
+    Hoy los tres parametros que dimensionan un keep-out -- el radio minimo de
+    curvatura de la fibra, el del coaxial y el diametro de haz -- son TBD, asi
+    que TODOS los keep-outs se dibujan con numeros inventados y varios se
+    invaden. Lo que dicen esas invasiones es "con la hipotesis de hoy, aqui no
+    cabe", y la manera de quitarlas no es bajar el radio supuesto: es conseguir
+    el dato.
+
+    Lo que este test si vigila es que no haya invasiones de un keep-out que SI
+    salga de un dato. El dia que llegue el radio de verdad, este test empieza a
+    exigir de verdad sin que nadie lo toque.
+    """
+    hallazgos = [
+        h for h in interference.invasion_keep_out(layout, piezas)
+        if not h.basada_en_supuesto
+    ]
     assert hallazgos == [], "\n".join(h.detalle for h in hallazgos)
+
+
+def test_toda_invasion_de_keep_out_de_hoy_sale_de_un_supuesto(layout, piezas):
+    """Contrapartida del anterior: que nada se cuele como 'supuesto' sin serlo."""
+    for hallazgo in interference.invasion_keep_out(layout, piezas):
+        assert hallazgo.basada_en_supuesto, hallazgo.detalle
 
 
 # --- que el detector detecta -------------------------------------------

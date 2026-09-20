@@ -109,10 +109,288 @@ zonas:
       puede decir: falta el radio minimo de curvatura. Zona con control
       termico propio.
 
-# Vacio hasta que lleguen los diametros de haz, el radio de curvatura de
-# la fibra y las holguras de conector. Declarar un keep-out con medidas
-# inventadas daria una falsa sensacion de comprobacion.
-keep_out: []
+# Volumenes reservados. TODOS salen de numeros SUPUESTOS: el radio
+# minimo de curvatura de la fibra, el del coaxial y el diametro de haz
+# siguen siendo TBD. Por eso cada uno lleva su estado y su fuente, y
+# por eso invadir uno NO tumba el codigo de salida de `clau3d informe`:
+# no es un choque de geometrias, es la consecuencia de una hipotesis.
+keep_out:
+  - id: fibra_laser_dfb_1550_salida
+    tipo: fibra
+    estado: supuesto
+    fuente: >-
+      Tramo recto de 20 mm (integracion.fibra.longitud_boot_modelada)
+      mas el envolvente de un codo de 30 mm
+      (integracion.fibra.radio_curvatura_modelado). Los dos son
+      SUPUESTOS: el radio de verdad es
+      integracion.fibra.radio_minimo_curvatura, que sigue siendo TBD. La
+      DIRECCION tampoco es un dato: se toma el eje de fibra que declara
+      'montaje', porque el encaminamiento real esta sin decidir.
+    caja:
+      min: [68.7, -40.8, -180.7]
+      max: [110.85, 19.2, -123.05]
+    nota: >-
+      Puerto de salida de fibra de laser_dfb_1550, recortado a la zona
+      z_payload_bandeja.
+  - id: fibra_mod_intensidad_mxer_ln_10_entrada
+    tipo: fibra
+    estado: supuesto
+    fuente: >-
+      Tramo recto de 20 mm (integracion.fibra.longitud_boot_modelada)
+      mas el envolvente de un codo de 30 mm
+      (integracion.fibra.radio_curvatura_modelado). Los dos son
+      SUPUESTOS: el radio de verdad es
+      integracion.fibra.radio_minimo_curvatura, que sigue siendo TBD. La
+      DIRECCION tampoco es un dato: se toma el eje de fibra que declara
+      'montaje', porque el encaminamiento real esta sin decidir.
+    caja:
+      min: [91.125, -30.0, 110.7]
+      max: [110.85, 30.0, 160.7]
+    nota: >-
+      Puerto de entrada de fibra de mod_intensidad_mxer_ln_10, recortado
+      a la zona z_payload_franja.
+  - id: fibra_mod_fase_mpz_ln_10_entrada
+    tipo: fibra
+    estado: supuesto
+    fuente: >-
+      Tramo recto de 20 mm (integracion.fibra.longitud_boot_modelada)
+      mas el envolvente de un codo de 30 mm
+      (integracion.fibra.radio_curvatura_modelado). Los dos son
+      SUPUESTOS: el radio de verdad es
+      integracion.fibra.radio_minimo_curvatura, que sigue siendo TBD. La
+      DIRECCION tampoco es un dato: se toma el eje de fibra que declara
+      'montaje', porque el encaminamiento real esta sin decidir.
+    caja:
+      min: [104.275, -30.0, 110.7]
+      max: [110.85, 30.0, 160.7]
+    nota: >-
+      Puerto de entrada de fibra de mod_fase_mpz_ln_10, recortado a la
+      zona z_payload_franja.
+  - id: fibra_voa_entrada
+    tipo: fibra
+    estado: supuesto
+    fuente: >-
+      Tramo recto de 20 mm (integracion.fibra.longitud_boot_modelada)
+      mas el envolvente de un codo de 30 mm
+      (integracion.fibra.radio_curvatura_modelado). Los dos son
+      SUPUESTOS: el radio de verdad es
+      integracion.fibra.radio_minimo_curvatura, que sigue siendo TBD. La
+      DIRECCION tampoco es un dato: se toma el eje de fibra que declara
+      'montaje', porque el encaminamiento real esta sin decidir.
+    caja:
+      min: [-10.85, -41.95, -150.65]
+      max: [-4.85, 18.05, -90.65]
+    nota: >-
+      Puerto de entrada de fibra de voa, recortado a la zona
+      z_payload_bandeja.
+  - id: fibra_voa_salida
+    tipo: fibra
+    estado: supuesto
+    fuente: >-
+      Tramo recto de 20 mm (integracion.fibra.longitud_boot_modelada)
+      mas el envolvente de un codo de 30 mm
+      (integracion.fibra.radio_curvatura_modelado). Los dos son
+      SUPUESTOS: el radio de verdad es
+      integracion.fibra.radio_minimo_curvatura, que sigue siendo TBD. La
+      DIRECCION tampoco es un dato: se toma el eje de fibra que declara
+      'montaje', porque el encaminamiento real esta sin decidir.
+    caja:
+      min: [30.15, -41.95, -150.65]
+      max: [80.15, 18.05, -90.65]
+    nota: >-
+      Puerto de salida de fibra de voa, recortado a la zona
+      z_payload_bandeja.
+  - id: fibra_aislador_entrada
+    tipo: fibra
+    estado: supuesto
+    fuente: >-
+      Tramo recto de 20 mm (integracion.fibra.longitud_boot_modelada)
+      mas el envolvente de un codo de 30 mm
+      (integracion.fibra.radio_curvatura_modelado). Los dos son
+      SUPUESTOS: el radio de verdad es
+      integracion.fibra.radio_minimo_curvatura, que sigue siendo TBD. La
+      DIRECCION tampoco es un dato: se toma el eje de fibra que declara
+      'montaje', porque el encaminamiento real esta sin decidir.
+    caja:
+      min: [19.85, -41.95, -150.65]
+      max: [69.85, 18.05, -90.65]
+    nota: >-
+      Puerto de entrada de fibra de aislador, recortado a la zona
+      z_payload_bandeja.
+  - id: fibra_aislador_salida
+    tipo: fibra
+    estado: supuesto
+    fuente: >-
+      Tramo recto de 20 mm (integracion.fibra.longitud_boot_modelada)
+      mas el envolvente de un codo de 30 mm
+      (integracion.fibra.radio_curvatura_modelado). Los dos son
+      SUPUESTOS: el radio de verdad es
+      integracion.fibra.radio_minimo_curvatura, que sigue siendo TBD. La
+      DIRECCION tampoco es un dato: se toma el eje de fibra que declara
+      'montaje', porque el encaminamiento real esta sin decidir.
+    caja:
+      min: [104.85, -41.95, -150.65]
+      max: [110.85, 18.05, -90.65]
+    nota: >-
+      Puerto de salida de fibra de aislador, recortado a la zona
+      z_payload_bandeja.
+  - id: fibra_filtro_espectral_entrada
+    tipo: fibra
+    estado: supuesto
+    fuente: >-
+      Tramo recto de 20 mm (integracion.fibra.longitud_boot_modelada)
+      mas el envolvente de un codo de 30 mm
+      (integracion.fibra.radio_curvatura_modelado). Los dos son
+      SUPUESTOS: el radio de verdad es
+      integracion.fibra.radio_minimo_curvatura, que sigue siendo TBD. La
+      DIRECCION tampoco es un dato: se toma el eje de fibra que declara
+      'montaje', porque el encaminamiento real esta sin decidir.
+    caja:
+      min: [-10.85, -41.95, -129.9]
+      max: [-4.85, 18.05, -74.3]
+    nota: >-
+      Puerto de entrada de fibra de filtro_espectral, recortado a la
+      zona z_payload_bandeja.
+  - id: fibra_filtro_espectral_salida
+    tipo: fibra
+    estado: supuesto
+    fuente: >-
+      Tramo recto de 20 mm (integracion.fibra.longitud_boot_modelada)
+      mas el envolvente de un codo de 30 mm
+      (integracion.fibra.radio_curvatura_modelado). Los dos son
+      SUPUESTOS: el radio de verdad es
+      integracion.fibra.radio_minimo_curvatura, que sigue siendo TBD. La
+      DIRECCION tampoco es un dato: se toma el eje de fibra que declara
+      'montaje', porque el encaminamiento real esta sin decidir.
+    caja:
+      min: [35.15, -41.95, -129.9]
+      max: [85.15, 18.05, -74.3]
+    nota: >-
+      Puerto de salida de fibra de filtro_espectral, recortado a la zona
+      z_payload_bandeja.
+  - id: fibra_acoplador_monitor_entrada
+    tipo: fibra
+    estado: supuesto
+    fuente: >-
+      Tramo recto de 20 mm (integracion.fibra.longitud_boot_modelada)
+      mas el envolvente de un codo de 30 mm
+      (integracion.fibra.radio_curvatura_modelado). Los dos son
+      SUPUESTOS: el radio de verdad es
+      integracion.fibra.radio_minimo_curvatura, que sigue siendo TBD. La
+      DIRECCION tampoco es un dato: se toma el eje de fibra que declara
+      'montaje', porque el encaminamiento real esta sin decidir.
+    caja:
+      min: [-5.15, -38.7, -129.9]
+      max: [44.85, 21.3, -74.3]
+    nota: >-
+      Puerto de entrada de fibra de acoplador_monitor, recortado a la
+      zona z_payload_bandeja.
+  - id: fibra_acoplador_monitor_salida
+    tipo: fibra
+    estado: supuesto
+    fuente: >-
+      Tramo recto de 20 mm (integracion.fibra.longitud_boot_modelada)
+      mas el envolvente de un codo de 30 mm
+      (integracion.fibra.radio_curvatura_modelado). Los dos son
+      SUPUESTOS: el radio de verdad es
+      integracion.fibra.radio_minimo_curvatura, que sigue siendo TBD. La
+      DIRECCION tampoco es un dato: se toma el eje de fibra que declara
+      'montaje', porque el encaminamiento real esta sin decidir.
+    caja:
+      min: [104.85, -38.7, -129.9]
+      max: [110.85, 21.3, -74.3]
+    nota: >-
+      Puerto de salida de fibra de acoplador_monitor, recortado a la
+      zona z_payload_bandeja.
+  - id: fibra_colimador_entrada
+    tipo: fibra
+    estado: supuesto
+    fuente: >-
+      Tramo recto de 20 mm (integracion.fibra.longitud_boot_modelada)
+      mas el envolvente de un codo de 30 mm
+      (integracion.fibra.radio_curvatura_modelado). Los dos son
+      SUPUESTOS: el radio de verdad es
+      integracion.fibra.radio_minimo_curvatura, que sigue siendo TBD. La
+      DIRECCION tampoco es un dato: se toma el eje de fibra que declara
+      'montaje', porque el encaminamiento real esta sin decidir.
+    caja:
+      min: [31.397, 0.0, -74.3]
+      max: [81.397, 47.7, -19.3]
+    nota: >-
+      Puerto de entrada de fibra de colimador, recortado a la zona
+      z_payload_banco.
+  - id: coaxial_mod_intensidad_mxer_ln_10
+    tipo: coaxial
+    estado: supuesto
+    fuente: >-
+      Envolvente de un codo de 25 mm a la salida del conector RF
+      (integracion.coaxial.radio_curvatura_modelado, SUPUESTO). El
+      conector SI es dato: 6.1 x 10 mm del plano de Exail.
+    caja:
+      min: [84.55, 17.5, 20.7]
+      max: [110.85, 42.5, 70.7]
+    nota: >-
+      Salida del conector RF de mod_intensidad_mxer_ln_10 hacia PCB-2.
+  - id: coaxial_mod_fase_mpz_ln_10
+    tipo: coaxial
+    estado: supuesto
+    fuente: >-
+      Envolvente de un codo de 25 mm a la salida del conector RF
+      (integracion.coaxial.radio_curvatura_modelado, SUPUESTO). El
+      conector SI es dato: 6.1 x 10 mm del plano de Exail.
+    caja:
+      min: [84.55, 17.5, 20.7]
+      max: [110.85, 42.5, 70.7]
+    nota: >-
+      Salida del conector RF de mod_fase_mpz_ln_10 hacia PCB-2.
+  - id: haz_e01
+    tipo: haz_libre
+    estado: supuesto
+    fuente: >-
+      Tubo de 10 mm de lado (integracion.optica.diametro_haz_modelado,
+      SUPUESTO) en el hueco que queda entre las dos piezas. El diametro
+      de haz de cada tramo es TBD en data/connections.yaml.
+    caja:
+      min: [76.397, -5.0, -51.8]
+      max: [81.397, 5.0, -41.8]
+    nota: >-
+      Camino optico colimador -> dicroico (e01).
+  - id: haz_e02
+    tipo: haz_libre
+    estado: supuesto
+    fuente: >-
+      Tubo de 10 mm de lado (integracion.optica.diametro_haz_modelado,
+      SUPUESTO) en el hueco que queda entre las dos piezas. El diametro
+      de haz de cada tramo es TBD en data/connections.yaml.
+    caja:
+      min: [48.397, -5.0, -51.8]
+      max: [53.397, 5.0, -41.8]
+    nota: >-
+      Camino optico dicroico -> fsm (e02).
+  - id: haz_e03
+    tipo: haz_libre
+    estado: supuesto
+    fuente: >-
+      Tubo de 10 mm de lado (integracion.optica.diametro_haz_modelado,
+      SUPUESTO) en el hueco que queda entre las dos piezas. El diametro
+      de haz de cada tramo es TBD en data/connections.yaml.
+    caja:
+      min: [31.85, -5.0, -35.253]
+      max: [41.85, 5.0, -19.3]
+    nota: >-
+      Camino optico fsm -> telescopio_cassegrain (e03).
+  - id: haz_e04
+    tipo: haz_libre
+    estado: supuesto
+    fuente: >-
+      Tubo de 10 mm de lado (integracion.optica.diametro_haz_modelado,
+      SUPUESTO) en el hueco que queda entre las dos piezas. El diametro
+      de haz de cada tramo es TBD en data/connections.yaml.
+    caja:
+      min: [59.897, 11.5, -51.8]
+      max: [69.897, 16.5, -41.8]
+    nota: >-
+      Camino optico dicroico -> camara_beacon (e04).
 
 colocaciones:
   - componente: adcs_iadcs400
