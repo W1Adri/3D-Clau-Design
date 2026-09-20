@@ -5,9 +5,9 @@ No editar a mano: los numeros salen de `data/components.yaml`.
 
 - Mision: CLAU - CubeSat Laser per a Aplicacions Ultrasegures
 - Norma: CubeSat Design Specification Rev. 14.1, The CubeSat Program, Cal Poly SLO
-- Estado del layout: **confirmada** (14 piezas colocadas)
+- Estado del layout: **confirmada** (20 piezas colocadas)
 
-Total de huecos abiertos: **60**, de los cuales **47** son TBD sin ninguna aproximacion y **13** son SUPUESTOS: numeros que se ha inventado este repositorio para poder dibujar y colocar la pieza.
+Total de huecos abiertos: **62**, de los cuales **43** son TBD sin ninguna aproximacion y **19** son SUPUESTOS: numeros que se ha inventado este repositorio para poder dibujar y colocar la pieza.
 
 > **Un supuesto no es un dato.** No suma en los presupuestos de masa ni de potencia, se dibuja en gris y aparece aqui hasta que alguien lo sustituya por una cifra con fuente. La lista de abajo es, literalmente, lo que hay que preguntar.
 
@@ -41,9 +41,9 @@ Total de huecos abiertos: **60**, de los cuales **47** son TBD sin ninguna aprox
 
 | componente | magnitud | estado | valor modelado | que falta |
 |---|---|---|---|---|
-| camara_beacon | camara_beacon.dimensiones | TBD | - | Modelo de sensor y su envolvente |
+| camara_beacon | camara_beacon.dimensiones | supuesto | `[30.0, 30.0, 30.0]` | Modelo de sensor, distancia focal del objetivo y campo de vision exigido por el lazo de apuntado |
 | camara_beacon | camara_beacon.masa | TBD | - | Masa del sensor elegido |
-| laser_beacon_bajada | laser_beacon_bajada.dimensiones | TBD | - | Longitud de onda, potencia y envolvente |
+| laser_beacon_bajada | laser_beacon_bajada.dimensiones | supuesto | `[25.0, 30.0, 25.0]` | Longitud de onda, potencia optica y envolvente del modulo elegido |
 | laser_beacon_bajada | laser_beacon_bajada.masa | TBD | - | Masa del laser de beacon elegido |
 
 ## Equipo de electronica de ACSAR (7)
@@ -70,11 +70,11 @@ Total de huecos abiertos: **60**, de los cuales **47** son TBD sin ninguna aprox
 
 | componente | magnitud | estado | valor modelado | que falta |
 |---|---|---|---|---|
-| fsm | fsm.dimensiones | TBD | - | Eleccion entre MEMS (Mirrorcle, herencia CLICK-A, espejo 5 mm) y piezo PI S-331, y su envolvente |
-| fsm | fsm.masa | TBD | - | Masa del FSM elegido (MEMS o piezo) |
-| dicroico | dicroico.dimensiones | TBD | - | Dimensiones del sustrato y del soporte |
+| fsm | fsm.eleccion_de_tecnologia | TBD | - | Elegir entre MEMS (Mirrorcle, herencia CLICK-A, espejo de 5 mm) y piezo (PI S-331). Se modela el MEMS porque es el que tiene cota publicada clara; eso NO es la eleccion. La alternativa piezo esta en el catalogo como 'fsm_piezo_pi_s331'. |
+| fsm | fsm.soporte | TBD | - | Soporte de vuelo del MEMS: el encapsulado DIP24 no se atornilla solo a un banco optico. Es lo que decide el volumen real de esta pieza. |
+| dicroico | dicroico.dimensiones | supuesto | `[23.0, 23.0, 23.0]` | Diametro del haz colimado (del que sale el tamano del sustrato), longitudes de onda de corte y envolvente del soporte |
 | dicroico | dicroico.masa | TBD | - | Masa del dicroico y su soporte |
-| colimador | colimador.dimensiones | TBD | - | Modelo y envolvente (diametro de haz colimado, longitud) |
+| colimador | colimador.dimensiones | supuesto | `[28.0, 12.0, 12.0]` | Diametro del haz colimado y modelo de colimador. Es el mismo dato que bloquea los keep-outs del camino optico. |
 | colimador | colimador.masa | TBD | - | Masa del colimador elegido |
 
 ## Equipo de payload de ACSAR (9)
@@ -137,6 +137,12 @@ Total de huecos abiertos: **60**, de los cuales **47** son TBD sin ninguna aprox
 |---|---|---|---|---|
 | qrng_idq20mc1_s3 | qrng_idq20mc1_s3.masa | TBD | - | Masa por unidad |
 
+## Mirrorcle Technologies / Equipo de optica de ACSAR (1)
+
+| componente | magnitud | estado | valor modelado | que falta |
+|---|---|---|---|---|
+| fsm | fsm.masa | TBD | - | Masa del MEMS con su soporte de vuelo |
+
 ## Oscar (ACSAR) / AAC Clyde Space (3)
 
 | componente | magnitud | estado | valor modelado | que falta |
@@ -149,14 +155,26 @@ Total de huecos abiertos: **60**, de los cuales **47** son TBD sin ninguna aprox
 
 | componente | magnitud | estado | valor modelado | que falta |
 |---|---|---|---|---|
-| telescopio_cassegrain | telescopio_cassegrain.dimensiones | TBD | - | Diametro exterior del barrilete y longitud optica del tubo. YA EXISTE un concepto en formato nativo SolidWorks (Telescopio_concepto.SLDPRT, entrega 'Preliminar viability model' del 2026-09-20), ilegible. Hace falta reexportarlo a STEP AP214 o AP242. Ver cad/vendor/MANIFEST.yaml, seccion 'sin_convertir'. |
+| telescopio_cassegrain | telescopio_cassegrain.dimensiones | supuesto | `[95.4, 95.4, 200.0]` | Diametro exterior del barrilete y longitud optica real. YA EXISTE un concepto en formato nativo SolidWorks (Telescopio_concepto.SLDPRT, entrega "Preliminar viability model" del 2026-09-20), ilegible. Hace falta reexportarlo a STEP AP214 o AP242 y dejarlo en la ruta de 'step_esperado'. Ver cad/vendor/MANIFEST.yaml, seccion 'sin_convertir'. |
 
-## Solo los supuestos, para sustituirlos (13)
+## Physik Instrumente (1)
+
+| componente | magnitud | estado | valor modelado | que falta |
+|---|---|---|---|---|
+| fsm_piezo_pi_s331 | fsm_piezo_pi_s331.dimensiones | supuesto | `[50.0, 50.0, 22.0]` | Cotas exteriores del S-331 (plano acotado o STEP) |
+
+## Solo los supuestos, para sustituirlos (19)
 
 Cada fila es un numero que hoy sostiene el modelo sin sostenerse en nada.
 
 | componente | magnitud | valor modelado | que falta | pedir a |
 |---|---|---|---|---|
+| telescopio_cassegrain | telescopio_cassegrain.dimensiones | `[95.4, 95.4, 200.0]` | Diametro exterior del barrilete y longitud optica real. YA EXISTE un concepto en formato nativo SolidWorks (Telescopio_concepto.SLDPRT, entrega "Preliminar viability model" del 2026-09-20), ilegible. Hace falta reexportarlo a STEP AP214 o AP242 y dejarlo en la ruta de 'step_esperado'. Ver cad/vendor/MANIFEST.yaml, seccion 'sin_convertir'. | Oscar (ACSAR) / Aperture Optical Sciences |
+| fsm_piezo_pi_s331 | fsm_piezo_pi_s331.dimensiones | `[50.0, 50.0, 22.0]` | Cotas exteriores del S-331 (plano acotado o STEP) | Physik Instrumente |
+| dicroico | dicroico.dimensiones | `[23.0, 23.0, 23.0]` | Diametro del haz colimado (del que sale el tamano del sustrato), longitudes de onda de corte y envolvente del soporte | Equipo de optica de ACSAR |
+| camara_beacon | camara_beacon.dimensiones | `[30.0, 30.0, 30.0]` | Modelo de sensor, distancia focal del objetivo y campo de vision exigido por el lazo de apuntado | Equipo de PAT de ACSAR |
+| laser_beacon_bajada | laser_beacon_bajada.dimensiones | `[25.0, 30.0, 25.0]` | Longitud de onda, potencia optica y envolvente del modulo elegido | Equipo de PAT de ACSAR |
+| colimador | colimador.dimensiones | `[28.0, 12.0, 12.0]` | Diametro del haz colimado y modelo de colimador. Es el mismo dato que bloquea los keep-outs del camino optico. | Equipo de optica de ACSAR |
 | bandeja_optica | bandeja_optica.dimensiones | `[117.7, 3.0, 102.4]` | Material, espesor y patron de taladros de la placa, del analisis estructural y termico | Equipo de estructura de ACSAR |
 | laser_dfb_1550 | laser_dfb_1550.pines_btf14.dimensiones | `[30.0, 15.3, 4.0]` | Cotas de la fila de pines del modulo elegido | Gooch & Housego |
 | laser_dfb_1550 | laser_dfb_1550.pines_btf14_b.dimensiones | `[30.0, 15.3, 4.0]` | Cotas de la fila de pines del modulo elegido | Gooch & Housego |
@@ -171,7 +189,7 @@ Cada fila es un numero que hoy sostiene el modelo sin sostenerse en nada.
 | filtro_espectral | filtro_espectral.dimensiones | `[40.0, 5.5, 5.5]` | Modelo de filtro elegido, su ancho de banda y su envolvente | Equipo de payload de ACSAR |
 | acoplador_monitor | acoplador_monitor.dimensiones | `[60.0, 20.0, 12.0]` | Modelo de acoplador y de fotodiodo, y si el fotodiodo va en la bandeja o montado en PCB-2 | Equipo de payload de ACSAR |
 
-## Discrepancias entre fuentes (7)
+## Discrepancias entre fuentes (9)
 
 ### adcs_iadcs400.potencia_pico
 
@@ -194,6 +212,16 @@ Cada fila es un numero que hoy sostiene el modelo sin sostenerse en nada.
 
 - Valor usado: `9.0` - fuente: https://www.aac-clyde.space/wp-content/uploads/2021/11/AAC_DataSheet_Photon.pdf
 - Alternativa: `9.25` - fuente: Brief ACSAR 2026-09-19 - El brief indica 9.25 W por cara de 3U.
+
+### fsm.dimensiones
+
+- Valor usado: `[30.5, 15.1, 2.16]` - fuente: https://mirrorcletech.com/pdf/Mirrorcle_MEMS_Packages_and_Mounts_Guide.pdf
+- Alternativa: `[66.04, 25.4, 14.07]` - fuente: https://mirrorcletech.com/pdf/Mirrorcle_MEMS_Packages_and_Mounts_Guide.pdf - MOUNT-DIP.5-KMS: "PCB Dimensions: 66.04mm x 25.40mm x 1.57mm, ZIF Socket Height: ~12.5mm". Es el soporte de laboratorio, no de vuelo, pero da el orden de magnitud de lo que hay que reservar de verdad alrededor del encapsulado.
+
+### fsm_piezo_pi_s331.masa
+
+- Valor usado: `130.0` - fuente: PI, manual S-331 PZ256E (7/29/2026), tabla "Mechanical properties": "Overall mass ... 130 g" para S-331.2SB / .2SH / .2SL.
+- Alternativa: `280.0` - fuente: PI, manual S-331 PZ256E, misma tabla, columna S-331.5SH / .5SL - Variante de 5 mrad de recorrido. Mas del doble de masa.
 
 ### laser_dfb_1550.dimensiones
 

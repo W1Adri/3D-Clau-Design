@@ -5,7 +5,7 @@ No editar a mano: los numeros salen de `data/components.yaml`.
 
 - Mision: CLAU - CubeSat Laser per a Aplicacions Ultrasegures
 - Norma: CubeSat Design Specification Rev. 14.1, The CubeSat Program, Cal Poly SLO
-- Estado del layout: **confirmada** (14 piezas colocadas)
+- Estado del layout: **confirmada** (20 piezas colocadas)
 
 ## Masa (g)
 

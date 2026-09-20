@@ -1,8 +1,14 @@
-"""Chequeos de viabilidad que NO dependen de donde se coloque cada pieza.
+"""Chequeos de viabilidad, casi todos independientes de la distribucion.
 
 Sirven para decidir la distribucion con numeros por delante, antes de fijarla.
 Un chequeo que no se puede hacer por falta de datos sale como 'no comprobable',
 nunca como correcto.
+
+La excepcion es 'banco_optico', que si necesita el layout: la pregunta que hace
+-- si el colimador y el dicroico caben entre el eje del telescopio y la pared --
+solo tiene sentido una vez decidido donde cae ese eje. Se le pasa el layout
+cuando lo hay, y sin el sale como no comprobable, igual que cualquier otro
+chequeo al que le falte un dato.
 """
 
 from __future__ import annotations
@@ -537,6 +543,112 @@ def chequeo_masa(catalogo: Catalogo) -> Chequeo:
     )
 
 
+def chequeo_banco_optico(catalogo: Catalogo, layout=None) -> Chequeo:
+    """Cabe la cadena de espacio libre entre el eje del telescopio y la pared.
+
+    El FSM dobla el haz de X a Z, asi que tiene que estar SOBRE el eje optico
+    del telescopio: no se puede mover. Eso deja al colimador y al dicroico en
+    linea con el, hacia +X, y el sitio que tienen es el que va del eje a la
+    pared de la columna de payload. Es el punto mas apretado del payload y el
+    que no se ve mirando volumenes: sobra hueco en el banco, pero no EN ESA
+    LINEA.
+
+    Si el margen sale negativo la salida no es apretar las piezas: es alargar
+    el banco a costa de la bandeja o de la longitud reservada al telescopio.
+    """
+    titulo = "Cadena de espacio libre entre el eje del telescopio y la pared"
+    if layout is None:
+        return Chequeo(
+            id="banco_optico", titulo=titulo, estado=NO_COMPROBABLE,
+            mensaje="Sin layout no se sabe donde cae el eje optico.",
+            falta="Distribucion (data/layout.yaml)",
+        )
+    zonas = {z.id: z for z in layout.zonas}
+    banco = zonas.get("z_payload_banco")
+    telescopio = zonas.get("z_payload_telescopio")
+    if banco is None or telescopio is None:
+        return Chequeo(
+            id="banco_optico", titulo=titulo, estado=NO_COMPROBABLE,
+            mensaje="El layout no declara las zonas del banco y del telescopio.",
+            falta="Zonas z_payload_banco y z_payload_telescopio",
+        )
+
+    from .. import parts
+
+    eje_x = telescopio.caja.centro[0]
+    disponible = banco.caja.xmax - eje_x
+
+    piezas = ("fsm", "dicroico", "colimador")
+    necesario = 0.0
+    sin_envolvente: list[str] = []
+    detalle: dict[str, float] = {}
+    for cid in piezas:
+        if not catalogo.existe(cid):
+            continue
+        componente = catalogo[cid]
+        caja = parts.caja_local(componente) if componente.modelable else None
+        if caja is None:
+            sin_envolvente.append(cid)
+            continue
+        # El FSM esta centrado en el eje, asi que solo cuenta su mitad. Y va a
+        # 45 grados, que es lo que lo hace ancho: su lado largo se proyecta
+        # sobre X.
+        if cid == "fsm":
+            ancho = math.hypot(caja.dims[0], caja.dims[2]) / 2
+        else:
+            ancho = caja.dims[0]
+        detalle[cid] = ancho
+        necesario += ancho
+
+    if sin_envolvente:
+        return Chequeo(
+            id="banco_optico", titulo=titulo, estado=NO_COMPROBABLE,
+            mensaje=(
+                f"Sin envolvente: {', '.join(sin_envolvente)}. No se puede "
+                f"sumar la linea."
+            ),
+            numeros={"disponible_mm": disponible},
+            falta=f"Envolvente de {', '.join(sin_envolvente)}",
+        )
+
+    margen = disponible - necesario
+    numeros = {**detalle, "necesario_mm": necesario, "disponible_mm": disponible,
+               "margen_mm": margen}
+    comun = (
+        f"El FSM va sobre el eje optico del telescopio (X = {eje_x:+.2f} mm) "
+        f"porque es el que dobla el haz de X a Z. Del eje a la pared +X de la "
+        f"columna hay {disponible:.1f} mm, y la media anchura del FSM mas el "
+        f"dicroico mas el colimador suman {necesario:.1f} mm, sin contar "
+        f"holguras de montaje."
+    )
+    if margen < 0:
+        return Chequeo(
+            id="banco_optico", titulo=titulo, estado=FALLA,
+            mensaje=(
+                comun + f" NO CABE por {abs(margen):.1f} mm. La salida no es "
+                f"apretar las piezas: es alargar el banco a costa de la "
+                f"bandeja o de la longitud reservada al telescopio."
+            ),
+            numeros=numeros,
+        )
+    if margen < HOLGURA_NULA_MM * 10:
+        return Chequeo(
+            id="banco_optico", titulo=titulo, estado=ATENCION,
+            mensaje=(
+                comun + f" Quedan {margen:.1f} mm, que no dan para holguras de "
+                f"montaje ni para que ninguna de las dos envolventes crezca. "
+                f"Las dos son SUPUESTAS; cualquier pieza real mayor rompe la "
+                f"linea."
+            ),
+            numeros=numeros,
+        )
+    return Chequeo(
+        id="banco_optico", titulo=titulo, estado=OK,
+        mensaje=comun + f" Quedan {margen:.1f} mm de margen.",
+        numeros=numeros,
+    )
+
+
 def chequeo_step_de_fabricante(catalogo: Catalogo) -> Chequeo:
     """Los STEP de fabricante presentes frente a cad/vendor/MANIFEST.yaml.
 
@@ -695,7 +807,7 @@ def _falta_de_step(ausentes, esperando, aparecidos) -> str | None:
     return ". ".join(trozos) if trozos else None
 
 
-def todos(catalogo: Catalogo) -> list[Chequeo]:
+def todos(catalogo: Catalogo, layout=None) -> list[Chequeo]:
     salida = [
         chequeo_volumen_total(catalogo),
         chequeo_apertura_telescopio(catalogo),
@@ -705,6 +817,7 @@ def todos(catalogo: Catalogo) -> list[Chequeo]:
     salida += chequeo_longitud_moduladores(catalogo)
     salida += [
         chequeo_pila_pc104(catalogo),
+        chequeo_banco_optico(catalogo, layout),
         chequeo_bucles_fibra(catalogo),
         chequeo_masa(catalogo),
         chequeo_step_de_fabricante(catalogo),

@@ -591,24 +591,58 @@ componentes:
 # ---------------------------------------------------------------------
 
   - id: telescopio_cassegrain
+    id_drive: OPT-13
+    referencia_comercial: Aperture Optical Sciences, Cassegrain a medida, apertura 90 mm
     nombre: Telescopio Cassegrain on-axis, apertura 90 mm
     categoria: payload_optico
     subsistema: terminal_optico
     cantidad: 1
+    montaje:
+      cara: "-Z"
+      eje: Z
+      tipo_eje: optico
+      nota: >-
+        Eje optico segun Z, apuntando a +Z. Se monta por su brida trasera
+        (-Z local), que es por donde le entra el haz desde el FSM.
     forma:
-      tipo: caja
-      dimensiones:
-        valor: null
-        unidad: mm
-        estado: TBD
-        falta: >-
-          Diametro exterior del barrilete y longitud optica del tubo. YA
-          EXISTE un concepto en formato nativo SolidWorks
-          (Telescopio_concepto.SLDPRT, entrega 'Preliminar viability model'
-          del 2026-09-20), ilegible. Hace falta reexportarlo a STEP AP214 o
-          AP242. Ver cad/vendor/MANIFEST.yaml, seccion 'sin_convertir'.
+      tipo: cilindro
+      eje: Z
+      step_esperado:
+        ruta: cad/vendor/aperture_optical_sciences/telescopio_cassegrain.step
         pedir_a: Oscar (ACSAR) / Aperture Optical Sciences
-        falta_tambien: STEP del telescopio
+        fuente_prevista: >-
+          Telescopio Cassegrain de Aperture Optical Sciences, via Oscar (ACSAR).
+          Existe ya un concepto en Telescopio_concepto.SLDPRT (entrega
+          "Preliminar viability model" del 2026-09-20), que hay que reexportar
+          a STEP AP214 o AP242 porque el formato nativo de SolidWorks no hay
+          manera de leerlo.
+        nota: >-
+          En cuanto el fichero este en esa ruta, sustituye al cilindro de
+          reserva sin tocar nada mas. Entrara como 'referencia' hasta verificar
+          que es el barrilete definitivo y no el concepto.
+      dimensiones:
+        valor: [95.4, 95.4, 200.0]
+        unidad: mm
+        estado: supuesto
+        fuente: >-
+          COTA SUPERIOR, no una medida. El diametro es la altura interior del
+          6U (95.4 mm): el barrilete no puede pasar de ahi, luego este es el
+          telescopio MAS GRANDE que cabe, no el que hay. La longitud es la ya
+          reservada en el layout ('longitud_reservada', 200 mm, provisional).
+          Dibujarlo asi hace visible lo que dice el chequeo
+          'apertura_vs_altura': con 90 mm de apertura libre quedan 2.7 mm por
+          lado para barrilete, celda y ajuste, que no da para nada. Si el
+          diametro real bajase, la columna de payload se abriria; si no cabe,
+          el telescopio tendra que ser el propio elemento estructural de esa
+          cara.
+        falta: >-
+          Diametro exterior del barrilete y longitud optica real. YA EXISTE un
+          concepto en formato nativo SolidWorks (Telescopio_concepto.SLDPRT,
+          entrega "Preliminar viability model" del 2026-09-20), ilegible. Hace
+          falta reexportarlo a STEP AP214 o AP242 y dejarlo en la ruta de
+          'step_esperado'. Ver cad/vendor/MANIFEST.yaml, seccion
+          'sin_convertir'.
+        pedir_a: Oscar (ACSAR) / Aperture Optical Sciences
         nota: >-
           El brief indica "aprox. 2U" y apertura libre 90 mm, pero 2U no fija el
           contorno. El diametro exterior es el numero critico: ver el chequeo
@@ -652,42 +686,177 @@ componentes:
     nota_vista: La apertura necesita vision despejada hacia el exterior (keep-out del haz).
 
   - id: fsm
-    nombre: Espejo de apuntado fino (FSM)
+    id_drive: OPT-10
+    referencia_comercial: Mirrorcle Technologies, MEMS de dos ejes en encapsulado DIP24
+    nombre: Espejo de apuntado fino (FSM) - opcion MEMS
     categoria: payload_optico
     subsistema: terminal_optico
     cantidad: 1
+    montaje:
+      cara: "-Z"
+      eje: Z
+      tipo_eje: optico
+      nota: >-
+        El espejo mira por +Z local. En el banco va girado para doblar el haz
+        que llega segun X hacia el telescopio, que apunta segun +Z.
     forma:
       tipo: caja
       dimensiones:
-        valor: null
+        valor: [30.5, 15.1, 2.16]
         unidad: mm
-        estado: TBD
-        falta: Eleccion entre MEMS (Mirrorcle, herencia CLICK-A, espejo 5 mm) y piezo PI S-331, y su envolvente
-        pedir_a: Equipo de optica de ACSAR
+        estado: referencia
+        fuente: https://mirrorcletech.com/pdf/Mirrorcle_MEMS_Packages_and_Mounts_Guide.pdf
         nota: >-
-          Las dos familias tienen envolventes muy distintas (MEMS de pocos mm
-          frente a piezo de varias decenas de mm). No se modela hasta decidir.
+          Encapsulado DIP24 ceramico de Mirrorcle: "Ceramic Dimensions:
+          30.5 mm x 15.1 mm, Ceramic Thickness: 2.16 mm". Es una cota publicada
+          de un encapsulado real de la familia candidata, no del producto
+          elegido, y NO INCLUYE EL SOPORTE, que es lo que de verdad ocupa: el
+          mount de Mirrorcle para banco optico es una PCB de 66.04 x 25.40 mm
+          con un zocalo ZIF de ~12.5 mm de alto. Un montaje a medida para vuelo
+          sera otra cosa, pero no menos que el encapsulado.
+        alternativas:
+          - valor: [66.04, 25.4, 14.07]
+            fuente: https://mirrorcletech.com/pdf/Mirrorcle_MEMS_Packages_and_Mounts_Guide.pdf
+            nota: >-
+              MOUNT-DIP.5-KMS: "PCB Dimensions: 66.04mm x 25.40mm x 1.57mm,
+              ZIF Socket Height: ~12.5mm". Es el soporte de laboratorio, no de
+              vuelo, pero da el orden de magnitud de lo que hay que reservar de
+              verdad alrededor del encapsulado.
+    eleccion_de_tecnologia:
+      valor: null
+      estado: TBD
+      falta: >-
+        Elegir entre MEMS (Mirrorcle, herencia CLICK-A, espejo de 5 mm) y piezo
+        (PI S-331). Se modela el MEMS porque es el que tiene cota publicada
+        clara; eso NO es la eleccion. La alternativa piezo esta en el catalogo
+        como 'fsm_piezo_pi_s331'.
+      pedir_a: Equipo de optica de ACSAR
+    soporte:
+      valor: null
+      estado: TBD
+      falta: >-
+        Soporte de vuelo del MEMS: el encapsulado DIP24 no se atornilla solo a
+        un banco optico. Es lo que decide el volumen real de esta pieza.
+      pedir_a: Equipo de optica de ACSAR
     masa:
       valor: null
       unidad: g
       estado: TBD
-      falta: Masa del FSM elegido (MEMS o piezo)
-      pedir_a: Equipo de optica de ACSAR
+      falta: Masa del MEMS con su soporte de vuelo
+      pedir_a: Mirrorcle Technologies / Equipo de optica de ACSAR
+    nota: >-
+      Se modela la opcion MEMS porque es la que tiene cotas publicadas claras,
+      no porque este elegida. La opcion piezo esta a su lado como
+      'fsm_piezo_pi_s331', con las cifras que SI publica PI.
+
+  - id: fsm_piezo_pi_s331
+    id_drive: OPT-10-ALT
+    referencia_comercial: Physik Instrumente S-331.2SB (plataforma piezo tip/tilt)
+    nombre: FSM - alternativa piezo PI S-331 (no va a bordo, esta en estudio)
+    categoria: payload_optico
+    subsistema: terminal_optico
+    cantidad: 1
+    alternativa_de: fsm
+    montaje:
+      cara: "-Z"
+      eje: Z
+      tipo_eje: optico
+    forma:
+      tipo: cilindro
+      eje: Z
+      dimensiones:
+        valor: [50.0, 50.0, 22.0]
+        unidad: mm
+        estado: supuesto
+        fuente: >-
+          SUPUESTO. PI publica la masa del S-331 y sus datos mecanicos, pero
+          sus cotas exteriores estan solo en el plano del manual (figura, sin
+          texto extraible). Las de aqui son una reserva del orden correcto para
+          una plataforma tip/tilt de flexion que monta un espejo de 12.7 mm.
+          Lo que SI es dato y esta abajo es la masa, 130 g, que es el numero
+          decisivo: es 2 ordenes de magnitud mas que un MEMS.
+        falta: Cotas exteriores del S-331 (plano acotado o STEP)
+        pedir_a: Physik Instrumente
+    masa:
+      valor: 130.0
+      unidad: g
+      estado: confirmado
+      fuente: >-
+        PI, manual S-331 PZ256E (7/29/2026), tabla "Mechanical properties":
+        "Overall mass ... 130 g" para S-331.2SB / .2SH / .2SL.
+      nota: >-
+        DATO DECISIVO. La variante de 5 mrad (S-331.5Sx) pesa 280 g. Frente a
+        un MEMS de gramos, 130 g en el banco optico cambian el presupuesto de
+        masa y el momento de inercia. Es el argumento fuerte a favor del MEMS.
+      alternativas:
+        - valor: 280.0
+          fuente: PI, manual S-331 PZ256E, misma tabla, columna S-331.5SH / .5SL
+          nota: Variante de 5 mrad de recorrido. Mas del doble de masa.
+    recorrido_angular:
+      valor: 3.0
+      unidad: mrad
+      estado: confirmado
+      fuente: 'PI, manual S-331 PZ256E: S-331.2Sx, 3 mrad de tip/tilt.'
+    temperatura_operacion:
+      valor: [-20.0, 80.0]
+      unidad: C
+      estado: confirmado
+      fuente: 'PI, manual S-331 PZ256E, tabla "Miscellaneous".'
+    espejo_admitido:
+      valor: [12.7, 3.0]
+      unidad: mm
+      estado: confirmado
+      fuente: >-
+        PI, manual S-331 PZ256E: ejemplo de centrado para espejo de diametro
+        12.7 mm (0.5") y 3 mm de espesor.
+      nota: Diametro y espesor del espejo de referencia. Fija el tamano del haz.
+    nota: >-
+      NO esta colocado en data/layout.yaml y NO suma en ningun presupuesto:
+      'alternativa_de' lo declara como candidato en estudio, no como pieza a
+      bordo. Esta aqui porque su masa SI es un dato, y es el dato que decide.
 
   - id: dicroico
+    id_drive: OPT-09
+    referencia_comercial: null
     nombre: Espejo dicroico (separacion beacon / canal cuantico)
     categoria: payload_optico
     subsistema: terminal_optico
     cantidad: 1
+    montaje:
+      cara: "-Y"
+      eje: X
+      tipo_eje: optico
+      nota: >-
+        El sustrato va a 45 grados dentro del soporte; lo que se declara aqui
+        es el soporte, que es lo que ocupa. El eje X es el del canal cuantico,
+        que lo ATRAVIESA; el beacon se refleja hacia +-Y.
     forma:
       tipo: caja
       dimensiones:
-        valor: null
+        valor: [23.0, 23.0, 23.0]
         unidad: mm
-        estado: TBD
-        falta: Dimensiones del sustrato y del soporte
+        estado: supuesto
+        fuente: >-
+          SUPUESTO. Reserva cubica para el SOPORTE del dicroico, con el
+          sustrato a 45 grados por dentro. La envolvente va alineada con los
+          ejes porque lo que ocupa es la celda, no el sustrato. Un lado de
+          23 mm admite un sustrato de unos 12-15 mm a 45 grados, que para un
+          haz colimado de pocos milimetros sobra; si el haz sale mas gordo, el
+          soporte crece. NO es ningun producto: no hay candidato elegido.
+          ACOTADA POR ARRIBA POR EL BANCO, ademas: el FSM tiene que estar sobre
+          el eje optico del telescopio, y entre ese eje y la pared +X de la
+          columna de payload quedan unos 56 mm para el colimador y el dicroico
+          juntos, gaps incluidos. Si las piezas reales son mayores no es que el
+          modelo este mal: es que el banco no da, y habra que alargarlo a costa
+          de la bandeja o de la longitud reservada al telescopio. El chequeo
+          'banco_optico' recalcula ese margen desde el catalogo.
+        falta: >-
+          Diametro del haz colimado (del que sale el tamano del sustrato),
+          longitudes de onda de corte y envolvente del soporte
         pedir_a: Equipo de optica de ACSAR
-    nota: El canal cuantico lo atraviesa; el beacon de subida se refleja hacia la camara.
+    nota: >-
+      El canal cuantico lo atraviesa; el beacon de subida se refleja hacia la
+      camara. SIN CANDIDATO: lo que se dibuja es una reserva, no una pieza.
     masa:
       valor: null
       unidad: g
@@ -696,18 +865,37 @@ componentes:
       pedir_a: Equipo de optica de ACSAR
 
   - id: camara_beacon
+    id_drive: OPT-11
+    referencia_comercial: null
     nombre: Camara / sensor de beacon (medida del error de apuntado)
     categoria: payload_optico
     subsistema: terminal_optico
     cantidad: 1
+    montaje:
+      cara: "-Y"
+      eje: Y
+      tipo_eje: optico
+      nota: >-
+        Mira hacia el dicroico por -Y, que es de donde le llega el beacon
+        reflejado. Se atornilla por su cara trasera al soporte del banco.
     forma:
       tipo: caja
       dimensiones:
-        valor: null
+        valor: [30.0, 30.0, 30.0]
         unidad: mm
-        estado: TBD
-        falta: Modelo de sensor y su envolvente
+        estado: supuesto
+        fuente: >-
+          SUPUESTO. Reserva para una camara de placa unica con su objetivo:
+          un cubo de 30 mm es el orden de magnitud de un sensor pequeno mas la
+          optica de imagen. NO es ningun producto: no hay sensor elegido. El
+          volumen real depende sobre todo de la distancia focal que pida el
+          campo de vision del PAT, que esta sin definir.
+        falta: >-
+          Modelo de sensor, distancia focal del objetivo y campo de vision
+          exigido por el lazo de apuntado
         pedir_a: Equipo de PAT de ACSAR
+    nota: >-
+      SIN CANDIDATO: lo que se dibuja es una reserva, no una pieza.
     masa:
       valor: null
       unidad: g
@@ -716,19 +904,33 @@ componentes:
       pedir_a: Equipo de PAT de ACSAR
 
   - id: laser_beacon_bajada
+    id_drive: OPT-12
+    referencia_comercial: null
     nombre: Laser de beacon de bajada
     categoria: payload_optico
     subsistema: terminal_optico
     cantidad: 1
+    montaje:
+      cara: "-Y"
+      eje: Y
+      tipo_eje: optico
+      nota: Emite hacia +Y, contra el dicroico, por el lado opuesto a la camara.
     forma:
       tipo: caja
       dimensiones:
-        valor: null
+        valor: [25.0, 30.0, 25.0]
         unidad: mm
-        estado: TBD
-        falta: Longitud de onda, potencia y envolvente
+        estado: supuesto
+        fuente: >-
+          SUPUESTO. Reserva para un diodo laser con su optica de colimacion y
+          su disipador. NO es ningun producto: ni la longitud de onda ni la
+          potencia estan decididas, y las dos cambian la envolvente (la
+          potencia, por el disipador).
+        falta: Longitud de onda, potencia optica y envolvente del modulo elegido
         pedir_a: Equipo de PAT de ACSAR
-    nota: Longitud de onda distinta de 1550 nm para que la estacion siga al satelite.
+    nota: >-
+      Longitud de onda distinta de 1550 nm para que la estacion siga al
+      satelite. SIN CANDIDATO: lo que se dibuja es una reserva.
     masa:
       valor: null
       unidad: g
@@ -737,19 +939,45 @@ componentes:
       pedir_a: Equipo de PAT de ACSAR
 
   - id: colimador
+    id_drive: OPT-08
+    referencia_comercial: null
     nombre: Colimador fibra a espacio libre
     categoria: payload_optico
     subsistema: terminal_optico
     cantidad: 1
+    montaje:
+      cara: "-Y"
+      eje: X
+      tipo_eje: optico
+      nota: >-
+        Es la frontera: le entra fibra por -X y le sale haz libre por +X. Se
+        fija con abrazadera en V al banco.
     forma:
-      tipo: caja
+      tipo: cilindro
+      eje: X
       dimensiones:
-        valor: null
+        valor: [28.0, 12.0, 12.0]
         unidad: mm
-        estado: TBD
-        falta: Modelo y envolvente (diametro de haz colimado, longitud)
+        estado: supuesto
+        fuente: >-
+          SUPUESTO. Reserva para un colimador de fibra de banco: barrilete
+          cilindrico de unos 12 mm de diametro. NO es ningun producto. El
+          diametro del barrilete lo fija el del haz colimado, que es TBD, asi
+          que esta cifra se movera con el.
+          ACOTADA POR ARRIBA POR EL BANCO, ademas: el FSM tiene que estar sobre
+          el eje optico del telescopio, y entre ese eje y la pared +X de la
+          columna de payload quedan unos 56 mm para el colimador y el dicroico
+          juntos, gaps incluidos. Si las piezas reales son mayores no es que el
+          modelo este mal: es que el banco no da, y habra que alargarlo a costa
+          de la bandeja o de la longitud reservada al telescopio. El chequeo
+          'banco_optico' recalcula ese margen desde el catalogo.
+        falta: >-
+          Diametro del haz colimado y modelo de colimador. Es el mismo dato que
+          bloquea los keep-outs del camino optico.
         pedir_a: Equipo de optica de ACSAR
-    nota: Frontera entre la cadena de fibra y el camino en espacio libre.
+    nota: >-
+      Frontera entre la cadena de fibra y el camino en espacio libre.
+      SIN CANDIDATO: lo que se dibuja es una reserva.
     masa:
       valor: null
       unidad: g

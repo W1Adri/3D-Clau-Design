@@ -57,8 +57,11 @@ zonas:
       'longitud_reservada', estado decision, provisional hasta el STEP).
       OJO: los "~2U" del brief son ~227 mm con la U de longitud de la CDS
       (113.5 mm), no 200. Esta zona mide 95.4 mm en X, que es el mayor
-      diametro de barrilete que cabe en la altura interior. Su envolvente
-      es TBD y no se dibuja.
+      diametro de barrilete que cabe en la altura interior. El barrilete
+      se dibuja LLENANDO la zona, porque su envolvente es una cota
+      superior y no una medida: asi se ve que con 90 mm de apertura libre
+      no queda sitio para barrilete, celda ni ajuste. En cuanto llegue el
+      STEP, sustituye al cilindro sin tocar nada.
 
   - id: z_payload_franja
     nombre: "Franja lateral - moduladores"
@@ -79,8 +82,13 @@ zonas:
       min: [-10.85, -47.70, -74.30]
       max: [110.85, 47.70, -19.30]
     nota: >-
-      Colimador, dicroico, FSM y camara de beacon. Camino: colimador ->
-      dicroico -> FSM -> telescopio, y dicroico -> camara.
+      Camino: colimador -> dicroico -> FSM -> telescopio, y del dicroico
+      sale el brazo del beacon hacia +-Y (camara arriba, laser de beacon
+      de bajada abajo). El FSM esta sobre el eje optico del telescopio (X
+      = +36.85) porque es el que dobla el haz de X a Z, y eso deja el
+      colimador y el dicroico en linea hacia +X. Margen contra la pared
+      +X: -0.5 mm. Los haces NO estan dibujados: sin diametro de haz, un
+      keep-out optico seria una medida inventada.
 
   - id: z_payload_bandeja
     nombre: "Bandeja optica de fibra"
@@ -174,3 +182,33 @@ colocaciones:
     centro: [74.85, -38.7, -99.9]
     rotacion: [-90, 0, 0]
     zona: z_payload_bandeja
+  - componente: fsm
+    instancia: 1
+    centro: [36.85, 0.0, -46.8]
+    rotacion: [0, 45, 0]
+    zona: z_payload_banco
+  - componente: dicroico
+    instancia: 1
+    centro: [64.897, 0.0, -46.8]
+    rotacion: [0, 0, 0]
+    zona: z_payload_banco
+  - componente: colimador
+    instancia: 1
+    centro: [95.397, 0.0, -46.8]
+    rotacion: [0, 0, 0]
+    zona: z_payload_banco
+  - componente: camara_beacon
+    instancia: 1
+    centro: [64.897, 31.5, -46.8]
+    rotacion: [0, 0, 0]
+    zona: z_payload_banco
+  - componente: laser_beacon_bajada
+    instancia: 1
+    centro: [64.897, -31.5, -46.8]
+    rotacion: [0, 0, 0]
+    zona: z_payload_banco
+  - componente: telescopio_cassegrain
+    instancia: 1
+    centro: [36.85, 0.0, 80.7]
+    rotacion: [0, 0, 0]
+    zona: z_payload_telescopio

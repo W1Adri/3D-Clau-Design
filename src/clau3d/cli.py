@@ -78,7 +78,7 @@ def cmd_informe(_: argparse.Namespace) -> int:
     for ruta in escritos:
         print(f"  - {ruta.relative_to(DIR_INFORMES.parent)}")
 
-    criticos = [c for c in fit.todos(catalogo) if c.critico]
+    criticos = [c for c in fit.todos(catalogo, layout) if c.critico]
     hallazgos = interference.todas(catalogo, layout, piezas)
     if criticos or hallazgos:
         print(f"\n{len(criticos)} chequeos fallidos, {len(hallazgos)} interferencias.")

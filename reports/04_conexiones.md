@@ -5,9 +5,9 @@ No editar a mano: los numeros salen de `data/components.yaml`.
 
 - Mision: CLAU - CubeSat Laser per a Aplicacions Ultrasegures
 - Norma: CubeSat Design Specification Rev. 14.1, The CubeSat Program, Cal Poly SLO
-- Estado del layout: **confirmada** (14 piezas colocadas)
+- Estado del layout: **confirmada** (20 piezas colocadas)
 
-Resumen: **26** no comprobable, **6** ok
+Resumen: **25** no comprobable, **7** ok
 
 | id | familia | desde | hasta | tipo | estado | recorrido mm | detalle |
 |---|---|---|---|---|---|---|---|
@@ -17,12 +17,12 @@ Resumen: **26** no comprobable, **6** ok
 | f04 | opticas_fibra | voa | aislador | fibra_pm | no comprobable | 75 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
 | f05 | opticas_fibra | aislador | filtro_espectral | fibra_pm | no comprobable | 75 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
 | f06 | opticas_fibra | filtro_espectral | acoplador_monitor | fibra_pm | no comprobable | 60 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
-| f07 | opticas_fibra | acoplador_monitor | colimador | fibra_pm | no comprobable | - | Sin colocar: colimador. No se puede medir el recorrido ni comprobar la holgura. |
-| e01 | opticas_espacio_libre | colimador | dicroico | haz_libre | no comprobable | - | Sin colocar: colimador, dicroico. No se puede medir el recorrido ni comprobar la holgura. |
-| e02 | opticas_espacio_libre | dicroico | fsm | haz_libre | no comprobable | - | Sin colocar: dicroico, fsm. No se puede medir el recorrido ni comprobar la holgura. |
-| e03 | opticas_espacio_libre | fsm | telescopio_cassegrain | haz_libre | no comprobable | - | Sin colocar: fsm, telescopio_cassegrain. No se puede medir el recorrido ni comprobar la holgura. |
-| e04 | opticas_espacio_libre | dicroico | camara_beacon | haz_libre | no comprobable | - | Sin colocar: dicroico, camara_beacon. No se puede medir el recorrido ni comprobar la holgura. |
-| e05 | opticas_espacio_libre | telescopio_cassegrain | EXTERIOR | apertura | no comprobable | - | Sin colocar: telescopio_cassegrain. No se puede medir el recorrido ni comprobar la holgura. |
+| f07 | opticas_fibra | acoplador_monitor | colimador | fibra_pm | no comprobable | 69 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
+| e01 | opticas_espacio_libre | colimador | dicroico | haz_libre | no comprobable | 30 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
+| e02 | opticas_espacio_libre | dicroico | fsm | haz_libre | no comprobable | 28 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
+| e03 | opticas_espacio_libre | fsm | telescopio_cassegrain | haz_libre | no comprobable | 127 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
+| e04 | opticas_espacio_libre | dicroico | camara_beacon | haz_libre | no comprobable | 32 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
+| e05 | opticas_espacio_libre | telescopio_cassegrain | EXTERIOR | apertura | ok | - | Extremos colocados y holgura declarada |
 | r01 | rf_coaxial | pcb2_drivers_opticos | laser_dfb_1550 | coaxial | no comprobable | - | Sin colocar: pcb2_drivers_opticos. No se puede medir el recorrido ni comprobar la holgura. |
 | r02 | rf_coaxial | pcb2_drivers_opticos | mod_intensidad_mxer_ln_10 | coaxial | no comprobable | - | Sin colocar: pcb2_drivers_opticos. No se puede medir el recorrido ni comprobar la holgura. |
 | r03 | rf_coaxial | pcb2_drivers_opticos | mod_fase_mpz_ln_10 | coaxial | no comprobable | - | Sin colocar: pcb2_drivers_opticos. No se puede medir el recorrido ni comprobar la holgura. |

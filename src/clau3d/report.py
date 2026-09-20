@@ -160,7 +160,7 @@ def informe_viabilidad(catalogo: Catalogo, layout: Layout) -> str:
         "Comprobaciones que no dependen de donde se coloque cada pieza.",
         "",
     ]
-    for chequeo in fit.todos(catalogo):
+    for chequeo in fit.todos(catalogo, layout):
         lineas += [
             f"## {chequeo.titulo}",
             "",

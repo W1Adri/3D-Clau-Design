@@ -197,7 +197,7 @@ def escena(catalogo: Catalogo, layout: Layout, piezas: list[PiezaColocada]) -> d
     util = structure.zona_util(catalogo)
     resumen = volume.resumen(catalogo, piezas)
     libre_zona = {f["zona"]: f for f in volume.libre_por_zona(layout, piezas)}
-    chequeos = fit.todos(catalogo)
+    chequeos = fit.todos(catalogo, layout)
     hallazgos = interference.todas(catalogo, layout, piezas)
 
     colocados = {p.colocacion.componente_id for p in piezas}

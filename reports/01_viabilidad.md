@@ -5,7 +5,7 @@ No editar a mano: los numeros salen de `data/components.yaml`.
 
 - Mision: CLAU - CubeSat Laser per a Aplicacions Ultrasegures
 - Norma: CubeSat Design Specification Rev. 14.1, The CubeSat Program, Cal Poly SLO
-- Estado del layout: **confirmada** (14 piezas colocadas)
+- Estado del layout: **confirmada** (20 piezas colocadas)
 
 Comprobaciones que no dependen de donde se coloque cada pieza.
 
@@ -13,17 +13,17 @@ Comprobaciones que no dependen de donde se coloque cada pieza.
 
 **Estado: ATENCION**
 
-Los 13 componentes con envolvente conocida ocupan 1452 cm3 de los 7644 cm3 interiores (19%). Quedan 13 componentes sin envolvente: el dato real sera mayor.
+Los 19 componentes con envolvente conocida ocupan 3335 cm3 de los 7644 cm3 interiores (44%). Quedan 7 componentes sin envolvente: el dato real sera mayor.
 
 | magnitud | valor |
 |---|---|
 | interior_cm3 | 7643.68 |
-| ocupado_conocido_cm3 | 1451.65 |
-| libre_si_nada_mas_creciera_cm3 | 6192.02 |
-| fraccion_ocupada | 0.19 |
-| componentes_sin_volumen | 13 |
+| ocupado_conocido_cm3 | 3334.83 |
+| libre_si_nada_mas_creciera_cm3 | 4308.85 |
+| fraccion_ocupada | 0.44 |
+| componentes_sin_volumen | 7 |
 
-Falta: Envolvente de: antena_quasar_wsant, radio_uhf_pulsar_vutrx, paneles_photon_side, propulsion, telescopio_cassegrain, fsm, dicroico, camara_beacon, laser_beacon_bajada, colimador, pcb1_control_qkd, pcb2_drivers_opticos, pcb3_pat
+Falta: Envolvente de: antena_quasar_wsant, radio_uhf_pulsar_vutrx, paneles_photon_side, propulsion, pcb1_control_qkd, pcb2_drivers_opticos, pcb3_pat
 
 ## Apertura del telescopio frente a la seccion interior
 
@@ -120,6 +120,21 @@ Con el paso estandar PC/104 de 15.24 mm, las 6 tarjetas de altura conocida ocupa
 
 Falta: Paso de apilamiento PC104 del chasis elegido
 
+## Cadena de espacio libre entre el eje del telescopio y la pared
+
+**Estado: OK**
+
+El FSM va sobre el eje optico del telescopio (X = +36.85 mm) porque es el que dobla el haz de X a Z. Del eje a la pared +X de la columna hay 74.0 mm, y la media anchura del FSM mas el dicroico mas el colimador suman 66.3 mm, sin contar holguras de montaje. Quedan 7.7 mm de margen.
+
+| magnitud | valor |
+|---|---|
+| fsm | 15.29 |
+| dicroico | 23.00 |
+| colimador | 28.00 |
+| necesario_mm | 66.29 |
+| disponible_mm | 74.00 |
+| margen_mm | 7.71 |
+
 ## Radio minimo de curvatura de la fibra
 
 **Estado: NO COMPROBABLE**
@@ -145,9 +160,9 @@ Falta: Masa de: estructura_6u, adcs_iadcs400, antena_quasar_wsant, radio_uhf_pul
 
 ## STEP de fabricante frente al manifiesto
 
-**Estado: OK**
+**Estado: ATENCION**
 
-4 de 4 CAD de fabricante presentes y con la huella del manifiesto.
+4 de 4 CAD de fabricante presentes y con la huella del manifiesto. 1 piezas esperan un STEP que aun no ha llegado; mientras tanto se dibujan con su envolvente aproximada. Dejar el fichero en la ruta indicada basta para que el modelo lo use: telescopio_cassegrain -> cad/vendor/aperture_optical_sciences/telescopio_cassegrain.step (a Oscar (ACSAR) / Aperture Optical Sciences).
 
 | magnitud | valor |
 |---|---|
@@ -156,6 +171,8 @@ Falta: Masa de: estructura_6u, adcs_iadcs400, antena_quasar_wsant, radio_uhf_pul
 | ausentes | 0.00 |
 | huella_distinta | 0.00 |
 | sin_declarar | 0.00 |
-| esperando_step | 0.00 |
+| esperando_step | 1.00 |
 | aparecidos_sin_verificar | 0.00 |
+
+Falta: STEP por recibir: telescopio_cassegrain (a Oscar (ACSAR) / Aperture Optical Sciences)
 

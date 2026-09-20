@@ -60,6 +60,30 @@ FILAS_BANDEJA = [
 HOLGURA_BANDEJA = 8.0
 MARGEN_BANDEJA = 6.0
 
+# --- el banco de espacio libre ----------------------------------------
+# El camino es colimador -> dicroico -> FSM -> telescopio, y el FSM es el que
+# dobla: el haz llega segun +X y sale segun +Z hacia el telescopio. Eso obliga
+# a dos cosas que no son negociables:
+#
+#   1. El FSM esta sobre el EJE OPTICO DEL TELESCOPIO. No se puede mover.
+#   2. El colimador y el dicroico van en linea con el, segun X.
+#
+# Y de ahi sale el numero que aprieta: entre el eje del telescopio y la pared
+# +X de la columna de payload solo hay sitio para esos dos. El chequeo
+# 'banco_optico' lo recalcula y dice cuanto margen queda. Si algun dia no da,
+# la salida es alargar el banco a costa de la bandeja o del telescopio, no
+# apretar las piezas.
+#
+# El brazo del beacon sale del dicroico segun +-Y: la camara arriba, el laser
+# de beacon de bajada abajo.
+CADENA_BANCO = ("colimador", "dicroico")   # de +X hacia el FSM
+BRAZO_BEACON = (("camara_beacon", +1), ("laser_beacon_bajada", -1))
+HOLGURA_BANCO = 5.0
+MARGEN_BANCO = 2.0
+# El FSM a 45 grados alrededor de Y: lleva la normal del espejo del +Z local a
+# la bisectriz entre +X y +Z, que es lo que dobla el haz de X a Z.
+GIRO_FSM = [0, 45, 0]
+
 
 # La cara de montaje de cada pieza (montaje.cara, en sus ejes locales) contra la
 # normal de la superficie sobre la que se atornilla. De aqui sale la rotacion, en
@@ -74,6 +98,9 @@ _ROTACION_DE_MONTAJE = {
     ("-X", "+Y"): [0, 0, 90],
     ("-Y", "+X"): [0, 0, -90],
     ("-Z", "+X"): [0, 90, 0],
+    # El telescopio no se atornilla a un suelo: se atornilla por su brida
+    # trasera a un mamparo que mira a +Z, que es por donde le entra el haz.
+    ("-Z", "+Z"): [0, 0, 0],
 }
 
 
@@ -92,27 +119,31 @@ def rotacion_de_montaje(componente, normal: str) -> list[int]:
         )
 
 
-def dims_en_mundo(componente, rotacion: list[int]) -> tuple[float, float, float]:
+def dims_en_mundo(componente, rotacion) -> tuple[float, float, float]:
     """Caja envolvente de la pieza YA girada, conectores incluidos.
 
-    Se pide a parts.caja_local, no a 'dimensiones': una pieza con conectores
-    ocupa mas que su cuerpo, y colocarla por el cuerpo la haria chocar con la
-    vecina justo por donde sale el cable.
+    Se gira el solido de verdad en vez de permutar cotas. Permutar valdria
+    mientras todos los giros fueran multiplos de 90 grados, y el FSM no lo es:
+    va a 45 para doblar el haz que llega segun X hacia el telescopio, que
+    apunta segun +Z. Una caja a 45 grados ocupa mas que la misma caja recta, y
+    ese "mas" es justo lo que decide si el banco da de si.
+
+    Ademas se pide a parts.caja_local y no a 'dimensiones', porque una pieza
+    con conectores ocupa mas que su cuerpo y colocarla por el cuerpo la haria
+    chocar con la vecina justo por donde sale el cable.
     """
+    import cadquery as cq
+
     from clau3d import parts
 
-    caja = parts.caja_local(componente)
-    assert caja is not None, componente.id
-    dx, dy, dz = caja.dims
-    # Los tres giros del diccionario son multiplos de 90 grados, asi que girar
-    # es permutar cotas. Se hace a mano para no tener que construir el solido.
-    if rotacion[0] in (90, -90):
-        dy, dz = dz, dy
-    if rotacion[1] in (90, -90):
-        dx, dz = dz, dx
-    if rotacion[2] in (90, -90):
-        dx, dy = dy, dx
-    return dx, dy, dz
+    solido = parts.solido(componente)
+    origen = cq.Vector(0, 0, 0)
+    for eje, angulo in zip(
+        (cq.Vector(1, 0, 0), cq.Vector(0, 1, 0), cq.Vector(0, 0, 1)), rotacion
+    ):
+        if angulo:
+            solido = solido.rotate(origen, eje, angulo)
+    return parts.caja_de_solidos(solido, componente.id).dims
 
 
 def generar() -> str:
@@ -277,6 +308,93 @@ def generar() -> str:
         cursor_z += fondo + HOLGURA_BANDEJA
     z_libre_bandeja = z_banco_min - (cursor_z - HOLGURA_BANDEJA)
 
+    # ----------------------------------------------------------------- banco
+    x_eje_telescopio = (x_sep + x_franja_min) / 2
+    z_eje_banco = (z_banco_min + z_tel_min) / 2
+
+    fsm = catalogo["fsm"]
+    margen_banco = None
+    if fsm.modelable:
+        colocaciones.append(
+            {
+                "componente": "fsm",
+                "instancia": 1,
+                "centro": [
+                    round(x_eje_telescopio, 3), 0.0, round(z_eje_banco, 3),
+                ],
+                "rotacion": GIRO_FSM,
+                "zona": "z_payload_banco",
+            }
+        )
+        # Hacia +X desde el FSM: dicroico y colimador, en orden inverso al de
+        # la cadena porque la cadena viene de fuera hacia el espejo.
+        cursor_x = x_eje_telescopio + dims_en_mundo(fsm, GIRO_FSM)[0] / 2
+        x_dicroico = None
+        for cid in reversed(CADENA_BANCO):
+            componente = catalogo[cid]
+            if not componente.modelable:
+                continue
+            rotacion = rotacion_de_montaje(componente, "+Y")
+            dx, dy, dz = dims_en_mundo(componente, rotacion)
+            cursor_x += HOLGURA_BANCO
+            centro_x = cursor_x + dx / 2
+            colocaciones.append(
+                {
+                    "componente": cid,
+                    "instancia": 1,
+                    "centro": [round(centro_x, 3), 0.0, round(z_eje_banco, 3)],
+                    "rotacion": rotacion,
+                    "zona": "z_payload_banco",
+                }
+            )
+            if cid == "dicroico":
+                x_dicroico = centro_x
+                ancho_dicroico = dy
+            cursor_x += dx
+        margen_banco = X - MARGEN_BANCO - cursor_x
+
+        # El brazo del beacon, a +-Y del dicroico.
+        if x_dicroico is not None:
+            for cid, signo in BRAZO_BEACON:
+                componente = catalogo[cid]
+                if not componente.modelable:
+                    continue
+                rotacion = rotacion_de_montaje(componente, "+Y")
+                dx, dy, dz = dims_en_mundo(componente, rotacion)
+                centro_y = signo * (ancho_dicroico / 2 + HOLGURA_BANCO + dy / 2)
+                colocaciones.append(
+                    {
+                        "componente": cid,
+                        "instancia": 1,
+                        "centro": [
+                            round(x_dicroico, 3), round(centro_y, 3),
+                            round(z_eje_banco, 3),
+                        ],
+                        "rotacion": rotacion,
+                        "zona": "z_payload_banco",
+                    }
+                )
+
+    # ------------------------------------------------------------ telescopio
+    # El barrilete llena su zona: su envolvente es la COTA SUPERIOR (el
+    # diametro es la altura interior del 6U) y la longitud es la reservada. Si
+    # llega el STEP con un diametro menor, la zona se queda igual y sobra sitio
+    # alrededor, que es lo que se quiere ver.
+    telescopio = catalogo["telescopio_cassegrain"]
+    if telescopio.modelable:
+        _, _, l_tubo = dims_en_mundo(telescopio, [0, 0, 0])
+        colocaciones.append(
+            {
+                "componente": "telescopio_cassegrain",
+                "instancia": 1,
+                "centro": [
+                    round(x_eje_telescopio, 3), 0.0, round(Z - l_tubo / 2, 3),
+                ],
+                "rotacion": rotacion_de_montaje(telescopio, "+Z"),
+                "zona": "z_payload_telescopio",
+            }
+        )
+
     zonas = [
         (
             "z_plataforma",
@@ -298,7 +416,11 @@ def generar() -> str:
             f"provisional hasta el STEP). OJO: los \"~2U\" del brief son ~227 mm "
             f"con la U de longitud de la CDS (113.5 mm), no 200. Esta zona mide "
             f"{iy:.1f} mm en X, que es el mayor diametro de barrilete que cabe "
-            f"en la altura interior. Su envolvente es TBD y no se dibuja.",
+            f"en la altura interior. El barrilete se dibuja LLENANDO la "
+            f"zona, porque su envolvente es una cota superior y no una medida: "
+            f"asi se ve que con 90 mm de apertura libre no queda sitio para "
+            f"barrilete, celda ni ajuste. En cuanto llegue el STEP, sustituye "
+            f"al cilindro sin tocar nada.",
         ),
         (
             "z_payload_franja",
@@ -316,8 +438,16 @@ def generar() -> str:
             "z_payload_banco",
             "Banco optico de espacio libre",
             (x_sep, -Y, z_banco_min), (X, Y, z_tel_min),
-            "Colimador, dicroico, FSM y camara de beacon. Camino: colimador -> "
-            "dicroico -> FSM -> telescopio, y dicroico -> camara.",
+            f"Camino: colimador -> dicroico -> FSM -> telescopio, y del "
+            f"dicroico sale el brazo del beacon hacia +-Y (camara arriba, "
+            f"laser de beacon de bajada abajo). El FSM esta sobre el eje "
+            f"optico del telescopio (X = {x_eje_telescopio:+.2f}) porque es el "
+            f"que dobla el haz de X a Z, y eso deja el colimador y el dicroico "
+            f"en linea hacia +X. Margen contra la pared +X: "
+            + (f"{margen_banco:.1f} mm." if margen_banco is not None
+               else "no calculable, faltan envolventes.")
+            + " Los haces NO estan dibujados: sin diametro de haz, un "
+              "keep-out optico seria una medida inventada.",
         ),
         (
             "z_payload_bandeja",
