@@ -13,8 +13,16 @@ de los modulos de analisis. Los unicos numeros del visor son de presentacion
 (posicion inicial de la camara, tamanos de letra) y viven en el JavaScript.
 
 La pagina se regenera sola: antes de servir ``escena.json`` o el GLB, el
-servidor mira la fecha de los YAML de ``data/`` y de los STEP de ``cad/vendor/``.
-Si algo ha cambiado, rehace la escena. Recargar el navegador basta.
+servidor mira la fecha de los YAML de ``data/``, de los STEP de ``cad/vendor/``
+y del propio codigo. Si algo ha cambiado, rehace la escena. Recargar el
+navegador basta.
+
+Y **solo** entonces. Rehacer la escena cuesta cerca de un minuto y medio: medio
+por teselar el ensamblaje y otro medio por las booleanas de interferencia. No
+tiene ningun sentido pagarlo al arrancar cuando no ha cambiado nada, asi que si
+los dos ficheros de salida son mas nuevos que todas las fuentes, se sirven tal
+cual. Lo mismo hacia el navegador: se responde con ``ETag``, de modo que una
+recarga con la escena intacta se salta los 17 MB del GLB con un 304.
 """
 
 from __future__ import annotations
@@ -28,7 +36,7 @@ from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from . import assembly, parts, structure
+from . import assembly, gltf, parts, structure
 from .analysis import fit, interference, volume
 from .assembly import Layout, PiezaColocada
 from .datamodel import DIR_CAD, DIR_DATOS, RAIZ, Catalogo, Componente, cargar
@@ -38,12 +46,27 @@ DIR_SALIDA = DIR_CAD / "generated"
 NOMBRE_GLB = "clau_6u.glb"
 NOMBRE_ESCENA = "escena.json"
 
-# Ficheros que, al cambiar, obligan a rehacer la escena.
+# Teselado del GLB. Son numeros de presentacion, como los de la camara: solo
+# deciden con cuantos triangulos se *dibuja* una superficie curva, no lo que
+# mide. El STEP del ensamblaje no los usa y sigue saliendo con la precision por
+# defecto de CadQuery; ninguna cota ni ningun chequeo pasa por aqui.
+#
+# CadQuery teselaria a 0.1 mm y 0.1 rad, que para un visor es tirar el dinero:
+# 862 000 triangulos y 33 MB para que el pin de un conector tenga una decima de
+# milimetro mejor la curva. A 0.2 mm son 418 000 triangulos y 17 MB, y en
+# pantalla no se distingue.
+TOLERANCIA_MALLA_MM = 0.2
+TOLERANCIA_ANGULAR_RAD = 0.3
+
+# Ficheros que, al cambiar, obligan a rehacer la escena. El codigo del paquete
+# entra tambien: si cambia un color de parts.py o una cota de structure.py, el
+# GLB que hay en disco ya no es el que describe el repositorio.
 def _fuentes() -> list[Path]:
     rutas = sorted(DIR_DATOS.glob("*.yaml"))
     vendor = DIR_CAD / "vendor"
     if vendor.exists():
         rutas += sorted(p for p in vendor.rglob("*") if p.suffix.lower() in (".step", ".stp"))
+    rutas += sorted(Path(__file__).resolve().parent.rglob("*.py"))
     return rutas
 
 
@@ -242,7 +265,15 @@ def exportar(destino: Path | None = None) -> tuple[Path, Path]:
     piezas = assembly.construir(catalogo, layout)
 
     ruta_glb = destino / NOMBRE_GLB
-    assembly.ensamblaje(catalogo, layout).export(str(ruta_glb))
+    assembly.ensamblaje(catalogo, layout).export(
+        str(ruta_glb),
+        tolerance=TOLERANCIA_MALLA_MM,
+        angularTolerance=TOLERANCIA_ANGULAR_RAD,
+    )
+    # OpenCASCADE escribe una primitiva de glTF por cara del BREP, que es lo
+    # correcto para un traductor de CAD y lo peor posible para un visor. Ver
+    # el modulo gltf: son los mismos triangulos, agrupados de otra manera.
+    gltf.compactar(ruta_glb)
 
     ruta_json = destino / NOMBRE_ESCENA
     ruta_json.write_text(
@@ -250,6 +281,14 @@ def exportar(destino: Path | None = None) -> tuple[Path, Path]:
         encoding="utf-8",
     )
     return ruta_glb, ruta_json
+
+
+def _al_dia(salida: Path) -> bool:
+    """Cierto si lo generado es mas nuevo que todas las fuentes."""
+    salidas = [salida / NOMBRE_GLB, salida / NOMBRE_ESCENA]
+    if not all(p.exists() for p in salidas):
+        return False
+    return min(p.stat().st_mtime for p in salidas) >= _sello()
 
 
 # -------------------------------------------------------------- servidor ----
@@ -293,12 +332,23 @@ class _Manejador(SimpleHTTPRequestHandler):
             if not ruta.exists():
                 self.send_error(404, f"falta {nombre}")
                 return
+            info = ruta.stat()
+            # Etiqueta de version: mientras no se regenere la escena, el
+            # navegador se ahorra volver a bajar el GLB entero.
+            etiqueta = f'"{int(info.st_mtime)}-{info.st_size}"'
+            if self.headers.get("If-None-Match") == etiqueta:
+                self.send_response(304)
+                self.send_header("ETag", etiqueta)
+                self.send_header("Cache-Control", "no-cache")
+                self.end_headers()
+                return
             cuerpo = ruta.read_bytes()
             tipo = "model/gltf-binary" if nombre.endswith(".glb") else "application/json"
             self.send_response(200)
             self.send_header("Content-Type", tipo)
             self.send_header("Content-Length", str(len(cuerpo)))
-            self.send_header("Cache-Control", "no-store")
+            self.send_header("ETag", etiqueta)
+            self.send_header("Cache-Control", "no-cache")
             self.end_headers()
             self.wfile.write(cuerpo)
             return
@@ -329,7 +379,11 @@ def servir(
 ) -> None:
     """Deja el visor en http://localhost:<puerto> hasta Ctrl-C."""
     salida = salida or DIR_SALIDA
-    exportar(salida)
+    if _al_dia(salida):
+        print("Escena al dia; no se regenera.")
+    else:
+        print("Regenerando la escena (teselado e interferencias, ~1 min)...")
+        exportar(salida)
     _Manejador._sello_servido = _sello()
 
     puerto = _puerto_libre(puerto)
@@ -340,7 +394,7 @@ def servir(
     print(f"Visor en {url}")
     print(f"  escena   : {(salida / NOMBRE_ESCENA).relative_to(RAIZ)}")
     print(f"  geometria: {(salida / NOMBRE_GLB).relative_to(RAIZ)}")
-    print("  se regenera sola al cambiar data/*.yaml o cad/vendor/*.step;")
+    print("  se regenera sola al cambiar data/*.yaml, cad/vendor/*.step o el codigo;")
     print("  recarga el navegador para verlo. Ctrl-C para parar.")
     if abrir:
         threading.Timer(0.5, webbrowser.open, args=(url,)).start()

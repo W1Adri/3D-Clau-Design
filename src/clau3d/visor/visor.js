@@ -76,13 +76,15 @@ let seleccion = null;
 // ---------------------------------------------------------------- carga ---
 async function arrancar() {
   try {
-    escena = await (await fetch('escena.json', { cache: 'no-store' })).json();
+    escena = await (await fetch('escena.json', { cache: 'no-cache' })).json();
   } catch (e) {
     return fallo('No se pudo leer escena.json. ¿Sigue vivo `uv run clau3d ver`?');
   }
   let gltf;
   try {
-    gltf = await new GLTFLoader().loadAsync(escena.glb + '?t=' + Date.now());
+    // Sin parametro anticache a proposito: el servidor manda ETag y decide el.
+    // Asi una recarga con la escena intacta se salta los 17 MB del GLB.
+    gltf = await new GLTFLoader().loadAsync(escena.glb);
   } catch (e) {
     return fallo('No se pudo leer ' + escena.glb + ': ' + e.message);
   }
@@ -129,6 +131,14 @@ function raizDelEnsamblaje(raiz) {
   return nodo;
 }
 
+// Por encima de esto una pieza se dibuja sin aristas. Una caja generada del
+// catalogo tiene 12 triangulos; una pieza que sale de un STEP de fabricante
+// pasa de los 100 000, y ahi las aristas no se leen, solo cuestan.
+const UMBRAL_ARISTAS = 2000;
+
+const triangulos = (geom) =>
+  (geom.index ? geom.index.count : geom.attributes.position.count) / 3;
+
 // OpenCASCADE parte cada solido en varias mallas, y GLTFLoader les pone sufijo
 // (_1, _2...). Los sufijos CHOCAN con nuestros nombres de instancia: la segunda
 // cara de 'bateria_optimus_30' se llama igual que la segunda bateria. Por eso
@@ -149,17 +159,22 @@ function indexarCuerpos(raiz) {
       obj.userData.opacidadBase = obj.material.opacity;
       obj.userData.colorBase = obj.material.color.clone();
 
-      // Aristas: sin ellas una caja translucida no se lee.
-      const aristas = new THREE.LineSegments(
-        new THREE.EdgesGeometry(obj.geometry, 25),
-        new THREE.LineBasicMaterial({
-          color: obj.material.color.clone().multiplyScalar(1.8),
-          transparent: true,
-          opacity: tipo === 'pieza' ? 0.8 : 0.3,
-        }),
-      );
-      obj.add(aristas);
-      obj.userData.aristas = aristas;
+      // Aristas: sin ellas una caja translucida no se lee. Pero solo tienen
+      // sentido en una caja. Sobre la geometria real de un STEP, EdgesGeometry
+      // tarda segundos y devuelve una marana de lineas que no aclara nada: la
+      // pieza ya se lee por su propia forma. Ver UMBRAL_ARISTAS.
+      if (triangulos(obj.geometry) <= UMBRAL_ARISTAS) {
+        const aristas = new THREE.LineSegments(
+          new THREE.EdgesGeometry(obj.geometry, 25),
+          new THREE.LineBasicMaterial({
+            color: obj.material.color.clone().multiplyScalar(1.8),
+            transparent: true,
+            opacity: tipo === 'pieza' ? 0.8 : 0.3,
+          }),
+        );
+        obj.add(aristas);
+        obj.userData.aristas = aristas;
+      }
 
       mallas.push(obj);
       porMalla.set(obj, clave);
@@ -302,7 +317,11 @@ function capas() {
       (v) => porTipo('keepout', v)),
     conmutador('ejes CDS', true, (v) => { gEjes.visible = v; }),
     conmutador('aristas', true, (v) => {
-      for (const c of cuerpos.values()) c.mallas.forEach((m) => { m.userData.aristas.visible = v; });
+      // Las mallas pesadas no llevan aristas (UMBRAL_ARISTAS), asi que
+      // aqui no todas tienen una que encender.
+      for (const c of cuerpos.values()) {
+        c.mallas.forEach((m) => { if (m.userData.aristas) m.userData.aristas.visible = v; });
+      }
     }),
   );
 }

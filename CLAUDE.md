@@ -15,7 +15,7 @@ repositorio; esto explica **por qué** está como está y **qué falta por decid
 | Con envolvente conocida | **10 de 29** |
 | Datos pendientes (TBD) | **53** |
 | Discrepancias entre fuentes | **6** |
-| Tests | **73**, todos en verde |
+| Tests | **78**, todos en verde |
 | Distribución | **CONFIRMADA** el 2026-09-20: dos columnas de 3U, moduladores en la franja lateral |
 | Piezas colocadas | **8 de 27**. Las otras 19 tienen geometría TBD |
 | Geometría real de fabricante | **3 de las 8** piezas colocadas salen ya de un STEP (§9) |
@@ -466,9 +466,50 @@ El JSON lleva todo lo que la geometría no sabe decir. El JavaScript **no calcul
 ninguna cota**: solo formatea lo que viene en el JSON. Si hiciera falta un número
 nuevo en pantalla, se añade a `viewer.escena()`, no al JS.
 
-**Se regenera solo.** El servidor compara la fecha de `data/*.yaml` y de los STEP
-de `cad/vendor/` con lo último servido, y rehace GLB y JSON si algo cambió.
-Recargar el navegador basta; no hace falta reiniciar.
+**Se regenera solo, y solo cuando hace falta.** El servidor compara la fecha de
+`data/*.yaml`, de los STEP de `cad/vendor/` y del propio código con lo último
+servido, y rehace GLB y JSON si algo cambió. Recargar el navegador basta; no
+hace falta reiniciar. Al revés también: si nada ha cambiado, `clau3d ver`
+**no regenera nada** y arranca al instante. Rehacer la escena cuesta **91 s**
+—12 s de teselado y el resto de booleanas de interferencia— y pagarlo en cada
+arranque no compraba nada. Y el GLB se sirve con `ETag`, así que una recarga
+con la escena intacta responde **304** en vez de mandar 17 MB otra vez.
+
+### Por qué el visor iba lento, y qué se hizo (2026-09-20)
+
+El cuello no era three.js ni el `http.server`: era **cómo entrega la geometría
+OpenCASCADE**. Escribe **una primitiva de glTF por cara del BREP**, que es lo
+correcto en un traductor de CAD y lo peor posible en un visor. El ensamblaje
+salía con **38 738 primitivas para 862 000 triángulos**, y GLTFLoader crea una
+malla de three.js por primitiva: 38 738 llamadas de dibujo por fotograma. La
+tarjeta gráfica se ríe de 862 000 triángulos; con 38 738 llamadas se atraganta.
+Encima el índice de esas primitivas ocupaba **18 MB de JSON** dentro de un
+fichero de 46 MB, y el visor construía una `EdgesGeometry` por cada una.
+
+`src/clau3d/gltf.py` funde las primitivas de cada malla en una sola por
+material, después de exportar. **No cambia ni un vértice**: son exactamente los
+mismos triángulos, agrupados de otra manera, y `tests/test_gltf.py` lo comprueba
+con geometría inventada. Aparte, el GLB se tesela a 0.2 mm / 0.3 rad en vez de
+los 0.1 / 0.1 de CadQuery —son números de presentación, como los de la cámara;
+el STEP sigue saliendo con la precisión por defecto— y el visor deja de dibujar
+aristas por encima de `UMBRAL_ARISTAS`: en una caja translúcida son lo que la
+hace legible, sobre un STEP de fabricante son una maraña que solo cuesta.
+
+Medido con el `GLTFLoader` de verdad, sobre el mismo ensamblaje:
+
+| | antes | después |
+|---|---|---|
+| GLB | 45.8 MB (18.2 MB de JSON) | **16.8 MB** (8.2 kB de JSON) |
+| `GLTFLoader.parse` | 1670 ms | **48 ms** |
+| mallas = llamadas de dibujo | 38 738 | **13** |
+| aristas | 4711 ms, 38 732 objetos | **5 ms**, 10 objetos |
+| triángulos | 861 906 | 418 310 |
+| `clau3d ver` sin cambios | 91 s | **instantáneo** |
+| recarga del navegador | 46 MB | **304, 0 B** |
+
+Si algún día 418 000 triángulos volvieran a ser un problema —con el STEP del
+chasis y el del telescopio dentro es posible—, lo siguiente sería comprimir con
+Draco o meter un BVH para el `raycast`. Ninguna de las dos hace falta hoy.
 
 ### Dos trampas que ya costaron un rato
 
@@ -477,13 +518,19 @@ Recargar el navegador basta; no hace falta reiniciar.
    visor lo deshace con `gltf.scene.rotation.x = Math.PI / 2`. Sin eso, la
    geometría y las cajas de zona dibujadas desde el JSON **no coinciden**, y el
    fallo se ve como un desencaje sutil, no como un error.
-2. **Los nombres de malla chocan con los de instancia.** OpenCASCADE parte cada
-   sólido en varias mallas y GLTFLoader les pone sufijo `_1`, `_2`… La segunda
-   cara de `bateria_optimus_30` se llama igual que la segunda batería,
+2. **Los nombres de malla chocan con los de instancia.** OpenCASCADE partía cada
+   sólido en varias mallas y GLTFLoader les ponía sufijo `_1`, `_2`… La segunda
+   cara de `bateria_optimus_30` se llamaba igual que la segunda batería,
    `bateria_optimus_30_2`. Por eso el visor **no agrupa por el nombre de la
    malla** sino por el `Group` que las contiene, que lleva el nombre exacto del
    nodo del ensamblaje. `tests/test_visor.py` comprueba que cada nodo del JSON
    existe en el GLB, que es justo lo que se rompe al renombrar una colocación.
+
+   Desde que el GLB se compacta ya no puede pasar: cada nodo trae una sola
+   primitiva, y GLTFLoader devuelve un `Mesh` con el nombre exacto. El código de
+   agrupación se queda igual porque sigue siendo correcto en los dos casos, y
+   porque es lo que protege de que el choque vuelva si alguien exporta sin
+   compactar.
 
 ---
 
@@ -543,7 +590,7 @@ El chequeo **`step_de_fabricante`** compara disco contra manifiesto:
 uno) y `escena.json` (43 KB) siguen en git: son cajas envolventes generadas desde
 el catálogo y no contienen nada de nadie. El **ensamblaje completo** ya no.
 Desde que hay geometría de fabricante dentro, `clau_6u.step` pesa **175 MB** y
-`clau_6u.glb` **46 MB** — pero el tamaño es lo de menos: **contienen el CAD de
+`clau_6u.glb` **17 MB** — pero el tamaño es lo de menos: **contienen el CAD de
 AAC**, así que versionarlos sería redistribuirlo por la puerta de atrás, justo lo
 que evita el `.gitignore` de `cad/vendor/`. Se regeneran con `clau3d ensamblar` y
 `clau3d ver`.
