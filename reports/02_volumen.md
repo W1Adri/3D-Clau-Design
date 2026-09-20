@@ -31,7 +31,7 @@ No editar a mano: los numeros salen de `data/components.yaml`.
 
 | id drive | id | componente | fuente | estado | uds | volumen cm3 | envolvente mm | keep-outs | centro mm | colocado |
 |---|---|---|---|---|---|---|---|---|---|---|
-| OPT-13 | telescopio_cassegrain | Telescopio Cassegrain on-axis, apertura 90 mm | aproximado propio: cilindro (esperando STEP) | supuesto | 1 | 1820.2 | 95 x 95 x 200 | 0 | (37, 0, 81) | si |
+| OPT-13 | telescopio_cassegrain | Telescopio Cassegrain on-axis, apertura 90 mm | aproximado propio: cassegrain (esperando STEP) | supuesto | 1 | 1820.2 | 95 x 95 x 200 | 0 | (37, 0, 81) | si |
 | PLAT-04 | adcs_iadcs400 | AAC Clyde Space iADCS400 | aproximado propio: caja | confirmado | 1 | 615.7 | 96 x 95 x 67 | 0 | (-61, 0, 143) | si |
 | PLAT-07 | paneles_photon_side | AAC Clyde Space PHOTON-SIDE (paneles de montaje en cuerpo) | aproximado propio: caja | supuesto | 2 | 511.3 | 209 x 4 x 349 | 0 | (0, 52, 0) | si |
 | PLAT-06 | bateria_optimus_30 | AAC Clyde Space Optimus-30 (bateria) | STEP de fabricante | referencia | 2 | 372.7 | 96 x 90 x 36 | 0 | (-61, 0, -56) | si |
@@ -79,7 +79,7 @@ No editar a mano: los numeros salen de `data/components.yaml`.
 | z_payload_banco | Banco optico de espacio libre | 638.6 | 70.0 | 568.6 | 0.57 | 11% |
 | z_payload_bandeja | Bandeja optica de fibra | 1235.3 | 66.5 | 1168.8 | 1.17 | 5% |
 
-## Supuestos pendientes de sustituir (28)
+## Supuestos pendientes de sustituir (61)
 
 Cada fila es un numero que este repositorio se ha inventado para poder dibujar algo. Ninguno suma en los presupuestos de masa ni de potencia, y todos se dibujan en gris. Sustituir cualquiera de ellos por una cifra con fuente es, literalmente, todo lo que hay que hacer para que esta parte del modelo deje de ser una reserva y pase a ser un dato.
 
@@ -89,9 +89,42 @@ Cada fila es un numero que este repositorio se ha inventado para poder dibujar a
 | integracion | integracion.fibra.longitud_boot_modelada | `20.0` | Tipo de conector o protector y su tramo recto de salida | Equipo de payload de ACSAR |
 | integracion | integracion.coaxial.radio_curvatura_modelado | `25.0` | Radio minimo de curvatura del coaxial elegido. Es el mismo hueco que 'cables_rf_moduladores.radio_minimo_curvatura'. | Equipo de electronica de ACSAR |
 | integracion | integracion.optica.diametro_haz_modelado | `10.0` | Diametro de haz de cada tramo (e01 a e05 en data/connections.yaml) y el semiangulo del cono de la apertura | Equipo de optica de ACSAR |
+| integracion | integracion.optica.punto_de_adelanto | `50.7` | Punto de adelanto maximo del enlace, del analisis de mision (orbita y geometria de los pases) | Equipo de PAT / de mision de ACSAR |
 | antena_quasar_wsant | antena_quasar_wsant.dimensiones | `[82.0, 82.0, 10.0]` | Dimensiones reales, ganancia, diagrama de radiacion y cara de montaje | AAC Clyde Space |
 | paneles_photon_side | paneles_photon_side.dimensiones | `[209.3, 3.5, 349.0]` | Contorno real de cada tamano de PHOTON-SIDE (1U/2U/3U/6U) y cual de ellos se monta en cada cara | AAC Clyde Space / Equipo de potencia de ACSAR |
 | telescopio_cassegrain | telescopio_cassegrain.dimensiones | `[95.4, 95.4, 200.0]` | Diametro exterior del barrilete y longitud optica real. YA EXISTE un concepto en formato nativo SolidWorks (Telescopio_concepto.SLDPRT, entrega "Preliminar viability model" del 2026-09-20), ilegible. Hace falta reexportarlo a STEP AP214 o AP242 y dejarlo en la ruta de 'step_esperado'. Ver cad/vendor/MANIFEST.yaml, seccion 'sin_convertir'. | Oscar (ACSAR) / Aperture Optical Sciences |
+| telescopio_cassegrain | telescopio_cassegrain.optica.focal_primario | `200.0` | Focal real del primario, del diseno optico de Aperture Optical Sciences | Oscar (ACSAR) / Aperture Optical Sciences |
+| telescopio_cassegrain | telescopio_cassegrain.optica.conica_primario | `-1.0` | Constante conica real del primario del diseno optico | Oscar (ACSAR) / Aperture Optical Sciences |
+| telescopio_cassegrain | telescopio_cassegrain.optica.conica_secundario | `-1.0` | Constante conica real del secundario del diseno optico | Oscar (ACSAR) / Aperture Optical Sciences |
+| telescopio_cassegrain | telescopio_cassegrain.optica.distancia_focal_trasera | `40.0` | Distancia focal trasera del diseno focal, si se eligiera esa configuracion | Oscar (ACSAR) / Aperture Optical Sciences |
+| telescopio_cassegrain | telescopio_cassegrain.optica.margen_secundario | `1.4` | Sobredimensionado real del secundario (campo de vista y alineacion) | Equipo de optica de ACSAR |
+| telescopio_cassegrain | telescopio_cassegrain.optica.margen_agujero_primario | `4.0` | Diametro real del agujero central del primario | Oscar (ACSAR) / Aperture Optical Sciences |
+| telescopio_cassegrain | telescopio_cassegrain.optica.margen_substrato_primario | `1.0` | Diametro exterior real del sustrato del primario | Oscar (ACSAR) / Aperture Optical Sciences |
+| telescopio_cassegrain | telescopio_cassegrain.optica.seccion_barrilete | `[95.4, 95.4]` | Contorno exterior real del barrilete | Oscar (ACSAR) / Aperture Optical Sciences |
+| telescopio_cassegrain | telescopio_cassegrain.optica.espesor_pared_barrilete | `1.5` | Espesor y material reales de la pared del barrilete | Equipo de estructura de ACSAR / Aperture Optical Sciences |
+| telescopio_cassegrain | telescopio_cassegrain.optica.espesor_mamparo | `3.0` | Espesor real de los mamparos | Equipo de estructura de ACSAR / Aperture Optical Sciences |
+| telescopio_cassegrain | telescopio_cassegrain.optica.lado_larguero_esquina | `12.0` | Seccion real de los largueros, del analisis de rigidez del tubo | Equipo de estructura de ACSAR |
+| telescopio_cassegrain | telescopio_cassegrain.optica.brida_interfaz_fsm | `[40.0, 40.0]` | Interfaz mecanica real telescopio-banco (patron de taladros y plano de referencia) | Oscar (ACSAR) / Equipo de optica de ACSAR |
+| telescopio_cassegrain | telescopio_cassegrain.optica.espesor_brida | `3.0` | Espesor real de la brida de interfaz | Oscar (ACSAR) / Equipo de optica de ACSAR |
+| telescopio_cassegrain | telescopio_cassegrain.optica.margen_agujero_entrada | `2.0` | Diametro real del agujero de entrada | Oscar (ACSAR) / Aperture Optical Sciences |
+| telescopio_cassegrain | telescopio_cassegrain.optica.espesor_espejo_primario | `8.0` | Espesor y material reales del sustrato del primario | Oscar (ACSAR) / Aperture Optical Sciences |
+| telescopio_cassegrain | telescopio_cassegrain.optica.espesor_espejo_secundario | `4.0` | Espesor y material reales del sustrato del secundario | Oscar (ACSAR) / Aperture Optical Sciences |
+| telescopio_cassegrain | telescopio_cassegrain.optica.altura_celda | `3.0` | Altura real de la celda isostatica del primario | Oscar (ACSAR) / Aperture Optical Sciences |
+| telescopio_cassegrain | telescopio_cassegrain.optica.flexures | `3` | Numero y tipo reales de flexures de la celda | Oscar (ACSAR) / Aperture Optical Sciences |
+| telescopio_cassegrain | telescopio_cassegrain.optica.radio_circulo_flexures | `40.0` | Radio real del circulo de apoyo de la celda | Oscar (ACSAR) / Aperture Optical Sciences |
+| telescopio_cassegrain | telescopio_cassegrain.optica.angulo_primer_flexure | `45.0` | Orientacion real de la celda respecto al barrilete | Oscar (ACSAR) / Aperture Optical Sciences |
+| telescopio_cassegrain | telescopio_cassegrain.optica.seccion_flexure | `[6.0, 6.0]` | Seccion real de los flexures | Oscar (ACSAR) / Aperture Optical Sciences |
+| telescopio_cassegrain | telescopio_cassegrain.optica.margen_buje_secundario | `3.0` | Montura real del secundario | Oscar (ACSAR) / Aperture Optical Sciences |
+| telescopio_cassegrain | telescopio_cassegrain.optica.tornillos_colimacion | `3` | Mecanismo real de colimacion del secundario | Oscar (ACSAR) / Aperture Optical Sciences |
+| telescopio_cassegrain | telescopio_cassegrain.optica.diametro_tornillo_colimacion | `3.0` | Tornilleria real de colimacion | Oscar (ACSAR) / Aperture Optical Sciences |
+| telescopio_cassegrain | telescopio_cassegrain.optica.vanes | `4` | Numero real de vanes de la arana | Oscar (ACSAR) / Aperture Optical Sciences |
+| telescopio_cassegrain | telescopio_cassegrain.optica.espesor_vane | `0.8` | Espesor real de los vanes | Equipo de estructura de ACSAR / Aperture Optical Sciences |
+| telescopio_cassegrain | telescopio_cassegrain.optica.ancho_vane | `6.0` | Geometria real de la arana | Oscar (ACSAR) / Aperture Optical Sciences |
+| telescopio_cassegrain | telescopio_cassegrain.optica.holgura_baffle | `0.5` | Holgura real entre el haz y el baffle, del analisis de luz parasita | Equipo de optica de ACSAR |
+| telescopio_cassegrain | telescopio_cassegrain.optica.espesor_baffle | `0.6` | Espesor real de los baffles | Equipo de optica de ACSAR |
+| telescopio_cassegrain | telescopio_cassegrain.optica.diafragmas_internos | `4` | Numero y posicion reales de los diafragmas, del analisis de luz parasita | Equipo de optica de ACSAR |
+| telescopio_cassegrain | telescopio_cassegrain.optica.espesor_diafragma | `1.0` | Espesor real de los diafragmas | Equipo de optica de ACSAR |
+| telescopio_cassegrain | telescopio_cassegrain.optica.angulo_exclusion_solar_modelado | `30.0` | El angulo de verdad, que es 'angulo_exclusion_solar' | Equipo de optica de ACSAR |
 | fsm_piezo_pi_s331 | fsm_piezo_pi_s331.dimensiones | `[50.0, 50.0, 22.0]` | Cotas exteriores del S-331 (plano acotado o STEP) | Physik Instrumente |
 | dicroico | dicroico.dimensiones | `[23.0, 23.0, 23.0]` | Diametro del haz colimado (del que sale el tamano del sustrato), longitudes de onda de corte y envolvente del soporte | Equipo de optica de ACSAR |
 | camara_beacon | camara_beacon.dimensiones | `[30.0, 30.0, 30.0]` | Modelo de sensor, distancia focal del objetivo y campo de vision exigido por el lazo de apuntado | Equipo de PAT de ACSAR |

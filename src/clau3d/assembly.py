@@ -66,6 +66,13 @@ class KeepOut:
     nota: str | None = None
     estado: str = "supuesto"
     fuente: str | None = None
+    # La pieza a la que pertenece el volumen, cuando el keep-out esta DENTRO de
+    # ella. El haz que viaja por el interior del telescopio es el caso: su
+    # volumen cae entero dentro de la envolvente del propio telescopio, y sin
+    # esto el modelo reportaria que el telescopio invade su propio haz. Es el
+    # mismo criterio con el que los keep-outs de haz libre del banco se
+    # recortan para no comerse a sus dos extremos.
+    de_pieza: str | None = None
 
     @property
     def es_supuesto(self) -> bool:
@@ -144,6 +151,7 @@ def cargar_layout(ruta: Path | None = None) -> Layout:
             nota=k.get("nota"),
             estado=k.get("estado", "supuesto"),
             fuente=k.get("fuente"),
+            de_pieza=k.get("de_pieza"),
         )
         for k in (bruto.get("keep_out") or [])
     ]
@@ -159,10 +167,31 @@ def cargar_layout(ruta: Path | None = None) -> Layout:
 
 @dataclass
 class PiezaColocada:
+    """Una pieza situada en el 6U, con sus DOS solidos.
+
+    ``solido`` es lo que se dibuja y lo que se exporta a STEP. ``envolvente`` es
+    lo que se analiza, y para casi todas las piezas es exactamente el mismo
+    objeto. La excepcion es el modelo parametrico del telescopio, que es hueco:
+    si el analisis de volumen usara ese hueco diria que dentro del tubo cabe
+    algo, y si la booleana de interferencias lo usara, una pieza vecina podria
+    meterse dentro del barrilete sin que nadie se quejara. Ver
+    ``parts.solido_envolvente``.
+    """
+
     colocacion: Colocacion
     componente: object  # Componente
     solido: cq.Solid | cq.Compound
     caja_mundo: Caja
+    # None significa "la misma cosa", que es el caso de todas las piezas menos
+    # el telescopio parametrico. Asi construir una PiezaColocada con geometria
+    # inventada -- que es lo que hacen los tests sinteticos -- no obliga a
+    # repetir el solido dos veces.
+    envolvente: cq.Solid | cq.Compound | None = None
+
+    @property
+    def solido_de_analisis(self) -> cq.Solid | cq.Compound:
+        """El solido contra el que se comprueban solapes: el macizo."""
+        return self.solido if self.envolvente is None else self.envolvente
 
 
 def _localizar(solido, colocacion: Colocacion):
@@ -192,14 +221,25 @@ def construir(catalogo: Catalogo, layout: Layout) -> list[PiezaColocada]:
                 f"layout: '{componente.id}' tiene geometria TBD y no se puede colocar. "
                 f"Consigue sus dimensiones antes de situarlo."
             )
-        solido_mundo = _localizar(parts.solido(componente), colocacion)
-        bb = solido_mundo.BoundingBox()
+        solido_mundo = _localizar(parts.solido(componente, catalogo), colocacion)
+        # Casi ninguna pieza tiene una envolvente distinta de su solido, y
+        # construirla dos veces seria trabajo tirado. Solo la del telescopio
+        # parametrico, que es hueco.
+        envolvente_mundo = (
+            _localizar(parts.solido_envolvente(componente, catalogo), colocacion)
+            if parts.tiene_envolvente_propia(componente)
+            else None
+        )
+        # La caja sale de la ENVOLVENTE, no del detalle: es la que dice cuanto
+        # sitio reserva la pieza, y es la que usan el volumen y el prefiltro.
+        bb = (envolvente_mundo or solido_mundo).BoundingBox()
         piezas.append(
             PiezaColocada(
                 colocacion=colocacion,
                 componente=componente,
                 solido=solido_mundo,
                 caja_mundo=Caja(bb.xmin, bb.ymin, bb.zmin, bb.xmax, bb.ymax, bb.zmax),
+                envolvente=envolvente_mundo,
             )
         )
     return piezas

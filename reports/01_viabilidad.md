@@ -29,7 +29,7 @@ Falta: Envolvente de: radio_uhf_pulsar_vutrx, propulsion, cables_rf_moduladores
 
 **Estado: ATENCION**
 
-La apertura de 90 mm deja solo 2.7 mm por lado dentro de los 95 mm interiores. No hay sitio para el barrilete, la celda del espejo ni el ajuste de alineacion. El eje optico NO puede ir paralelo a Y, y en cualquier otra orientacion la seccion util sigue limitada por Y.
+Con seccion CUADRADA de 95.4 mm y 90 mm de apertura quedan 2.7 mm hasta la cara plana y 22.5 mm hasta la esquina. Los dos numeros son el mismo problema visto por dos lados: en la cara plana no cabe nada (pared, baffle y holgura ya se comen esos 2.7 mm), y la celda del primario, los flexures y los largueros estructurales tienen que ir en las esquinas. Con un barrilete de REVOLUCION solo existiria el primer numero, en todas las direcciones. El eje optico NO puede ir paralelo a Y, y en cualquier otra orientacion la seccion util sigue limitada por Y. Si la esquina tampoco bastara, la salida es que el barrilete sea el elemento estructural de esa cara.
 
 | magnitud | valor |
 |---|---|
@@ -37,8 +37,10 @@ La apertura de 90 mm deja solo 2.7 mm por lado dentro de los 95 mm interiores. N
 | altura_exterior_mm | 100.00 |
 | altura_interior_util_mm | 95.40 |
 | holgura_por_lado_mm | 2.70 |
+| holgura_cara_plana_mm | 2.70 |
+| holgura_esquina_mm | 22.46 |
 
-Falta: Diametro exterior del barrilete (la apertura libre no basta)
+Falta: Contorno exterior del barrilete (la apertura libre no basta)
 
 ## Contorno PC104 frente a la seccion interior
 
@@ -134,6 +136,59 @@ El FSM va sobre el eje optico del telescopio (X = +36.85 mm) porque es el que do
 | necesario_mm | 66.29 |
 | disponible_mm | 74.00 |
 | margen_mm | 7.71 |
+
+## Configuracion optica del telescopio
+
+**Estado: OK**
+
+Afocal tipo Mersenne: dos parabolas confocales, M = 9.00. Entra colimado y sale colimado, asi que NO hay foco real dentro del satelite y no hace falta ninguna lente de enfoque en el banco. El foco comun de las dos conicas es VIRTUAL y por eso el modelo no dibuja ningun marcador ahi: no hay nada. Obstruccion lineal 0.156 (secundario de 14.0 mm sobre 90 mm), o sea 0.21 dB en amplitud de campo (0.11 dB en potencia).
+
+| magnitud | valor |
+|---|---|
+| magnificacion | 9.00 |
+| focal_primario_mm | 200.00 |
+| focal_secundario_mm | 22.22 |
+| separacion_mm | 177.78 |
+| obstruccion_lineal | 0.16 |
+| perdida_obstruccion_dB_amplitud | 0.21 |
+
+## Longitud del telescopio frente a la reservada
+
+**Estado: ATENCION**
+
+Con f1 = 200 mm y M = 9.00 la separacion entre vertices es 177.8 mm, que no se puede tocar sin cambiar la optica. Para los 200 mm reservados eso deja 22.2 mm para los dos mamparos, la celda y los dos espejos. Cabe por 1.2 mm, que no es margen: los espesores con los que se dibuja (mamparos de 3 mm, celda de 3 mm, primario de 8 mm) estan todos en su COTA SUPERIOR, no elegidos. Cualquiera de ellos que crezca deja de caber. Con los ~2U de verdad del brief (227 mm, no 200: la U de longitud de la CDS son 113.5 mm) la misma optica tendria 28 mm de margen. Alargar se paga con la bandeja y es decision de ACSAR.
+
+| magnitud | valor |
+|---|---|
+| longitud_reservada_mm | 200.00 |
+| separacion_vertices_mm | 177.78 |
+| estructura_mm | 22.22 |
+| longitud_necesaria_mm | 198.78 |
+| margen_mm | 1.22 |
+| focal_primario_mm | 200.00 |
+| magnificacion | 9.00 |
+
+Falta: Longitud real del telescopio (STEP de Aperture Optical Sciences)
+
+## El haz comprimido frente al espejo del FSM
+
+**Estado: NO COMPROBABLE**
+
+El espejo del FSM mide 5.0 mm, y un haz a 45 grados deja una huella de d x d*raiz(2), asi que solo admite un haz de 3.54 mm. Con 90 mm de apertura eso exige una magnificacion de al menos 25.5. Con el haz SUPUESTO con el que se dibuja (10 mm, de integracion.optica.diametro_haz_modelado) la huella seria 10 x 14.1 mm y NO CABRIA en el espejo de 5 mm. Si el equipo de optica confirma un haz de ese orden, el MEMS DIP24 queda descartado y hay que ir al 'fsm_piezo_pi_s331' (que pesa 130 g frente a los gramos del MEMS) o subir la magnificacion de 9.0 a 25.5, lo que reduce el secundario y alarga el tubo. Punto de adelanto: 50.7 urad en el cielo son 456 urad opticos en el haz comprimido (228 urad de giro mecanico del espejo) con M = 9.00, porque un afocal comprime los angulos por M. Es poco para cualquiera de las dos tecnologias -- el piezo S-331 da 3 mrad --, asi que el recorrido NO es lo que decide: lo que decide es el tamano del espejo.
+
+| magnitud | valor |
+|---|---|
+| diametro_espejo_fsm_mm | 5.00 |
+| haz_maximo_admisible_mm | 3.54 |
+| magnificacion_minima | 25.46 |
+| magnificacion_modelada | 9.00 |
+| haz_modelado_mm | 10.00 |
+| huella_a_45_mm | 14.14 |
+| punto_de_adelanto_urad | 50.70 |
+| recorrido_optico_en_el_fsm_urad | 456.30 |
+| giro_mecanico_en_el_fsm_urad | 228.15 |
+
+Falta: Diametro del haz comprimido (telescopio_cassegrain.optica.diametro_haz_comprimido y diametro_haz_mm de e01..e05). Es el dato que DECIDE el TBD 'fsm.eleccion_de_tecnologia': sin el no se puede elegir entre el MEMS y el piezo.
 
 ## Radio minimo de curvatura de la fibra
 

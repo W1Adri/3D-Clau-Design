@@ -3,7 +3,7 @@
 Documento de continuidad entre sesiones. El README explica **qué** es el
 repositorio; esto explica **por qué** está como está y **qué falta por decidir**.
 
-Última actualización: **2026-09-20** (tarde: payload opción B completo).
+Última actualización: **2026-09-20** (noche: telescopio paramétrico, §4.7).
 
 ---
 
@@ -13,16 +13,16 @@ repositorio; esto explica **por qué** está como está y **qué falta por decid
 |---|---|
 | Catálogo | 31 componentes, 0 problemas de integridad |
 | Con envolvente | **28 de 31**. Los 3 que faltan, por buenos motivos (§1.1) |
-| Huecos sin ninguna aproximación (TBD) | **42** |
-| Números inventados aquí (SUPUESTO) | **28** — se dibujan, no son datos (§2) |
-| Discrepancias entre fuentes | **9** |
-| Tests | **120**, todos en verde |
+| Huecos sin ninguna aproximación (TBD) | **45** |
+| Números inventados aquí (SUPUESTO) | **61** — se dibujan, no son datos (§2). Suben de 28 a 61 con el telescopio paramétrico (§4.7): 32 parámetros ópticos y mecánicos del barrilete más el punto de adelanto, cada uno con su razonamiento y a quién pedirlo |
+| Discrepancias entre fuentes | **10** |
+| Tests | **148**, todos en verde |
 | Distribución | **CONFIRMADA** el 2026-09-20: dos columnas de 3U, moduladores en la franja lateral |
 | Piezas colocadas | **26**. Todos los componentes de la opción B están dibujados y situados |
 | Geometría real de fabricante | **3** piezas salen de un STEP de AAC (§9); el telescopio tiene sitio reservado para el suyo |
-| Keep-outs | **18**, todos dibujados con números supuestos (§3.7) |
+| Keep-outs | **20**, todos dibujados con números supuestos (§3.7, §4.7) |
 | Choques de geometría | **0** |
-| Riesgos abiertos | **3**: térmico modulador–barrilete (§3.6), fibra del colimador (§3.7), antena en −Z (§3.8) |
+| Riesgos abiertos | **4**: térmico modulador–barrilete (§3.6), fibra del colimador (§3.7), antena en −Z (§3.8) y la longitud del telescopio, que cabe en los 200 mm por 1.2 mm (§4.7) |
 | Zona útil | 221.7 × 95.4 × 361.4 mm = **7.64 L**, de la que quedan **2.88 L** libres |
 
 Funciona de punta a punta: catálogo validado, layout generado, ensamblaje
@@ -562,6 +562,170 @@ Esto refuerza el punto 4 de §6: **el paso de apilamiento real del chasis** es
 todavía más importante de lo que parecía, porque el margen se ha reducido a la
 mitad.
 
+### 4.7 El telescopio deja de ser un cilindro de reserva
+
+Hasta ahora `telescopio_cassegrain` era un cilindro de 95.4 × 95.4 × 200 mm en
+estado `supuesto`: un hueco con forma. Ahora es un **modelo paramétrico**
+—barrilete, primario, secundario, araña, baffles, celda isostática, brida al
+FSM y el camino del haz— construido en `src/clau3d/optica/` a partir de un
+bloque `optica` nuevo en el catálogo.
+
+**Lo que no cambia, y es lo importante.** Sigue siendo `supuesto`: gris,
+transparente, sin sumar en masa y entero en `reports/06_pendientes.md`, ahora
+con 33 filas en vez de una. Sigue siendo el **fallback**: el día que aparezca
+`cad/vendor/aperture_optical_sciences/telescopio_cassegrain.step`, lo sustituye
+sin tocar el catálogo, exactamente igual que sustituía al cilindro. Y sigue
+reservando lo mismo: **el volumen libre y las interferencias no se han movido**
+(2.88 L libres, 0 choques, 14 invasiones de keep-out supuesto). Ver más abajo
+por qué eso no es casualidad.
+
+#### (a) La sección pasa a ser cuadrada
+
+Un barrilete de **revolución** de Ø95.4 con 90 mm de apertura deja 2.7 mm por
+lado, y ahí no caben celda, flexures ni tornillería. Con **sección cuadrada** de
+95.4 mm los dos números son distintos y el segundo es el que sirve:
+
+| | mm radiales |
+|---|---|
+| hasta la cara plana | **2.70** |
+| hasta la esquina (semidiagonal 67.46) | **22.46** |
+
+El modelo reparte en consecuencia: en la cara plana solo caben la pared
+(1.5 mm), el baffle (0.6 mm) y su holgura (0.5 mm) —es decir, los diafragmas
+knife-edge pueden proyectar hacia dentro **medio milímetro y ni uno más**—, y la
+carga la llevan cuatro **largueros de esquina**, con la celda del primario
+orientada para que el primero de sus tres flexures caiga también en una esquina
+(`angulo_primer_flexure` = 45°).
+
+Además es lo único coherente con lo que ya decía §4.2: si el telescopio acaba
+siendo el elemento estructural de esa cara, hacen falta caras planas y bridas,
+no un tubo redondo.
+
+`chequeo_apertura_telescopio` informa ahora de **los dos márgenes**, no solo del
+radial, que daba una imagen más pesimista de la que corresponde.
+
+#### (b) Afocal (Mersenne), no focal
+
+Dos parábolas confocales, primario cóncavo y secundario convexo: entra colimado
+y sale colimado. El motivo no es óptico, es **el banco**. Un Cassegrain focal
+clásico (f/12, EFL 1080 mm) deja el foco real ~40 mm detrás del vértice del
+primario, o sea **dentro de `z_payload_banco`**, y obliga a meter una lente de
+enfoque en la línea que solo tiene 7.7 mm de margen (§3.7). El afocal no
+necesita ningún elemento adicional, y en particular **ninguna superficie
+transmisiva en el camino del canal cuántico**, donde un refractivo mete
+birrefringencia por tensión y se come justo lo que el enlace mide.
+
+Por lo mismo se descarta la **placa correctora** que sostendría el secundario sin
+araña: es un refractivo en ese camino. Queda escrito en el catálogo como
+alternativa descartada con su motivo.
+
+El foco común de las dos cónicas en el afocal es **virtual**, así que el modelo
+**no dibuja ningún marcador** ahí: no hay nada. Si alguien pone
+`optica.configuracion: focal_clasico`, el modelo sí dibuja el foco real y
+`chequeo_configuracion_telescopio` avisa de dónde cae.
+
+#### (c) El diámetro de haz acopla telescopio, FSM y banco
+
+`diametro_haz_mm` era un TBD más en `e01`–`e03`. Resulta ser **el parámetro que
+lo decide todo**, porque de él sale la magnificación y de la magnificación sale
+la geometría entera:
+
+```
+M  = apertura_libre / diametro_haz_comprimido        f2 = f1 / M
+d  = f1 − |f2|   (confocalidad)                      D2 = haz × margen
+ε  = D2 / apertura_libre        pérdida = −20·log₁₀(1 − ε²)
+```
+
+Ninguno de esos seis números está escrito en el catálogo: se derivan en
+`optica/parametros.py`, y hay un test que comprueba que cambiar el haz los mueve
+todos. Con lo que hay hoy (apertura 90, haz supuesto 10): **M = 9.00**,
+f2 = 22.22 mm, d = 177.78 mm, secundario Ø14, ε = 0.156, 0.21 dB en amplitud
+(0.11 dB en potencia).
+
+Y aquí está el acoplamiento: **un haz de d mm sobre un espejo a 45° deja una
+huella de d × d·√2**, así que un espejo circular de D mm solo admite
+D·cos 45° = D/√2.
+
+| espejo del FSM | haz máximo | M mínima |
+|---|---|---|
+| **5 mm** (MEMS Mirrorcle, herencia CLICK-A) | **3.54 mm** | **25.5** |
+| 12.7 mm (espejo del piezo PI S-331) | 8.98 mm | 10.0 |
+
+Con el haz supuesto de 10 mm con el que hoy se dibuja todo, **el MEMS DIP24 no
+vale**: haría falta el `fsm_piezo_pi_s331` —que pesa 130 g frente a los gramos
+del MEMS— o subir la magnificación de 9 a 25.5, lo que encoge el secundario y
+alarga el tubo. `chequeo_haz_vs_fsm` dice exactamente eso, y sale **`no
+comprobable`**, no `ok` ni `falla`: el número con el que se dibuja no valida
+nada. **Este es el dato que decide el TBD `fsm.eleccion_de_tecnologia`**, y así
+está redactado en el informe.
+
+El **punto de adelanto** no es el problema: un afocal comprime los ángulos por M,
+así que los ~51 µrad del cielo son 456 µrad ópticos en el haz comprimido
+(228 µrad de giro mecánico del espejo) con M = 9. El piezo da 3 mrad y un MEMS
+mucho más. Lo que decide es el **tamaño** del espejo, no su recorrido.
+
+#### (d) La longitud: cabe por 1.2 mm, y eso no es margen
+
+La separación entre vértices de un afocal es `f1·(1 − 1/M)` y no se negocia.
+Con f1 = 200 mm y M = 9 son **177.8 mm**, así que de los 200 mm que el layout
+reserva quedan **22.2 mm** para los dos mamparos, la celda y los dos espejos:
+
+| | mm |
+|---|---|
+| mamparos (2 × 3.0) | 6.0 |
+| celda del primario | 3.0 |
+| espejo primario | 8.0 |
+| espejo secundario | 4.0 |
+| **margen** | **1.2** |
+
+Todos esos espesores están en su **cota superior**, no elegidos, y su `fuente` en
+el catálogo lo dice —el mismo patrón que el colimador y el dicroico de §3.7—.
+Una celda de 3 mm no es una celda, y un primario de Ø92 × 8 mm tiene una relación
+de aspecto de 11.5. `chequeo_longitud_telescopio` sale como **atención** y dice
+la salida: con los **~2U de verdad del brief (227 mm, no 200)** la misma óptica
+tendría ~28 mm de margen. **Alargar se paga con la bandeja y es decisión de
+ACSAR**, así que aquí no se ha tocado `longitud_reservada`.
+
+#### Por qué el volumen y las interferencias no se mueven
+
+Porque el modelo detallado **es hueco**, y meterlo tal cual en el análisis diría
+que dentro del tubo cabe algo. No cabe: ahí va el haz. Así que una pieza expone
+ahora **dos sólidos**, y quien pide uno dice cuál quiere:
+
+- `parts.solido()` — el detalle. Visor y export STEP.
+- `parts.solido_envolvente()` — el prisma macizo. **Volumen e interferencias.**
+
+Para todo lo demás son el mismo objeto. Y el constructor **comprueba que el
+detalle no se sale del prisma declarado**: si la óptica derivada pidiera más
+tubo, aborta con el número que falta en vez de dibujar una pieza que se sale, que
+es lo mismo que hace el generador con una fila de bandeja que no cabe.
+
+El camino del haz dentro del barrilete va como **keep-out**, no como cuerpo:
+dos tramos con su diámetro real —`haz_telescopio_colimado` (Ø90, de la apertura
+al primario) y `haz_telescopio_comprimido` (Ø10, del secundario a la brida del
+FSM)—. Llevan un campo nuevo, `de_pieza`, porque caen enteros dentro de la
+envolvente del propio telescopio: sin él el modelo diría que el telescopio invade
+su propio haz.
+
+#### Lo que sigue siendo inventado, y quién tiene el dato
+
+- **Aperture Optical Sciences / Óscar** — el STEP, y con él la focal real, las
+  cónicas, el contorno del barrilete, los espesores de los espejos, la celda y la
+  interfaz al banco. Es la mitad de las 33 filas nuevas.
+- **Equipo de óptica de ACSAR** — el **diámetro de haz comprimido** (el que más
+  desbloquea, §6.8), el **ángulo de exclusión solar** (con el que los dos baffles
+  dejan de dibujarse con una regla de primer orden), la holgura del baffle y el
+  número y posición reales de los diafragmas.
+- **Equipo de óptica de ACSAR** — la **estabilidad de despace primario–secundario**,
+  que es TBD y es **el requisito que dimensiona el tubo y la araña**: la
+  sensibilidad a desenfoque escala con m²(1+m), así que unas micras de deriva
+  térmica agotan el presupuesto de frente de onda. Hoy el barrilete y los vanes
+  se dibujan con espesores supuestos, no con una rigidez calculada.
+- **Equipo de estructura de ACSAR** — la sección de los largueros de esquina y el
+  espesor de pared, que salen de ese mismo análisis de rigidez.
+- **Equipo de PAT / de misión** — el punto de adelanto real, que aquí se ha
+  calculado como 2v/c con v = 7.6 km/s.
+
 ---
 
 ## 5. Avisos sobre los datos
@@ -614,11 +778,12 @@ mitad.
    chequeo `bucles_fibra` pasa de `no comprobable` a decir algo, y los
    keep-outs pasan de `supuesto` a `confirmado` sin tocar una línea de código.
 5. **Los otros dos datos que bloquean mucho**:
-   - **STEP del telescopio** (Óscar / Aperture Optical Sciences): diámetro
+   - **STEP del telescopio** (Óscar / Aperture Optical Sciences): contorno
      exterior del barrilete **y longitud real**. Hay sitio reservado para él en
      `cad/vendor/aperture_optical_sciences/telescopio_cassegrain.step`: dejarlo
-     ahí basta para que sustituya al cilindro de reserva. Ojo: los «~2U» del
-     brief son ~227 mm, no 200 (la U de longitud de la CDS son 113.5 mm).
+     ahí basta para que sustituya al modelo paramétrico (§4.7). Ojo: los «~2U»
+     del brief son ~227 mm, no 200 (la U de longitud de la CDS son 113.5 mm), y
+     con 200 mm la óptica derivada cabe por **1.2 mm**.
    - **Paso de apilamiento real del chasis** (equipo de estructura). Ahora se usa
      el estándar PC/104; el real puede cambiar los **305 mm** de pila, y el
      margen ya solo es de 56 mm (§4.6).
@@ -628,18 +793,32 @@ mitad.
 7. **Decidir dónde va la antena de banda S** (§3.8), que es una decisión de
    operaciones: si el canal clásico puede no ser simultáneo al pase óptico,
    −Z vale; si no, hay que buscarle cara y no la hay.
-8. **Los diámetros de haz** (equipo de óptica), para que los keep-outs ópticos
-   dejen de dibujarse con un tubo de 10 mm inventado, y el semiángulo del cono
-   de la apertura, que hoy no se dibuja en absoluto.
+8. **EL DIÁMETRO DEL HAZ COMPRIMIDO** (equipo de óptica). Ha dejado de ser «un
+   keep-out mejor dibujado» y es, después del radio de curvatura de la fibra, lo
+   que más desbloquea: de él salen la magnificación del telescopio y con ella su
+   geometría entera, **y decide el punto 12** (si el MEMS de 5 mm vale o hay que
+   irse al piezo). Ver §4.7(c). Con él, `chequeo_haz_vs_fsm` pasa de `no
+   comprobable` a decir algo. Hacen falta además el **ángulo de exclusión
+   solar**, con el que los dos baffles del telescopio dejan de dibujarse con una
+   regla de primer orden, y el semiángulo del cono de la apertura, que hoy no se
+   dibuja en absoluto.
+
+8.b **La estabilidad de despace primario–secundario** (equipo de óptica). Es el
+   requisito que dimensiona el tubo métrico y la araña —la sensibilidad a
+   desenfoque escala con m²(1+m)— y hoy no existe, así que el barrilete se dibuja
+   con espesores supuestos y no con una rigidez calculada (§4.7d).
 9. **El diámetro y el radio de curvatura del coaxial RF** (equipo de
    electrónica), que es lo que falta de ELEC-04.
 10. **Sustituir el chasis genérico por el STEP del equipo**, con lo que
     desaparece la hipótesis de espesor de pared y la zona útil pasa a ser real.
 11. **Cerrar el encaminamiento de los 4.1 W del láser**: directo del bus del EPS
     o a través de PCB-2. Y el disipador del láser, que no está modelado.
-12. **Elegir FSM**: MEMS o piezo (§4.4). El modelo enseña las dos cifras que
-    deciden —la masa y el volumen del soporte— y ninguna de las dos está
-    cerrada: del MEMS falta el soporte de vuelo, del piezo faltan las cotas.
+12. **Elegir FSM**: MEMS o piezo (§4.4). El modelo enseña las tres cifras que
+    deciden. Dos son de la pieza —la masa y el volumen del soporte— y ninguna
+    está cerrada: del MEMS falta el soporte de vuelo, del piezo faltan las
+    cotas. La tercera **no es del FSM**: es el diámetro del haz (punto 8). Con el
+    espejo de 5 mm del MEMS el haz máximo son 3.54 mm; si el equipo de óptica
+    pide más, el MEMS queda descartado sin discusión (§4.7c).
 
 > **La lista de supuestos a sustituir, entera y con el valor concreto de cada
 > uno, está en `reports/06_pendientes.md` y en `reports/components_status.csv`.**
@@ -648,13 +827,17 @@ mitad.
 ## 7. Notas de implementación
 
 - **Python 3.12**, no 3.14: CadQuery/OCP no tiene ruedas para 3.14 todavía.
-- **Las formas aproximadas son tres cosas, no una.** `forma.tipo` admite `caja`
+- **Las formas aproximadas no son una sola cosa.** `forma.tipo` admite `caja`
   y `cilindro` —media cadena óptica es cilíndrica, y dibujar un cilindro como
   caja infla su volumen un 27 % sin que nadie lo vea— y cualquiera de las dos
   puede llevar `conectores`, que se pegan a una cara declarada y **agrandan la
   caja envolvente**. Eso último es lo importante: el conector RF del modulador
   sobresale 10 mm y el detector de interferencias tiene que verlo. Un conector
   sin cotas no se dibuja de ningún tamaño y sale como pendiente.
+  Y admite `cassegrain`, que no es una envolvente sino un **modelo paramétrico**
+  entero (§4.7): exige su bloque `optica` completo igual que un cilindro exige
+  su `eje`, y es la única forma que distingue entre el sólido que se **dibuja**
+  y el que se **analiza**, porque es hueca por dentro.
 - **`montaje` no es geometría.** Declara con qué cara se atornilla la pieza y
   por qué eje entra la señal. De ahí saca el generador la rotación de cada
   colocación, en vez de escribirla a mano: una pieza que cambie de cara de
@@ -708,7 +891,7 @@ componentes sin envolvente con a quién pedírselos, marca el volumen libre como
 criterio que `reports/`. Un visor genérico no puede decir nada de eso.
 
 Desde el 2026-09-20 por la tarde tiene además un panel de **«números
-inventados aquí»**: los 28 supuestos, uno a uno, con qué falta y a quién
+inventados aquí»**: los 61 supuestos, uno a uno, con qué falta y a quién
 pedírselo. Es lo único que distingue en pantalla un cuerpo gris que está ahí
 porque alguien lo midió de uno que está ahí porque alguien se lo inventó; la
 geometría los enseña igual de sólidos a los dos.

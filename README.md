@@ -200,8 +200,7 @@ así que la procedencia se puede escribir por adelantado con `step_esperado`:
 ```yaml
   - id: telescopio_cassegrain
     forma:
-      tipo: cilindro
-      eje: Z
+      tipo: cassegrain
       step_esperado:
         ruta: cad/vendor/aperture_optical_sciences/telescopio_cassegrain.step
         pedir_a: Oscar (ACSAR) / Aperture Optical Sciences
@@ -230,8 +229,9 @@ data/connections.yaml   conexiones ópticas, RF, datos, potencia y térmicas
 data/layout.yaml        distribución dentro del 6U (GENERADO, no editar)
 tools/generar_layout.py genera data/layout.yaml desde el catálogo
 src/clau3d/             modelo de datos, piezas, ensamblaje, análisis, informes
+src/clau3d/optica/      modelo parametrico del telescopio Cassegrain
 src/clau3d/visor/       pagina del visor web (clau3d ver)
-tests/                  120 tests: datos, formas, supuestos, keep-outs, STEP, visor
+tests/                  148 tests: datos, formas, supuestos, keep-outs, STEP, visor, telescopio
 cad/vendor/             STEP de fabricante, una carpeta por proveedor (no se tocan)
 cad/generated/          STEP generados: uno por pieza, mas el ensamblaje completo
 cad/generated/subsistemas/  un STEP por subsistema, con las coordenadas del conjunto
@@ -273,7 +273,9 @@ lista a mano, que se quedaría obsoleta con el siguiente STEP de proveedor— y 
 
 | Hallazgo | Número |
 |---|---|
-| La apertura de 90 mm del telescopio contra la altura interior | Deja **2.7 mm por lado**. El eje óptico no puede ir paralelo a Y, y en cualquier otra orientación la sección sigue limitada por Y. Falta el **diámetro exterior del barrilete**, que es lo que decide si cabe. |
+| La apertura de 90 mm del telescopio contra la altura interior | Deja **2.7 mm hasta la cara plana** y **22.5 mm hasta la esquina**. Por eso el barrilete se modela de sección **cuadrada**: en la cara plana solo caben pared, baffle y holgura, y la celda del primario y los largueros estructurales tienen que ir en las esquinas. El eje óptico no puede ir paralelo a Y. Falta el **contorno exterior del barrilete**. |
+| La longitud del telescopio contra los 200 mm reservados | La separación entre vértices del afocal (`f1·(1−1/M)`) son **177.8 mm**, así que quedan **22.2 mm** para los dos mamparos, la celda y los dos espejos, y el modelo cabe por **1.2 mm**. Todos esos espesores están en su cota superior, no elegidos. Con los **~2U de verdad** del brief (227 mm, no 200) habría ~28 mm de margen. Alargar se paga con la bandeja: es decisión de ACSAR. |
+| El haz comprimido contra el espejo del FSM | Un haz de *d* mm a 45° deja una huella de *d* × *d*·√2, así que el espejo de **5 mm** del MEMS solo admite **3.54 mm** de haz, o sea magnificación ≥ 25.5. Con el haz supuesto de 10 mm el MEMS **no vale** y habría que ir al piezo (130 g) o subir la magnificación de 9 a 25.5. El diámetro de haz real es TBD, y es **el dato que decide qué FSM se elige**. |
 | El **iADCS400** (95.4 mm de lado corto) dentro de los 100 mm exteriores | El espesor de pared no puede pasar de **2.30 mm**. Es la pieza que más aprieta, por delante del contorno PC104 desnudo, que daba 4.91 mm. |
 | Moduladores Exail de **grado espacial** | **130 mm** de recorrido recto cada uno, protectores de fibra incluidos. Es **45 mm más largo** que la cifra del encapsulado comercial. En la columna de payload, de 121.7 mm de ancho, **no caben según X**: van según Z. |
 | Longitud de la pila PC104 | **305 mm de 361 mm**, con el paso estándar PC/104 de 15.24 mm. Eran 274 hasta descubrir que las ranuras se reservaban con la altura de **ficha** y se dibujaban con el **STEP**: las fichas de AAC no incluyen el conector PC104 pasante, que baja 12.45 mm. El paso **real** del chasis sigue siendo TBD, y ahora el margen es la mitad. |
@@ -345,12 +347,15 @@ Se regeneran con `uv run clau3d informe`.
 
 1. **El radio mínimo de curvatura de la fibra** (equipo de payload). Las 14
    invasiones de keep-out del modelo salen de él, todas.
-2. **El STEP del telescopio** (Óscar / Aperture Optical Sciences). Hay sitio
+2. **El diámetro del haz comprimido** (equipo de óptica). De él salen la
+   magnificación del telescopio y con ella su geometría entera, y decide si el
+   FSM puede ser el MEMS de 5 mm o tiene que ser el piezo.
+3. **El STEP del telescopio** (Óscar / Aperture Optical Sciences). Hay sitio
    reservado: dejarlo en `cad/vendor/aperture_optical_sciences/telescopio_cassegrain.step`
-   basta para que sustituya al cilindro de reserva, sin tocar el catálogo.
-3. **El paso de apilamiento real del chasis** (equipo de estructura). El margen
+   basta para que sustituya al modelo paramétrico, sin tocar el catálogo.
+4. **El paso de apilamiento real del chasis** (equipo de estructura). El margen
    de la pila se ha quedado en 56 mm.
-4. **Las alturas reales de PCB-1, PCB-2 y PCB-3** (equipo de electrónica).
+5. **Las alturas reales de PCB-1, PCB-2 y PCB-3** (equipo de electrónica).
    Ahora se dibujan con 15 mm supuestos.
 
 ---

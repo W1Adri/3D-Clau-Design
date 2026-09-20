@@ -35,12 +35,18 @@ class Interferencia:
 
 
 def _solape_real(a: PiezaColocada, b: PiezaColocada) -> float:
-    """Volumen de interseccion. Filtra por caja antes de la booleana, que es cara."""
+    """Volumen de interseccion. Filtra por caja antes de la booleana, que es cara.
+
+    La booleana se hace sobre la ENVOLVENTE de cada pieza, no sobre el detalle.
+    Para casi todas son la misma cosa; para el telescopio parametrico no, y usar
+    el detalle dejaria que una pieza vecina se metiera dentro del barrilete sin
+    que nadie lo viera.
+    """
     aproximado = a.caja_mundo.volumen_solape(b.caja_mundo)
     if aproximado <= 0:
         return 0.0
     try:
-        interseccion = a.solido.intersect(b.solido)
+        interseccion = a.solido_de_analisis.intersect(b.solido_de_analisis)
     except Exception:  # pragma: no cover - fallo de OCC en geometrias raras
         return aproximado
     volumen = interseccion.Volume() if interseccion is not None else 0.0
@@ -193,6 +199,12 @@ def invasion_keep_out(
     salida: list[Interferencia] = []
     for keep_out in layout.keep_outs:
         for pieza in piezas:
+            # Un keep-out que esta DENTRO de una pieza no lo invade esa pieza:
+            # el haz que viaja por el interior del telescopio cae entero dentro
+            # de su envolvente, y contarlo diria que el telescopio choca
+            # consigo mismo.
+            if keep_out.de_pieza == pieza.colocacion.componente_id:
+                continue
             volumen = keep_out.caja.volumen_solape(pieza.caja_mundo)
             if volumen <= TOLERANCIA_MM:
                 continue

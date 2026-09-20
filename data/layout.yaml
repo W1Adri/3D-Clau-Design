@@ -391,6 +391,42 @@ keep_out:
       max: [69.897, 16.5, -41.8]
     nota: >-
       Camino optico dicroico -> camara_beacon (e04).
+  - id: haz_telescopio_colimado
+    tipo: haz_libre
+    estado: supuesto
+    de_pieza: telescopio_cassegrain
+    fuente: >-
+      Envolvente del haz dentro del barrilete, derivada de 'optica' en
+      data/components.yaml. SUPUESTO por partida doble: la apertura
+      libre es una decision de ACSAR sin diametro de barrilete que la
+      respalde, y el haz comprimido se dibuja con
+      integracion.optica.diametro_haz_modelado (10 mm) porque
+      'optica.diametro_haz_comprimido' sigue siendo TBD.
+    caja:
+      min: [-8.15, -45.0, -5.3]
+      max: [81.85, 45.0, 180.7]
+    nota: >-
+      Haz de entrada, 90 mm, de la apertura al primario. Es lo que
+      obliga a que nada estructural entre en el tubo por delante del
+      espejo.
+  - id: haz_telescopio_comprimido
+    tipo: haz_libre
+    estado: supuesto
+    de_pieza: telescopio_cassegrain
+    fuente: >-
+      Envolvente del haz dentro del barrilete, derivada de 'optica' en
+      data/components.yaml. SUPUESTO por partida doble: la apertura
+      libre es una decision de ACSAR sin diametro de barrilete que la
+      respalde, y el haz comprimido se dibuja con
+      integracion.optica.diametro_haz_modelado (10 mm) porque
+      'optica.diametro_haz_comprimido' sigue siendo TBD.
+    caja:
+      min: [31.85, -5.0, -19.3]
+      max: [41.85, 5.0, 172.478]
+    nota: >-
+      Haz comprimido, 10 mm, del secundario a la brida del FSM
+      atravesando el agujero central del primario. Magnificacion
+      derivada M = 9.00.
 
 colocaciones:
   - componente: adcs_iadcs400
