@@ -14,6 +14,11 @@ Lo que se deriva, y de que:
     D2  = diametro_haz_comprimido * margen_secundario
     eps = D2 / apertura_libre                           (obstruccion lineal)
 
+La obstruccion da DOS perdidas distintas, y las dos son de potencia: la
+fraccion de potencia recogida es (1 - eps^2), o sea -10 log10(1 - eps^2), y la
+intensidad en el eje en campo lejano es (1 - eps^2)^2, o sea
+-20 log10(1 - eps^2). Para un enlace optico manda la segunda.
+
 El diametro de haz comprimido es el parametro que lo acopla todo, y HOY NO
 EXISTE: es TBD en el catalogo (telescopio_cassegrain.optica) y tambien en cada
 tramo de ``data/connections.yaml``. Mientras falte, el modelo dibuja con
@@ -120,7 +125,11 @@ class Optica:
     diametro_secundario: float
     diametro_agujero_primario: float
     obstruccion_lineal: float
-    perdida_obstruccion_db: float
+    # Las DOS cifras de la obstruccion central, que no son la misma en dos
+    # convenios: son dos magnitudes distintas y las dos son de potencia. Para
+    # un enlace optico manda 'perdida_intensidad_en_eje_db'. Ver 'derivar'.
+    perdida_potencia_recogida_db: float
+    perdida_intensidad_en_eje_db: float
     diametro_substrato_primario: float
 
     @property
@@ -230,12 +239,27 @@ def derivar(componente: Componente, catalogo: Catalogo) -> Optica:
     d2 = haz * _escalar(componente, "margen_secundario")
     agujero = d2 + _escalar(componente, "margen_agujero_primario")
     epsilon = d2 / diametro
-    # OJO CON EL CONVENIO. -20 log10(1 - eps^2) es la perdida en AMPLITUD de
-    # campo: el area obstruida es eps^2, el campo transmitido (1 - eps^2) y la
-    # potencia su cuadrado. En POTENCIA la misma obstruccion cuesta la mitad de
-    # dB: -10 log10(1 - eps^2). Se deja el de amplitud porque es el que pedia
-    # la especificacion, y se deja dicho para que se pueda auditar.
-    perdida_db = -20.0 * math.log10(1.0 - epsilon * epsilon)
+    # DOS CIFRAS DISTINTAS, LAS DOS EN POTENCIA. No son dos convenios de la
+    # misma magnitud -- eso decia el comentario que habia aqui, y era falso --
+    # sino dos magnitudes que responden a dos preguntas distintas:
+    #
+    #   * POTENCIA RECOGIDA: la obstruccion tapa una fraccion eps^2 del area,
+    #     asi que pasa (1 - eps^2) de la potencia. Son -10 log10(1 - eps^2).
+    #     Es la que vale si lo que se pregunta es cuanta luz sale del tubo.
+    #
+    #   * INTENSIDAD EN EL EJE en campo lejano: la obstruccion no solo quita
+    #     area, redistribuye energia del lobulo principal a los anillos. El
+    #     campo en el eje es proporcional al area despejada, y la intensidad a
+    #     su cuadrado: (1 - eps^2)^2, o sea -20 log10(1 - eps^2).
+    #
+    # PARA UN ENLACE OPTICO MANDA LA SEGUNDA: lo que llega al receptor es la
+    # intensidad en el eje, no la potencia total que sale del telescopio. Cual
+    # manda esta declarado en el catalogo como
+    # 'integracion.optica.perdida_obstruccion_convenio'; los numeros no, porque
+    # se derivan de eps y escribirlos alli seria duplicarlos.
+    transmitido = 1.0 - epsilon * epsilon
+    perdida_potencia_db = -10.0 * math.log10(transmitido)
+    perdida_intensidad_db = -20.0 * math.log10(transmitido)
 
     substrato = diametro + 2.0 * _escalar(componente, "margen_substrato_primario")
 
@@ -254,7 +278,8 @@ def derivar(componente: Componente, catalogo: Catalogo) -> Optica:
         diametro_secundario=d2,
         diametro_agujero_primario=agujero,
         obstruccion_lineal=epsilon,
-        perdida_obstruccion_db=perdida_db,
+        perdida_potencia_recogida_db=perdida_potencia_db,
+        perdida_intensidad_en_eje_db=perdida_intensidad_db,
         diametro_substrato_primario=substrato,
     )
 
@@ -272,7 +297,7 @@ class Mecanica:
 
     La separacion la fija la optica; todo lo demas son espesores. Por eso los
     espesores del catalogo llevan escrito en su 'fuente' que son COTA SUPERIOR
-    impuesta por la longitud reservada, igual que el colimador y el dicroico
+    impuesta por la longitud reservada, igual que el colimador y D1
     del banco (CLAUDE.md 3.7).
     """
 
@@ -520,7 +545,8 @@ def resumen(componente: Componente, catalogo: Catalogo) -> dict:
             "diametro_secundario_mm": o.diametro_secundario,
             "diametro_agujero_primario_mm": o.diametro_agujero_primario,
             "obstruccion_lineal": o.obstruccion_lineal,
-            "perdida_obstruccion_dB_amplitud": o.perdida_obstruccion_db,
+            "perdida_potencia_recogida_dB": o.perdida_potencia_recogida_db,
+            "perdida_intensidad_en_eje_dB": o.perdida_intensidad_en_eje_db,
             "radio_curvatura_primario_mm": o.radio_curvatura_primario,
             "radio_curvatura_secundario_mm": o.radio_curvatura_secundario,
             "longitud_necesaria_mm": m.longitud_necesaria,

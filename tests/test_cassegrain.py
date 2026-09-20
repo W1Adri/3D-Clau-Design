@@ -197,7 +197,12 @@ def test_las_magnitudes_derivadas_salen_de_los_parametros():
     assert o.diametro_secundario == pytest.approx(15.0)
     assert o.diametro_agujero_primario == pytest.approx(19.0)
     assert o.obstruccion_lineal == pytest.approx(0.15)
-    assert o.perdida_obstruccion_db == pytest.approx(
+    # Las DOS perdidas de la obstruccion, que no son la misma con un factor:
+    # son dos magnitudes distintas y las dos son de potencia.
+    assert o.perdida_potencia_recogida_db == pytest.approx(
+        -10 * math.log10(1 - 0.15 ** 2)
+    )
+    assert o.perdida_intensidad_en_eje_db == pytest.approx(
         -20 * math.log10(1 - 0.15 ** 2)
     )
 

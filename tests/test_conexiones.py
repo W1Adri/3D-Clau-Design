@@ -24,8 +24,10 @@ def test_la_cadena_de_fibra_esta_completa(catalogo):
 def test_el_camino_en_espacio_libre_llega_al_exterior(catalogo):
     tramos = catalogo.conexiones["opticas_espacio_libre"]
     assert any(t["hasta"] == "EXTERIOR" for t in tramos)
+    # El brazo de los beacons y sus dos dicroicos estan en
+    # tests/test_brazo_beacon.py, que es donde se comprueba entero.
     assert any(
-        t["desde"] == "dicroico" and t["hasta"] == "camara_beacon" for t in tramos
+        t["desde"] == "colimador" and t["hasta"] == "dicroico_d1" for t in tramos
     )
 
 

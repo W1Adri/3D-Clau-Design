@@ -35,7 +35,7 @@ meta:
     fibra comerciales (DFB pulsado 1550 nm + moduladores de niobato de litio),
     polarizacion. Sin PIC en vuelo y sin canal optico clasico.
     Canal clasico de post-procesado por radio en banda S.
-  revision_datos: 2026-09-19
+  revision_datos: 2026-09-20
 
 # ---------------------------------------------------------------------
 # 1. NORMA Y ENVOLVENTE
@@ -1373,10 +1373,10 @@ componentes:
       'alternativa_de' lo declara como candidato en estudio, no como pieza a
       bordo. Esta aqui porque su masa SI es un dato, y es el dato que decide.
 
-  - id: dicroico
+  - id: dicroico_d1
     id_drive: OPT-09
     referencia_comercial: null
-    nombre: Espejo dicroico (separacion beacon / canal cuantico)
+    nombre: Dicroico D1 (separacion canal cuantico / beacons)
     categoria: payload_optico
     subsistema: terminal_optico
     cantidad: 1
@@ -1387,7 +1387,8 @@ componentes:
       nota: >-
         El sustrato va a 45 grados dentro del soporte; lo que se declara aqui
         es el soporte, que es lo que ocupa. El eje X es el del canal cuantico,
-        que lo ATRAVIESA; el beacon se refleja hacia +-Y.
+        que lo ATRAVIESA; los DOS beacons se reflejan hacia un unico brazo
+        lateral segun +Y.
     forma:
       tipo: caja
       dimensiones:
@@ -1395,7 +1396,7 @@ componentes:
         unidad: mm
         estado: supuesto
         fuente: >-
-          SUPUESTO. Reserva cubica para el SOPORTE del dicroico, con el
+          SUPUESTO. Reserva cubica para el SOPORTE de D1, con el
           sustrato a 45 grados por dentro. La envolvente va alineada con los
           ejes porque lo que ocupa es la celda, no el sustrato. Un lado de
           23 mm admite un sustrato de unos 12-15 mm a 45 grados, que para un
@@ -1403,7 +1404,7 @@ componentes:
           soporte crece. NO es ningun producto: no hay candidato elegido.
           ACOTADA POR ARRIBA POR EL BANCO, ademas: el FSM tiene que estar sobre
           el eje optico del telescopio, y entre ese eje y la pared +X de la
-          columna de payload quedan unos 56 mm para el colimador y el dicroico
+          columna de payload quedan unos 56 mm para el colimador y D1
           juntos, gaps incluidos. Si las piezas reales son mayores no es que el
           modelo este mal: es que el banco no da, y habra que alargarlo a costa
           de la bandeja o de la longitud reservada al telescopio. El chequeo
@@ -1412,20 +1413,46 @@ componentes:
           Diametro del haz colimado (del que sale el tamano del sustrato),
           longitudes de onda de corte y envolvente del soporte
         pedir_a: Equipo de optica de ACSAR
+    tipo_filtro:
+      valor: paso_largo
+      estado: decision
+      fuente: >-
+        Decision de arquitectura de ACSAR del 2026-09-20. Paso largo con el
+        borde en 'integracion.optica.borde_dicroico_d1': transmite el 1550 del
+        canal cuantico y refleja los dos beacons (976 de subida y 1064 de
+        bajada) hacia un unico brazo lateral, donde D2 los separa. La
+        alternativa -- un brazo por beacon, con la camara y el laser en lados
+        opuestos de D1 -- es la que habia antes y NO FUNCIONA: un laser que
+        emite contra la cara trasera de D1 no tiene camino hacia el FSM.
+    puertos:
+      valor:
+        - "+X (transmision): canal cuantico 1550 nm hacia el FSM (e02)"
+        - "-X (transmision): entrada del colimador (e01)"
+        - "+Y (reflexion): brazo compartido de los dos beacons, hacia D2 (e04/e08)"
+        - "-Y (reflexion): fuga del 1550 en reflexion -> trampa_luz_d1 (e09)"
+      estado: decision
+      fuente: >-
+        Decision de arquitectura de ACSAR del 2026-09-20. Se declara aqui para
+        que ningun puerto quede sin destino: el cuarto puerto de un divisor no
+        desaparece porque no se dibuje, y sin trampa la fuga del 1550 en
+        reflexion se queda rebotando dentro del banco. Hay un test que
+        comprueba que los cuatro tienen conexion declarada en
+        data/connections.yaml.
     nota: >-
-      El canal cuantico lo atraviesa; el beacon de subida se refleja hacia la
-      camara. SIN CANDIDATO: lo que se dibuja es una reserva, no una pieza.
+      El canal cuantico lo atraviesa; los DOS beacons se reflejan hacia el
+      mismo brazo lateral, y dentro de ese brazo los separa 'dicroico_d2'.
+      SIN CANDIDATO: lo que se dibuja es una reserva, no una pieza.
     masa:
       valor: null
       unidad: g
       estado: TBD
-      falta: Masa del dicroico y su soporte
+      falta: Masa del divisor y su soporte
       pedir_a: Equipo de optica de ACSAR
 
-  - id: camara_beacon
-    id_drive: OPT-11
+  - id: dicroico_d2
+    id_drive: OPT-15
     referencia_comercial: null
-    nombre: Camara / sensor de beacon (medida del error de apuntado)
+    nombre: Dicroico D2 (separacion beacon de subida / beacon de bajada)
     categoria: payload_optico
     subsistema: terminal_optico
     cantidad: 1
@@ -1434,26 +1461,111 @@ componentes:
       eje: Y
       tipo_eje: optico
       nota: >-
-        Mira hacia el dicroico por -Y, que es de donde le llega el beacon
-        reflejado. Se atornilla por su cara trasera al soporte del banco.
+        Va dentro del brazo que refleja D1, asi que su eje en linea es Y: por
+        el le llega el beacon de subida desde D1 y por el sigue hasta la
+        camara. El de bajada entra LATERALMENTE segun X y sale reflejado hacia
+        -Y, de vuelta a D1. El sustrato va a 45 grados dentro del soporte,
+        igual que en D1.
     forma:
       tipo: caja
       dimensiones:
-        valor: [30.0, 30.0, 30.0]
+        valor: [23.0, 23.0, 23.0]
         unidad: mm
         estado: supuesto
         fuente: >-
-          SUPUESTO. Reserva para una camara de placa unica con su objetivo:
-          un cubo de 30 mm es el orden de magnitud de un sensor pequeno mas la
-          optica de imagen. NO es ningun producto: no hay sensor elegido. El
-          volumen real depende sobre todo de la distancia focal que pida el
-          campo de vision del PAT, que esta sin definir.
+          SUPUESTO. Misma reserva cubica que 'dicroico_d1' y por el mismo
+          motivo: lo que ocupa es la celda con el sustrato a 45 grados por
+          dentro, no el sustrato. NO es ningun producto. ACOTADA POR ARRIBA POR
+          EL BRAZO: entre D1 y la pared del banco hay 47.7 mm para D1/2, D2 y
+          la camara en fila, y hoy NO CABEN. El chequeo 'brazo_beacon'
+          recalcula ese margen desde el catalogo y falla mientras no quepa.
         falta: >-
-          Modelo de sensor, distancia focal del objetivo y campo de vision
-          exigido por el lazo de apuntado
+          Diametro de los dos haces de beacon, longitud de onda de corte y
+          envolvente del soporte
+        pedir_a: Equipo de optica de ACSAR
+    tipo_filtro:
+      valor: paso_corto
+      estado: decision
+      fuente: >-
+        Decision de arquitectura de ACSAR del 2026-09-20. Paso corto con el
+        borde en 'integracion.optica.borde_dicroico_d2': TRANSMITE los 976 nm
+        del beacon de subida en linea recta hacia la camara y REFLEJA los
+        1064 nm del beacon de bajada, que entra lateralmente. EL ORDEN NO ES
+        INTERCAMBIABLE: con la camara en transmision y el beacon en reflexion,
+        los 100 mW del beacon tocan UNA SOLA superficie con recubrimiento antes
+        de salir, y lo que se fugue en D2 se va al puerto opuesto al laser en
+        vez de hacia el sensor. Invertirlo mete el beacon en transmision (dos
+        superficies mas) y apunta su fuga al sensor, que es justo lo que hay
+        que proteger.
+    puertos:
+      valor:
+        - "-Y (transmision, entrada): beacon de subida 976 nm desde D1 (e04)"
+        - "+Y (transmision, salida): camara de seguimiento (e06)"
+        - "-X (reflexion, entrada): beacon de bajada 1064 nm desde el laser (e07)"
+        - "-Y (reflexion, salida): de vuelta a D1 -> FSM -> telescopio (e08)"
+        - "+X (transmision): fuga del beacon -> fotodiodo_monitor_beacon (e10)"
+      estado: decision
+      fuente: >-
+        Decision de arquitectura de ACSAR del 2026-09-20. Son cuatro puertos
+        fisicos: el brazo (-Y), la camara (+Y), el laser (-X) y el opuesto al
+        laser (+X). El tramo -Y lo comparten el beacon de subida que ENTRA y el
+        de bajada que SALE: es el mismo tramo fisico recorrido en los dos
+        sentidos y con dos colores, y por eso en data/connections.yaml e08
+        declara 'keep_out_compartido_con: e04' en vez de duplicar el volumen.
+    nota: >-
+      Dentro del brazo que refleja D1. SIN CANDIDATO: lo que se dibuja es una
+      reserva, no una pieza.
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa del divisor y su soporte
+      pedir_a: Equipo de optica de ACSAR
+
+  - id: camara_beacon
+    id_drive: OPT-11
+    referencia_comercial: null
+    nombre: Camara / sensor de beacon de subida (medida del error de apuntado)
+    categoria: payload_optico
+    subsistema: terminal_optico
+    cantidad: 1
+    montaje:
+      cara: "-Y"
+      eje: Y
+      tipo_eje: optico
+      nota: >-
+        Mira hacia D2 por -Y, que es de donde le llega el beacon de subida en
+        TRANSMISION. Se atornilla por su cara trasera al soporte del banco.
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: [20.0, 20.0, 20.0]
+        unidad: mm
+        estado: supuesto
+        fuente: >-
+          SUPUESTO. Reserva para un sensor pequeno con objetivo corto a 976 nm,
+          INCLUIDO EL FILTRO DE BANDA ESTRECHA que va delante: el filtro no es
+          un cuerpo aparte del catalogo, va dentro de esta reserva, porque
+          modelarlo suelto anade una pieza mas a la fila del brazo y el brazo
+          ya no cabe. BAJADA DE 30 A 20 MM el 2026-09-20 al pasar a la
+          arquitectura de dos dicroicos: con la camara y el laser de beacon en
+          lados OPUESTOS de D1 cabian 30 mm a cada lado, pero esa arquitectura
+          no funcionaba (el laser no tenia camino hacia el FSM). Compartiendo
+          brazo, D1/2 + D2 + camara van en fila hacia un solo lado y no caben.
+          20 mm es la cota superior compatible con un sensor pequeno y un
+          objetivo corto; NO sale de ningun producto, no hay sensor elegido, y
+          AUN ASI SIGUEN FALTANDO 6.8 mm. Ver el chequeo 'brazo_beacon'.
+        falta: >-
+          Modelo de sensor, distancia focal del objetivo, campo de vision
+          exigido por el lazo de apuntado y espesor del filtro de banda
+          estrecha de 976 nm
         pedir_a: Equipo de PAT de ACSAR
     nota: >-
-      SIN CANDIDATO: lo que se dibuja es una reserva, no una pieza.
+      SIN CANDIDATO: lo que se dibuja es una reserva, no una pieza. Ve el
+      beacon de SUBIDA (976 nm). Como el beacon de bajada comparte el FSM con
+      el canal cuantico, lo que la camara mide y lo que el FSM transmite estan
+      separados por el punto de adelanto: ver
+      'integracion.optica.punto_de_adelanto'.
     masa:
       valor: null
       unidad: g
@@ -1464,7 +1576,88 @@ componentes:
   - id: laser_beacon_bajada
     id_drive: OPT-12
     referencia_comercial: null
-    nombre: Laser de beacon de bajada
+    nombre: Laser de beacon de bajada (1064 nm)
+    categoria: payload_optico
+    subsistema: terminal_optico
+    cantidad: 1
+    montaje:
+      cara: "-Y"
+      eje: X
+      tipo_eje: optico
+      nota: >-
+        Inyecta LATERALMENTE en D2 segun X. D2 lo refleja hacia -Y, de vuelta a
+        D1, que lo refleja otra vez hacia el FSM y el telescopio. Antes emitia
+        segun Y contra la cara trasera de D1, que no llevaba a ninguna parte.
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: [30.0, 25.0, 25.0]
+        unidad: mm
+        estado: supuesto
+        fuente: >-
+          SUPUESTO. Reserva para un diodo laser con su optica de colimacion y
+          su disipador. La cota larga va ahora por X, que es el eje por el que
+          inyecta en D2; antes iba por Y, cuando emitia contra D1. NO es ningun producto: con la longitud de onda ya
+          decidida (1064 nm) sigue sin haber modelo elegido, y la potencia
+          -- 100 mW supuestos -- manda sobre el disipador, que es lo que fija
+          la envolvente.
+        falta: Modelo del laser elegido, potencia optica real y su disipador
+        pedir_a: Equipo de PAT de ACSAR
+    nota: >-
+      1064 nm: ver 'integracion.optica.longitud_onda_beacon_bajada' para el
+      argumento del silicio. SIN CANDIDATO: lo que se dibuja es una reserva.
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa del laser de beacon elegido
+      pedir_a: Equipo de PAT de ACSAR
+
+  - id: fotodiodo_monitor_beacon
+    id_drive: OPT-16
+    referencia_comercial: null
+    nombre: Fotodiodo de monitorizacion de potencia del beacon de bajada
+    categoria: payload_optico
+    subsistema: terminal_optico
+    cantidad: 1
+    montaje:
+      cara: "-Y"
+      eje: X
+      tipo_eje: optico
+      nota: >-
+        Va en el puerto de D2 OPUESTO al laser: le llega la fuga en transmision
+        del beacon de bajada, que es proporcional a lo que sale por la
+        apertura. Da telemetria de salud del beacon SIN tocar el haz util.
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: [12.0, 12.0, 12.0]
+        unidad: mm
+        estado: supuesto
+        fuente: >-
+          SUPUESTO. Reserva para un fotodiodo en encapsulado TO con su soporte
+          y una lente de concentracion. Un cubo de 12 mm es el orden de
+          magnitud; NO es ningun producto. Al ir en un puerto de fuga no le
+          hacen falta ni apertura grande ni alineacion fina, asi que es la
+          pieza del brazo cuya cota menos puede crecer.
+        falta: Modelo de fotodiodo, encapsulado y electronica de acondicionamiento
+        pedir_a: Equipo de PAT de ACSAR
+    nota: >-
+      Instrumenta el cuarto puerto de D2. Si no se instrumenta, ese puerto
+      necesita igualmente una trampa de luz: ver 'trampa_luz_d2', que esta
+      declarada como alternativa EXCLUYENTE de esta pieza, no como pieza
+      adicional. SIN CANDIDATO: lo que se dibuja es una reserva.
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa del fotodiodo con su soporte y su acondicionamiento
+      pedir_a: Equipo de PAT de ACSAR
+
+  - id: trampa_luz_d1
+    id_drive: OPT-17
+    referencia_comercial: null
+    nombre: Trampa de luz del cuarto puerto de D1
     categoria: payload_optico
     subsistema: terminal_optico
     cantidad: 1
@@ -1472,29 +1665,72 @@ componentes:
       cara: "-Y"
       eje: Y
       tipo_eje: optico
-      nota: Emite hacia +Y, contra el dicroico, por el lado opuesto a la camara.
+      nota: >-
+        En el puerto de D1 opuesto al brazo de los beacons. Le llega la fuga en
+        reflexion del 1550 del canal cuantico.
     forma:
       tipo: caja
       dimensiones:
-        valor: [25.0, 30.0, 25.0]
+        valor: [15.0, 15.0, 15.0]
         unidad: mm
         estado: supuesto
         fuente: >-
-          SUPUESTO. Reserva para un diodo laser con su optica de colimacion y
-          su disipador. NO es ningun producto: ni la longitud de onda ni la
-          potencia estan decididas, y las dos cambian la envolvente (la
-          potencia, por el disipador).
-        falta: Longitud de onda, potencia optica y envolvente del modulo elegido
-        pedir_a: Equipo de PAT de ACSAR
+          SUPUESTO. Reserva para un absorbedor de haz de banco: cavidad o cono
+          negro con su soporte. Un cubo de 15 mm es el orden de magnitud de una
+          trampa para un haz colimado de pocos milimetros y potencias de
+          microvatios; NO es ningun producto. La cota real depende del angulo
+          de aceptacion que haga falta para que nada vuelva al banco.
+        falta: Tipo de absorbedor, su envolvente y el rechazo exigido
+        pedir_a: Equipo de optica de ACSAR
     nota: >-
-      Longitud de onda distinta de 1550 nm para que la estacion siga al
-      satelite. SIN CANDIDATO: lo que se dibuja es una reserva.
+      OBLIGATORIA, no opcional. Ningun divisor transmite el 100 %: lo que D1
+      no transmite del 1550 sale por este puerto, y sin trampa se queda
+      rebotando dentro del banco hasta llegar a la camara de seguimiento o de
+      vuelta al canal. SIN CANDIDATO: lo que se dibuja es una reserva.
     masa:
       valor: null
       unidad: g
       estado: TBD
-      falta: Masa del laser de beacon elegido
-      pedir_a: Equipo de PAT de ACSAR
+      falta: Masa de la trampa elegida
+      pedir_a: Equipo de optica de ACSAR
+
+  - id: trampa_luz_d2
+    id_drive: OPT-18
+    referencia_comercial: null
+    nombre: Trampa de luz del cuarto puerto de D2 (alternativa al fotodiodo)
+    categoria: payload_optico
+    subsistema: terminal_optico
+    cantidad: 1
+    alternativa_de: fotodiodo_monitor_beacon
+    montaje:
+      cara: "-Y"
+      eje: X
+      tipo_eje: optico
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: [15.0, 15.0, 15.0]
+        unidad: mm
+        estado: supuesto
+        fuente: >-
+          SUPUESTO. Misma reserva que 'trampa_luz_d1' y por el mismo motivo.
+        falta: Tipo de absorbedor, su envolvente y el rechazo exigido
+        pedir_a: Equipo de optica de ACSAR
+    nota: >-
+      EXCLUYENTE con 'fotodiodo_monitor_beacon': el cuarto puerto de D2 es uno
+      solo, y o se instrumenta o se tapa. Va aqui como 'alternativa_de' para
+      que NO sume en ningun presupuesto ni se coloque en el layout, igual que
+      'fsm_piezo_pi_s331'. La opcion modelada es el fotodiodo, porque un puerto
+      de fuga instrumentado da telemetria gratis; si el equipo de PAT decide no
+      instrumentarlo, se intercambian las dos piezas y la geometria del brazo
+      no cambia (la trampa es 3 mm mayor por lado, que el chequeo 'brazo_beacon'
+      recalcula solo).
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa de la trampa elegida
+      pedir_a: Equipo de optica de ACSAR
 
   - id: colimador
     id_drive: OPT-08
@@ -1524,7 +1760,7 @@ componentes:
           que esta cifra se movera con el.
           ACOTADA POR ARRIBA POR EL BANCO, ademas: el FSM tiene que estar sobre
           el eje optico del telescopio, y entre ese eje y la pared +X de la
-          columna de payload quedan unos 56 mm para el colimador y el dicroico
+          columna de payload quedan unos 56 mm para el colimador y D1
           juntos, gaps incluidos. Si las piezas reales son mayores no es que el
           modelo este mal: es que el banco no da, y habra que alargarlo a costa
           de la bandeja o de la longitud reservada al telescopio. El chequeo
@@ -2390,6 +2626,158 @@ integracion:
         angulos por M, asi que en el haz comprimido, que es donde esta el FSM,
         el mismo adelanto son 50.7 * M urad opticos, o la mitad en giro
         mecanico del espejo. Ver el chequeo 'haz_vs_fsm'.
+        EL BEACON DE BAJADA COMPARTE EL FSM con el canal cuantico: sale por
+        D2, vuelve a D1 y se refleja al mismo espejo, asi que recibe el MISMO
+        punto de adelanto. Es lo que se quiere -- el beacon tiene que llegar
+        adonde ESTARA la estacion, no donde se la ve --, pero tiene una
+        consecuencia que hay que tener presente: la camara ve el beacon de
+        subida en la direccion de RETORNO, sin adelantar, mientras el FSM
+        trabaja adelantado, asi que entre lo que se recibe y lo que se
+        transmite hay siempre ese desfase. Queda ESCRITO, no implementado: el
+        lazo de control del FSM no esta en este repositorio.
+    longitud_onda_beacon_subida:
+      valor: 976.0
+      unidad: nm
+      estado: decision
+      fuente: >-
+        Decision de arquitectura de ACSAR del 2026-09-20. El beacon que sube de
+        la estacion al satelite va en 976 nm porque el sensor que lo mide es un
+        CMOS de silicio, y el silicio tiene eficiencia cuantica decente a 976 nm
+        y esta practicamente ciego a 1064 nm (por debajo del 1 %). Esa ceguera
+        es la que regala dos o tres ordenes de magnitud de rechazo del beacon de
+        bajada ENCIMA de lo que da el filtro de banda estrecha, y es lo que
+        permite que los dos beacons compartan brazo y dicroicos sin que los
+        100 mW que salen deslumbren al sensor que mide microvatios que entran.
+      nota: >-
+        Invertir la asignacion (subida en 1064, bajada en 976) pierde ese
+        aislamiento y obliga a una camara InGaAs, que es mas cara, mas pesada y
+        con mas ruido. Ver 'longitud_onda_beacon_bajada'.
+    longitud_onda_beacon_bajada:
+      valor: 1064.0
+      unidad: nm
+      estado: decision
+      fuente: >-
+        Decision de arquitectura de ACSAR del 2026-09-20. El beacon que baja del
+        satelite a la estacion va en 1064 nm por dos motivos. Arriba: es a lo
+        que el CMOS de silicio de la camara de seguimiento esta ciego (ver
+        'longitud_onda_beacon_subida'), asi que el propio sensor rechaza el
+        beacon propio. Abajo: 1064 nm es la linea del Nd:YAG, de las mas
+        instrumentadas que hay, y en tierra se detecta con APD de silicio --
+        que a 1064 todavia responde lo justo y hay detectores comerciales de
+        sobra -- o con InGaAs, donde el tamano y el consumo no son problema.
+      nota: >-
+        Separado del 1550 del canal cuantico lo suficiente para que D1 sea un
+        paso largo comodo, y separado del 976 lo suficiente para que D2 lo sea
+        tambien.
+    potencia_beacon_bajada:
+      valor: 100.0
+      unidad: mW
+      estado: supuesto
+      fuente: >-
+        SUPUESTO. Orden de magnitud tipico del beacon de bajada de un terminal
+        optico de CubeSat; NO sale de ningun presupuesto de enlace de CLAU, que
+        no existe todavia. Se declara porque es lo que dimensiona el disipador
+        del laser (y con el su envolvente) y lo que decide cuanto aislamiento
+        hace falta entre el beacon que sale y el canal cuantico que entra.
+      falta: >-
+        Potencia optica de bajada del presupuesto de enlace (divergencia,
+        distancia, sensibilidad del receptor de la estacion)
+      pedir_a: Equipo de PAT / de mision de ACSAR
+    borde_dicroico_d1:
+      valor: 1300.0
+      unidad: nm
+      estado: supuesto
+      fuente: >-
+        SUPUESTO. Borde de un paso largo que tiene que transmitir 1550 nm y
+        reflejar 976 y 1064: cualquier valor entre ~1100 y ~1400 nm lo cumple, y
+        1300 nm es el centro de esa ventana, lo mas lejos posible de los dos
+        lados. NO sale de ninguna ficha: D1 no esta elegido.
+      falta: >-
+        Longitud de onda de corte, anchura de la transicion y curvas de
+        transmision y reflexion del divisor elegido
+      pedir_a: Equipo de optica de ACSAR
+    borde_dicroico_d2:
+      valor: 1020.0
+      unidad: nm
+      estado: supuesto
+      fuente: >-
+        SUPUESTO. Borde de un paso corto que tiene que transmitir 976 nm y
+        reflejar 1064: la ventana es de 88 nm y 1020 nm es su centro. Es una
+        transicion ESTRECHA, y esa estrechez es el precio de meter los dos
+        beacons en el mismo brazo. NO sale de ninguna ficha: D2 no esta
+        elegido.
+      falta: >-
+        Longitud de onda de corte, anchura de la transicion y curvas de
+        transmision y reflexion del divisor elegido
+      pedir_a: Equipo de optica de ACSAR
+      nota: >-
+        Si ningun divisor comercial da esa transicion con el rechazo que haga
+        falta, la salida no es apretar el borde: es separar mas las dos
+        longitudes de onda, y eso vuelve a abrir
+        'longitud_onda_beacon_subida'.
+    aislamiento_camara_a_1064:
+      valor: null
+      unidad: dB
+      estado: TBD
+      falta: >-
+        Aislamiento total medido del beacon de bajada (1064 nm, 100 mW) en el
+        sensor de la camara de seguimiento: la suma de la reflexion de D2, el
+        filtro de banda estrecha de 976 nm y la ceguera del silicio a 1064.
+      pedir_a: Equipo de PAT de ACSAR
+      nota: >-
+        ES EL NUMERO QUE SOSTIENE TODA LA ELECCION DE LONGITUDES DE ONDA, y hoy
+        no esta medido. Lo que decide es si un sensor que mide microvatios de
+        beacon de subida puede convivir en el mismo brazo con 100 mW de beacon
+        de bajada. Si sale corto, las salidas son separar mas los dos colores,
+        apagar el beacon durante la lectura de la camara, o volver a dos brazos
+        separados -- y esta ultima ya se sabe que no cabe en el banco.
+    geometria_del_brazo_de_beacons:
+      valor: null
+      estado: TBD
+      falta: >-
+        DECIDIR COMO CABE EL BRAZO. Con los dos beacons compartiendo brazo, la
+        fila D1/2 + D2 + camara pide 54.5 mm desde el centro de D1 y solo hay
+        47.7 mm hasta la pared del banco: FALTAN 6.8 mm con las envolventes
+        desnudas y 16.8 mm con holguras de montaje, y por eso 'camara_beacon'
+        no esta colocada en data/layout.yaml. Ya esta aplicada la unica salida
+        que no le cuesta volumen a nadie (bajar la reserva de la camara de 30 a
+        20 mm). Quedan dos, y las dos se pagan:
+        (1) PLEGAR EL BRAZO HACIA -Z con un espejo de doblado. Da unos 27.5 mm
+        mas -- la mitad de los 55 mm de banco en Z -- a costa de una superficie
+        reflectante adicional en el camino del beacon y de una pieza mas que
+        alinear.
+        (2) ALARGAR EL BANCO, que hoy mide 55 mm en Z. Se paga con la bandeja de
+        fibra o con 'telescopio_cassegrain.longitud_reservada', exactamente
+        igual que la salida de la linea en X (CLAUDE.md 3.7).
+        Lo que NO es una salida es seguir bajando reservas hasta que el chequeo
+        pase: las del brazo ya son todas cotas superiores.
+      pedir_a: ACSAR (mecanica y optica)
+      nota: >-
+        Es lo unico que hoy hace que 'clau3d informe' devuelva codigo 1. Ver el
+        chequeo 'brazo_beacon' y CLAUDE.md 3.9.
+    perdida_obstruccion_convenio:
+      valor: intensidad_en_eje
+      estado: decision
+      fuente: >-
+        Decision de ACSAR del 2026-09-20. La obstruccion central de un
+        Cassegrain da DOS cifras distintas, las dos en potencia, y confundirlas
+        cuesta un factor 2 en dB:
+        (a) fraccion de POTENCIA recogida = 1 - eps^2, o sea -10 log10(1-eps^2);
+        (b) INTENSIDAD EN EJE en campo lejano = (1 - eps^2)^2, o sea
+        -20 log10(1-eps^2), porque la obstruccion no solo quita area sino que
+        redistribuye energia del lobulo principal a los anillos.
+        Para un enlace optico manda (b): lo que llega al receptor es la
+        intensidad en el eje, no la potencia total que sale del telescopio. Las
+        dos se derivan y se publican por separado en
+        src/clau3d/optica/parametros.py ('perdida_potencia_recogida_dB' y
+        'perdida_intensidad_en_eje_dB'); aqui solo se declara CUAL manda,
+        porque los numeros se derivan de eps y escribirlos aqui seria
+        duplicarlos.
+      nota: >-
+        Esto corrige un comentario anterior del codigo que llamaba al -20 log10
+        "convenio de amplitud" y decia que en potencia costaba la mitad de dB.
+        Era falso: no son dos convenios de la misma magnitud, son dos
+        magnitudes distintas y las dos son de potencia.
   holgura_conector:
     valor: null
     unidad: mm

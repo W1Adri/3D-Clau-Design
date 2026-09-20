@@ -15,6 +15,7 @@ telescopio pueda crecer en Z.
 from __future__ import annotations
 
 import math
+import sys
 from pathlib import Path
 
 from clau3d.datamodel import RAIZ, cargar
@@ -61,12 +62,12 @@ HOLGURA_BANDEJA = 8.0
 MARGEN_BANDEJA = 6.0
 
 # --- el banco de espacio libre ----------------------------------------
-# El camino es colimador -> dicroico -> FSM -> telescopio, y el FSM es el que
+# El camino es colimador -> D1 -> FSM -> telescopio, y el FSM es el que
 # dobla: el haz llega segun +X y sale segun +Z hacia el telescopio. Eso obliga
 # a dos cosas que no son negociables:
 #
 #   1. El FSM esta sobre el EJE OPTICO DEL TELESCOPIO. No se puede mover.
-#   2. El colimador y el dicroico van en linea con el, segun X.
+#   2. El colimador y D1 van en linea con el, segun X.
 #
 # Y de ahi sale el numero que aprieta: entre el eje del telescopio y la pared
 # +X de la columna de payload solo hay sitio para esos dos. El chequeo
@@ -74,10 +75,36 @@ MARGEN_BANDEJA = 6.0
 # la salida es alargar el banco a costa de la bandeja o del telescopio, no
 # apretar las piezas.
 #
-# El brazo del beacon sale del dicroico segun +-Y: la camara arriba, el laser
-# de beacon de bajada abajo.
-CADENA_BANCO = ("colimador", "dicroico")   # de +X hacia el FSM
-BRAZO_BEACON = (("camara_beacon", +1), ("laser_beacon_bajada", -1))
+# EL BRAZO DE LOS BEACONS (arquitectura de dos dicroicos, 2026-09-20). Los dos
+# beacons comparten UN SOLO brazo, el que refleja D1 hacia +Y, y dentro de ese
+# brazo los separa D2. Cada rama es una fila de piezas que sale de una pieza
+# "estacion" por un eje, y se coloca hacia fuera desde ella:
+#
+#          camara            <- +Y, transmision de D2 (976 nm)
+#            |
+#   laser - D2 - fotodiodo   <- +-X, reflexion (1064) y fuga en transmision
+#            |
+#           D1 --- FSM       <- el 1550 sigue recto por X
+#            |
+#     trampa_luz_d1          <- -Y, fuga del 1550 en reflexion
+#
+# El orden de las ramas importa: una rama no se puede colocar hasta que su
+# estacion esta colocada, y D2 es estacion de dos de ellas.
+#
+# ESTO NO CABE, y el chequeo 'brazo_beacon' lo dice con numeros: la camara se
+# sale por 16.8 mm con estas holguras. La pieza que no cabe NO SE COLOCA y se
+# avisa por stderr. Las otras dos opciones eran apretarla, que esconde el
+# resultado, o dibujarla saliendose del satelite, que ademas choca con el panel
+# solar. Ver CLAUDE.md 3.9.
+CADENA_BANCO = ("colimador", "dicroico_d1")   # de +X hacia el FSM
+RAMAS_BRAZO = (
+    ("dicroico_d1", "+Y", ("dicroico_d2", "camara_beacon")),
+    ("dicroico_d1", "-Y", ("trampa_luz_d1",)),
+    # El laser es la pieza grande del brazo y va hacia -X, que es el lado con
+    # sitio: hacia +X solo hay 46 mm hasta la pared de la columna.
+    ("dicroico_d2", "-X", ("laser_beacon_bajada",)),
+    ("dicroico_d2", "+X", ("fotodiodo_monitor_beacon",)),
+)
 HOLGURA_BANCO = 5.0
 MARGEN_BANCO = 2.0
 # El FSM a 45 grados alrededor de Y: lleva la normal del espejo del +Z local a
@@ -228,6 +255,68 @@ def _recortado(minimo, maximo, util):
     if any(nuevo_max[i] - nuevo_min[i] <= 1e-6 for i in range(3)):
         return None
     return nuevo_min, nuevo_max
+
+
+def _keep_outs_compartidos(catalogo) -> dict[str, list[dict]]:
+    """Tramos que recorren el mismo tubo que otro, por 'keep_out_compartido_con'.
+
+    Un tramo de espacio libre que va y vuelve por el mismo sitio -- el brazo de
+    los beacons, donde suben 976 nm y bajan 1064 -- es UN volumen, no dos.
+    Declararlo dos veces no reserva nada nuevo: reserva lo mismo otra vez, y el
+    detector de interferencias ve dos cajas identicas solapando al 100 % e
+    informa de una invasion que no existe.
+
+    Devuelve {id del tramo que SI lleva keep-out: [los tramos que lo comparten]},
+    para que la nota del keep-out diga quien mas pasa por ahi y con que color.
+
+    Se comprueba que el tramo compartido exista, que lleve keep-out y que una
+    los MISMOS DOS EXTREMOS. Si no, es otro tramo y necesita su propio volumen:
+    antes un error que un camino optico sin reservar.
+    """
+    por_id = {
+        con.get("id"): con
+        for familia, con in catalogo.todas_las_conexiones()
+        if familia == "opticas_espacio_libre"
+    }
+    salida: dict[str, list[dict]] = {}
+    for cid, con in por_id.items():
+        destino = con.get("keep_out_compartido_con")
+        if destino is None:
+            continue
+        if con.get("keep_out"):
+            raise SystemExit(
+                f"conexion {cid}: declara 'keep_out: true' y "
+                f"'keep_out_compartido_con: {destino}' a la vez. O tiene "
+                f"volumen propio o comparte el de otro."
+            )
+        otro = por_id.get(destino)
+        if otro is None:
+            raise SystemExit(
+                f"conexion {cid}: 'keep_out_compartido_con' apunta a "
+                f"'{destino}', que no es un tramo de opticas_espacio_libre."
+            )
+        if not otro.get("keep_out"):
+            raise SystemExit(
+                f"conexion {cid}: comparte el keep-out de '{destino}', que no "
+                f"tiene ninguno. Entonces ese tramo no esta reservado por nadie."
+            )
+        if {con.get("desde"), con.get("hasta")} != {otro.get("desde"), otro.get("hasta")}:
+            raise SystemExit(
+                f"conexion {cid} ({con.get('desde')} -> {con.get('hasta')}) "
+                f"comparte el keep-out de '{destino}' "
+                f"({otro.get('desde')} -> {otro.get('hasta')}), que une otros "
+                f"extremos. Un tramo compartido es el MISMO tubo recorrido al "
+                f"reves, no un tramo parecido."
+            )
+        salida.setdefault(destino, []).append(
+            {
+                "id": cid,
+                "desde": con.get("desde"),
+                "hasta": con.get("hasta"),
+                "longitud_onda_nm": con.get("longitud_onda_nm"),
+            }
+        )
+    return salida
 
 
 def generar_keep_outs(catalogo, colocaciones, zonas_por_id) -> list[dict]:
@@ -399,6 +488,7 @@ def generar_keep_outs(catalogo, colocaciones, zonas_por_id) -> list[dict]:
         f"queda entre las dos piezas. El diametro de haz de cada tramo es TBD "
         f"en data/connections.yaml."
     )
+    compartidos = _keep_outs_compartidos(catalogo)
     for familia, con in catalogo.todas_las_conexiones():
         if familia != "opticas_espacio_libre" or not con.get("keep_out"):
             continue
@@ -434,6 +524,21 @@ def generar_keep_outs(catalogo, colocaciones, zonas_por_id) -> list[dict]:
         recorte = _recortado(minimo, maximo, _recinto(a))
         if recorte is None:
             continue
+        nota = f"Camino optico {desde} -> {hasta} ({con.get('id')})."
+        otros = compartidos.get(con.get("id"), [])
+        if otros:
+            nota += (
+                " TRAMO COMPARTIDO: lo recorren tambien "
+                + ", ".join(
+                    f"{o['id']} ({o['desde']} -> {o['hasta']}"
+                    + (f", {o['longitud_onda_nm']:.0f} nm" if o["longitud_onda_nm"] else "")
+                    + ")"
+                    for o in otros
+                )
+                + ". Es el mismo tubo, asi que el volumen se declara una sola "
+                "vez: duplicarlo no reservaria nada nuevo y si generaria una "
+                "invasion de keep-out que no significa nada."
+            )
         salida.append({
             "id": f"haz_{con.get('id')}",
             "tipo": "haz_libre",
@@ -441,7 +546,7 @@ def generar_keep_outs(catalogo, colocaciones, zonas_por_id) -> list[dict]:
             "fuente": fuente_haz,
             "min": [round(v, 3) for v in recorte[0]],
             "max": [round(v, 3) for v in recorte[1]],
-            "nota": f"Camino optico {desde} -> {hasta} ({con.get('id')}).",
+            "nota": nota,
         })
 
     salida += _haz_del_telescopio(catalogo, puestas)
@@ -515,6 +620,85 @@ def _haz_del_telescopio(catalogo, puestas) -> list[dict]:
             f"Magnificacion derivada M = {o.magnificacion:.2f}.",
         ),
     ]
+
+
+def _ramas_del_brazo(catalogo, colocaciones, recinto):
+    """Las piezas que cuelgan de D1 y de D2, rama por rama.
+
+    Cada rama sale de una pieza ESTACION ya colocada y crece hacia fuera por un
+    eje, dejando ``HOLGURA_BANCO`` entre pieza y pieza. Las estaciones se leen
+    de lo que ya hay colocado, asi que D2 -- que es estacion de dos ramas ademas
+    de pieza de la primera -- no se situa dos veces ni se escribe su posicion a
+    mano en ningun sitio.
+
+    UNA PIEZA QUE NO CABE NO SE COLOCA. Hoy es el caso de la camara: el brazo
+    compartido pide mas de lo que hay desde D1 hasta la pared, y no sobra sitio
+    en ninguna otra direccion. Las tres salidas posibles son apretarla, dibujarla
+    saliendose del satelite o no colocarla, y las dos primeras mienten: la
+    primera esconde el resultado y la segunda dibuja una pieza en un sitio en el
+    que no puede estar, que ademas choca con el panel solar. Asi que no se
+    coloca, se avisa por stderr, y el chequeo 'brazo_beacon' lo cuenta en
+    milimetros. Es el mismo criterio que la fila de la bandeja que no cabe
+    -- no se aprieta -- sin tumbar el generador entero, porque aqui lo que no
+    cabe es la ARQUITECTURA, no el reparto, y el resto del modelo sigue siendo
+    valido y hay que poder verlo.
+    """
+    salida: list[dict] = []
+    sin_sitio: list[tuple[str, str, float]] = []
+    puestas = {c["componente"]: c for c in colocaciones}
+
+    for estacion_id, cara, fila in RAMAS_BRAZO:
+        estacion = puestas.get(estacion_id)
+        if estacion is None:
+            # La estacion no se pudo colocar (su envolvente es TBD): la rama
+            # entera se queda sin sitio de donde salir. No se inventa uno.
+            continue
+        eje = "XYZ".index(cara[1])
+        signo = 1 if cara[0] == "+" else -1
+        dims_estacion = dims_en_mundo(
+            catalogo, catalogo[estacion_id], estacion["rotacion"]
+        )
+        # Desde la cara de la estacion hacia fuera.
+        borde = estacion["centro"][eje] + signo * dims_estacion[eje] / 2
+        for cid in fila:
+            if not catalogo.existe(cid):
+                continue
+            componente = catalogo[cid]
+            # Una alternativa excluyente no se coloca, igual que el FSM piezo:
+            # el cuarto puerto de D2 es uno solo.
+            if not componente.modelable or not componente.cuenta_en_presupuesto:
+                continue
+            rotacion = rotacion_de_montaje(componente, "+Y")
+            dims = dims_en_mundo(catalogo, componente, rotacion)
+            borde += signo * HOLGURA_BANCO
+            centro = list(estacion["centro"])
+            centro[eje] = borde + signo * dims[eje] / 2
+            extremo = borde + signo * dims[eje]
+            pared = recinto[1][eje] if signo > 0 else recinto[0][eje]
+            if signo * (extremo - pared) > 0:
+                sin_sitio.append((cid, cara, abs(extremo - pared)))
+                # Y tampoco lo que fuera detras de ella: sin la pieza anterior
+                # colocada no hay de donde medir la siguiente.
+                break
+            colocacion = {
+                "componente": cid,
+                "instancia": 1,
+                "centro": [round(v, 3) for v in centro],
+                "rotacion": rotacion,
+                "zona": "z_payload_banco",
+            }
+            salida.append(colocacion)
+            puestas[cid] = colocacion
+            borde = extremo
+
+    for cid, cara, falta in sin_sitio:
+        print(
+            f"AVISO: {cid} no cabe en la rama {cara} del brazo de los beacons "
+            f"por {falta:.1f} mm y NO se coloca. Ver el chequeo 'brazo_beacon' "
+            f"y CLAUDE.md 3.9.",
+            file=sys.stderr,
+        )
+    return salida, sin_sitio
 
 
 def _caja_mundo(catalogo, colocacion):
@@ -708,6 +892,7 @@ def generar() -> str:
 
     fsm = catalogo["fsm"]
     margen_banco = None
+    sin_sitio_brazo: list[tuple[str, str, float]] = []
     if fsm.modelable:
         colocaciones.append(
             {
@@ -720,10 +905,10 @@ def generar() -> str:
                 "zona": "z_payload_banco",
             }
         )
-        # Hacia +X desde el FSM: dicroico y colimador, en orden inverso al de
+        # Hacia +X desde el FSM: D1 y colimador, en orden inverso al de
         # la cadena porque la cadena viene de fuera hacia el espejo.
         cursor_x = x_eje_telescopio + dims_en_mundo(catalogo, fsm, GIRO_FSM)[0] / 2
-        x_dicroico = None
+        x_d1 = None
         for cid in reversed(CADENA_BANCO):
             componente = catalogo[cid]
             if not componente.modelable:
@@ -741,33 +926,22 @@ def generar() -> str:
                     "zona": "z_payload_banco",
                 }
             )
-            if cid == "dicroico":
-                x_dicroico = centro_x
-                ancho_dicroico = dy
+            if cid == "dicroico_d1":
+                x_d1 = centro_x
             cursor_x += dx
         margen_banco = X - MARGEN_BANCO - cursor_x
 
-        # El brazo del beacon, a +-Y del dicroico.
-        if x_dicroico is not None:
-            for cid, signo in BRAZO_BEACON:
-                componente = catalogo[cid]
-                if not componente.modelable:
-                    continue
-                rotacion = rotacion_de_montaje(componente, "+Y")
-                dx, dy, dz = dims_en_mundo(catalogo, componente, rotacion)
-                centro_y = signo * (ancho_dicroico / 2 + HOLGURA_BANCO + dy / 2)
-                colocaciones.append(
-                    {
-                        "componente": cid,
-                        "instancia": 1,
-                        "centro": [
-                            round(x_dicroico, 3), round(centro_y, 3),
-                            round(z_eje_banco, 3),
-                        ],
-                        "rotacion": rotacion,
-                        "zona": "z_payload_banco",
-                    }
-                )
+        # El brazo de los beacons. Cada rama sale de una pieza ya colocada,
+        # asi que se recorren en orden y se lee el centro y la envolvente de la
+        # estacion del propio acumulador de colocaciones: asi D2, que es
+        # estacion de dos ramas, no hay que situarlo dos veces.
+        if x_d1 is not None:
+            del_brazo, sin_sitio_brazo = _ramas_del_brazo(
+                catalogo,
+                colocaciones,
+                ([x_sep, -Y, z_banco_min], [X, Y, z_tel_min]),
+            )
+            colocaciones += del_brazo
 
     # ------------------------------------------------------------ telescopio
     # El barrilete llena su zona: su envolvente es la COTA SUPERIOR (el
@@ -898,16 +1072,29 @@ def generar() -> str:
             "z_payload_banco",
             "Banco optico de espacio libre",
             (x_sep, -Y, z_banco_min), (X, Y, z_tel_min),
-            f"Camino: colimador -> dicroico -> FSM -> telescopio, y del "
-            f"dicroico sale el brazo del beacon hacia +-Y (camara arriba, "
-            f"laser de beacon de bajada abajo). El FSM esta sobre el eje "
-            f"optico del telescopio (X = {x_eje_telescopio:+.2f}) porque es el "
-            f"que dobla el haz de X a Z, y eso deja el colimador y el dicroico "
-            f"en linea hacia +X. Margen contra la pared +X: "
+            f"Canal cuantico: colimador -> D1 -> FSM -> telescopio. De D1 "
+            f"sale hacia +Y UN SOLO brazo para los dos beacons, y dentro de el "
+            f"D2 los separa: la camara en transmision (976 nm) y el laser de "
+            f"bajada inyectando lateralmente en reflexion (1064 nm). Los dos "
+            f"cuartos puertos llevan su trampa y su fotodiodo. El FSM esta "
+            f"sobre el eje optico del telescopio (X = {x_eje_telescopio:+.2f}) "
+            f"porque es el que dobla el haz de X a Z, y eso deja el colimador "
+            f"y D1 en linea hacia +X. Margen contra la pared +X: "
             + (f"{margen_banco:.1f} mm." if margen_banco is not None
                else "no calculable, faltan envolventes.")
-            + " Los haces NO estan dibujados: sin diametro de haz, un "
-              "keep-out optico seria una medida inventada.",
+            + (
+                " EL BRAZO NO CABE: "
+                + "; ".join(
+                    f"{cid} se sale por la rama {cara} en {falta:.1f} mm y NO "
+                    f"esta colocado"
+                    for cid, cara, falta in sin_sitio_brazo
+                )
+                + ". Apretarlo hasta que entrara, o dibujarlo saliendose del "
+                  "satelite, seria esconder el resultado. Ver el chequeo "
+                  "'brazo_beacon' y CLAUDE.md 3.9."
+                if sin_sitio_brazo
+                else " El brazo de los beacons cabe entero."
+            ),
         ),
         (
             "z_payload_bandeja",
