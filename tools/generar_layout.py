@@ -39,6 +39,420 @@ ORDEN_PILA = [
     ("bateria_optimus_30", 2),
 ]
 
+# --- la bandeja de fibra ----------------------------------------------
+# Las piezas de la bandeja se montan sobre una placa horizontal, en filas que
+# avanzan segun Z. Dentro de cada fila van en hilera segun X, que es la
+# direccion ancha (121.7 mm) y la del eje de fibra de todas ellas.
+#
+# El ORDEN ES EL DE LA CADENA OPTICA, y el sentido tambien: el laser al extremo
+# -Z, lo mas lejos posible del barrilete del telescopio, porque con sus 4.1 W es
+# la principal fuente de calor del payload; y la salida hacia el colimador al
+# extremo +Z, que es por donde se sale al banco. Los dos moduladores NO estan
+# aqui: van en la franja lateral (ver CLAUDE.md 3.6), asi que la fibra sale de
+# la bandeja hacia la franja y vuelve.
+FILAS_BANDEJA = [
+    ("laser_dfb_1550",),
+    ("voa", "aislador"),
+    ("filtro_espectral", "acoplador_monitor"),
+]
+# Holgura entre filas y contra los bordes de la zona. No es una cota de nada:
+# es sitio para el tramo recto de fibra que sale de cada pieza antes de curvar.
+HOLGURA_BANDEJA = 8.0
+MARGEN_BANDEJA = 6.0
+
+# --- el banco de espacio libre ----------------------------------------
+# El camino es colimador -> dicroico -> FSM -> telescopio, y el FSM es el que
+# dobla: el haz llega segun +X y sale segun +Z hacia el telescopio. Eso obliga
+# a dos cosas que no son negociables:
+#
+#   1. El FSM esta sobre el EJE OPTICO DEL TELESCOPIO. No se puede mover.
+#   2. El colimador y el dicroico van en linea con el, segun X.
+#
+# Y de ahi sale el numero que aprieta: entre el eje del telescopio y la pared
+# +X de la columna de payload solo hay sitio para esos dos. El chequeo
+# 'banco_optico' lo recalcula y dice cuanto margen queda. Si algun dia no da,
+# la salida es alargar el banco a costa de la bandeja o del telescopio, no
+# apretar las piezas.
+#
+# El brazo del beacon sale del dicroico segun +-Y: la camara arriba, el laser
+# de beacon de bajada abajo.
+CADENA_BANCO = ("colimador", "dicroico")   # de +X hacia el FSM
+BRAZO_BEACON = (("camara_beacon", +1), ("laser_beacon_bajada", -1))
+HOLGURA_BANCO = 5.0
+MARGEN_BANCO = 2.0
+# El FSM a 45 grados alrededor de Y: lleva la normal del espejo del +Z local a
+# la bisectriz entre +X y +Z, que es lo que dobla el haz de X a Z.
+GIRO_FSM = [0, 45, 0]
+
+
+# La cara de montaje de cada pieza (montaje.cara, en sus ejes locales) contra la
+# normal de la superficie sobre la que se atornilla. De aqui sale la rotacion, en
+# vez de escribirla a mano colocacion por colocacion: asi una pieza que cambie de
+# cara de montaje en el catalogo se recoloca sola, y el STEP que llegue manana se
+# orienta por la misma regla que el aproximado al que sustituye.
+_ROTACION_DE_MONTAJE = {
+    # (cara local que se atornilla, normal de la superficie) -> giros [gx, gy, gz]
+    ("-Y", "+Y"): [0, 0, 0],
+    ("-Z", "+Y"): [-90, 0, 0],
+    ("+Z", "+Y"): [90, 0, 0],
+    ("-X", "+Y"): [0, 0, 90],
+    ("-Y", "+X"): [0, 0, -90],
+    ("-Z", "+X"): [0, 90, 0],
+    # El telescopio no se atornilla a un suelo: se atornilla por su brida
+    # trasera a un mamparo que mira a +Z, que es por donde le entra el haz.
+    ("-Z", "+Z"): [0, 0, 0],
+    # La antena de parche: se sujeta por +Z local y radia por -Z local, hacia
+    # fuera del satelite por la cara -Z.
+    ("+Z", "-Z"): [0, 0, 0],
+    # Los paneles de cuerpo, uno por cada cara grande. El de -Y va del reves.
+    ("-Y", "-Y"): [180, 0, 0],
+}
+
+
+def rotacion_de_montaje(componente, normal: str) -> list[int]:
+    """Giros que llevan la cara de montaje de la pieza contra la superficie."""
+    montaje = componente.montaje
+    if montaje is None or montaje.cara is None:
+        return [0, 0, 0]
+    try:
+        return _ROTACION_DE_MONTAJE[(montaje.cara, normal)]
+    except KeyError:
+        raise SystemExit(
+            f"{componente.id}: no se sabe como montar la cara {montaje.cara} "
+            f"contra una superficie {normal}. Anade el caso a "
+            f"_ROTACION_DE_MONTAJE en tools/generar_layout.py."
+        )
+
+
+def dims_en_mundo(componente, rotacion) -> tuple[float, float, float]:
+    """Caja envolvente de la pieza YA girada, conectores incluidos.
+
+    Se gira el solido de verdad en vez de permutar cotas. Permutar valdria
+    mientras todos los giros fueran multiplos de 90 grados, y el FSM no lo es:
+    va a 45 para doblar el haz que llega segun X hacia el telescopio, que
+    apunta segun +Z. Una caja a 45 grados ocupa mas que la misma caja recta, y
+    ese "mas" es justo lo que decide si el banco da de si.
+
+    Ademas se pide a parts.caja_local y no a 'dimensiones', porque una pieza
+    con conectores ocupa mas que su cuerpo y colocarla por el cuerpo la haria
+    chocar con la vecina justo por donde sale el cable.
+    """
+    import cadquery as cq
+
+    from clau3d import parts
+
+    solido = parts.solido(componente)
+    origen = cq.Vector(0, 0, 0)
+    for eje, angulo in zip(
+        (cq.Vector(1, 0, 0), cq.Vector(0, 1, 0), cq.Vector(0, 0, 1)), rotacion
+    ):
+        if angulo:
+            solido = solido.rotate(origen, eje, angulo)
+    return parts.caja_de_solidos(solido, componente.id).dims
+
+
+# Direcciones de las seis caras, en ejes locales.
+_VECTOR_CARA = {
+    "+X": (1, 0, 0), "-X": (-1, 0, 0),
+    "+Y": (0, 1, 0), "-Y": (0, -1, 0),
+    "+Z": (0, 0, 1), "-Z": (0, 0, -1),
+}
+
+
+def _gira_vector(v, rotacion):
+    """Gira un vector unitario por los mismos giros que la pieza."""
+    import math as _m
+
+    x, y, z = v
+    gx, gy, gz = (_m.radians(a) for a in rotacion)
+    # X
+    y, z = y * _m.cos(gx) - z * _m.sin(gx), y * _m.sin(gx) + z * _m.cos(gx)
+    # Y
+    z, x = z * _m.cos(gy) - x * _m.sin(gy), z * _m.sin(gy) + x * _m.cos(gy)
+    # Z
+    x, y = x * _m.cos(gz) - y * _m.sin(gz), x * _m.sin(gz) + y * _m.cos(gz)
+    return (x, y, z)
+
+
+def _caja_saliente(centro, direccion, largo, radio, normal_montaje=None):
+    """Volumen que barre un cable al salir de un puerto y dar su primer codo.
+
+    Sale del punto en 'direccion' una longitud 'largo' (tramo recto mas el
+    envolvente del codo) y tiene 'radio' a cada lado, porque el codo puede irse
+    a un lado o al otro.
+
+    En el eje perpendicular al montaje NO es simetrico: un cable que sale de
+    una pieza atornillada a una bandeja puede subir, pero no atravesar la
+    bandeja. Con 'normal_montaje' el volumen crece solo hacia ese lado, que es
+    la diferencia entre un keep-out util y uno que se hunde en la placa y
+    ensucia el informe con invasiones que no significan nada.
+    """
+    eje = max(range(3), key=lambda i: abs(direccion[i]))
+    signo = 1.0 if direccion[eje] >= 0 else -1.0
+    eje_normal = (
+        max(range(3), key=lambda i: abs(normal_montaje[i]))
+        if normal_montaje is not None
+        else None
+    )
+    minimo = [0.0, 0.0, 0.0]
+    maximo = [0.0, 0.0, 0.0]
+    for i in range(3):
+        if i == eje:
+            a, b = centro[i], centro[i] + signo * largo
+            minimo[i], maximo[i] = min(a, b), max(a, b)
+        elif i == eje_normal:
+            # Solo hacia fuera de la superficie de montaje.
+            if normal_montaje[i] >= 0:
+                minimo[i], maximo[i] = centro[i], centro[i] + 2 * radio
+            else:
+                minimo[i], maximo[i] = centro[i] - 2 * radio, centro[i]
+        else:
+            minimo[i], maximo[i] = centro[i] - radio, centro[i] + radio
+    return minimo, maximo
+
+
+def _recortado(minimo, maximo, util):
+    """Recorta el volumen a la zona util. Devuelve None si se queda en nada.
+
+    Un keep-out no puede reservar sitio fuera del satelite: lo que queda al
+    otro lado de la pared no es volumen que nadie vaya a invadir, es ruido en
+    el informe.
+    """
+    caja = (util.xmin, util.ymin, util.zmin, util.xmax, util.ymax, util.zmax)
+    nuevo_min = [max(minimo[i], caja[i]) for i in range(3)]
+    nuevo_max = [min(maximo[i], caja[i + 3]) for i in range(3)]
+    if any(nuevo_max[i] - nuevo_min[i] <= 1e-6 for i in range(3)):
+        return None
+    return nuevo_min, nuevo_max
+
+
+def generar_keep_outs(catalogo, colocaciones, zonas_por_id) -> list[dict]:
+    """Los volumenes reservados que se pueden dibujar hoy, y solo esos.
+
+    Tres familias, y las tres salen de un numero SUPUESTO, porque las tres
+    cotas de verdad -- el radio minimo de curvatura de la fibra, el del
+    coaxial y el diametro de haz -- siguen siendo TBD:
+
+    * **fibra**: el tramo recto de salida (boot) mas el envolvente del primer
+      codo, en cada puerto QUE TENGA UNA CONEXION DECLARADA. No en los dos
+      extremos de todo: el laser solo tiene fibra por un lado y el colimador
+      tambien, y dibujarles un keep-out en la cara que no lleva fibra inventa
+      un encaminamiento que nadie ha decidido.
+    * **coaxial**: lo mismo a la salida del conector RF de cada modulador.
+    * **haz libre**: el tubo que queda ENTRE dos piezas del banco, sin contar
+      los cuerpos de las dos: un keep-out que se come a sus propios extremos
+      genera invasiones que no significan nada.
+
+    Cada volumen se recorta a la zona de su pieza. Un keep-out de la bandeja
+    que se cuela en la columna de plataforma no esta diciendo que la fibra
+    pase por ahi: esta diciendo que este generador no sabe por donde pasa. Y no
+    lo sabe: el encaminamiento es una decision abierta.
+
+    Si alguno de los tres parametros llegara a existir de verdad, el keep-out
+    correspondiente pasaria de 'supuesto' a 'confirmado' sin tocar este codigo.
+
+    Lo que NO se genera es el cono de la apertura del telescopio hacia fuera:
+    sin semiangulo, un cono es una medida inventada de las gordas.
+    """
+    from clau3d import parts, structure
+
+    util = structure.zona_util(catalogo)
+    puestas = {
+        (c["componente"], c["instancia"]): c for c in colocaciones
+    }
+    radio = catalogo.integracion["fibra.radio_curvatura_modelado"].escalar()
+    boot = catalogo.integracion["fibra.longitud_boot_modelada"].escalar()
+    radio_coax = catalogo.integracion["coaxial.radio_curvatura_modelado"].escalar()
+    haz = catalogo.integracion["optica.diametro_haz_modelado"].escalar()
+
+    def _recinto(colocacion):
+        """La zona de la pieza, o la util si esta fuera de toda zona."""
+        zona = zonas_por_id.get(colocacion.get("zona"))
+        return zona if zona is not None else util
+
+    salida: list[dict] = []
+
+    # --- fibra: solo los puertos con conexion declarada -------------------
+    fuente_fibra = (
+        f"Tramo recto de {boot:.0f} mm (integracion.fibra.longitud_boot_modelada) "
+        f"mas el envolvente de un codo de {radio:.0f} mm "
+        f"(integracion.fibra.radio_curvatura_modelado). Los dos son SUPUESTOS: "
+        f"el radio de verdad es integracion.fibra.radio_minimo_curvatura, que "
+        f"sigue siendo TBD. La DIRECCION tampoco es un dato: se toma el eje de "
+        f"fibra que declara 'montaje', porque el encaminamiento real esta sin "
+        f"decidir."
+    )
+    puertos: dict[str, set[str]] = {}
+    for familia, con in catalogo.todas_las_conexiones():
+        if familia != "opticas_fibra":
+            continue
+        if con.get("desde"):
+            puertos.setdefault(con["desde"], set()).add("salida")
+        if con.get("hasta"):
+            puertos.setdefault(con["hasta"], set()).add("entrada")
+
+    for cid, lados in puertos.items():
+        if not catalogo.existe(cid):
+            continue
+        componente = catalogo[cid]
+        colocacion = puestas.get((cid, 1))
+        if colocacion is None or componente.montaje is None:
+            continue
+        if componente.montaje.eje is None:
+            continue
+        rotacion = colocacion["rotacion"]
+        centro = colocacion["centro"]
+        dims = dims_en_mundo(componente, rotacion)
+        eje_local = {"X": "+X", "Y": "+Y", "Z": "+Z"}[componente.montaje.eje]
+        normal = None
+        if componente.montaje.cara:
+            # La cara del catalogo es la que SE APOYA; el cable crece al otro
+            # lado, asi que no puede atravesar la placa de montaje.
+            normal = tuple(
+                -k for k in _gira_vector(
+                    _VECTOR_CARA[componente.montaje.cara], rotacion
+                )
+            )
+        for lado in sorted(lados):
+            signo = 1 if lado == "salida" else -1
+            direccion = _gira_vector(
+                tuple(signo * k for k in _VECTOR_CARA[eje_local]), rotacion
+            )
+            eje_mundo = max(range(3), key=lambda i: abs(direccion[i]))
+            punto = list(centro)
+            mitad = dims[eje_mundo] / 2
+            punto[eje_mundo] += mitad if direccion[eje_mundo] >= 0 else -mitad
+            recorte = _recortado(
+                *_caja_saliente(punto, direccion, boot + radio, radio, normal),
+                _recinto(colocacion),
+            )
+            if recorte is None:
+                continue
+            salida.append({
+                "id": f"fibra_{cid}_{lado}",
+                "tipo": "fibra",
+                "estado": "supuesto",
+                "fuente": fuente_fibra,
+                "min": [round(v, 3) for v in recorte[0]],
+                "max": [round(v, 3) for v in recorte[1]],
+                "nota": (
+                    f"Puerto de {lado} de fibra de {cid}, recortado a la zona "
+                    f"{colocacion.get('zona')}."
+                ),
+            })
+
+    # --- coaxial: el conector RF de cada modulador ------------------------
+    fuente_coax = (
+        f"Envolvente de un codo de {radio_coax:.0f} mm a la salida del conector "
+        f"RF (integracion.coaxial.radio_curvatura_modelado, SUPUESTO). El "
+        f"conector SI es dato: 6.1 x 10 mm del plano de Exail."
+    )
+    for cid in ("mod_intensidad_mxer_ln_10", "mod_fase_mpz_ln_10"):
+        colocacion = puestas.get((cid, 1))
+        if colocacion is None or not catalogo.existe(cid):
+            continue
+        componente = catalogo[cid]
+        rotacion = colocacion["rotacion"]
+        centro = colocacion["centro"]
+        dims = dims_en_mundo(componente, rotacion)
+        for conector in componente.conectores:
+            if conector.tipo != "coaxial" or conector.dimensiones.es_tbd:
+                continue
+            direccion = _gira_vector(_VECTOR_CARA[conector.cara], rotacion)
+            eje_mundo = max(range(3), key=lambda i: abs(direccion[i]))
+            # El cable sale de la PUNTA del conector, no del borde de la caja
+            # envolvente de la pieza. No es lo mismo: la envolvente crece hacia
+            # el conector pero el centro de la pieza sigue siendo el del
+            # cuerpo, asi que centro + media envolvente se queda CORTO y el
+            # keep-out se solapa con su propio conector. Se mide desde el
+            # cuerpo, que es simetrico, y se le suma el saliente declarado.
+            eje_local = "XYZ".index(conector.cara[1])
+            cuerpo = componente.dimensiones.como_vector()
+            saliente = conector.dimensiones.como_vector()
+            mitad = cuerpo[eje_local] / 2 + saliente[eje_local]
+            punto = list(centro)
+            punto[eje_mundo] += mitad if direccion[eje_mundo] >= 0 else -mitad
+            recorte = _recortado(
+                *_caja_saliente(punto, direccion, radio_coax, radio_coax),
+                _recinto(colocacion),
+            )
+            if recorte is None:
+                continue
+            salida.append({
+                "id": f"coaxial_{cid}",
+                "tipo": "coaxial",
+                "estado": "supuesto",
+                "fuente": fuente_coax,
+                "min": [round(v, 3) for v in recorte[0]],
+                "max": [round(v, 3) for v in recorte[1]],
+                "nota": f"Salida del conector RF de {cid} hacia PCB-2.",
+            })
+
+    # --- haz libre: el hueco ENTRE dos piezas del banco -------------------
+    fuente_haz = (
+        f"Tubo de {haz:.0f} mm de lado "
+        f"(integracion.optica.diametro_haz_modelado, SUPUESTO) en el hueco que "
+        f"queda entre las dos piezas. El diametro de haz de cada tramo es TBD "
+        f"en data/connections.yaml."
+    )
+    for familia, con in catalogo.todas_las_conexiones():
+        if familia != "opticas_espacio_libre" or not con.get("keep_out"):
+            continue
+        desde, hasta = con.get("desde"), con.get("hasta")
+        a, b = puestas.get((desde, 1)), puestas.get((hasta, 1))
+        if a is None or b is None:
+            continue
+        caja_a = _caja_mundo(catalogo, a)
+        caja_b = _caja_mundo(catalogo, b)
+        # El eje del tramo es aquel en el que las dos cajas NO se solapan: es
+        # por donde hay hueco entre ellas.
+        tramo = None
+        for i in range(3):
+            hueco_min = max(caja_a[0][i], caja_b[0][i])
+            hueco_max = min(caja_a[1][i], caja_b[1][i])
+            if hueco_max < hueco_min:  # separadas en este eje
+                bajo, alto = (caja_a, caja_b) if caja_a[1][i] < caja_b[0][i] else (caja_b, caja_a)
+                tramo = (i, bajo[1][i], alto[0][i])
+                break
+        if tramo is None:
+            continue
+        eje, z0, z1 = tramo
+        centro_a = [(caja_a[0][k] + caja_a[1][k]) / 2 for k in range(3)]
+        centro_b = [(caja_b[0][k] + caja_b[1][k]) / 2 for k in range(3)]
+        minimo = [0.0, 0.0, 0.0]
+        maximo = [0.0, 0.0, 0.0]
+        for i in range(3):
+            if i == eje:
+                minimo[i], maximo[i] = z0, z1
+            else:
+                medio = (centro_a[i] + centro_b[i]) / 2
+                minimo[i], maximo[i] = medio - haz / 2, medio + haz / 2
+        recorte = _recortado(minimo, maximo, _recinto(a))
+        if recorte is None:
+            continue
+        salida.append({
+            "id": f"haz_{con.get('id')}",
+            "tipo": "haz_libre",
+            "estado": "supuesto",
+            "fuente": fuente_haz,
+            "min": [round(v, 3) for v in recorte[0]],
+            "max": [round(v, 3) for v in recorte[1]],
+            "nota": f"Camino optico {desde} -> {hasta} ({con.get('id')}).",
+        })
+
+    return salida
+
+
+def _caja_mundo(catalogo, colocacion):
+    """(min, max) de la pieza ya girada y situada."""
+    componente = catalogo[colocacion["componente"]]
+    dims = dims_en_mundo(componente, colocacion["rotacion"])
+    centro = colocacion["centro"]
+    return (
+        [centro[i] - dims[i] / 2 for i in range(3)],
+        [centro[i] + dims[i] / 2 for i in range(3)],
+    )
+
 
 def generar() -> str:
     catalogo = cargar()
@@ -73,10 +487,22 @@ def generar() -> str:
         componente = catalogo[cid]
         for instancia in range(1, unidades + 1):
             if componente.modelable:
-                dx, dy, dz = componente.dimensiones.como_vector()
+                fx, fy, _ = componente.dimensiones.como_vector()
                 # El iADCS400 no es cuadrado: su lado corto va por Y, que es el
                 # eje con menos margen de los tres.
-                rotacion = [0, 0, 90] if dx < dy else [0, 0, 0]
+                rotacion = [0, 0, 90] if fx < fy else [0, 0, 0]
+                # La ranura se mide sobre lo que SE DIBUJA, no sobre la altura
+                # de ficha. No es lo mismo: las fichas de AAC miden "from top
+                # PCB to lowest component" y no incluyen el conector PC104
+                # pasante, que baja 12.45 mm por debajo de la tarjeta. Mientras
+                # la tarjeta vecina era un hueco TBD daba igual -- los pines no
+                # chocaban con nada --, pero en cuanto la vecina se dibuja, sus
+                # 2.91 cm3 de solape aparecen en el informe. Un pin que
+                # atraviesa el conector de la vecina es correcto en una pila
+                # PC104 de verdad; un pin que atraviesa el BLOQUE MACIZO con el
+                # que se modela una tarjeta cuya altura no se conoce, no. Se
+                # reserva por lo dibujado, que es conservador y cierto.
+                _, _, dz = dims_en_mundo(componente, rotacion)
                 ranura = math.ceil(dz / paso) * paso
                 colocaciones.append(
                     {
@@ -126,6 +552,231 @@ def generar() -> str:
             }
         )
 
+    # ---------------------------------------------------------------- bandeja
+    # La placa, al fondo de la zona, y encima las piezas de la cadena de fibra.
+    # Todo se mide desde los limites de la zona, no desde numeros escritos: al
+    # cambiar la longitud reservada al telescopio, la bandeja se estrecha y las
+    # filas se recolocan solas (o el chequeo avisa de que ya no caben).
+    bandeja = catalogo["bandeja_optica"]
+    x_bandeja = (x_sep + X) / 2
+    z_bandeja = (-Z + z_banco_min) / 2
+    y_placa = -Y
+    if bandeja.modelable:
+        _, espesor_placa, _ = bandeja.dimensiones.como_vector()
+        colocaciones.append(
+            {
+                "componente": "bandeja_optica",
+                "instancia": 1,
+                "centro": [
+                    round(x_bandeja, 3), round(-Y + espesor_placa / 2, 3),
+                    round(z_bandeja, 3),
+                ],
+                "rotacion": rotacion_de_montaje(bandeja, "+Y"),
+                "zona": "z_payload_bandeja",
+            }
+        )
+        y_placa = -Y + espesor_placa
+
+    # Las filas avanzan segun Z desde el extremo -Z de la zona. Dentro de cada
+    # fila, las piezas se reparten el ancho util en hilera segun X, que es el eje
+    # de fibra de todas ellas.
+    ancho_util = ancho_payload - 2 * MARGEN_BANDEJA
+    cursor_z = -Z + MARGEN_BANDEJA
+    for fila in FILAS_BANDEJA:
+        piezas = []
+        for cid in fila:
+            componente = catalogo[cid]
+            if not componente.modelable:
+                continue
+            rotacion = rotacion_de_montaje(componente, "+Y")
+            piezas.append((componente, rotacion, dims_en_mundo(componente, rotacion)))
+        if not piezas:
+            continue
+        fondo = max(dims[2] for _, _, dims in piezas)
+        ancho_total = sum(dims[0] for _, _, dims in piezas)
+        if ancho_total > ancho_util:
+            # Antes un error que un layout que se apana. Apretando las piezas
+            # hasta que entren saldrian solapes de decimas de milimetro, que el
+            # informe de interferencias marcaria sin que se entendiera por que.
+            raise SystemExit(
+                f"la fila {fila} de la bandeja suma {ancho_total:.1f} mm y solo "
+                f"hay {ancho_util:.1f} mm utiles. Parte la fila en dos en "
+                f"FILAS_BANDEJA, o baja MARGEN_BANDEJA."
+            )
+        hueco = (
+            (ancho_util - ancho_total) / (len(piezas) - 1) if len(piezas) > 1 else 0.0
+        )
+        # Una fila de una sola pieza se centra; varias se reparten el ancho.
+        cursor_x = x_sep + MARGEN_BANDEJA + (
+            (ancho_util - ancho_total) / 2 if len(piezas) == 1 else 0.0
+        )
+        for componente, rotacion, (dx, dy, dz) in piezas:
+            colocaciones.append(
+                {
+                    "componente": componente.id,
+                    "instancia": 1,
+                    "centro": [
+                        round(cursor_x + dx / 2, 3),
+                        round(y_placa + dy / 2, 3),
+                        round(cursor_z + fondo / 2, 3),
+                    ],
+                    "rotacion": rotacion,
+                    "zona": "z_payload_bandeja",
+                }
+            )
+            cursor_x += dx + hueco
+        cursor_z += fondo + HOLGURA_BANDEJA
+    z_libre_bandeja = z_banco_min - (cursor_z - HOLGURA_BANDEJA)
+
+    # ----------------------------------------------------------------- banco
+    x_eje_telescopio = (x_sep + x_franja_min) / 2
+    z_eje_banco = (z_banco_min + z_tel_min) / 2
+
+    fsm = catalogo["fsm"]
+    margen_banco = None
+    if fsm.modelable:
+        colocaciones.append(
+            {
+                "componente": "fsm",
+                "instancia": 1,
+                "centro": [
+                    round(x_eje_telescopio, 3), 0.0, round(z_eje_banco, 3),
+                ],
+                "rotacion": GIRO_FSM,
+                "zona": "z_payload_banco",
+            }
+        )
+        # Hacia +X desde el FSM: dicroico y colimador, en orden inverso al de
+        # la cadena porque la cadena viene de fuera hacia el espejo.
+        cursor_x = x_eje_telescopio + dims_en_mundo(fsm, GIRO_FSM)[0] / 2
+        x_dicroico = None
+        for cid in reversed(CADENA_BANCO):
+            componente = catalogo[cid]
+            if not componente.modelable:
+                continue
+            rotacion = rotacion_de_montaje(componente, "+Y")
+            dx, dy, dz = dims_en_mundo(componente, rotacion)
+            cursor_x += HOLGURA_BANCO
+            centro_x = cursor_x + dx / 2
+            colocaciones.append(
+                {
+                    "componente": cid,
+                    "instancia": 1,
+                    "centro": [round(centro_x, 3), 0.0, round(z_eje_banco, 3)],
+                    "rotacion": rotacion,
+                    "zona": "z_payload_banco",
+                }
+            )
+            if cid == "dicroico":
+                x_dicroico = centro_x
+                ancho_dicroico = dy
+            cursor_x += dx
+        margen_banco = X - MARGEN_BANCO - cursor_x
+
+        # El brazo del beacon, a +-Y del dicroico.
+        if x_dicroico is not None:
+            for cid, signo in BRAZO_BEACON:
+                componente = catalogo[cid]
+                if not componente.modelable:
+                    continue
+                rotacion = rotacion_de_montaje(componente, "+Y")
+                dx, dy, dz = dims_en_mundo(componente, rotacion)
+                centro_y = signo * (ancho_dicroico / 2 + HOLGURA_BANCO + dy / 2)
+                colocaciones.append(
+                    {
+                        "componente": cid,
+                        "instancia": 1,
+                        "centro": [
+                            round(x_dicroico, 3), round(centro_y, 3),
+                            round(z_eje_banco, 3),
+                        ],
+                        "rotacion": rotacion,
+                        "zona": "z_payload_banco",
+                    }
+                )
+
+    # ------------------------------------------------------------ telescopio
+    # El barrilete llena su zona: su envolvente es la COTA SUPERIOR (el
+    # diametro es la altura interior del 6U) y la longitud es la reservada. Si
+    # llega el STEP con un diametro menor, la zona se queda igual y sobra sitio
+    # alrededor, que es lo que se quiere ver.
+    telescopio = catalogo["telescopio_cassegrain"]
+    if telescopio.modelable:
+        _, _, l_tubo = dims_en_mundo(telescopio, [0, 0, 0])
+        colocaciones.append(
+            {
+                "componente": "telescopio_cassegrain",
+                "instancia": 1,
+                "centro": [
+                    round(x_eje_telescopio, 3), 0.0, round(Z - l_tubo / 2, 3),
+                ],
+                "rotacion": rotacion_de_montaje(telescopio, "+Z"),
+                "zona": "z_payload_telescopio",
+            }
+        )
+
+    # ------------------------------------------------------------ antena
+    # Es la pieza que peor lo tiene: necesita ver la Tierra y no hay cara
+    # libre. +Z la ocupan el telescopio y el star tracker; contra las caras
+    # +-X y +-Y la pila PC104 deja 2-3 mm; y sus 10 mm de espesor no caben en
+    # los 6.5 mm de protrusion que permite la CDS, asi que tampoco puede ir
+    # pegada por fuera. Queda -Z, que es el hueco que dejan las baterias, con
+    # el coste de que apunta al lado contrario que el telescopio.
+    antena = catalogo["antena_quasar_wsant"]
+    if antena.modelable:
+        _, _, espesor = dims_en_mundo(antena, [0, 0, 0])
+        colocaciones.append(
+            {
+                "componente": "antena_quasar_wsant",
+                "instancia": 1,
+                "centro": [round(x_pila, 3), 0.0, round(-Z + espesor / 2, 3)],
+                "rotacion": rotacion_de_montaje(antena, "-Z"),
+                "zona": "z_plataforma",
+            }
+        )
+
+    # ------------------------------------------------------- paneles solares
+    # Van POR FUERA, sobre las dos caras grandes. Se salen de la envolvente a
+    # proposito: la CDS 14.1 req 2.2.3 concede 6.5 mm de protrusion y el panel
+    # mide 3.5. El detector de desbordes lo sabe porque el catalogo los marca
+    # 'exterior'. No pertenecen a ninguna zona interior: llevan zona
+    # 'exterior', que no es una de las cinco que embaldosan el hueco util.
+    paneles = catalogo["paneles_photon_side"]
+    if paneles.modelable and paneles.n_unidades:
+        ex, ey, ez = catalogo.dims_exteriores
+        _, espesor_panel, _ = paneles.dimensiones.como_vector()
+        for instancia, (signo, normal) in enumerate(
+            ((+1, "+Y"), (-1, "-Y"))[: paneles.n_unidades], start=1
+        ):
+            colocaciones.append(
+                {
+                    "componente": "paneles_photon_side",
+                    "instancia": instancia,
+                    "centro": [
+                        0.0,
+                        round(signo * (ey / 2 + espesor_panel / 2), 3),
+                        0.0,
+                    ],
+                    "rotacion": rotacion_de_montaje(paneles, normal),
+                    "zona": "exterior",
+                }
+            )
+
+    # ----------------------------------------------------------- keep-outs
+    # Las zonas se construyen mas abajo, pero los keep-outs se recortan a
+    # ellas, asi que aqui hace falta su geometria. Es la misma que usa la
+    # tabla 'zonas'.
+    from clau3d.structure import Caja as _Caja
+
+    recintos = {
+        "z_plataforma": _Caja(-X, -Y, -Z, x_sep, Y, Z),
+        "z_payload_telescopio": _Caja(x_sep, -Y, z_tel_min, x_franja_min, Y, Z),
+        "z_payload_franja": _Caja(x_franja_min, -Y, z_tel_min, X, Y, Z),
+        "z_payload_banco": _Caja(x_sep, -Y, z_banco_min, X, Y, z_tel_min),
+        "z_payload_bandeja": _Caja(x_sep, -Y, -Z, X, Y, z_banco_min),
+    }
+    keep_outs = generar_keep_outs(catalogo, colocaciones, recintos)
+
     zonas = [
         (
             "z_plataforma",
@@ -134,9 +785,13 @@ def generar() -> str:
             f"ADCS en +Z, para que el star tracker ST200 mire por la misma cara "
             f"que el telescopio. Despues OBC, EPS, radio banda S, PCB-3, PCB-1 y "
             f"PCB-2, y las baterias al final de -Z, que equilibran en Z la masa "
-            f"del telescopio. La pila usa {usado:.0f} mm de los {iz:.0f} mm "
-            f"disponibles. Las tres PCBs propias tienen posicion de separador "
-            f"reservada pero no se dibujan: su altura es TBD.",
+            f"del telescopio, y la antena de banda S detras de ellas, contra "
+            f"la pared -Z, que es la unica cara con hueco. La pila usa "
+            f"{usado:.0f} mm de los {iz:.0f} mm disponibles. Cada ranura se "
+            f"mide sobre la geometria DIBUJADA, no sobre la altura de ficha: "
+            f"las fichas AAC no incluyen el conector PC104 pasante y los STEP "
+            f"si. Las tres PCBs propias se dibujan con una altura SUPUESTA de "
+            f"15 mm.",
         ),
         (
             "z_payload_telescopio",
@@ -147,7 +802,11 @@ def generar() -> str:
             f"provisional hasta el STEP). OJO: los \"~2U\" del brief son ~227 mm "
             f"con la U de longitud de la CDS (113.5 mm), no 200. Esta zona mide "
             f"{iy:.1f} mm en X, que es el mayor diametro de barrilete que cabe "
-            f"en la altura interior. Su envolvente es TBD y no se dibuja.",
+            f"en la altura interior. El barrilete se dibuja LLENANDO la "
+            f"zona, porque su envolvente es una cota superior y no una medida: "
+            f"asi se ve que con 90 mm de apertura libre no queda sitio para "
+            f"barrilete, celda ni ajuste. En cuanto llegue el STEP, sustituye "
+            f"al cilindro sin tocar nada.",
         ),
         (
             "z_payload_franja",
@@ -165,8 +824,16 @@ def generar() -> str:
             "z_payload_banco",
             "Banco optico de espacio libre",
             (x_sep, -Y, z_banco_min), (X, Y, z_tel_min),
-            "Colimador, dicroico, FSM y camara de beacon. Camino: colimador -> "
-            "dicroico -> FSM -> telescopio, y dicroico -> camara.",
+            f"Camino: colimador -> dicroico -> FSM -> telescopio, y del "
+            f"dicroico sale el brazo del beacon hacia +-Y (camara arriba, "
+            f"laser de beacon de bajada abajo). El FSM esta sobre el eje "
+            f"optico del telescopio (X = {x_eje_telescopio:+.2f}) porque es el "
+            f"que dobla el haz de X a Z, y eso deja el colimador y el dicroico "
+            f"en linea hacia +X. Margen contra la pared +X: "
+            + (f"{margen_banco:.1f} mm." if margen_banco is not None
+               else "no calculable, faltan envolventes.")
+            + " Los haces NO estan dibujados: sin diametro de haz, un "
+              "keep-out optico seria una medida inventada.",
         ),
         (
             "z_payload_bandeja",
@@ -174,10 +841,14 @@ def generar() -> str:
             (x_sep, -Y, -Z), (X, Y, z_banco_min),
             f"{iz - l_telescopio - L_BANCO:.1f} mm de Z con los "
             f"{ancho_payload:.1f} mm de ancho enteros, ya sin cuerpos de "
-            f"modulador dentro: los bucles de fibra pueden curvar en toda la "
-            f"anchura. Aqui se queda el laser DFB, que con sus 4.1 W es la "
-            f"principal fuente de calor del payload y no debe ir junto al "
-            f"barrilete. Zona con control termico propio.",
+            f"modulador dentro. La cadena va en filas que avanzan segun Z, en "
+            f"el orden y el sentido de la cadena optica: el laser DFB al "
+            f"extremo -Z, lo mas lejos posible del barrilete porque con sus "
+            f"4.1 W es la principal fuente de calor del payload, y la salida "
+            f"hacia el colimador en +Z. Quedan {z_libre_bandeja:.1f} mm de Z "
+            f"libres al final para los bucles, mas los huecos entre filas. "
+            f"Cuanta fibra cabe ahi NO se puede decir: falta el radio minimo de "
+            f"curvatura. Zona con control termico propio.",
         ),
     ]
 
@@ -233,10 +904,29 @@ def generar() -> str:
         lineas.append("")
 
     lineas += [
-        "# Vacio hasta que lleguen los diametros de haz, el radio de curvatura de",
-        "# la fibra y las holguras de conector. Declarar un keep-out con medidas",
-        "# inventadas daria una falsa sensacion de comprobacion.",
-        "keep_out: []",
+        "# Volumenes reservados. TODOS salen de numeros SUPUESTOS: el radio",
+        "# minimo de curvatura de la fibra, el del coaxial y el diametro de haz",
+        "# siguen siendo TBD. Por eso cada uno lleva su estado y su fuente, y",
+        "# por eso invadir uno NO tumba el codigo de salida de `clau3d informe`:",
+        "# no es un choque de geometrias, es la consecuencia de una hipotesis.",
+        "keep_out:" if keep_outs else "keep_out: []",
+    ]
+    for k in keep_outs:
+        lineas += [
+            f"  - id: {k['id']}",
+            f"    tipo: {k['tipo']}",
+            f"    estado: {k['estado']}",
+            "    fuente: >-",
+        ]
+        lineas += [f"      {t}" for t in _envolver(k["fuente"], 66)]
+        lineas += [
+            "    caja:",
+            f"      min: [{k['min'][0]}, {k['min'][1]}, {k['min'][2]}]",
+            f"      max: [{k['max'][0]}, {k['max'][1]}, {k['max'][2]}]",
+            "    nota: >-",
+        ]
+        lineas += [f"      {t}" for t in _envolver(k["nota"], 66)]
+    lineas += [
         "",
         "colocaciones:",
     ]

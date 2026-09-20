@@ -7,7 +7,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from ..datamodel import CONFIRMADO, DECISION, REFERENCIA, Catalogo, Magnitud
+from ..datamodel import (
+    CONFIRMADO,
+    DECISION,
+    REFERENCIA,
+    SUPUESTO,
+    Catalogo,
+    Magnitud,
+)
 
 
 @dataclass
@@ -29,6 +36,15 @@ class Presupuesto:
     filas: list[FilaPresupuesto]
     sin_dato: list[str] = field(default_factory=list)
     limite: float | None = None
+    # Las filas cuyo valor se ha inventado este repositorio. Van APARTE de
+    # 'filas' y no entran en ningun total: sumar una masa supuesta a una masa de
+    # ficha da un numero que no se puede ensenar a nadie. Se listan igual porque
+    # saber cuanto pesa lo que falta por saber tambien es informacion.
+    supuestas: list[FilaPresupuesto] = field(default_factory=list)
+
+    @property
+    def total_supuesto(self) -> float:
+        return sum(f.total for f in self.supuestas if f.total is not None)
 
     def total_por_estado(self) -> dict[str, float]:
         salida: dict[str, float] = {}
@@ -76,6 +92,7 @@ def _fila(componente, magnitud: Magnitud) -> FilaPresupuesto | None:
 
 def masa(catalogo: Catalogo) -> Presupuesto:
     filas: list[FilaPresupuesto] = []
+    supuestas: list[FilaPresupuesto] = []
     sin_dato: list[str] = []
     for componente in catalogo.componentes:
         if not componente.cuenta_en_presupuesto:  # alternativa en estudio
@@ -83,20 +100,25 @@ def masa(catalogo: Catalogo) -> Presupuesto:
         fila = _fila(componente, componente.masa)
         if fila is None or fila.total is None:
             sin_dato.append(componente.id)
+        elif fila.estado == SUPUESTO:
+            supuestas.append(fila)
         else:
             filas.append(fila)
     filas.sort(key=lambda f: -(f.total or 0))
+    supuestas.sort(key=lambda f: -(f.total or 0))
     return Presupuesto(
         titulo="Masa",
         unidad="g",
         filas=filas,
         sin_dato=sin_dato,
+        supuestas=supuestas,
         limite=catalogo.envolvente["masa_maxima"].escalar(),
     )
 
 
 def potencia(catalogo: Catalogo, pico: bool = False) -> Presupuesto:
     filas: list[FilaPresupuesto] = []
+    supuestas: list[FilaPresupuesto] = []
     sin_dato: list[str] = []
     for componente in catalogo.componentes:
         if componente.categoria == "estructura":
@@ -114,14 +136,18 @@ def potencia(catalogo: Catalogo, pico: bool = False) -> Presupuesto:
         fila = _fila(componente, magnitud)
         if fila is None or fila.total is None:
             sin_dato.append(componente.id)
+        elif fila.estado == SUPUESTO:
+            supuestas.append(fila)
         else:
             filas.append(fila)
     filas.sort(key=lambda f: -(f.total or 0))
+    supuestas.sort(key=lambda f: -(f.total or 0))
     return Presupuesto(
         titulo="Potencia de pico" if pico else "Potencia nominal",
         unidad="W",
         filas=filas,
         sin_dato=sin_dato,
+        supuestas=supuestas,
     )
 
 

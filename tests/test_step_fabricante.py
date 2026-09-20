@@ -301,3 +301,127 @@ def test_la_discrepancia_de_las_tarjetas_aac_esta_registrada(catalogo):
         assert dims.hay_discrepancia, id_componente
         alturas = {dims.valor[2]} | {a["valor"][2] for a in dims.alternativas}
         assert len(alturas) == 3, id_componente
+
+
+# --- el STEP que todavia no ha llegado ------------------------------------
+#
+# 'forma.step_esperado' declara por adelantado donde caera un fichero y de quien
+# viene. Mientras no este, la pieza se dibuja con su envolvente aproximada; en
+# cuanto aparece, se dibuja con el STEP. Lo que NO puede pasar es que un fichero
+# sin procedencia declarada entre al modelo solo por llamarse como toca.
+
+def _componente_esperando(ruta, dims_estado="supuesto", **esperado_extra):
+    bruto = {
+        "id": "telescopio_de_prueba",
+        "nombre": "Telescopio de prueba",
+        "categoria": "payload_optico",
+        "subsistema": "prueba",
+        "cantidad": 1,
+        "forma": {
+            "tipo": "caja",
+            "dimensiones": {
+                "valor": [95.4, 95.4, 200.0], "unidad": "mm",
+                "estado": dims_estado,
+                "fuente": "Cota superior: no cabe nada mas grande.",
+                "falta": "Diametro real del barrilete",
+                "pedir_a": "Oscar (ACSAR)",
+            },
+            "step_esperado": {
+                "ruta": str(ruta),
+                "pedir_a": "Oscar (ACSAR)",
+                "fuente_prevista": "Aperture Optical Sciences, via Oscar",
+                **esperado_extra,
+            },
+        },
+        "masa": {"valor": None, "estado": "TBD", "falta": "x", "pedir_a": "y"},
+    }
+    return _componente(bruto)
+
+
+def test_sin_el_fichero_se_dibuja_el_aproximado(tmp_path):
+    componente = _componente_esperando(tmp_path / "todavia_no.step")
+    assert not parts.step_disponible(componente)
+    assert parts.estado_geometria(componente) == "supuesto"
+    local = parts.caja_local(componente)
+    assert local is not None
+    assert local.dims == pytest.approx((95.4, 95.4, 200.0))
+
+
+def test_al_aparecer_el_fichero_sustituye_al_aproximado_sin_tocar_nada(tmp_path):
+    """El punto entero de step_esperado: dejarlo en su sitio y ya esta."""
+    ruta = tmp_path / "ya_llego.step"
+    componente = _componente_esperando(ruta)
+    assert not parts.step_disponible(componente)
+
+    cq.exporters.export(cq.Solid.makeBox(80, 80, 187, cq.Vector(50, 50, 50)), str(ruta))
+
+    assert parts.step_disponible(componente)
+    local = parts.caja_local(componente)
+    assert local is not None
+    # Ahora manda la geometria real, no la reserva.
+    assert local.dims == pytest.approx((80.0, 80.0, 187.0))
+    # Y sigue centrada, como toda pieza que coloca el layout.
+    assert local.centro == pytest.approx((0.0, 0.0, 0.0), abs=1e-6)
+
+
+def test_un_step_que_aparece_solo_entra_como_referencia_nunca_como_confirmado(tmp_path):
+    """Que el fichero este donde se esperaba no verifica su part number."""
+    ruta = tmp_path / "aparecido.step"
+    cq.exporters.export(cq.Solid.makeBox(10, 10, 10), str(ruta))
+    componente = _componente_esperando(ruta)
+
+    fuente = parts.fuente_step(componente)
+    assert fuente is not None
+    assert fuente.estado == "referencia"
+    assert "Aperture Optical Sciences" in (fuente.fuente or "")
+    assert parts.estado_geometria(componente) == "referencia"
+
+
+def test_el_step_esperado_tambien_gira_a_los_ejes_del_catalogo(tmp_path):
+    ruta = tmp_path / "girado.step"
+    cq.exporters.export(cq.Solid.makeBox(30, 10, 20), str(ruta))
+    componente = _componente_esperando(ruta, orientacion=[0, 0, 90])
+    local = parts.caja_local(componente)
+    assert local is not None
+    assert local.dims == pytest.approx((10.0, 30.0, 20.0))
+
+
+def test_step_y_step_esperado_a_la_vez_es_un_error_de_catalogo(tmp_path):
+    """Son la misma cosa en dos momentos distintos: juntos no se sabe cual manda."""
+    from clau3d.datamodel import Catalogo, validar
+
+    ruta = tmp_path / "pieza.step"
+    cq.exporters.export(cq.Solid.makeBox(10, 10, 10), str(ruta))
+    bruto = {
+        "id": "dos_fuentes", "nombre": "Dos fuentes", "categoria": "plataforma",
+        "subsistema": "prueba", "cantidad": 1,
+        "forma": {
+            "tipo": "step",
+            "step": {"ruta": str(ruta), "estado": "referencia", "fuente": "una"},
+            "step_esperado": {"ruta": str(ruta), "pedir_a": "otro",
+                              "fuente_prevista": "otra"},
+        },
+        "masa": {"valor": None, "estado": "TBD", "falta": "x", "pedir_a": "y"},
+    }
+    catalogo = Catalogo(
+        meta={}, norma={}, envolvente={}, zona_util={}, integracion={},
+        componentes=[_componente(bruto)], conexiones={},
+    )
+    assert any("step_esperado" in p for p in validar(catalogo))
+
+
+def test_un_step_esperado_sin_procedencia_no_se_carga(tmp_path):
+    """La procedencia se declara por adelantado, pero se declara."""
+    with pytest.raises(ErrorDeDatos, match="fuente_prevista"):
+        _componente({
+            "id": "anonimo", "nombre": "Anonimo", "categoria": "plataforma",
+            "subsistema": "prueba", "cantidad": 1,
+            "forma": {
+                "tipo": "caja",
+                "dimensiones": {"valor": [1.0, 1.0, 1.0], "unidad": "mm",
+                                "estado": "decision", "fuente": "x"},
+                "step_esperado": {"ruta": str(tmp_path / "x.step"),
+                                  "pedir_a": "alguien"},
+            },
+            "masa": {"valor": None, "estado": "TBD", "falta": "x", "pedir_a": "y"},
+        })

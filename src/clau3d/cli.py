@@ -34,11 +34,11 @@ def cmd_validar(_: argparse.Namespace) -> int:
         for p in problemas:
             print(f"  - {p}")
         return 1
-    pendientes = catalogo.pendientes()
     print("Catalogo integro.")
     print(f"  componentes: {len(catalogo.componentes)}")
     print(f"  modelables : {len(parts.modelables(catalogo))}")
-    print(f"  pendientes : {len(pendientes)} TBD")
+    print(f"  TBD        : {len(catalogo.tbd())} (sin dato y sin aproximacion)")
+    print(f"  supuestos  : {len(catalogo.supuestos())} (dibujados, pero inventados)")
     print(f"  discrepancias entre fuentes: {len(catalogo.discrepancias())}")
     return 0
 
@@ -64,6 +64,12 @@ def cmd_ensamblar(args: argparse.Namespace) -> int:
     print(f"Ensamblaje escrito en {destino}")
     print(f"  estado del layout: {layout.estado}")
     print(f"  piezas colocadas : {len(piezas)}")
+    subsistemas = assembly.exportar_por_subsistema(
+        catalogo, layout, destino.parent / "subsistemas"
+    )
+    print(f"  {len(subsistemas)} STEP por subsistema en {destino.parent / 'subsistemas'}")
+    for nombre in sorted(subsistemas):
+        print(f"    - {nombre}.step")
     if not layout.confirmado:
         print("  AVISO: la distribucion aun no esta confirmada.")
     return 0
@@ -78,11 +84,25 @@ def cmd_informe(_: argparse.Namespace) -> int:
     for ruta in escritos:
         print(f"  - {ruta.relative_to(DIR_INFORMES.parent)}")
 
-    criticos = [c for c in fit.todos(catalogo) if c.critico]
+    criticos = [c for c in fit.todos(catalogo, layout) if c.critico]
     hallazgos = interference.todas(catalogo, layout, piezas)
-    if criticos or hallazgos:
-        print(f"\n{len(criticos)} chequeos fallidos, {len(hallazgos)} interferencias.")
+    # Una invasion de keep-out dibujado con un numero inventado NO tumba el
+    # codigo de salida. Es informacion util -- dice que con esa hipotesis la
+    # cosa no cabe -- pero no es un choque de geometrias, y si hiciera fallar a
+    # CI, la manera de arreglarlo seria bajar el radio de curvatura supuesto,
+    # que es exactamente lo que no se quiere que nadie haga.
+    duros = [h for h in hallazgos if not h.basada_en_supuesto]
+    blandos = len(hallazgos) - len(duros)
+    if criticos or duros:
+        print(f"\n{len(criticos)} chequeos fallidos, {len(duros)} interferencias.")
+        if blandos:
+            print(f"(y {blandos} invasiones de keep-outs SUPUESTOS, que no cuentan)")
         return 1
+    if blandos:
+        print(
+            f"\nSin interferencias reales. {blandos} invasiones de keep-outs "
+            f"dibujados con numeros SUPUESTOS: ver reports/03_interferencias.md."
+        )
     return 0
 
 

@@ -3,7 +3,7 @@
 Documento de continuidad entre sesiones. El README explica **qué** es el
 repositorio; esto explica **por qué** está como está y **qué falta por decidir**.
 
-Última actualización: **2026-09-20**.
+Última actualización: **2026-09-20** (tarde: payload opción B completo).
 
 ---
 
@@ -11,25 +11,56 @@ repositorio; esto explica **por qué** está como está y **qué falta por decid
 
 | | |
 |---|---|
-| Catálogo | 29 componentes, 0 problemas de integridad |
-| Con envolvente conocida | **10 de 29** |
-| Datos pendientes (TBD) | **53** |
-| Discrepancias entre fuentes | **6** |
-| Tests | **78**, todos en verde |
+| Catálogo | 31 componentes, 0 problemas de integridad |
+| Con envolvente | **28 de 31**. Los 3 que faltan, por buenos motivos (§1.1) |
+| Huecos sin ninguna aproximación (TBD) | **42** |
+| Números inventados aquí (SUPUESTO) | **28** — se dibujan, no son datos (§2) |
+| Discrepancias entre fuentes | **9** |
+| Tests | **120**, todos en verde |
 | Distribución | **CONFIRMADA** el 2026-09-20: dos columnas de 3U, moduladores en la franja lateral |
-| Piezas colocadas | **8 de 27**. Las otras 19 tienen geometría TBD |
-| Geometría real de fabricante | **3 de las 8** piezas colocadas salen ya de un STEP (§9) |
-| Riesgos abiertos | **1**: acoplamiento térmico modulador–barrilete (§3.6) |
-| Zona útil | 221.7 × 95.4 × 361.4 mm = **7.64 L**, de la que quedan **5.84 L** libres |
+| Piezas colocadas | **26**. Todos los componentes de la opción B están dibujados y situados |
+| Geometría real de fabricante | **3** piezas salen de un STEP de AAC (§9); el telescopio tiene sitio reservado para el suyo |
+| Keep-outs | **18**, todos dibujados con números supuestos (§3.7) |
+| Choques de geometría | **0** |
+| Riesgos abiertos | **3**: térmico modulador–barrilete (§3.6), fibra del colimador (§3.7), antena en −Z (§3.8) |
+| Zona útil | 221.7 × 95.4 × 361.4 mm = **7.64 L**, de la que quedan **2.88 L** libres |
 
 Funciona de punta a punta: catálogo validado, layout generado, ensamblaje
-exportado a STEP, interferencias, conexiones, volumen, presupuestos, vistas e
-informes. Sin interferencias ni desbordes con las 8 piezas colocadas.
-Para mirarlo, `uv run clau3d ver` (§8).
+exportado a STEP —completo y por subsistema—, interferencias, conexiones,
+volumen, presupuestos, vistas, informes y `components_status.csv` para la hoja
+de Drive. Para mirarlo, `uv run clau3d ver` (§8).
 
-La limitación real no es el modelo, son los datos: **19 de 27 componentes no
-tienen envolvente**, así que el volumen libre de 5.84 L es un techo, no una
-cifra de diseño.
+**Lo que cambió el 2026-09-20 por la tarde.** Hasta entonces 19 de 27
+componentes no tenían envolvente y no se dibujaban, así que el modelo no podía
+comprobar nada del payload: ni interferencias, ni recorridos, ni volumen libre
+de verdad. Ahora se dibujan todos, con un estado nuevo —`supuesto`— que dice a
+las claras cuáles de esos cuerpos están ahí porque alguien se inventó una cota.
+El precio de dibujarlo todo es que el volumen libre baja de 5.84 L a **2.88 L**:
+la primera cifra no era mejor noticia, era menos información.
+
+### 1.1 Los tres que siguen sin envolvente, y por qué está bien
+
+- **`radio_uhf_pulsar_vutrx`** y **`propulsion`**: opcionales, y la decisión de
+  misión está abierta. Reservarles volumen sería decidir por el equipo.
+- **`cables_rf_moduladores`** (ELEC-04): un coaxial no tiene envolvente hasta
+  que se encamina. Lo que ocupa es el tubo que barre al curvarse, y eso es un
+  **keep-out**, no un cuerpo. Está modelado así.
+
+### 1.2 Lo que el modelo encontró al dibujarlo todo
+
+Cuatro cosas que no se veían con 8 piezas colocadas, y que están detalladas más
+abajo:
+
+1. **La pila PC104 mide 305 mm, no 259.** Las ranuras se reservaban con la
+   altura de ficha y se dibujaban con el STEP, y las fichas de AAC no incluyen
+   el conector PC104 pasante. Sigue cabiendo en los 361 mm, con 56 mm de
+   margen en vez de 102. Ver §4.6.
+2. **El banco óptico es el punto apretado del payload**, y no se ve mirando
+   volúmenes: sobra hueco en el banco, pero no *en la línea* que va del eje del
+   telescopio a la pared. Ver §3.7.
+3. **El colimador no tiene por dónde sacar su latiguillo.** Ver §3.7.
+4. **La antena de banda S no tiene cara libre** y acaba en −Z, apuntando al
+   lado contrario que el telescopio. Ver §3.8.
 
 ---
 
@@ -39,6 +70,39 @@ cifra de diseño.
   número nuevo, va al catálogo con fuente y estado, no a un literal.
 - **Un hueco se queda como hueco.** `TBD` obliga a `falta` y `pedir_a`, y el
   valor tiene que ser `null`. Hay un test para cada una de esas tres cosas.
+- **Un número inventado se declara como inventado.** `supuesto` es el estado
+  para una cota que este repositorio se ha sacado de la manga porque hacía
+  falta un número con el que dibujar. Lleva la carga de los dos mundos: exige
+  `fuente` como cualquier magnitud —pero ahí va el **razonamiento**, no una
+  ficha— y exige además `falta` y `pedir_a` como un TBD, porque el dato de
+  verdad sigue sin estar. **No suma en los presupuestos** de masa ni de
+  potencia, se dibuja en gris y más transparente, y aparece en
+  `reports/06_pendientes.md` con el valor concreto que hay que sustituir.
+  La diferencia con TBD no es si el dato está: es si existe una aproximación
+  defendible. Con ella la pieza se dibuja; sin ella, no.
+
+  El motivo de abrir esta puerta: con 19 componentes sin dibujar, el análisis
+  de interferencias y el de volumen libre no decían nada del payload. Reservar
+  un volumen aproximado y marcarlo es más útil que no reservar ninguno. Lo que
+  la puerta **no** hace es relajar el TBD: sigue sin poder llevar valor, y el
+  mensaje de error ahora enseña la salida buena en vez de solo prohibir.
+- **Un keep-out lleva procedencia, igual que un número.** `estado` y `fuente`
+  son obligatorios. Hoy los 18 que hay son todos `supuesto`, porque las tres
+  cotas que los dimensionan —radio mínimo de curvatura de la fibra, el del
+  coaxial y el diámetro de haz— siguen siendo TBD.
+- **Una invasión de keep-out supuesto no tumba el código de salida.** Si lo
+  hiciera, la manera de poner CI en verde sería bajar el radio de curvatura
+  supuesto hasta que las invasiones desaparecieran, que es exactamente lo que
+  no se quiere que nadie haga. `clau3d informe` devuelve 1 por choques de
+  geometría, no por consecuencias de una hipótesis.
+- **La procedencia de un STEP se puede declarar antes que el STEP.** De los
+  ficheros que faltan ya se sabe quién los tiene y de qué producto son, así que
+  `forma.step_esperado` lo escribe por adelantado: ruta, a quién pedirlo y
+  fuente prevista. Dejar el fichero en esa ruta basta para que sustituya al
+  modelo aproximado sin tocar el catálogo, y entra como `referencia`, porque
+  que aparezca donde se esperaba no verifica su part number. Lo que sigue sin
+  existir es la tercera vía: importar cualquier fichero que se llame como el
+  componente.
 - **Lo no comprobable se declara.** Un chequeo sin datos sale como
   `no comprobable`. Nunca como `ok`.
 - **Los tests sintéticos son obligatorios.** Con el layout vacío, un test de
@@ -66,6 +130,21 @@ cifra de diseño.
 - **Una comprobación circular no es una comprobación.** Si una cota se dedujo de
   una pieza, comprobar esa misma pieza contra esa cota devuelve la hipótesis, no
   un resultado. Sale como `no comprobable`, igual que un chequeo sin datos.
+- **Lo que se reserva se mide sobre lo que se dibuja.** Reservar con la cota de
+  ficha y dibujar con el STEP hace que los dos números dejen de hablar de lo
+  mismo. Pasó con la pila PC104 y costó 46 mm (§4.6).
+- **El nombre de un fichero generado dice si se puede publicar.** Un STEP de
+  subsistema que lleve dentro una pieza dibujada con CAD de fabricante
+  *contiene* ese CAD, y el repositorio es público. El sufijo
+  `_con_cad_de_fabricante` lo pone el exportador mirando lo que ha metido, no
+  una lista escrita a mano que se quedaría obsoleta con el siguiente STEP de
+  proveedor, y el `.gitignore` ignora ese sufijo. Hay un test que comprueba que
+  el sufijo del código y el del `.gitignore` siguen siendo el mismo.
+- **Los identificadores de Drive conviven con los del repositorio.** `id` dice
+  qué es la pieza y es legible; `id_drive` (OPT-01, PLAT-04, ELEC-02…) dice en
+  qué fila de la hoja índice del equipo está. `validar` rechaza dos piezas con
+  el mismo `id_drive`, porque pisarían la misma fila al actualizar la hoja
+  desde `reports/components_status.csv`.
 
 ---
 
@@ -101,7 +180,7 @@ declarado: **221.7 × 95.4 × 361.4 mm** ≈ 7.64 L.
          │                      │ FSM, cámara │ (provisional)           │
   −10.85 ├──────────────────────┴─────────────┴─────────────────────────┤
          │ z_plataforma  3.45 L                                         │
-  PLATAF.│ pila PC104 a lo largo de todo Z — 259 mm usados de 361 mm     │
+  PLATAF.│ pila PC104 a lo largo de todo Z — 305 mm usados de 361 mm     │
   100 mm │ −Z ← baterías·baterías·PCB-2·PCB-1·PCB-3·radio·EPS·OBC·ADCS → │
  −110.85 └──────────────────────────────────────────────────────────────┘
              106.4 mm             55 mm            200 mm
@@ -109,11 +188,16 @@ declarado: **221.7 × 95.4 × 361.4 mm** ≈ 7.64 L.
 
 | zona | volumen | libre | contenido |
 |---|---|---|---|
-| `z_plataforma` | 3.45 L | 2.09 L | Pila PC104 completa |
-| `z_payload_telescopio` | 1.82 L | 1.82 L | Telescopio (TBD, sin dibujar) |
-| `z_payload_franja` | 0.50 L | 0.47 L | Los 2 moduladores, tumbados |
-| `z_payload_banco` | 0.64 L | 0.64 L | Colimador, dicroico, FSM, cámara |
-| `z_payload_bandeja` | 1.24 L | 1.24 L | Bandeja de fibra, láser DFB (todo TBD) |
+| `z_plataforma` | 3.45 L | 1.22 L | Pila PC104 (305 mm) + antena en el extremo −Z |
+| `z_payload_telescopio` | 1.82 L | 0.00 L | Telescopio, dibujado **llenando la zona** a propósito (§4.2) |
+| `z_payload_franja` | 0.50 L | 0.44 L | Los 2 moduladores, tumbados, con sus conectores |
+| `z_payload_banco` | 0.64 L | 0.57 L | Colimador, dicroico, FSM, cámara y láser de beacon |
+| `z_payload_bandeja` | 1.24 L | 1.17 L | Placa, láser DFB, VOA, aislador, filtro y tap |
+
+Los paneles solares no están en ninguna zona: van **por fuera**, sobre las dos
+caras grandes, con la protrusión que concede la CDS 14.1 req 2.2.3. El layout
+los marca `zona: exterior`, que no es una de las cinco que embaldosan el hueco
+útil, y el detector de desbordes los trata aparte.
 
 Las cinco zonas **embaldosan exactamente** la zona útil; hay un test que lo
 comprueba. La columna de payload se parte en X **solo a lo largo del
@@ -124,17 +208,23 @@ telescopio**: 95.4 mm para el barrilete y 26.3 mm de franja.
 Con el paso estándar PC/104 de 15.24 mm; una tarjeta más alta ocupa
 `ceil(altura / paso)` posiciones de separador.
 
-| # | tarjeta | altura | posiciones | por qué ahí |
-|---|---|---|---|---|
-| 1 | iADCS400 | 67.3 mm | 5 | En +Z, para que el ST200 mire por la misma cara que el telescopio |
-| 2 | Kryten-M3-PLUS | 5.51 mm | 1 | Junto al ADCS y al payload |
-| 3 | Starbuck-Nano-PLUS | 20.82 mm | 2 | |
-| 4 | Quasar-STRX | 16.9 mm (ref) | 2 | |
-| 5 | PCB-3 PAT | TBD | 1 reservada | A la altura del banco de espacio libre |
-| 6 | PCB-1 Control QKD | TBD | 1 reservada | |
-| 7 | PCB-2 Drivers | TBD | 1 reservada | Lo más cerca posible de la bandeja |
-| 8-9 | Optimus-30 ×2 | 21.55 mm | 2 cada una | En −Z, equilibran la masa del telescopio |
-| | **total** | | | **259 mm de 361 mm** |
+La altura que manda es la **dibujada**, no la de ficha: ver §4.6.
+
+| # | tarjeta | ficha | dibujado | posiciones | por qué ahí |
+|---|---|---|---|---|---|
+| 1 | iADCS400 | 67.30 mm | 67.30 | 5 | En +Z, para que el ST200 mire por la misma cara que el telescopio |
+| 2 | Kryten-M3-PLUS | 5.51 mm | **23.24** | 2 | Junto al ADCS y al payload |
+| 3 | Starbuck-Nano-PLUS | 20.82 mm | 20.82 | 2 | |
+| 4 | Quasar-STRX | 16.90 mm (ref) | 16.90 | 2 | |
+| 5 | PCB-3 PAT | — | 15.00 (sup.) | 1 | Junto al ADCS, de quien recibe la actitud, y a la altura del banco |
+| 6 | PCB-1 Control QKD | — | 15.00 (sup.) | 1 | La que más habla con el OBC (bus y PPS del GNSS) |
+| 7 | PCB-2 Drivers | — | 15.00 (sup.) | 1 | La más hacia −Z de las tres: lo más cerca posible de la bandeja |
+| 8-9 | Optimus-30 ×2 | 21.55 mm | **36.44** | 3 cada una | En −Z, equilibran la masa del telescopio |
+| | **total** | | | **20** | **305 mm de 361 mm** |
+
+Detrás de las baterías, contra la pared −Z, va la **antena de banda S** (§3.8).
+El hueco que queda entre la pila y la antena es lo que le tocaría al UHF de
+respaldo y a la propulsión si se deciden.
 
 ### Por qué así
 
@@ -212,9 +302,77 @@ regenerar el layout es todo lo que hace falta para reasignar el reparto.
 - **La bandeja se queda sin cuerpos dentro**: 121.7 × 95.4 × 106.4 mm con el
   ancho entero disponible para curvar. Antes los bucles tenían que sortear dos
   cuerpos de 110 mm, que era el punto flojo declarado de la distribución.
-- **La pila PC104 deja de ser el problema**: **259 mm usados de 361 mm**, con
-  102 mm de margen para que las tres PCBs propias crezcan más de una posición de
+- **La pila PC104 deja de ser el problema**: **305 mm usados de 361 mm**, con
+  56 mm de margen para que las tres PCBs propias crezcan más de una posición de
   separador. En la otra opción la pila tenía 198 mm y ya iba justa.
+  (Este número era 259 mm hasta que se dibujaron las tarjetas propias y salió
+  a la luz que las ranuras se reservaban con la altura de ficha; ver §4.6. El
+  margen se ha quedado en la mitad, pero la conclusión no cambia: cabe.)
+
+### 3.7 El banco óptico es el punto apretado del payload
+
+Y no se ve mirando volúmenes: en el banco sobra hueco —0.57 L de 0.64— pero no
+**en la línea** que importa.
+
+**Por qué esa línea no se puede mover.** El FSM dobla el haz que llega según X
+hacia el telescopio, que apunta según +Z. Para doblarlo tiene que estar *sobre
+el eje óptico del telescopio*, en X = +36.85 mm. Eso deja al colimador y al
+dicroico en fila con él, hacia +X, y lo que tienen es lo que va del eje a la
+pared de la columna: **74.0 mm**.
+
+Las reservas iniciales (colimador de 40 mm, dicroico de 30) **no cabían**. Están
+ahora en 28 y 23, y su `fuente` en el catálogo lo dice: la cota está *acotada
+por arriba por el banco*, no solo elegida a ojo. Sumando la media anchura del
+FSM a 45°, la línea ocupa 66.3 mm y quedan **7.7 mm**, que no dan para holguras
+de montaje. El chequeo `banco_optico` lo recalcula desde el catálogo, avisa por
+debajo de 5 mm y falla si se pasa.
+
+**Si las piezas reales son mayores, no es que el modelo esté mal: es que el
+banco no da.** La salida sería alargarlo a costa de la bandeja o de la longitud
+reservada al telescopio, no apretar las piezas.
+
+### 3.7.1 El colimador no tiene por dónde sacar su latiguillo
+
+Está pegado a la pared +X con 7.7 mm, y su fibra tiene que volver a la bandeja,
+que está en −Z. Con la reserva supuesta de fibra (20 mm de tramo recto + 30 mm
+de radio de curvatura = 50 mm por puerto), su keep-out se come al dicroico, al
+FSM y a la cámara de beacon.
+
+**Esto no es un fallo del reparto: es lo que cuesta no tener el radio de
+curvatura.** Si el radio real resulta ser la mitad, buena parte del problema
+desaparece sola. Si no, hay tres salidas y las tres son decisiones de alguien:
+mover el dicroico al tramo +Z (entre el FSM y el telescopio, lo que cambia el
+orden de la cadena óptica declarada en `connections.yaml`), alargar el banco, o
+sacar el colimador del banco y ponerlo en el borde de la bandeja.
+
+### 3.7.2 La bandeja tampoco respeta un radio de 30 mm
+
+Mismo origen, mismo dato. Las filas de la bandeja están a 8 mm y cada puerto de
+fibra querría 50. De las 14 invasiones de keep-out que reporta el modelo, 11 son
+de la bandeja.
+
+`reports/03_interferencias.md` las lista en una sección aparte que empieza
+diciendo que **no es una lista de errores**. La manera de resolverlas no es
+bajar el radio supuesto hasta que desaparezcan.
+
+### 3.8 La antena de banda S es la pieza que peor lo tiene
+
+Necesita ver la Tierra y **no hay cara libre**:
+
+- **+Z** la ocupan el telescopio y el star tracker del ADCS.
+- Contra **±X** y **±Y** la pila PC104 deja 2–3 mm hasta la pared.
+- **Por fuera** tampoco: sus 10 mm supuestos de espesor no caben en los 6.5 mm
+  de protrusión que permite la CDS 14.1 req 2.2.3.
+
+Queda **−Z**, que es el hueco de detrás de las baterías. Y eso tiene un coste
+que hay que decidir: −Z es la cara que entra primero en el dispensador y, sobre
+todo, **apunta al lado contrario que el telescopio**. Con el satélite apuntando
++Z a la estación óptica durante un pase de QKD, esta antena mira al cenit.
+
+Puede no ser un problema —el canal clásico de post-procesado no tiene por qué
+ser simultáneo al pase óptico— pero es una **decisión de operaciones**, no de
+mecánica, y está sin tomar. Si el espesor real de la antena fuera menor de
+6.5 mm, podría ir por fuera en cualquier cara y el problema se evapora.
 
 ### Cómo se regenera
 
@@ -312,6 +470,24 @@ chequeos de sección (`seccion_componentes` y `contorno_pc104`).
 - **iADCS400, potencia de pico**: 4 W (web AAC) frente a 5 W (satsearch).
 - **PHOTON, potencia por cara de 3U**: 9 W (ficha, "up to 9W") frente a 9.25 W
   (brief).
+- **PLAT-05 y PLAT-06 en la hoja de Drive están cambiados.** La hoja etiqueta
+  PLAT-05 como "Batería Starbuck-Nano-PLUS" y PLAT-06 como "EPS Optimus-30". Es
+  al revés: el Starbuck-Nano-PLUS es el EPS y el Optimus-30 es la batería. En
+  el catálogo el `id_drive` se asigna **por producto**, no por la etiqueta, y
+  los dos componentes llevan una nota diciéndolo. Corregir los nombres en la
+  hoja.
+- **Láser DFB**: el contorno que se usa es el del encapsulado butterfly de 14
+  pines estándar (37.4 × 12.7 × 7.8 mm sin pines, 43.3 mm de ancho con ellos),
+  no un plano de Gooch & Housego, que no publica ninguno. Y no incluye el
+  disipador, que con 4.1 W no es opcional.
+- **FSM**: se modela la opción MEMS porque es la que tiene cota publicada clara
+  (encapsulado DIP24 de Mirrorcle, 30.5 × 15.1 × 2.16 mm). **Eso no es
+  elegirla.** La opción piezo está en el catálogo como `fsm_piezo_pi_s331`,
+  marcada `alternativa_de` para que no sume en nada, con lo que PI sí publica:
+  **130 g** de masa (280 g en la variante de 5 mrad), −20 a +80 °C y espejo de
+  12.7 × 3 mm. Esos 130 g frente a los gramos de un MEMS son el argumento
+  fuerte a favor del MEMS, y ahora están en el catálogo en vez de en la cabeza
+  de alguien.
 
 ### 4.5 La entrega del equipo trae otro ADCS y otras alturas de tarjeta
 
@@ -350,8 +526,41 @@ Del zip `Preliminar_viability_model.zip` (2026-09-20). Detalle en §9.
   pasantes, o sea que el prefiltro las manda a la booleana, y la booleana
   devuelve **0**. Los pines de una pasan limpios por al lado de la otra, que es
   como debe funcionar una pila PC104. Lo que sí baja es el volumen libre: de
-  6.25 L a **5.84 L**, porque lo que ocupan las tarjetas ya no es su caja de
-  ficha.
+  6.25 L a 5.84 L, porque lo que ocupan las tarjetas ya no es su caja de
+  ficha. (Hoy el volumen libre es **2.88 L**: lo que cambió no es el modelo de
+  las tarjetas, es que ya se dibujan los 19 componentes del payload que antes
+  no ocupaban nada. Ver §1.)
+
+### 4.6 La pila PC104 mide 305 mm, no 259
+
+Apareció al dibujar PCB-2: un solape de 2.91 cm³ con los pines pasantes del
+Optimus-30. La causa no era la PCB.
+
+**El generador reservaba cada ranura con la altura de FICHA y dibujaba con el
+STEP.** Las fichas de AAC miden "from top PCB to lowest component" y no incluyen
+el conector PC104 pasante, que baja 12.45 mm por debajo de la tarjeta; el STEP
+sí lo trae. Mientras la tarjeta vecina era un hueco TBD, los pines no chocaban
+con nada y §4.5 lo daba por bueno. **En cuanto la vecina se dibuja, deja de
+serlo.**
+
+Un pin que atraviesa el *conector* de la tarjeta vecina es correcto en una pila
+PC104 de verdad. Un pin que atraviesa el *bloque macizo* con el que se modela
+una tarjeta cuya altura no se conoce, no. Y como no hay manera de distinguir una
+cosa de otra sin conocer las tarjetas propias, se reserva por lo dibujado, que
+es conservador y cierto:
+
+| | ficha | dibujado | posiciones antes | ahora |
+|---|---|---|---|---|
+| Kryten-M3-PLUS | 5.51 mm | 23.24 mm | 1 | **2** |
+| Optimus-30 (×2) | 21.55 mm | 36.44 mm | 2 | **3** |
+
+**259 mm → 305 mm de los 361 disponibles.** Sigue cabiendo, con 56 mm de margen
+en vez de 102. El chequeo `pila_pc104` usa ahora la misma altura que el
+generador, así que los dos números vuelven a hablar de lo mismo.
+
+Esto refuerza el punto 4 de §6: **el paso de apilamiento real del chasis** es
+todavía más importante de lo que parecía, porque el margen se ha reducido a la
+mitad.
 
 ---
 
@@ -397,30 +606,67 @@ Del zip `Preliminar_viability_model.zip` (2026-09-20). Detalle en §9.
    acoplados al barrilete del telescopio. No bloquea el layout, pero puede
    obligar a devolverlos a la bandeja, y entonces el telescopio vuelve a tener
    techo de 176.4 mm.
-4. **Los tres datos que bloquean más cosas**:
+4. **EL RADIO MÍNIMO DE CURVATURA DE LA FIBRA** (equipo de payload). Ha pasado
+   a ser el dato que más desbloquea, por delante del resto. De las 14
+   invasiones de keep-out que reporta el modelo, **las 14** salen de él: 11 en
+   la bandeja y 3 en el colimador. Mientras no exista, la bandeja no se puede
+   validar y el colimador no se puede encaminar (§3.7.1, §3.7.2). Con él, el
+   chequeo `bucles_fibra` pasa de `no comprobable` a decir algo, y los
+   keep-outs pasan de `supuesto` a `confirmado` sin tocar una línea de código.
+5. **Los otros dos datos que bloquean mucho**:
    - **STEP del telescopio** (Óscar / Aperture Optical Sciences): diámetro
-     exterior del barrilete **y longitud real**. El diámetro decide si el payload
-     cabe; la longitud sustituye a los 200 mm provisionales de
-     `longitud_reservada`. Ojo: los «~2U» del brief son ~227 mm, no 200 (la U de
-     longitud de la CDS son 113.5 mm).
-   - **Radio mínimo de curvatura de la fibra** (equipo de payload). Sin él no se
-     puede comprobar ni un bucle de la bandeja, que es justo donde esta
-     distribución tiene su punto flojo.
+     exterior del barrilete **y longitud real**. Hay sitio reservado para él en
+     `cad/vendor/aperture_optical_sciences/telescopio_cassegrain.step`: dejarlo
+     ahí basta para que sustituya al cilindro de reserva. Ojo: los «~2U» del
+     brief son ~227 mm, no 200 (la U de longitud de la CDS son 113.5 mm).
    - **Paso de apilamiento real del chasis** (equipo de estructura). Ahora se usa
-     el estándar PC/104; el real puede cambiar los 259 mm de pila.
-5. **Alturas de PCB-1, PCB-2 y PCB-3.** Con ellas las tres dejan de ser reservas
-   y pasan a ser piezas colocadas.
-6. **Declarar los keep-out del haz óptico**, cuando lleguen los diámetros de haz.
-   Ahora `keep_out: []` a propósito: inventar medidas daría una falsa sensación
-   de comprobación.
-7. **Sustituir el chasis genérico por el STEP del equipo**, con lo que desaparece
-   la hipótesis de espesor de pared y la zona útil pasa a ser real.
-8. **Cerrar el encaminamiento de los 4.1 W del láser**: directo del bus del EPS o
-   a través de PCB-2.
+     el estándar PC/104; el real puede cambiar los **305 mm** de pila, y el
+     margen ya solo es de 56 mm (§4.6).
+6. **Alturas reales de PCB-1, PCB-2 y PCB-3.** Ahora se dibujan con 15 mm
+   supuestos. Si alguna pasa de 15.24 mm ocupará dos posiciones de separador y
+   la pila crecerá 15.24 mm por cada una.
+7. **Decidir dónde va la antena de banda S** (§3.8), que es una decisión de
+   operaciones: si el canal clásico puede no ser simultáneo al pase óptico,
+   −Z vale; si no, hay que buscarle cara y no la hay.
+8. **Los diámetros de haz** (equipo de óptica), para que los keep-outs ópticos
+   dejen de dibujarse con un tubo de 10 mm inventado, y el semiángulo del cono
+   de la apertura, que hoy no se dibuja en absoluto.
+9. **El diámetro y el radio de curvatura del coaxial RF** (equipo de
+   electrónica), que es lo que falta de ELEC-04.
+10. **Sustituir el chasis genérico por el STEP del equipo**, con lo que
+    desaparece la hipótesis de espesor de pared y la zona útil pasa a ser real.
+11. **Cerrar el encaminamiento de los 4.1 W del láser**: directo del bus del EPS
+    o a través de PCB-2. Y el disipador del láser, que no está modelado.
+12. **Elegir FSM**: MEMS o piezo (§4.4). El modelo enseña las dos cifras que
+    deciden —la masa y el volumen del soporte— y ninguna de las dos está
+    cerrada: del MEMS falta el soporte de vuelo, del piezo faltan las cotas.
+
+> **La lista de supuestos a sustituir, entera y con el valor concreto de cada
+> uno, está en `reports/06_pendientes.md` y en `reports/components_status.csv`.**
+> No hace falta mantenerla a mano aquí: se regenera con `clau3d informe`.
 
 ## 7. Notas de implementación
 
 - **Python 3.12**, no 3.14: CadQuery/OCP no tiene ruedas para 3.14 todavía.
+- **Las formas aproximadas son tres cosas, no una.** `forma.tipo` admite `caja`
+  y `cilindro` —media cadena óptica es cilíndrica, y dibujar un cilindro como
+  caja infla su volumen un 27 % sin que nadie lo vea— y cualquiera de las dos
+  puede llevar `conectores`, que se pegan a una cara declarada y **agrandan la
+  caja envolvente**. Eso último es lo importante: el conector RF del modulador
+  sobresale 10 mm y el detector de interferencias tiene que verlo. Un conector
+  sin cotas no se dibuja de ningún tamaño y sale como pendiente.
+- **`montaje` no es geometría.** Declara con qué cara se atornilla la pieza y
+  por qué eje entra la señal. De ahí saca el generador la rotación de cada
+  colocación, en vez de escribirla a mano: una pieza que cambie de cara de
+  montaje se recoloca sola, y el STEP que llegue mañana se orienta por la misma
+  regla que el aproximado al que sustituye.
+- **El generador mide girando el sólido, no permutando cotas.** Permutar valdría
+  mientras todos los giros fueran múltiplos de 90°, y el FSM va a 45° para
+  doblar el haz. Una caja a 45° ocupa más que la misma caja recta, y ese «más»
+  es justo lo que decide si el banco da de sí (§3.7).
+- **Una fila de la bandeja que no quepa aborta el generador.** No se aprieta:
+  la primera versión metía tres cilindros de 110 mm en 109.7 y salían solapes de
+  décimas de milímetro que el informe marcaba sin que se entendiera por qué.
 - **CadQuery 2.8**. `Assembly.save()` está obsoleto; se usa `Assembly.export()`.
 - Las interferencias se filtran primero por caja envolvente y solo entonces se
   hace la booleana de OCC, que es cara.
@@ -460,6 +706,12 @@ cota y qué falta**. El visor colorea por estado del dato, lista los 19
 componentes sin envolvente con a quién pedírselos, marca el volumen libre como
 *techo* mientras `resumen.fiable` sea falso y muestra los chequeos con el mismo
 criterio que `reports/`. Un visor genérico no puede decir nada de eso.
+
+Desde el 2026-09-20 por la tarde tiene además un panel de **«números
+inventados aquí»**: los 28 supuestos, uno a uno, con qué falta y a quién
+pedírselo. Es lo único que distingue en pantalla un cuerpo gris que está ahí
+porque alguien lo midió de uno que está ahí porque alguien se lo inventó; la
+geometría los enseña igual de sólidos a los dos.
 
 **El reparto de responsabilidades.** El GLB lleva geometría, nombres y colores.
 El JSON lleva todo lo que la geometría no sabe decir. El JavaScript **no calcula
@@ -600,6 +852,39 @@ Y una pieza que pasa de caja a STEP de fabricante **deja de generarse** ahí:
 repositorio seguiría enseñando una caja envolvente de una pieza que el modelo ya
 dibuja con su geometría real. Pasó con `obc_kryten_m3_plus.step` y
 `bateria_optimus_30.step`.
+
+### El STEP que todavía no ha llegado
+
+`forma.step_esperado` declara por adelantado dónde caerá un fichero y de quién
+viene: ruta, `pedir_a` y `fuente_prevista`. Dejar el STEP en esa ruta basta para
+que sustituya al modelo aproximado **sin tocar el catálogo**, y entra como
+`referencia`, porque que aparezca donde se esperaba no verifica su part number.
+
+Hoy lo usa el telescopio:
+`cad/vendor/aperture_optical_sciences/telescopio_cassegrain.step`. El chequeo
+`step_de_fabricante` dice qué fichero falta, en qué ruta va y a quién pedírselo,
+y avisa de los que han aparecido solos y siguen sin verificar.
+
+Lo que sigue sin existir es la tercera vía, la de importar cualquier fichero que
+se llame como el componente: un STEP sin procedencia es lo mismo que un número
+sin fuente.
+
+### Los STEP por subsistema y lo que pueden llevar dentro
+
+`clau3d ensamblar` escribe además un STEP por subsistema en
+`cad/generated/subsistemas/`. No es un despiece: cada fichero lleva las
+coordenadas del satélite completo, así que abrir dos a la vez los enseña
+encajados. Sirve para mirar una parte sin cargar los ~550 sólidos del conjunto
+y para mandarle a alguien solo lo suyo.
+
+**El nombre del fichero dice si se puede versionar.** Uno que contenga una pieza
+dibujada con CAD de fabricante *contiene* ese CAD: hoy `EPS` sale con la batería
+de AAC dentro y pesa 141 MB, y `OBC` pesa 32. El sufijo
+`_con_cad_de_fabricante` lo pone el exportador **mirando lo que ha metido**, no
+una lista escrita a mano, y el `.gitignore` ignora ese sufijo. Así, el día que
+llegue el STEP del telescopio, `terminal_optico` pasa solo al lado de los que no
+se publican sin que nadie tenga que acordarse. Hay un test que comprueba que el
+sufijo del código y el del `.gitignore` siguen siendo el mismo.
 
 ### Las dos correcciones que el modelo aplica solo
 

@@ -28,9 +28,29 @@ def test_las_zonas_cubren_toda_la_zona_util(catalogo, layout):
 
 
 def test_toda_colocacion_apunta_a_una_zona_declarada(layout):
-    ids = {z.id for z in layout.zonas}
+    """...o a 'exterior', que es lo de fuera del chasis y no es una zona.
+
+    Las cinco zonas embaldosan el hueco util INTERIOR. Un panel de cuerpo o una
+    antena montada por fuera no estan en ninguna de ellas, y meterlos en una
+    romperia el embaldosado. 'exterior' los marca sin fingir que son una zona
+    mas: el detector de desbordes los trata aparte, con la protrusion que
+    permite la CDS.
+    """
+    ids = {z.id for z in layout.zonas} | {"exterior"}
     for colocacion in layout.colocaciones:
         assert colocacion.zona in ids, colocacion
+
+
+def test_lo_marcado_exterior_esta_fuera_y_lo_demas_dentro(catalogo, layout):
+    """La zona 'exterior' del layout y la marca 'exterior' del catalogo cuadran."""
+    for colocacion in layout.colocaciones:
+        componente = catalogo[colocacion.componente_id]
+        if colocacion.zona == "exterior":
+            assert componente.exterior, (
+                f"{componente.id} esta colocado fuera pero el catalogo no lo "
+                f"marca 'exterior', asi que el detector de desbordes lo dara "
+                f"por fallo"
+            )
 
 
 def test_el_layout_declara_su_estado(layout):

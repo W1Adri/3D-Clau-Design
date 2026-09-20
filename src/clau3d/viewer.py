@@ -119,11 +119,43 @@ def _pieza(pieza: PiezaColocada) -> dict:
         "categoria": componente.categoria,
         "subsistema": componente.subsistema,
         "zona": pieza.colocacion.zona,
+        "id_drive": componente.id_drive,
+        "referencia_comercial": componente.referencia_comercial,
         "estado_dato": parts.estado_geometria(componente),
         "desde_step": parts.step_disponible(componente),
-        "step": componente.step_ruta,
-        "step_estado": componente.step.estado if componente.step else None,
-        "step_nota": componente.step.nota if componente.step else None,
+        "step": fuente.ruta if (fuente := parts.fuente_step(componente)) else None,
+        "step_estado": fuente.estado if fuente else None,
+        "step_nota": fuente.nota if fuente else None,
+        "step_esperado": (
+            None
+            if componente.step_esperado is None
+            else {
+                "ruta": componente.step_esperado.ruta,
+                "pedir_a": componente.step_esperado.pedir_a,
+                "fuente_prevista": componente.step_esperado.fuente_prevista,
+            }
+        ),
+        "forma": componente.tipo_forma,
+        "montaje": (
+            None
+            if componente.montaje is None
+            else {
+                "cara": componente.montaje.cara,
+                "eje": componente.montaje.eje,
+                "tipo_eje": componente.montaje.tipo_eje,
+                "nota": componente.montaje.nota,
+            }
+        ),
+        "conectores": [
+            {
+                "id": k.id,
+                "tipo": k.tipo,
+                "cara": k.cara,
+                "dimensiones": _magnitud(k.dimensiones),
+                "nota": k.nota,
+            }
+            for k in componente.conectores
+        ],
         "centro": list(pieza.colocacion.centro),
         "rotacion": list(pieza.colocacion.rotacion),
         "caja": _caja(pieza.caja_mundo),
@@ -165,7 +197,7 @@ def escena(catalogo: Catalogo, layout: Layout, piezas: list[PiezaColocada]) -> d
     util = structure.zona_util(catalogo)
     resumen = volume.resumen(catalogo, piezas)
     libre_zona = {f["zona"]: f for f in volume.libre_por_zona(layout, piezas)}
-    chequeos = fit.todos(catalogo)
+    chequeos = fit.todos(catalogo, layout)
     hallazgos = interference.todas(catalogo, layout, piezas)
 
     colocados = {p.colocacion.componente_id for p in piezas}
@@ -193,7 +225,8 @@ def escena(catalogo: Catalogo, layout: Layout, piezas: list[PiezaColocada]) -> d
             "componentes": len(catalogo.componentes),
             "sin_envolvente": resumen.sin_envolvente,
             "no_colocados": resumen.no_colocados,
-            "pendientes_tbd": len(catalogo.pendientes()),
+            "pendientes_tbd": len(catalogo.tbd()),
+            "pendientes_supuestos": len(catalogo.supuestos()),
             "discrepancias": len(catalogo.discrepancias()),
         },
         "zonas": [
@@ -223,6 +256,10 @@ def escena(catalogo: Catalogo, layout: Layout, piezas: list[PiezaColocada]) -> d
         ],
         "piezas": [_pieza(p) for p in piezas],
         "sin_geometria": _sin_geometria(catalogo),
+        # Los numeros inventados, uno a uno. El visor los ensena como lista de
+        # "esto hay que preguntarlo", que es lo unico que un visor generico no
+        # puede decir de un solido que se ve igual de solido que los demas.
+        "supuestos": catalogo.supuestos(),
         "chequeos": [
             {
                 "id": c.id,

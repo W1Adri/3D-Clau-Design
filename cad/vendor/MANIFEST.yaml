@@ -107,14 +107,29 @@ ficheros:
 sin_convertir:
   pedir_a: Oscar (ACSAR)
   formato_pedido: STEP AP214 o AP242
+  nota: >-
+    Algunos de estos ficheros tienen ya SITIO RESERVADO en el modelo: el
+    catalogo declara su ruta y su procedencia por adelantado, en el bloque
+    'forma.step_esperado' del componente. Dejar el STEP ahi basta para que
+    sustituya al modelo aproximado, sin editar el catalogo y sin que ningun
+    fichero anonimo entre al modelo. Entra como 'referencia' hasta que alguien
+    verifique el part number; entonces se convierte en un bloque 'forma.step'
+    con estado 'confirmado' y se anota aqui su huella.
+    El chequeo 'step_de_fabricante' (uv run clau3d informe) imprime la lista de
+    rutas que faltan con el nombre de a quien pedirselas.
   ficheros:
     - nombre: Chasis.SLDPRT
       sha256: 24e09ed3e7ed231975b80b3ecd2caa2f029da291b0342f912853236c548a5f95
       bytes: 2001482
+      componente: estructura_6u
       bloquea: >-
-        Sustituir el chasis generico de paredes uniformes por el real. Es el
-        punto 4 de "que haria falta a continuacion" y la razon de que los dos
-        chequeos de seccion salgan como no comprobables.
+        Sustituir el chasis generico de paredes uniformes por el real, y la
+        razon de que los dos chequeos de seccion salgan como no comprobables.
+        OJO: este NO tiene sitio reservado con 'step_esperado', y a proposito.
+        El chasis no es una pieza mas del ensamblaje: de el sale la ZONA UTIL,
+        que hoy se deriva de un espesor de pared supuesto. Conectarlo pide algo
+        mas que dejar el fichero en una carpeta, asi que declarar un drop-in
+        prometeria algo que no funcionaria.
     - nombre: Chasis_base.SLDPRT
       sha256: 92281d24ae001d57992f1904125e01956aaf1aeb1cf9315180f48e48d1b3f118
       bytes: 1791258
@@ -122,9 +137,15 @@ sin_convertir:
     - nombre: Telescopio_concepto.SLDPRT
       sha256: 12b42b7847d178d29f5c3758b4e171b2a5e3416d2dad19f6f8b15b8b653338ca
       bytes: 435682
+      componente: telescopio_cassegrain
+      dejar_en: cad/vendor/aperture_optical_sciences/telescopio_cassegrain.step
       bloquea: >-
         Diametro exterior del barrilete y longitud real del telescopio. Son dos
-        de los tres datos que mas cosas bloquean.
+        de los datos que mas cosas bloquean. SITIO RESERVADO: el catalogo lo
+        espera en 'dejar_en' (forma.step_esperado de telescopio_cassegrain).
+        Mientras no llegue, el telescopio se dibuja como un cilindro de
+        95.4 mm de diametro por 200 mm, que es la COTA SUPERIOR -- el barrilete
+        no puede pasar de la altura interior del 6U -- y no una medida.
     - nombre: Power_control_and_distribution_unit.SLDPRT
       sha256: 33620645f7a9a99506f4695ead654e8522de0b53195da5a5edc53deefe3ebb1b
       bytes: 13273037
@@ -134,7 +155,11 @@ sin_convertir:
     - nombre: 1U_propulsion_module.sldprt
       sha256: 4a9128f8ebeda0c77ae8376a4dc45c5f29707caafadc51687d6af0d974cfd380
       bytes: 13293293
-      bloquea: Geometria del modulo de propulsion, que en el catalogo es opcional.
+      componente: propulsion
+      bloquea: >-
+        Geometria del modulo de propulsion, que en el catalogo es opcional y
+        sigue sin envolvente porque reservarle volumen seria decidir por el
+        equipo. Sin sitio reservado hasta que la decision de mision se cierre.
     - nombre: Ensamblaje_preliminar.SLDASM
       sha256: 3cfca12a35a845dbb0f8c2b0e2171d7ceeb542e0cd4adcb170b185ec819cbde5
       bytes: 109761116

@@ -1,8 +1,14 @@
-"""Chequeos de viabilidad que NO dependen de donde se coloque cada pieza.
+"""Chequeos de viabilidad, casi todos independientes de la distribucion.
 
 Sirven para decidir la distribucion con numeros por delante, antes de fijarla.
 Un chequeo que no se puede hacer por falta de datos sale como 'no comprobable',
 nunca como correcto.
+
+La excepcion es 'banco_optico', que si necesita el layout: la pregunta que hace
+-- si el colimador y el dicroico caben entre el eje del telescopio y la pared --
+solo tiene sentido una vez decidido donde cae ese eje. Se le pasa el layout
+cuando lo hay, y sin el sale como no comprobable, igual que cualquier otro
+chequeo al que le falte un dato.
 """
 
 from __future__ import annotations
@@ -387,7 +393,17 @@ def chequeo_longitud_moduladores(catalogo: Catalogo) -> list[Chequeo]:
 
 
 def chequeo_pila_pc104(catalogo: Catalogo) -> Chequeo:
-    """Longitud de la pila PC104. Sin el paso de apilamiento solo hay una cota."""
+    """Longitud de la pila PC104. Sin el paso de apilamiento solo hay una cota.
+
+    La altura de cada tarjeta se mide sobre LO QUE SE DIBUJA, no sobre la ficha.
+    Las fichas de AAC dan la altura "from top PCB to lowest component" y no
+    incluyen el conector PC104 pasante, que baja 12.45 mm por debajo de la
+    tarjeta; el STEP de fabricante si lo trae. Si la pila se reserva por la
+    ficha y se dibuja por el STEP, los dos numeros dejan de hablar de lo mismo,
+    y la diferencia no es pequena: 259 mm contra 305 mm.
+    """
+    from .. import parts
+
     paso = catalogo.integracion.get("pila_pc104.paso_apilamiento")
     tarjetas: list[tuple[str, float, int]] = []
     sin_altura: list[str] = []
@@ -401,10 +417,11 @@ def chequeo_pila_pc104(catalogo: Catalogo) -> Chequeo:
         if componente.bruto.get("formato") != "pc104":
             continue
         n = componente.n_unidades
-        if dims.es_tbd or not dims.esta_declarada or n is None:
+        caja = parts.caja_local(componente) if componente.modelable else None
+        if caja is None or n is None:
             sin_altura.append(componente.id)
             continue
-        altura = dims.como_vector()[2]  # type: ignore[index]
+        altura = caja.dims[2]
         tarjetas.append((componente.id, altura, n))
 
     suma = sum(altura * n for _, altura, n in tarjetas)
@@ -482,6 +499,28 @@ def chequeo_pila_pc104(catalogo: Catalogo) -> Chequeo:
 def chequeo_bucles_fibra(catalogo: Catalogo) -> Chequeo:
     radio = catalogo.integracion.get("fibra.radio_minimo_curvatura")
     if radio is None or radio.es_tbd:
+        modelado = catalogo.integracion.get("fibra.radio_curvatura_modelado")
+        boot = catalogo.integracion.get("fibra.longitud_boot_modelada")
+        extra = ""
+        numeros: dict[str, float] = {}
+        if modelado is not None and not modelado.es_tbd:
+            r_sup = modelado.escalar() or 0.0
+            l_boot = (boot.escalar() if boot is not None else None) or 0.0
+            numeros = {
+                "radio_supuesto_mm": r_sup,
+                "boot_supuesto_mm": l_boot,
+                "reserva_por_puerto_mm": l_boot + r_sup,
+            }
+            extra = (
+                f" Mientras tanto, los keep-outs se dibujan con un radio "
+                f"SUPUESTO de {r_sup:.0f} mm y un tramo recto de "
+                f"{l_boot:.0f} mm, o sea {l_boot + r_sup:.0f} mm reservados por "
+                f"puerto. Con esa hipotesis la bandeja NO cumple: ver las "
+                f"invasiones de keep-out en el informe de interferencias. Eso "
+                f"no es un fallo del reparto, es lo que cuesta no tener el "
+                f"dato: si el radio real resulta ser la mitad, la mayoria de "
+                f"esas invasiones desaparecen solas."
+            )
         return Chequeo(
             id="bucles_fibra",
             titulo="Radio minimo de curvatura de la fibra",
@@ -489,8 +528,9 @@ def chequeo_bucles_fibra(catalogo: Catalogo) -> Chequeo:
             mensaje=(
                 "Sin radio minimo de curvatura no se puede dimensionar la bandeja "
                 "optica ni comprobar ningun bucle. Es el parametro que mas area "
-                "consume de toda la bandeja."
+                "consume de toda la bandeja." + extra
             ),
+            numeros=numeros,
             falta="Radio minimo de curvatura de la fibra elegida",
         )
     r = radio.escalar()
@@ -534,6 +574,112 @@ def chequeo_masa(catalogo: Catalogo) -> Chequeo:
         ),
         numeros=numeros,
         falta=f"Masa de: {', '.join(sin_dato)}" if sin_dato else None,
+    )
+
+
+def chequeo_banco_optico(catalogo: Catalogo, layout=None) -> Chequeo:
+    """Cabe la cadena de espacio libre entre el eje del telescopio y la pared.
+
+    El FSM dobla el haz de X a Z, asi que tiene que estar SOBRE el eje optico
+    del telescopio: no se puede mover. Eso deja al colimador y al dicroico en
+    linea con el, hacia +X, y el sitio que tienen es el que va del eje a la
+    pared de la columna de payload. Es el punto mas apretado del payload y el
+    que no se ve mirando volumenes: sobra hueco en el banco, pero no EN ESA
+    LINEA.
+
+    Si el margen sale negativo la salida no es apretar las piezas: es alargar
+    el banco a costa de la bandeja o de la longitud reservada al telescopio.
+    """
+    titulo = "Cadena de espacio libre entre el eje del telescopio y la pared"
+    if layout is None:
+        return Chequeo(
+            id="banco_optico", titulo=titulo, estado=NO_COMPROBABLE,
+            mensaje="Sin layout no se sabe donde cae el eje optico.",
+            falta="Distribucion (data/layout.yaml)",
+        )
+    zonas = {z.id: z for z in layout.zonas}
+    banco = zonas.get("z_payload_banco")
+    telescopio = zonas.get("z_payload_telescopio")
+    if banco is None or telescopio is None:
+        return Chequeo(
+            id="banco_optico", titulo=titulo, estado=NO_COMPROBABLE,
+            mensaje="El layout no declara las zonas del banco y del telescopio.",
+            falta="Zonas z_payload_banco y z_payload_telescopio",
+        )
+
+    from .. import parts
+
+    eje_x = telescopio.caja.centro[0]
+    disponible = banco.caja.xmax - eje_x
+
+    piezas = ("fsm", "dicroico", "colimador")
+    necesario = 0.0
+    sin_envolvente: list[str] = []
+    detalle: dict[str, float] = {}
+    for cid in piezas:
+        if not catalogo.existe(cid):
+            continue
+        componente = catalogo[cid]
+        caja = parts.caja_local(componente) if componente.modelable else None
+        if caja is None:
+            sin_envolvente.append(cid)
+            continue
+        # El FSM esta centrado en el eje, asi que solo cuenta su mitad. Y va a
+        # 45 grados, que es lo que lo hace ancho: su lado largo se proyecta
+        # sobre X.
+        if cid == "fsm":
+            ancho = math.hypot(caja.dims[0], caja.dims[2]) / 2
+        else:
+            ancho = caja.dims[0]
+        detalle[cid] = ancho
+        necesario += ancho
+
+    if sin_envolvente:
+        return Chequeo(
+            id="banco_optico", titulo=titulo, estado=NO_COMPROBABLE,
+            mensaje=(
+                f"Sin envolvente: {', '.join(sin_envolvente)}. No se puede "
+                f"sumar la linea."
+            ),
+            numeros={"disponible_mm": disponible},
+            falta=f"Envolvente de {', '.join(sin_envolvente)}",
+        )
+
+    margen = disponible - necesario
+    numeros = {**detalle, "necesario_mm": necesario, "disponible_mm": disponible,
+               "margen_mm": margen}
+    comun = (
+        f"El FSM va sobre el eje optico del telescopio (X = {eje_x:+.2f} mm) "
+        f"porque es el que dobla el haz de X a Z. Del eje a la pared +X de la "
+        f"columna hay {disponible:.1f} mm, y la media anchura del FSM mas el "
+        f"dicroico mas el colimador suman {necesario:.1f} mm, sin contar "
+        f"holguras de montaje."
+    )
+    if margen < 0:
+        return Chequeo(
+            id="banco_optico", titulo=titulo, estado=FALLA,
+            mensaje=(
+                comun + f" NO CABE por {abs(margen):.1f} mm. La salida no es "
+                f"apretar las piezas: es alargar el banco a costa de la "
+                f"bandeja o de la longitud reservada al telescopio."
+            ),
+            numeros=numeros,
+        )
+    if margen < HOLGURA_NULA_MM * 10:
+        return Chequeo(
+            id="banco_optico", titulo=titulo, estado=ATENCION,
+            mensaje=(
+                comun + f" Quedan {margen:.1f} mm, que no dan para holguras de "
+                f"montaje ni para que ninguna de las dos envolventes crezca. "
+                f"Las dos son SUPUESTAS; cualquier pieza real mayor rompe la "
+                f"linea."
+            ),
+            numeros=numeros,
+        )
+    return Chequeo(
+        id="banco_optico", titulo=titulo, estado=OK,
+        mensaje=comun + f" Quedan {margen:.1f} mm de margen.",
+        numeros=numeros,
     )
 
 
@@ -595,12 +741,30 @@ def chequeo_step_de_fabricante(catalogo: Catalogo) -> Chequeo:
         if c.step is not None and not (RAIZ / c.step.ruta).exists()
     ]
 
+    # Piezas que esperan un STEP que todavia no ha llegado. Se dibujan con su
+    # envolvente aproximada, y el dia que el fichero aparezca en la ruta que el
+    # catalogo declara se dibujan con el sin tocar nada. Lo util del chequeo es
+    # decir EXACTAMENTE que fichero falta y en que ruta va, para poder pedirlo.
+    esperando = [
+        (c.id, c.step_esperado)
+        for c in catalogo.componentes
+        if c.step_esperado is not None
+        and not (RAIZ / c.step_esperado.ruta).exists()
+    ]
+    aparecidos = [
+        c.id
+        for c in catalogo.componentes
+        if c.step_esperado is not None and (RAIZ / c.step_esperado.ruta).exists()
+    ]
+
     numeros = {
         "declarados": float(len(declarados)),
         "presentes": float(len(presentes)),
         "ausentes": float(len(ausentes)),
         "huella_distinta": float(len(corruptos)),
         "sin_declarar": float(len(sueltos)),
+        "esperando_step": float(len(esperando)),
+        "aparecidos_sin_verificar": float(len(aparecidos)),
     }
 
     partes = [
@@ -626,10 +790,29 @@ def chequeo_step_de_fabricante(catalogo: Catalogo) -> Chequeo:
             f"Componentes con STEP conectado pero sin fichero: "
             f"{', '.join(conectados_sin_fichero)}."
         )
+    if esperando:
+        partes.append(
+            f"{len(esperando)} "
+            + ("pieza espera" if len(esperando) == 1 else "piezas esperan")
+            + " un STEP que aun no ha llegado; "
+            f"mientras tanto se dibuja con su envolvente aproximada. Dejar el "
+            f"fichero en la ruta indicada basta para que el modelo lo use: "
+            + "; ".join(
+                f"{cid} -> {esp.ruta} (a {esp.pedir_a})" for cid, esp in esperando
+            )
+            + "."
+        )
+    if aparecidos:
+        partes.append(
+            f"STEP aparecidos en su ruta y conectados automaticamente, como "
+            f"REFERENCIA hasta verificar su part number: {', '.join(aparecidos)}. "
+            f"Al verificarlos, sustituir 'forma.step_esperado' por 'forma.step' "
+            f"con estado 'confirmado' y anotar la huella en el manifiesto."
+        )
 
     if corruptos:
         estado = FALLA
-    elif ausentes or sueltos:
+    elif ausentes or sueltos or esperando or aparecidos:
         estado = ATENCION
     else:
         estado = OK
@@ -640,13 +823,27 @@ def chequeo_step_de_fabricante(catalogo: Catalogo) -> Chequeo:
         estado=estado,
         mensaje=" ".join(partes),
         numeros=numeros,
-        falta=(
-            f"Descargar de Drive: {', '.join(ausentes)}" if ausentes else None
-        ),
+        falta=_falta_de_step(ausentes, esperando, aparecidos),
     )
 
 
-def todos(catalogo: Catalogo) -> list[Chequeo]:
+def _falta_de_step(ausentes, esperando, aparecidos) -> str | None:
+    trozos = []
+    if ausentes:
+        trozos.append(f"Descargar de Drive: {', '.join(ausentes)}")
+    if esperando:
+        trozos.append(
+            "STEP por recibir: "
+            + ", ".join(f"{cid} (a {esp.pedir_a})" for cid, esp in esperando)
+        )
+    if aparecidos:
+        trozos.append(
+            "Verificar el part number de: " + ", ".join(aparecidos)
+        )
+    return ". ".join(trozos) if trozos else None
+
+
+def todos(catalogo: Catalogo, layout=None) -> list[Chequeo]:
     salida = [
         chequeo_volumen_total(catalogo),
         chequeo_apertura_telescopio(catalogo),
@@ -656,6 +853,7 @@ def todos(catalogo: Catalogo) -> list[Chequeo]:
     salida += chequeo_longitud_moduladores(catalogo)
     salida += [
         chequeo_pila_pc104(catalogo),
+        chequeo_banco_optico(catalogo, layout),
         chequeo_bucles_fibra(catalogo),
         chequeo_masa(catalogo),
         chequeo_step_de_fabricante(catalogo),

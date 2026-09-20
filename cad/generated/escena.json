@@ -1,11 +1,11 @@
 {
- "generado": "2026-09-20T11:14:44+02:00",
+ "generado": "2026-09-20T18:00:47+02:00",
  "glb": "clau_6u.glb",
  "proyecto": "CLAU",
  "layout": {
   "estado": "confirmada",
   "confirmado": true,
-  "nota": "Dos columnas de 3U a lo largo de todo Z. La pila PC104 queda holgada: 259 mm usados de 361 mm. La columna de payload mide 121.7 mm de ancho y se parte en dos a lo largo del telescopio: 95.4 mm para el barrilete y 26.3 mm de franja lateral, donde van los dos moduladores tumbados segun Z. Asi la bandeja se queda sin cuerpos dentro y el telescopio puede reservar 200 mm. PCB-2 sigue en la otra columna, con lo que el coaxial RF cruza el satelite a lo ancho.",
+  "nota": "Dos columnas de 3U a lo largo de todo Z. La pila PC104 queda holgada: 305 mm usados de 361 mm. La columna de payload mide 121.7 mm de ancho y se parte en dos a lo largo del telescopio: 95.4 mm para el barrilete y 26.3 mm de franja lateral, donde van los dos moduladores tumbados segun Z. Asi la bandeja se queda sin cuerpos dentro y el telescopio puede reservar 200 mm. PCB-2 sigue en la otra columna, con lo que el coaxial RF cruza el satelite a lo ancho.",
   "decidido": "2026-09-20"
  },
  "envolvente": {
@@ -55,61 +55,30 @@
  "resumen": {
   "volumen_exterior_l": 8.28258,
   "volumen_interior_l": 7.643675052000001,
-  "volumen_ocupado_l": 1.8049264770857092,
-  "volumen_libre_l": 5.838748574914291,
+  "volumen_ocupado_l": 4.7603652523657125,
+  "volumen_libre_l": 2.883309799634289,
   "fiable": false,
-  "piezas_colocadas": 8,
-  "componentes": 29,
+  "piezas_colocadas": 26,
+  "componentes": 31,
   "sin_envolvente": [
-   "antena_quasar_wsant",
    "radio_uhf_pulsar_vutrx",
-   "paneles_photon_side",
    "propulsion",
-   "telescopio_cassegrain",
-   "fsm",
-   "dicroico",
-   "camara_beacon",
-   "laser_beacon_bajada",
-   "colimador",
-   "bandeja_optica",
-   "laser_dfb_1550",
-   "voa",
-   "aislador",
-   "filtro_espectral",
-   "acoplador_monitor",
-   "pcb1_control_qkd",
-   "pcb2_drivers_opticos",
-   "pcb3_pat"
+   "cables_rf_moduladores"
   ],
   "no_colocados": [
-   "antena_quasar_wsant",
    "radio_uhf_pulsar_vutrx",
-   "paneles_photon_side",
    "propulsion",
-   "telescopio_cassegrain",
-   "fsm",
-   "dicroico",
-   "camara_beacon",
-   "laser_beacon_bajada",
-   "colimador",
-   "bandeja_optica",
-   "laser_dfb_1550",
-   "voa",
-   "aislador",
-   "filtro_espectral",
-   "acoplador_monitor",
-   "pcb1_control_qkd",
-   "pcb2_drivers_opticos",
-   "pcb3_pat"
+   "cables_rf_moduladores"
   ],
-  "pendientes_tbd": 53,
-  "discrepancias": 6
+  "pendientes_tbd": 42,
+  "pendientes_supuestos": 28,
+  "discrepancias": 9
  },
  "zonas": [
   {
    "id": "z_plataforma",
    "nombre": "Columna de plataforma - pila PC104 a lo largo de todo Z",
-   "nota": "ADCS en +Z, para que el star tracker ST200 mire por la misma cara que el telescopio. Despues OBC, EPS, radio banda S, PCB-3, PCB-1 y PCB-2, y las baterias al final de -Z, que equilibran en Z la masa del telescopio. La pila usa 259 mm de los 361 mm disponibles. Las tres PCBs propias tienen posicion de separador reservada pero no se dibujan: su altura es TBD.",
+   "nota": "ADCS en +Z, para que el star tracker ST200 mire por la misma cara que el telescopio. Despues OBC, EPS, radio banda S, PCB-3, PCB-1 y PCB-2, y las baterias al final de -Z, que equilibran en Z la masa del telescopio, y la antena de banda S detras de ellas, contra la pared -Z, que es la unica cara con hueco. La pila usa 305 mm de los 361 mm disponibles. Cada ranura se mide sobre la geometria DIBUJADA, no sobre la altura de ficha: las fichas AAC no incluyen el conector PC104 pasante y los STEP si. Las tres PCBs propias se dibujan con una altura SUPUESTA de 15 mm.",
    "caja": {
     "min": [
      -110.85,
@@ -133,13 +102,13 @@
     ]
    },
    "volumen_l": 3.447756,
-   "libre_l": 1.674839522914291,
-   "fraccion_ocupada": 0.5142233026599646
+   "libre_l": 1.2185114644142911,
+   "fraccion_ocupada": 0.6465783934784564
   },
   {
    "id": "z_payload_telescopio",
    "nombre": "Telescopio",
-   "nota": "Telescopio Cassegrain apuntando por +Z. 200 mm RESERVADOS en Z (dato 'longitud_reservada', estado decision, provisional hasta el STEP). OJO: los \"~2U\" del brief son ~227 mm con la U de longitud de la CDS (113.5 mm), no 200. Esta zona mide 95.4 mm en X, que es el mayor diametro de barrilete que cabe en la altura interior. Su envolvente es TBD y no se dibuja.",
+   "nota": "Telescopio Cassegrain apuntando por +Z. 200 mm RESERVADOS en Z (dato 'longitud_reservada', estado decision, provisional hasta el STEP). OJO: los \"~2U\" del brief son ~227 mm con la U de longitud de la CDS (113.5 mm), no 200. Esta zona mide 95.4 mm en X, que es el mayor diametro de barrilete que cabe en la altura interior. El barrilete se dibuja LLENANDO la zona, porque su envolvente es una cota superior y no una medida: asi se ve que con 90 mm de apertura libre no queda sitio para barrilete, celda ni ajuste. En cuanto llegue el STEP, sustituye al cilindro sin tocar nada.",
    "caja": {
     "min": [
      -10.85,
@@ -163,8 +132,8 @@
     ]
    },
    "volumen_l": 1.820232,
-   "libre_l": 1.820232,
-   "fraccion_ocupada": 0.0
+   "libre_l": 0.0,
+   "fraccion_ocupada": 1.0
   },
   {
    "id": "z_payload_franja",
@@ -193,13 +162,13 @@
     ]
    },
    "volumen_l": 0.501804,
-   "libre_l": 0.46979399999999993,
-   "fraccion_ocupada": 0.06378984623478501
+   "libre_l": 0.43875399999999964,
+   "fraccion_ocupada": 0.1256466668260922
   },
   {
    "id": "z_payload_banco",
    "nombre": "Banco optico de espacio libre",
-   "nota": "Colimador, dicroico, FSM y camara de beacon. Camino: colimador -> dicroico -> FSM -> telescopio, y dicroico -> camara.",
+   "nota": "Camino: colimador -> dicroico -> FSM -> telescopio, y del dicroico sale el brazo del beacon hacia +-Y (camara arriba, laser de beacon de bajada abajo). El FSM esta sobre el eje optico del telescopio (X = +36.85) porque es el que dobla el haz de X a Z, y eso deja el colimador y el dicroico en linea hacia +X. Margen contra la pared +X: -0.5 mm. Los haces NO estan dibujados: sin diametro de haz, un keep-out optico seria una medida inventada.",
    "caja": {
     "min": [
      -10.85,
@@ -223,13 +192,13 @@
     ]
    },
    "volumen_l": 0.6385599000000001,
-   "libre_l": 0.6385599000000001,
-   "fraccion_ocupada": 0.0
+   "libre_l": 0.56855749922,
+   "fraccion_ocupada": 0.10962542555522198
   },
   {
    "id": "z_payload_bandeja",
    "nombre": "Bandeja optica de fibra",
-   "nota": "106.4 mm de Z con los 121.7 mm de ancho enteros, ya sin cuerpos de modulador dentro: los bucles de fibra pueden curvar en toda la anchura. Aqui se queda el laser DFB, que con sus 4.1 W es la principal fuente de calor del payload y no debe ir junto al barrilete. Zona con control termico propio.",
+   "nota": "106.4 mm de Z con los 121.7 mm de ancho enteros, ya sin cuerpos de modulador dentro. La cadena va en filas que avanzan segun Z, en el orden y el sentido de la cadena optica: el laser DFB al extremo -Z, lo mas lejos posible del barrilete porque con sus 4.1 W es la principal fuente de calor del payload, y la salida hacia el colimador en +Z. Quedan 15.6 mm de Z libres al final para los bucles, mas los huecos entre filas. Cuanta fibra cabe ahi NO se puede decir: falta el radio minimo de curvatura. Zona con control termico propio.",
    "caja": {
     "min": [
      -10.85,
@@ -253,11 +222,498 @@
     ]
    },
    "volumen_l": 1.235323152,
-   "libre_l": 1.235323152,
-   "fraccion_ocupada": 0.0
+   "libre_l": 1.168806736,
+   "fraccion_ocupada": 0.053845356894922015
   }
  ],
- "keep_outs": [],
+ "keep_outs": [
+  {
+   "id": "fibra_laser_dfb_1550_salida",
+   "tipo": "fibra",
+   "nota": "Puerto de salida de fibra de laser_dfb_1550, recortado a la zona z_payload_bandeja.",
+   "caja": {
+    "min": [
+     68.7,
+     -40.8,
+     -180.7
+    ],
+    "max": [
+     110.85,
+     19.2,
+     -123.05
+    ],
+    "centro": [
+     89.775,
+     -10.799999999999999,
+     -151.875
+    ],
+    "dims": [
+     42.14999999999999,
+     60.0,
+     57.64999999999999
+    ]
+   }
+  },
+  {
+   "id": "fibra_mod_intensidad_mxer_ln_10_entrada",
+   "tipo": "fibra",
+   "nota": "Puerto de entrada de fibra de mod_intensidad_mxer_ln_10, recortado a la zona z_payload_franja.",
+   "caja": {
+    "min": [
+     91.125,
+     -30.0,
+     110.7
+    ],
+    "max": [
+     110.85,
+     30.0,
+     160.7
+    ],
+    "centro": [
+     100.9875,
+     0.0,
+     135.7
+    ],
+    "dims": [
+     19.724999999999994,
+     60.0,
+     49.999999999999986
+    ]
+   }
+  },
+  {
+   "id": "fibra_mod_fase_mpz_ln_10_entrada",
+   "tipo": "fibra",
+   "nota": "Puerto de entrada de fibra de mod_fase_mpz_ln_10, recortado a la zona z_payload_franja.",
+   "caja": {
+    "min": [
+     104.275,
+     -30.0,
+     110.7
+    ],
+    "max": [
+     110.85,
+     30.0,
+     160.7
+    ],
+    "centro": [
+     107.5625,
+     0.0,
+     135.7
+    ],
+    "dims": [
+     6.574999999999989,
+     60.0,
+     49.999999999999986
+    ]
+   }
+  },
+  {
+   "id": "fibra_voa_entrada",
+   "tipo": "fibra",
+   "nota": "Puerto de entrada de fibra de voa, recortado a la zona z_payload_bandeja.",
+   "caja": {
+    "min": [
+     -10.85,
+     -41.95,
+     -150.65
+    ],
+    "max": [
+     -4.85,
+     18.05,
+     -90.65
+    ],
+    "centro": [
+     -7.85,
+     -11.950000000000001,
+     -120.65
+    ],
+    "dims": [
+     6.0,
+     60.0,
+     60.0
+    ]
+   }
+  },
+  {
+   "id": "fibra_voa_salida",
+   "tipo": "fibra",
+   "nota": "Puerto de salida de fibra de voa, recortado a la zona z_payload_bandeja.",
+   "caja": {
+    "min": [
+     30.15,
+     -41.95,
+     -150.65
+    ],
+    "max": [
+     80.15,
+     18.05,
+     -90.65
+    ],
+    "centro": [
+     55.150000000000006,
+     -11.950000000000001,
+     -120.65
+    ],
+    "dims": [
+     50.00000000000001,
+     60.0,
+     60.0
+    ]
+   }
+  },
+  {
+   "id": "fibra_aislador_entrada",
+   "tipo": "fibra",
+   "nota": "Puerto de entrada de fibra de aislador, recortado a la zona z_payload_bandeja.",
+   "caja": {
+    "min": [
+     19.85,
+     -41.95,
+     -150.65
+    ],
+    "max": [
+     69.85,
+     18.05,
+     -90.65
+    ],
+    "centro": [
+     44.849999999999994,
+     -11.950000000000001,
+     -120.65
+    ],
+    "dims": [
+     49.99999999999999,
+     60.0,
+     60.0
+    ]
+   }
+  },
+  {
+   "id": "fibra_aislador_salida",
+   "tipo": "fibra",
+   "nota": "Puerto de salida de fibra de aislador, recortado a la zona z_payload_bandeja.",
+   "caja": {
+    "min": [
+     104.85,
+     -41.95,
+     -150.65
+    ],
+    "max": [
+     110.85,
+     18.05,
+     -90.65
+    ],
+    "centro": [
+     107.85,
+     -11.950000000000001,
+     -120.65
+    ],
+    "dims": [
+     6.0,
+     60.0,
+     60.0
+    ]
+   }
+  },
+  {
+   "id": "fibra_filtro_espectral_entrada",
+   "tipo": "fibra",
+   "nota": "Puerto de entrada de fibra de filtro_espectral, recortado a la zona z_payload_bandeja.",
+   "caja": {
+    "min": [
+     -10.85,
+     -41.95,
+     -129.9
+    ],
+    "max": [
+     -4.85,
+     18.05,
+     -74.3
+    ],
+    "centro": [
+     -7.85,
+     -11.950000000000001,
+     -102.1
+    ],
+    "dims": [
+     6.0,
+     60.0,
+     55.60000000000001
+    ]
+   }
+  },
+  {
+   "id": "fibra_filtro_espectral_salida",
+   "tipo": "fibra",
+   "nota": "Puerto de salida de fibra de filtro_espectral, recortado a la zona z_payload_bandeja.",
+   "caja": {
+    "min": [
+     35.15,
+     -41.95,
+     -129.9
+    ],
+    "max": [
+     85.15,
+     18.05,
+     -74.3
+    ],
+    "centro": [
+     60.150000000000006,
+     -11.950000000000001,
+     -102.1
+    ],
+    "dims": [
+     50.00000000000001,
+     60.0,
+     55.60000000000001
+    ]
+   }
+  },
+  {
+   "id": "fibra_acoplador_monitor_entrada",
+   "tipo": "fibra",
+   "nota": "Puerto de entrada de fibra de acoplador_monitor, recortado a la zona z_payload_bandeja.",
+   "caja": {
+    "min": [
+     -5.15,
+     -38.7,
+     -129.9
+    ],
+    "max": [
+     44.85,
+     21.3,
+     -74.3
+    ],
+    "centro": [
+     19.85,
+     -8.700000000000001,
+     -102.1
+    ],
+    "dims": [
+     50.0,
+     60.0,
+     55.60000000000001
+    ]
+   }
+  },
+  {
+   "id": "fibra_acoplador_monitor_salida",
+   "tipo": "fibra",
+   "nota": "Puerto de salida de fibra de acoplador_monitor, recortado a la zona z_payload_bandeja.",
+   "caja": {
+    "min": [
+     104.85,
+     -38.7,
+     -129.9
+    ],
+    "max": [
+     110.85,
+     21.3,
+     -74.3
+    ],
+    "centro": [
+     107.85,
+     -8.700000000000001,
+     -102.1
+    ],
+    "dims": [
+     6.0,
+     60.0,
+     55.60000000000001
+    ]
+   }
+  },
+  {
+   "id": "fibra_colimador_entrada",
+   "tipo": "fibra",
+   "nota": "Puerto de entrada de fibra de colimador, recortado a la zona z_payload_banco.",
+   "caja": {
+    "min": [
+     31.397,
+     0.0,
+     -74.3
+    ],
+    "max": [
+     81.397,
+     47.7,
+     -19.3
+    ],
+    "centro": [
+     56.397000000000006,
+     23.85,
+     -46.8
+    ],
+    "dims": [
+     50.00000000000001,
+     47.7,
+     55.0
+    ]
+   }
+  },
+  {
+   "id": "coaxial_mod_intensidad_mxer_ln_10",
+   "tipo": "coaxial",
+   "nota": "Salida del conector RF de mod_intensidad_mxer_ln_10 hacia PCB-2.",
+   "caja": {
+    "min": [
+     84.55,
+     17.5,
+     20.7
+    ],
+    "max": [
+     110.85,
+     42.5,
+     70.7
+    ],
+    "centro": [
+     97.69999999999999,
+     30.0,
+     45.7
+    ],
+    "dims": [
+     26.299999999999997,
+     25.0,
+     50.0
+    ]
+   }
+  },
+  {
+   "id": "coaxial_mod_fase_mpz_ln_10",
+   "tipo": "coaxial",
+   "nota": "Salida del conector RF de mod_fase_mpz_ln_10 hacia PCB-2.",
+   "caja": {
+    "min": [
+     84.55,
+     17.5,
+     20.7
+    ],
+    "max": [
+     110.85,
+     42.5,
+     70.7
+    ],
+    "centro": [
+     97.69999999999999,
+     30.0,
+     45.7
+    ],
+    "dims": [
+     26.299999999999997,
+     25.0,
+     50.0
+    ]
+   }
+  },
+  {
+   "id": "haz_e01",
+   "tipo": "haz_libre",
+   "nota": "Camino optico colimador -> dicroico (e01).",
+   "caja": {
+    "min": [
+     76.397,
+     -5.0,
+     -51.8
+    ],
+    "max": [
+     81.397,
+     5.0,
+     -41.8
+    ],
+    "centro": [
+     78.897,
+     0.0,
+     -46.8
+    ],
+    "dims": [
+     5.0,
+     10.0,
+     10.0
+    ]
+   }
+  },
+  {
+   "id": "haz_e02",
+   "tipo": "haz_libre",
+   "nota": "Camino optico dicroico -> fsm (e02).",
+   "caja": {
+    "min": [
+     48.397,
+     -5.0,
+     -51.8
+    ],
+    "max": [
+     53.397,
+     5.0,
+     -41.8
+    ],
+    "centro": [
+     50.897,
+     0.0,
+     -46.8
+    ],
+    "dims": [
+     5.0,
+     10.0,
+     10.0
+    ]
+   }
+  },
+  {
+   "id": "haz_e03",
+   "tipo": "haz_libre",
+   "nota": "Camino optico fsm -> telescopio_cassegrain (e03).",
+   "caja": {
+    "min": [
+     31.85,
+     -5.0,
+     -35.253
+    ],
+    "max": [
+     41.85,
+     5.0,
+     -19.3
+    ],
+    "centro": [
+     36.85,
+     0.0,
+     -27.2765
+    ],
+    "dims": [
+     10.0,
+     10.0,
+     15.953
+    ]
+   }
+  },
+  {
+   "id": "haz_e04",
+   "tipo": "haz_libre",
+   "nota": "Camino optico dicroico -> camara_beacon (e04).",
+   "caja": {
+    "min": [
+     59.897,
+     11.5,
+     -51.8
+    ],
+    "max": [
+     69.897,
+     16.5,
+     -41.8
+    ],
+    "centro": [
+     64.897,
+     14.0,
+     -46.8
+    ],
+    "dims": [
+     10.000000000000007,
+     5.0,
+     10.0
+    ]
+   }
+  }
+ ],
  "railes": [
   {
    "id": "rail_-X-Y",
@@ -368,11 +824,17 @@
    "categoria": "plataforma",
    "subsistema": "ADCS",
    "zona": "z_plataforma",
+   "id_drive": "PLAT-04",
+   "referencia_comercial": "AAC Clyde Space iADCS400 (incluye star tracker ST200)",
    "estado_dato": "confirmado",
    "desde_step": false,
    "step": null,
    "step_estado": null,
    "step_nota": null,
+   "step_esperado": null,
+   "forma": "caja",
+   "montaje": null,
+   "conectores": [],
    "centro": [
     -60.85,
     0.0,
@@ -473,15 +935,21 @@
    "categoria": "plataforma",
    "subsistema": "OBC",
    "zona": "z_plataforma",
+   "id_drive": "PLAT-01",
+   "referencia_comercial": "AAC Clyde Space Kryten-M3-PLUS",
    "estado_dato": "referencia",
    "desde_step": true,
    "step": "cad/vendor/aac_clyde_space/obc_3d_25_02929.step",
    "step_estado": "referencia",
    "step_nota": "REFERENCIA, no confirmado: el part number 3D-25-02929 NO esta verificado como Kryten-M3-PLUS. Es una tarjeta PC104 de AAC del tamano correcto, y el equipo la llamo \"Onboard_computer\", pero eso no es la ficha. El STEP viene con el contorno girado respecto al catalogo (90.17 por X, 95.89 por Y); los 90 grados alrededor de Z lo llevan a los ejes de 'dimensiones'. Sin ese giro el lado de 95.89 mm caeria por Y, que solo tiene 95.4 mm de altura interior, y saldria un desborde que no es real.",
+   "step_esperado": null,
+   "forma": "step",
+   "montaje": null,
+   "conectores": [],
    "centro": [
     -60.85,
     0.0,
-    96.88
+    89.26
    ],
    "rotacion": [
     0.0,
@@ -492,17 +960,17 @@
     "min": [
      -108.79285593856055,
      -45.085000000000015,
-     85.2594999398564
+     77.6394999398564
     ],
     "max": [
      -12.90714406143944,
      45.085000000000015,
-     108.5005000601436
+     100.8805000601436
     ],
     "centro": [
      -60.849999999999994,
      0.0,
-     96.88
+     89.26
     ],
     "dims": [
      95.88571187712111,
@@ -587,19 +1055,25 @@
   {
    "nodo": "eps_starbuck_nano_plus",
    "componente": "eps_starbuck_nano_plus",
-   "nombre": "AAC Clyde Space Starbuck-Nano-PLUS",
+   "nombre": "AAC Clyde Space Starbuck-Nano-PLUS (EPS)",
    "categoria": "plataforma",
    "subsistema": "EPS",
    "zona": "z_plataforma",
+   "id_drive": "PLAT-05",
+   "referencia_comercial": "AAC Clyde Space Starbuck-Nano-PLUS",
    "estado_dato": "confirmado",
    "desde_step": false,
    "step": null,
    "step_estado": null,
    "step_nota": null,
+   "step_esperado": null,
+   "forma": "caja",
+   "montaje": null,
+   "conectores": [],
    "centro": [
     -60.85,
     0.0,
-    74.02
+    58.78
    ],
    "rotacion": [
     0.0,
@@ -610,25 +1084,25 @@
     "min": [
      -108.795,
      -45.085,
-     63.61
+     48.370000000000005
     ],
     "max": [
      -12.905000000000001,
      45.085,
-     84.43
+     69.19
     ],
     "centro": [
      -60.85,
      0.0,
-     74.02000000000001
+     58.78
     ],
     "dims": [
      95.89,
      90.17,
-     20.820000000000007
+     20.819999999999993
     ]
    },
-   "volumen_cm3": 180.01807506600005,
+   "volumen_cm3": 180.01807506599994,
    "requiere_vista_exterior": false,
    "nota": "ATENCION: la ficha describe el NANO-PLUS como pensado para 3-12U CON PANELES DESPLEGABLES, mientras que CLAU parte de paneles PHOTON-SIDE de montaje en cuerpo (variante NANO). Decision a revisar con AAC segun la configuracion final de paneles.",
    "color": [
@@ -690,15 +1164,21 @@
    "categoria": "plataforma",
    "subsistema": "comunicaciones",
    "zona": "z_plataforma",
+   "id_drive": "PLAT-02",
+   "referencia_comercial": "AAC Clyde Space Quasar-STRX",
    "estado_dato": "referencia",
    "desde_step": false,
    "step": null,
    "step_estado": null,
    "step_nota": null,
+   "step_esperado": null,
+   "forma": "caja",
+   "montaje": null,
+   "conectores": [],
    "centro": [
     -60.85,
     0.0,
-    43.54
+    28.3
    ],
    "rotacion": [
     0.0,
@@ -709,17 +1189,17 @@
     "min": [
      -108.85,
      -45.0,
-     35.09
+     19.85
     ],
     "max": [
      -12.849999999999994,
      45.0,
-     51.99
+     36.75
     ],
     "centro": [
      -60.849999999999994,
      0.0,
-     43.540000000000006
+     28.3
     ],
     "dims": [
      96.0,
@@ -783,21 +1263,357 @@
    }
   },
   {
+   "nodo": "pcb3_pat",
+   "componente": "pcb3_pat",
+   "nombre": "PCB-3 PAT (apuntado, adquisicion y seguimiento)",
+   "categoria": "payload_pcb",
+   "subsistema": "pat",
+   "zona": "z_plataforma",
+   "id_drive": "ELEC-03",
+   "referencia_comercial": null,
+   "estado_dato": "supuesto",
+   "desde_step": false,
+   "step": null,
+   "step_estado": null,
+   "step_nota": null,
+   "step_esperado": null,
+   "forma": "caja",
+   "montaje": {
+    "cara": "-Z",
+    "eje": null,
+    "tipo_eje": null,
+    "nota": "Tarjeta de la pila PC104, apilada segun Z."
+   },
+   "conectores": [],
+   "centro": [
+    -60.85,
+    0.0,
+    5.44
+   ],
+   "rotacion": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     -108.795,
+     -45.085,
+     -2.0599999999999996
+    ],
+    "max": [
+     -12.905000000000001,
+     45.085,
+     12.940000000000001
+    ],
+    "centro": [
+     -60.85,
+     0.0,
+     5.440000000000001
+    ],
+    "dims": [
+     95.89,
+     90.17,
+     15.0
+    ]
+   },
+   "volumen_cm3": 129.6960195,
+   "requiere_vista_exterior": false,
+   "nota": "Lectura de la camara, driver del FSM, driver del laser de beacon, lazo de apuntado fino. Es la primera de las tres propias en la pila viniendo de +Z, o sea la mas cercana al ADCS (del que recibe la actitud para el traspaso de apuntado grueso a fino) y a la altura del banco optico, que es donde estan la camara, el FSM y el laser de beacon.",
+   "color": [
+    0.6200000002918433,
+    0.6200000002918433,
+    0.6599999923026542
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      95.89,
+      90.17,
+      15.0
+     ],
+     "unidad": "mm",
+     "estado": "supuesto",
+     "fuente": "SUPUESTO en la altura. El CONTORNO si sale del catalogo: es el contorno PC104 comun a la gama AAC que usa CLAU (integracion.pila_pc104.contorno, 95.89 x 90.17 mm), y esta PROPUESTO, no confirmado. La ALTURA, 15.0 mm, esta inventada: es la posicion de separador PC/104 (15.24 mm) menos holgura, o sea lo que el layout ya le reserva a esta tarjeta.\nOJO CON LA CIRCULARIDAD: comprobar que esta tarjeta cabe en SU posicion de separador devuelve la hipotesis, no un resultado, por el mismo motivo que el chequeo 'seccion_componentes' sale como no comprobable. Lo que si comprueba de verdad es que no choca con las tarjetas vecinas ni se sale de la columna, y eso depende de las alturas de las OTRAS, que si son datos. En cuanto llegue la altura real, si pasa de 15.24 mm la tarjeta ocupara dos posiciones y la pila crecera 15.24 mm; hay 102 mm de margen.",
+     "nota": null,
+     "falta": "Altura real de la tarjeta, y si el driver del FSM es de alta tension (un driver piezo de 120 V ocupa bastante mas que uno de MEMS). Es el mismo dato que bloquea la eleccion del FSM. Y confirmar el contorno.",
+     "pedir_a": "Equipo de electronica de ACSAR",
+     "discrepancia": []
+    },
+    "masa": {
+     "valor": null,
+     "unidad": "g",
+     "estado": "TBD",
+     "fuente": null,
+     "nota": null,
+     "falta": "Masa de la tarjeta poblada",
+     "pedir_a": "Equipo de electronica de ACSAR",
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  },
+  {
+   "nodo": "pcb1_control_qkd",
+   "componente": "pcb1_control_qkd",
+   "nombre": "PCB-1 Control QKD (FPGA, QRNG, memoria, reloj)",
+   "categoria": "payload_pcb",
+   "subsistema": "control_qkd",
+   "zona": "z_plataforma",
+   "id_drive": "ELEC-01",
+   "referencia_comercial": null,
+   "estado_dato": "supuesto",
+   "desde_step": false,
+   "step": null,
+   "step_estado": null,
+   "step_nota": null,
+   "step_esperado": null,
+   "forma": "caja",
+   "montaje": {
+    "cara": "-Z",
+    "eje": null,
+    "tipo_eje": null,
+    "nota": "Tarjeta de la pila PC104: se apila por separadores segun Z, que es el eje de la pila en este layout. No declara eje de senal."
+   },
+   "conectores": [],
+   "centro": [
+    -60.85,
+    0.0,
+    -9.8
+   ],
+   "rotacion": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     -108.795,
+     -45.085,
+     -17.3
+    ],
+    "max": [
+     -12.905000000000001,
+     45.085,
+     -2.3000000000000007
+    ],
+    "centro": [
+     -60.85,
+     0.0,
+     -9.8
+    ],
+    "dims": [
+     95.89,
+     90.17,
+     15.0
+    ]
+   },
+   "volumen_cm3": 129.6960195,
+   "requiere_vista_exterior": false,
+   "nota": "FPGA, 4 x QRNG, memoria no volatil >=32 GB, reloj disciplinado por el PPS del GNSS. Va en la pila de plataforma, no en la columna de payload: es la tarjeta que mas habla con el OBC (bus de datos y PPS del GNSS del Kryten-M3-PLUS), y en la columna de payload no hay formato PC104 ni sitio entre el banco y la bandeja.",
+   "color": [
+    0.6200000002918433,
+    0.6200000002918433,
+    0.6599999923026542
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      95.89,
+      90.17,
+      15.0
+     ],
+     "unidad": "mm",
+     "estado": "supuesto",
+     "fuente": "SUPUESTO en la altura. El CONTORNO si sale del catalogo: es el contorno PC104 comun a la gama AAC que usa CLAU (integracion.pila_pc104.contorno, 95.89 x 90.17 mm), y esta PROPUESTO, no confirmado. La ALTURA, 15.0 mm, esta inventada: es la posicion de separador PC/104 (15.24 mm) menos holgura, o sea lo que el layout ya le reserva a esta tarjeta.\nOJO CON LA CIRCULARIDAD: comprobar que esta tarjeta cabe en SU posicion de separador devuelve la hipotesis, no un resultado, por el mismo motivo que el chequeo 'seccion_componentes' sale como no comprobable. Lo que si comprueba de verdad es que no choca con las tarjetas vecinas ni se sale de la columna, y eso depende de las alturas de las OTRAS, que si son datos. En cuanto llegue la altura real, si pasa de 15.24 mm la tarjeta ocupara dos posiciones y la pila crecera 15.24 mm; hay 102 mm de margen.",
+     "nota": null,
+     "falta": "Altura real de la tarjeta, que la fija el componente mas alto (la FPGA y su disipador, si lleva). Y confirmar el contorno PC104.",
+     "pedir_a": "Equipo de electronica de ACSAR",
+     "discrepancia": []
+    },
+    "masa": {
+     "valor": null,
+     "unidad": "g",
+     "estado": "TBD",
+     "fuente": null,
+     "nota": null,
+     "falta": "Masa de la tarjeta poblada",
+     "pedir_a": "Equipo de electronica de ACSAR",
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  },
+  {
+   "nodo": "pcb2_drivers_opticos",
+   "componente": "pcb2_drivers_opticos",
+   "nombre": "PCB-2 Drivers opticos",
+   "categoria": "payload_pcb",
+   "subsistema": "drivers_opticos",
+   "zona": "z_plataforma",
+   "id_drive": "ELEC-02",
+   "referencia_comercial": null,
+   "estado_dato": "supuesto",
+   "desde_step": false,
+   "step": null,
+   "step_estado": null,
+   "step_nota": null,
+   "step_esperado": null,
+   "forma": "caja",
+   "montaje": {
+    "cara": "-Z",
+    "eje": null,
+    "tipo_eje": null,
+    "nota": "Tarjeta de la pila PC104, apilada segun Z."
+   },
+   "conectores": [],
+   "centro": [
+    -60.85,
+    0.0,
+    -25.04
+   ],
+   "rotacion": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     -108.795,
+     -45.085,
+     -32.54
+    ],
+    "max": [
+     -12.905000000000001,
+     45.085,
+     -17.54
+    ],
+    "centro": [
+     -60.85,
+     0.0,
+     -25.04
+    ],
+    "dims": [
+     95.89,
+     90.17,
+     15.0
+    ]
+   },
+   "volumen_cm3": 129.6960195,
+   "requiere_vista_exterior": false,
+   "nota": "Pulsos del laser y su Peltier, 2 drivers RF de moduladores, lazo de punto de trabajo del modulador, control termico de la bandeja. Es la tarjeta de la pila que va MAS HACIA -Z de las tres propias, que es el extremo mas cercano a la bandeja: el coaxial RF a los moduladores es el cable critico del payload. Aun asi cruza el satelite a lo ancho, porque los moduladores estan en la franja de +X desde el 2026-09-20 (ver CLAUDE.md 3.6); en distancia de Manhattan la tirada apenas cambio.",
+   "color": [
+    0.6200000002918433,
+    0.6200000002918433,
+    0.6599999923026542
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      95.89,
+      90.17,
+      15.0
+     ],
+     "unidad": "mm",
+     "estado": "supuesto",
+     "fuente": "SUPUESTO en la altura. El CONTORNO si sale del catalogo: es el contorno PC104 comun a la gama AAC que usa CLAU (integracion.pila_pc104.contorno, 95.89 x 90.17 mm), y esta PROPUESTO, no confirmado. La ALTURA, 15.0 mm, esta inventada: es la posicion de separador PC/104 (15.24 mm) menos holgura, o sea lo que el layout ya le reserva a esta tarjeta.\nOJO CON LA CIRCULARIDAD: comprobar que esta tarjeta cabe en SU posicion de separador devuelve la hipotesis, no un resultado, por el mismo motivo que el chequeo 'seccion_componentes' sale como no comprobable. Lo que si comprueba de verdad es que no choca con las tarjetas vecinas ni se sale de la columna, y eso depende de las alturas de las OTRAS, que si son datos. En cuanto llegue la altura real, si pasa de 15.24 mm la tarjeta ocupara dos posiciones y la pila crecera 15.24 mm; hay 102 mm de margen.",
+     "nota": null,
+     "falta": "Altura real de la tarjeta. Los drivers RF y el del Peltier son los candidatos a componente mas alto. Y confirmar el contorno PC104.",
+     "pedir_a": "Equipo de electronica de ACSAR",
+     "discrepancia": []
+    },
+    "masa": {
+     "valor": null,
+     "unidad": "g",
+     "estado": "TBD",
+     "fuente": null,
+     "nota": null,
+     "falta": "Masa de la tarjeta poblada",
+     "pedir_a": "Equipo de electronica de ACSAR",
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  },
+  {
    "nodo": "bateria_optimus_30",
    "componente": "bateria_optimus_30",
-   "nombre": "AAC Clyde Space Optimus-30",
+   "nombre": "AAC Clyde Space Optimus-30 (bateria)",
    "categoria": "plataforma",
    "subsistema": "EPS",
    "zona": "z_plataforma",
+   "id_drive": "PLAT-06",
+   "referencia_comercial": "AAC Clyde Space Optimus-30",
    "estado_dato": "referencia",
    "desde_step": true,
    "step": "cad/vendor/aac_clyde_space/bateria_3d_01_02686.step",
    "step_estado": "referencia",
    "step_nota": "REFERENCIA, no confirmado: el part number 3D-01-02686 NO esta verificado como Optimus-30. Por dentro es UN SOLO modulo PC104 con 8 celdas de 35.56 x 57.81 x 5.0 mm en cuatro capas de dos, mas la PCB de 1.6 mm; el fichero se llamaba \"Batteries\" en plural, pero no son dos modulos. Mismo giro de 90 grados alrededor de Z que el OBC, por el mismo motivo.",
+   "step_esperado": null,
+   "forma": "step",
+   "montaje": null,
+   "conectores": [],
    "centro": [
     -60.85,
     0.0,
-    -32.66
+    -55.52
    ],
    "rotacion": [
     0.0,
@@ -808,25 +1624,25 @@
     "min": [
      -108.79655882475348,
      -45.085000000000015,
-     -50.881500057270685
+     -73.74150005727068
     ],
     "max": [
      -12.903441175246533,
      45.085000000000015,
-     -14.438499942729308
+     -37.298499942729315
     ],
     "centro": [
      -60.85,
      0.0,
-     -32.66
+     -55.519999999999996
     ],
     "dims": [
      95.89311764950695,
      90.17000000000003,
-     36.44300011454138
+     36.44300011454137
     ]
    },
-   "volumen_cm3": 315.11104836619654,
+   "volumen_cm3": 315.1110483661964,
    "requiere_vista_exterior": false,
    "nota": null,
    "color": [
@@ -903,19 +1719,25 @@
   {
    "nodo": "bateria_optimus_30_2",
    "componente": "bateria_optimus_30",
-   "nombre": "AAC Clyde Space Optimus-30",
+   "nombre": "AAC Clyde Space Optimus-30 (bateria)",
    "categoria": "plataforma",
    "subsistema": "EPS",
    "zona": "z_plataforma",
+   "id_drive": "PLAT-06",
+   "referencia_comercial": "AAC Clyde Space Optimus-30",
    "estado_dato": "referencia",
    "desde_step": true,
    "step": "cad/vendor/aac_clyde_space/bateria_3d_01_02686.step",
    "step_estado": "referencia",
    "step_nota": "REFERENCIA, no confirmado: el part number 3D-01-02686 NO esta verificado como Optimus-30. Por dentro es UN SOLO modulo PC104 con 8 celdas de 35.56 x 57.81 x 5.0 mm en cuatro capas de dos, mas la PCB de 1.6 mm; el fichero se llamaba \"Batteries\" en plural, pero no son dos modulos. Mismo giro de 90 grados alrededor de Z que el OBC, por el mismo motivo.",
+   "step_esperado": null,
+   "forma": "step",
+   "montaje": null,
+   "conectores": [],
    "centro": [
     -60.85,
     0.0,
-    -63.14
+    -101.24
    ],
    "rotacion": [
     0.0,
@@ -926,17 +1748,17 @@
     "min": [
      -108.79655882475348,
      -45.085000000000015,
-     -81.36150005727069
+     -119.46150005727068
     ],
     "max": [
      -12.903441175246533,
      45.085000000000015,
-     -44.91849994272931
+     -83.0184999427293
     ],
     "centro": [
      -60.85,
      0.0,
-     -63.14
+     -101.24
     ],
     "dims": [
      95.89311764950695,
@@ -1025,11 +1847,83 @@
    "categoria": "payload_bandeja",
    "subsistema": "bandeja_optica",
    "zona": "z_payload_franja",
+   "id_drive": "OPT-02",
+   "referencia_comercial": "Exail MXER-LN-10, encapsulado de grado espacial EM/NS-FM/FM",
    "estado_dato": "confirmado",
    "desde_step": false,
    "step": null,
    "step_estado": null,
    "step_nota": null,
+   "step_esperado": null,
+   "forma": "caja",
+   "montaje": {
+    "cara": "-Z",
+    "eje": "X",
+    "tipo_eje": "fibra",
+    "nota": "Se atornilla por su base (-Z local) por las dos bridas de los extremos. El eje de fibra recorre X, a 4.8 mm de la base (dato 'altura_eje_fibra'). En el layout va TUMBADO: la rotacion [0, 90, 0] lleva el eje de fibra a Z del satelite y la altura del cuerpo a X, que es el eje escaso de la franja. Asi el conector RF sale hacia +-Y, donde sobra sitio."
+   },
+   "conectores": [
+    {
+     "id": "rf",
+     "tipo": "coaxial",
+     "cara": "+Y",
+     "dimensiones": {
+      "valor": [
+       6.1,
+       10.0,
+       6.1
+      ],
+      "unidad": "mm",
+      "estado": "supuesto",
+      "fuente": "Dos de las tres cotas SI son del plano (Exail 03_2026_ED2 / 00025851-B p.9): 6.1 mm de ancho y 10 mm de saliente sobre el cuerpo. La tercera, 6.1 mm, esta inventada: se toma igual al ancho porque el plano no la acota. Es el saliente de 10 mm el que manda, y ese es dato.",
+      "nota": null,
+      "falta": "Profundidad del conector RF, y holgura de insercion del coaxial",
+      "pedir_a": "Exail / Equipo de electronica de ACSAR",
+      "discrepancia": []
+     },
+     "nota": "Este conector es la razon de que el modulador vaya tumbado. Con el cuerpo de pie, sus 10 mm saldrian hacia la franja, que tiene 26.3 mm para los dos moduladores."
+    },
+    {
+     "id": "fibra_entrada",
+     "tipo": "fibra",
+     "cara": "-X",
+     "dimensiones": {
+      "valor": [
+       10.0,
+       3.0,
+       3.0
+      ],
+      "unidad": "mm",
+      "estado": "supuesto",
+      "fuente": "Los 10 mm de saliente salen de restar las dos cotas del plano: (130 con protectores - 110 con bridas) / 2. La seccion de 3 mm esta inventada; es un boot de fibra tipico.",
+      "nota": null,
+      "falta": "Diametro del protector de fibra del encapsulado de grado espacial",
+      "pedir_a": "Exail",
+      "discrepancia": []
+     },
+     "nota": null
+    },
+    {
+     "id": "fibra_salida",
+     "tipo": "fibra",
+     "cara": "+X",
+     "dimensiones": {
+      "valor": [
+       10.0,
+       3.0,
+       3.0
+      ],
+      "unidad": "mm",
+      "estado": "supuesto",
+      "fuente": "Simetrico de 'fibra_entrada'. Mismas cotas y mismo origen.",
+      "nota": null,
+      "falta": "Diametro del protector de fibra del encapsulado de grado espacial",
+      "pedir_a": "Exail",
+      "discrepancia": []
+     },
+     "nota": null
+    }
+   ],
    "centro": [
     91.125,
     0.0,
@@ -1044,25 +1938,25 @@
     "min": [
      86.27499999999999,
      -7.5,
-     -9.299999999999997
+     -19.299999999999997
     ],
     "max": [
      95.97500000000001,
-     7.5,
-     100.7
+     17.5,
+     110.7
     ],
     "centro": [
      91.125,
-     0.0,
+     5.0,
      45.7
     ],
     "dims": [
      9.700000000000017,
-     15.0,
-     110.0
+     25.0,
+     130.0
     ]
    },
-   "volumen_cm3": 16.005000000000027,
+   "volumen_cm3": 31.525000000000055,
    "requiere_vista_exterior": false,
    "nota": null,
    "color": [
@@ -1134,11 +2028,83 @@
    "categoria": "payload_bandeja",
    "subsistema": "bandeja_optica",
    "zona": "z_payload_franja",
+   "id_drive": "OPT-03",
+   "referencia_comercial": "Exail MPZ-LN-10 (grado espacial sin ficha publica)",
    "estado_dato": "referencia",
    "desde_step": false,
    "step": null,
    "step_estado": null,
    "step_nota": null,
+   "step_esperado": null,
+   "forma": "caja",
+   "montaje": {
+    "cara": "-Z",
+    "eje": "X",
+    "tipo_eje": "fibra",
+    "nota": "Identico al MXER-LN-10; va tumbado en la franja por el mismo motivo."
+   },
+   "conectores": [
+    {
+     "id": "rf",
+     "tipo": "coaxial",
+     "cara": "+Y",
+     "dimensiones": {
+      "valor": [
+       6.1,
+       10.0,
+       6.1
+      ],
+      "unidad": "mm",
+      "estado": "supuesto",
+      "fuente": "Dos de las tres cotas SI son del plano (Exail 03_2026_ED3 / 00025631-B p.9, NIR-MPX-LN): 6.1 mm de ancho y 10 mm de saliente sobre el cuerpo. La tercera, 6.1 mm, esta inventada: se toma igual al ancho porque el plano no la acota. Es el saliente de 10 mm el que manda, y ese es dato.",
+      "nota": null,
+      "falta": "Profundidad del conector RF, y holgura de insercion del coaxial",
+      "pedir_a": "Exail / Equipo de electronica de ACSAR",
+      "discrepancia": []
+     },
+     "nota": "Este conector es la razon de que el modulador vaya tumbado. Con el cuerpo de pie, sus 10 mm saldrian hacia la franja, que tiene 26.3 mm para los dos moduladores."
+    },
+    {
+     "id": "fibra_entrada",
+     "tipo": "fibra",
+     "cara": "-X",
+     "dimensiones": {
+      "valor": [
+       10.0,
+       3.0,
+       3.0
+      ],
+      "unidad": "mm",
+      "estado": "supuesto",
+      "fuente": "Los 10 mm de saliente salen de restar las dos cotas del plano: (130 con protectores - 110 con bridas) / 2. La seccion de 3 mm esta inventada; es un boot de fibra tipico.",
+      "nota": null,
+      "falta": "Diametro del protector de fibra del encapsulado de grado espacial",
+      "pedir_a": "Exail",
+      "discrepancia": []
+     },
+     "nota": null
+    },
+    {
+     "id": "fibra_salida",
+     "tipo": "fibra",
+     "cara": "+X",
+     "dimensiones": {
+      "valor": [
+       10.0,
+       3.0,
+       3.0
+      ],
+      "unidad": "mm",
+      "estado": "supuesto",
+      "fuente": "Simetrico de 'fibra_entrada'. Mismas cotas y mismo origen.",
+      "nota": null,
+      "falta": "Diametro del protector de fibra del encapsulado de grado espacial",
+      "pedir_a": "Exail",
+      "discrepancia": []
+     },
+     "nota": null
+    }
+   ],
    "centro": [
     104.275,
     0.0,
@@ -1153,25 +2119,25 @@
     "min": [
      99.425,
      -7.5,
-     -9.299999999999997
+     -19.299999999999997
     ],
     "max": [
      109.12500000000001,
-     7.5,
-     100.7
+     17.5,
+     110.7
     ],
     "centro": [
      104.275,
-     0.0,
+     5.0,
      45.7
     ],
     "dims": [
      9.700000000000017,
-     15.0,
-     110.0
+     25.0,
+     130.0
     ]
    },
-   "volumen_cm3": 16.005000000000027,
+   "volumen_cm3": 31.525000000000055,
    "requiere_vista_exterior": false,
    "nota": "Esquema ICFO de codificacion de polarizacion con un solo modulador de fase.",
    "color": [
@@ -1235,23 +2201,1724 @@
      "discrepancia": []
     }
    }
-  }
- ],
- "sin_geometria": [
+  },
   {
+   "nodo": "bandeja_optica",
+   "componente": "bandeja_optica",
+   "nombre": "Bandeja optica (placa mecanica, no PCB)",
+   "categoria": "payload_bandeja",
+   "subsistema": "bandeja_optica",
+   "zona": "z_payload_bandeja",
+   "id_drive": "OPT-14",
+   "referencia_comercial": null,
+   "estado_dato": "supuesto",
+   "desde_step": false,
+   "step": null,
+   "step_estado": null,
+   "step_nota": null,
+   "step_esperado": null,
+   "forma": "caja",
+   "montaje": {
+    "cara": "-Y",
+    "eje": null,
+    "tipo_eje": null,
+    "nota": "Placa horizontal: se atornilla por su cara -Y al chasis y los componentes de fibra se fijan encima, en +Y. No declara eje de senal: no es un componente optico, es el soporte de todos los demas."
+   },
+   "conectores": [],
+   "centro": [
+    50.0,
+    -46.2,
+    -127.5
+   ],
+   "rotacion": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     -8.850000000000001,
+     -47.7,
+     -178.7
+    ],
+    "max": [
+     108.85,
+     -44.7,
+     -76.29999999999998
+    ],
+    "centro": [
+     50.0,
+     -46.2,
+     -127.49999999999999
+    ],
+    "dims": [
+     117.69999999999999,
+     3.0,
+     102.4
+    ]
+   },
+   "volumen_cm3": 36.157439999999994,
+   "requiere_vista_exterior": false,
+   "nota": "Necesita control termico propio: la extincion garantizada del modulador de intensidad solo cubre 0 a +70 C. Reservar espacio para sensores y calefactores. Los dos moduladores NO van encima: desde el 2026-09-20 van en la franja lateral, junto al telescopio (ver CLAUDE.md 3.6).",
+   "color": [
+    0.6200000002918433,
+    0.6200000002918433,
+    0.6599999923026542
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      117.7,
+      3.0,
+      102.4
+     ],
+     "unidad": "mm",
+     "estado": "supuesto",
+     "fuente": "El CONTORNO si esta derivado: es la zona z_payload_bandeja del layout confirmado (121.7 x 106.4 mm en X y Z) menos 2 mm por lado de holgura de montaje. El ESPESOR de 3 mm esta inventado, y la holgura de 2 mm tambien: no hay ni material elegido ni analisis estructural. Como la magnitud es una sola, el bloque entero va como supuesto, que es lo honesto: dos de las tres cotas dependen de un numero sin respaldo.",
+     "nota": "Al cambiar el reparto (por ejemplo cuando llegue la longitud real del telescopio) esta cota deja de cuadrar con su zona. El chequeo 'bandeja_en_su_zona' lo detecta.",
+     "falta": "Material, espesor y patron de taladros de la placa, del analisis estructural y termico",
+     "pedir_a": "Equipo de estructura de ACSAR",
+     "discrepancia": []
+    },
+    "masa": {
+     "valor": null,
+     "unidad": "g",
+     "estado": "TBD",
+     "fuente": null,
+     "nota": null,
+     "falta": "Masa de la placa, que sale del contorno y el material una vez fijado el layout",
+     "pedir_a": "Este repositorio, tras fijar el layout",
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  },
+  {
+   "nodo": "laser_dfb_1550",
+   "componente": "laser_dfb_1550",
+   "nombre": "Laser DFB 1550 nm, Gooch & Housego (modulo validado para espacio)",
+   "categoria": "payload_bandeja",
+   "subsistema": "bandeja_optica",
+   "zona": "z_payload_bandeja",
+   "id_drive": "OPT-01",
+   "referencia_comercial": "Gooch & Housego, modulo DFB 1550 nm ESCC-23201",
+   "estado_dato": "referencia",
+   "desde_step": false,
+   "step": null,
+   "step_estado": null,
+   "step_nota": null,
+   "step_esperado": null,
+   "forma": "caja",
+   "montaje": {
+    "cara": "-Z",
+    "eje": "X",
+    "tipo_eje": "fibra",
+    "nota": "Butterfly de montaje en superficie: se atornilla por su base (-Z local) a la bandeja, que le hace de disipador. La fibra de salida sale por +X."
+   },
+   "conectores": [
+    {
+     "id": "pines_btf14",
+     "tipo": "electrico",
+     "cara": "+Y",
+     "dimensiones": {
+      "valor": [
+       30.0,
+       15.3,
+       4.0
+      ],
+      "unidad": "mm",
+      "estado": "supuesto",
+      "fuente": "El saliente de 15.3 mm por lado sale de las dos cotas del plano BTF14: (43.3 - 12.7) / 2. Las otras dos, 30 mm de largo y 4 mm de alto, estan INVENTADAS: el plano no acota la fila de pines, solo el envolvente total.",
+      "nota": null,
+      "falta": "Cotas de la fila de pines del modulo elegido",
+      "pedir_a": "Gooch & Housego",
+      "discrepancia": []
+     },
+     "nota": "7 pines por lado. El lado opuesto lleva la fila simetrica."
+    },
+    {
+     "id": "pines_btf14_b",
+     "tipo": "electrico",
+     "cara": "-Y",
+     "dimensiones": {
+      "valor": [
+       30.0,
+       15.3,
+       4.0
+      ],
+      "unidad": "mm",
+      "estado": "supuesto",
+      "fuente": "Simetrico de 'pines_btf14'. Mismas cotas y mismo origen.",
+      "nota": null,
+      "falta": "Cotas de la fila de pines del modulo elegido",
+      "pedir_a": "Gooch & Housego",
+      "discrepancia": []
+     },
+     "nota": null
+    }
+   ],
+   "centro": [
+    50.0,
+    -40.8,
+    -153.05
+   ],
+   "rotacion": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     31.3,
+     -44.699999999999996,
+     -174.70000000000002
+    ],
+    "max": [
+     68.7,
+     -36.9,
+     -131.4
+    ],
+    "centro": [
+     50.0,
+     -40.8,
+     -153.05
+    ],
+    "dims": [
+     37.400000000000006,
+     7.799999999999997,
+     43.30000000000001
+    ]
+   },
+   "volumen_cm3": 12.631476,
+   "requiere_vista_exterior": false,
+   "nota": null,
+   "color": [
+    0.9999999999999999,
+    0.5500000090900438,
+    0.0
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      37.4,
+      12.7,
+      7.8
+     ],
+     "unidad": "mm",
+     "estado": "referencia",
+     "fuente": "https://www.phix.com/wp-content/uploads/2025/10/PHIX-BTF14-Design-Guidelines.pdf",
+     "nota": "Contorno del encapsulado BUTTERFLY DE 14 PINES estandar (seccion \"BTF14 dimensions\": bulk external sin pines 37.4 x 12.7 x 7.8 mm, tolerancia +/-0.2). NO es el plano de Gooch & Housego: es la cota del formato en el que viene el modulo. G&H no publica plano mecanico del ESCC-23201. Sirve para reservar volumen con una cifra real de un encapsulado real; el contorno exacto de ESTE modulo sigue pendiente, y sobre todo falta el DISIPADOR, que con 4.1 W no es opcional y no esta en ninguna de estas cotas.",
+     "falta": "Plano mecanico del modulo G&H ESCC-23201 y, sobre todo, el disipador o la interfaz termica que necesitan sus 4.1 W.",
+     "pedir_a": "Gooch & Housego / Equipo termico de ACSAR",
+     "discrepancia": [
+      {
+       "valor": [
+        37.4,
+        43.3,
+        7.8
+       ],
+       "fuente": "https://www.phix.com/wp-content/uploads/2025/10/PHIX-BTF14-Design-Guidelines.pdf",
+       "nota": "\"Envelope external dimensions (with pins and ports)\". Los pines salen por los dos lados y llevan el ancho de 12.7 a 43.3 mm. Es la cota que manda para el hueco en la bandeja, no para el cuerpo."
+      }
+     ]
+    },
+    "masa": {
+     "valor": null,
+     "unidad": "g",
+     "estado": "TBD",
+     "fuente": null,
+     "nota": null,
+     "falta": "Masa del modulo butterfly con Peltier",
+     "pedir_a": "Gooch & Housego",
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": 4.1,
+     "unidad": "W",
+     "estado": "confirmado",
+     "fuente": "Brief ACSAR 2026-09-19 (cita ficha Gooch & Housego)",
+     "nota": "La ficha indica \"<4.1 W\" electricos, incluido el Peltier. Es el mayor consumo del payload. Se toma la cota como valor nominal.",
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  },
+  {
+   "nodo": "voa",
+   "componente": "voa",
+   "nombre": "Atenuador optico variable (VOA)",
+   "categoria": "payload_bandeja",
+   "subsistema": "bandeja_optica",
+   "zona": "z_payload_bandeja",
+   "id_drive": "OPT-04",
+   "referencia_comercial": null,
+   "estado_dato": "supuesto",
+   "desde_step": false,
+   "step": null,
+   "step_estado": null,
+   "step_nota": null,
+   "step_esperado": null,
+   "forma": "cilindro",
+   "montaje": {
+    "cara": "-Z",
+    "eje": "X",
+    "tipo_eje": "fibra",
+    "nota": "Componente en linea. Se fija con abrazadera a la bandeja."
+   },
+   "conectores": [],
+   "centro": [
+    12.65,
+    -41.95,
+    -120.65
+   ],
+   "rotacion": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     -4.85,
+     -44.7,
+     -123.4
+    ],
+    "max": [
+     30.15,
+     -39.2,
+     -117.9
+    ],
+    "centro": [
+     12.649999999999999,
+     -41.95,
+     -120.65
+    ],
+    "dims": [
+     35.0,
+     5.5,
+     5.5
+    ]
+   },
+   "volumen_cm3": 1.05875,
+   "requiere_vista_exterior": false,
+   "nota": "Lleva el flujo al nivel de fotones por pulso exigido por BB84 con decoy. SIN CANDIDATO: la envolvente que se dibuja es una reserva, no una pieza.",
+   "color": [
+    0.6200000002918433,
+    0.6200000002918433,
+    0.6599999923026542
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      35.0,
+      5.5,
+      5.5
+     ],
+     "unidad": "mm",
+     "estado": "supuesto",
+     "fuente": "SUPUESTO. Encapsulado cilindrico en linea tipico de los componentes pasivos de fibra de telecomunicaciones (del orden de 5.5 mm de diametro por 35-40 mm de cuerpo). NO es ningun producto: no hay candidato elegido, asi que no hay ficha que copiar. Sirve para reservar un volumen del orden correcto en la bandeja y para que el recorrido de fibra tenga extremos donde apoyarse. La cifra real cambiara, y puede cambiar mucho si se elige un encapsulado en caja.",
+     "nota": null,
+     "falta": "Modelo de VOA elegido y su envolvente",
+     "pedir_a": "Equipo de payload de ACSAR",
+     "discrepancia": []
+    },
+    "masa": {
+     "valor": null,
+     "unidad": "g",
+     "estado": "TBD",
+     "fuente": null,
+     "nota": null,
+     "falta": "Masa del VOA elegido",
+     "pedir_a": "Equipo de payload de ACSAR",
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  },
+  {
+   "nodo": "aislador",
+   "componente": "aislador",
+   "nombre": "Aislador optico",
+   "categoria": "payload_bandeja",
+   "subsistema": "bandeja_optica",
+   "zona": "z_payload_bandeja",
+   "id_drive": "OPT-05",
+   "referencia_comercial": null,
+   "estado_dato": "supuesto",
+   "desde_step": false,
+   "step": null,
+   "step_estado": null,
+   "step_nota": null,
+   "step_esperado": null,
+   "forma": "cilindro",
+   "montaje": {
+    "cara": "-Z",
+    "eje": "X",
+    "tipo_eje": "fibra",
+    "nota": "Componente en linea. Tiene sentido de paso; orientar segun la cadena."
+   },
+   "conectores": [],
+   "centro": [
+    87.35,
+    -41.95,
+    -120.65
+   ],
+   "rotacion": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     69.85,
+     -44.7,
+     -123.4
+    ],
+    "max": [
+     104.85,
+     -39.2,
+     -117.9
+    ],
+    "centro": [
+     87.35,
+     -41.95,
+     -120.65
+    ],
+    "dims": [
+     35.0,
+     5.5,
+     5.5
+    ]
+   },
+   "volumen_cm3": 1.05875,
+   "requiere_vista_exterior": false,
+   "nota": "SIN CANDIDATO: la envolvente que se dibuja es una reserva, no una pieza.",
+   "color": [
+    0.6200000002918433,
+    0.6200000002918433,
+    0.6599999923026542
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      35.0,
+      5.5,
+      5.5
+     ],
+     "unidad": "mm",
+     "estado": "supuesto",
+     "fuente": "SUPUESTO. Encapsulado cilindrico en linea tipico de los componentes pasivos de fibra de telecomunicaciones (del orden de 5.5 mm de diametro por 35-40 mm de cuerpo). NO es ningun producto: no hay candidato elegido, asi que no hay ficha que copiar. Sirve para reservar un volumen del orden correcto en la bandeja y para que el recorrido de fibra tenga extremos donde apoyarse. La cifra real cambiara, y puede cambiar mucho si se elige un encapsulado en caja.",
+     "nota": null,
+     "falta": "Modelo de aislador elegido y su envolvente",
+     "pedir_a": "Equipo de payload de ACSAR",
+     "discrepancia": []
+    },
+    "masa": {
+     "valor": null,
+     "unidad": "g",
+     "estado": "TBD",
+     "fuente": null,
+     "nota": null,
+     "falta": "Masa del aislador elegido",
+     "pedir_a": "Equipo de payload de ACSAR",
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  },
+  {
+   "nodo": "filtro_espectral",
+   "componente": "filtro_espectral",
+   "nombre": "Filtro espectral",
+   "categoria": "payload_bandeja",
+   "subsistema": "bandeja_optica",
+   "zona": "z_payload_bandeja",
+   "id_drive": "OPT-06",
+   "referencia_comercial": null,
+   "estado_dato": "supuesto",
+   "desde_step": false,
+   "step": null,
+   "step_estado": null,
+   "step_nota": null,
+   "step_esperado": null,
+   "forma": "cilindro",
+   "montaje": {
+    "cara": "-Z",
+    "eje": "X",
+    "tipo_eje": "fibra",
+    "nota": "Componente en linea."
+   },
+   "conectores": [],
+   "centro": [
+    15.15,
+    -41.95,
+    -99.9
+   ],
+   "rotacion": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     -4.85,
+     -44.7,
+     -102.65
+    ],
+    "max": [
+     35.15,
+     -39.2,
+     -97.15
+    ],
+    "centro": [
+     15.149999999999999,
+     -41.95,
+     -99.9
+    ],
+    "dims": [
+     40.0,
+     5.5,
+     5.5
+    ]
+   },
+   "volumen_cm3": 1.21,
+   "requiere_vista_exterior": false,
+   "nota": "SIN CANDIDATO: la envolvente que se dibuja es una reserva, no una pieza.",
+   "color": [
+    0.6200000002918433,
+    0.6200000002918433,
+    0.6599999923026542
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      40.0,
+      5.5,
+      5.5
+     ],
+     "unidad": "mm",
+     "estado": "supuesto",
+     "fuente": "SUPUESTO. Encapsulado cilindrico en linea tipico de los componentes pasivos de fibra de telecomunicaciones (del orden de 5.5 mm de diametro por 35-40 mm de cuerpo). NO es ningun producto: no hay candidato elegido, asi que no hay ficha que copiar. Sirve para reservar un volumen del orden correcto en la bandeja y para que el recorrido de fibra tenga extremos donde apoyarse. La cifra real cambiara, y puede cambiar mucho si se elige un encapsulado en caja.",
+     "nota": null,
+     "falta": "Modelo de filtro elegido, su ancho de banda y su envolvente",
+     "pedir_a": "Equipo de payload de ACSAR",
+     "discrepancia": []
+    },
+    "masa": {
+     "valor": null,
+     "unidad": "g",
+     "estado": "TBD",
+     "fuente": null,
+     "nota": null,
+     "falta": "Masa del filtro elegido",
+     "pedir_a": "Equipo de payload de ACSAR",
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  },
+  {
+   "nodo": "acoplador_monitor",
+   "componente": "acoplador_monitor",
+   "nombre": "Acoplador de monitorizacion + fotodiodo tap",
+   "categoria": "payload_bandeja",
+   "subsistema": "bandeja_optica",
+   "zona": "z_payload_bandeja",
+   "id_drive": "OPT-07",
+   "referencia_comercial": null,
+   "estado_dato": "supuesto",
+   "desde_step": false,
+   "step": null,
+   "step_estado": null,
+   "step_nota": null,
+   "step_esperado": null,
+   "forma": "caja",
+   "montaje": {
+    "cara": "-Z",
+    "eje": "X",
+    "tipo_eje": "fibra",
+    "nota": "Son DOS cosas en una envolvente: el acoplador (un tubo de empalme en linea) y el fotodiodo con su encapsulado. Se modelan juntas porque van juntas; al elegir modelo habra que separarlas."
+   },
+   "conectores": [],
+   "centro": [
+    74.85,
+    -38.7,
+    -99.9
+   ],
+   "rotacion": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     44.849999999999994,
+     -44.7,
+     -109.9
+    ],
+    "max": [
+     104.85,
+     -32.7,
+     -89.9
+    ],
+    "centro": [
+     74.85,
+     -38.7,
+     -99.9
+    ],
+    "dims": [
+     60.0,
+     12.0,
+     20.0
+    ]
+   },
+   "volumen_cm3": 14.4,
+   "requiere_vista_exterior": false,
+   "nota": "SIN CANDIDATO: la envolvente que se dibuja es una reserva, no una pieza.",
+   "color": [
+    0.6200000002918433,
+    0.6200000002918433,
+    0.6599999923026542
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      60.0,
+      20.0,
+      12.0
+     ],
+     "unidad": "mm",
+     "estado": "supuesto",
+     "fuente": "SUPUESTO. Reserva para un acoplador de derivacion en linea (tubo de unos 60 mm) mas el encapsulado de un fotodiodo InGaAs con su transimpedancia. NO es ningun producto: no hay candidato elegido. Es la pieza de la bandeja con el supuesto mas flojo de todos, porque la geometria depende por completo de si el fotodiodo va en la bandeja o en PCB-2.",
+     "nota": null,
+     "falta": "Modelo de acoplador y de fotodiodo, y si el fotodiodo va en la bandeja o montado en PCB-2",
+     "pedir_a": "Equipo de payload de ACSAR",
+     "discrepancia": []
+    },
+    "masa": {
+     "valor": null,
+     "unidad": "g",
+     "estado": "TBD",
+     "fuente": null,
+     "nota": null,
+     "falta": "Masa del acoplador y el fotodiodo",
+     "pedir_a": "Equipo de payload de ACSAR",
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  },
+  {
+   "nodo": "fsm",
+   "componente": "fsm",
+   "nombre": "Espejo de apuntado fino (FSM) - opcion MEMS",
+   "categoria": "payload_optico",
+   "subsistema": "terminal_optico",
+   "zona": "z_payload_banco",
+   "id_drive": "OPT-10",
+   "referencia_comercial": "Mirrorcle Technologies, MEMS de dos ejes en encapsulado DIP24",
+   "estado_dato": "referencia",
+   "desde_step": false,
+   "step": null,
+   "step_estado": null,
+   "step_nota": null,
+   "step_esperado": null,
+   "forma": "caja",
+   "montaje": {
+    "cara": "-Z",
+    "eje": "Z",
+    "tipo_eje": "optico",
+    "nota": "El espejo mira por +Z local. En el banco va girado para doblar el haz que llega segun X hacia el telescopio, que apunta segun +Z."
+   },
+   "conectores": [],
+   "centro": [
+    36.85,
+    0.0,
+    -46.8
+   ],
+   "rotacion": [
+    0.0,
+    45.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     25.30294626322368,
+     -7.55,
+     -58.34705373677632
+    ],
+    "max": [
+     48.39705373677633,
+     7.55,
+     -35.25294626322368
+    ],
+    "centro": [
+     36.85000000000001,
+     0.0,
+     -46.8
+    ],
+    "dims": [
+     23.094107473552647,
+     15.1,
+     23.09410747355264
+    ]
+   },
+   "volumen_cm3": 8.05340078,
+   "requiere_vista_exterior": false,
+   "nota": "Se modela la opcion MEMS porque es la que tiene cotas publicadas claras, no porque este elegida. La opcion piezo esta a su lado como 'fsm_piezo_pi_s331', con las cifras que SI publica PI.",
+   "color": [
+    0.9999999999999999,
+    0.5500000090900438,
+    0.0
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      30.5,
+      15.1,
+      2.16
+     ],
+     "unidad": "mm",
+     "estado": "referencia",
+     "fuente": "https://mirrorcletech.com/pdf/Mirrorcle_MEMS_Packages_and_Mounts_Guide.pdf",
+     "nota": "Encapsulado DIP24 ceramico de Mirrorcle: \"Ceramic Dimensions: 30.5 mm x 15.1 mm, Ceramic Thickness: 2.16 mm\". Es una cota publicada de un encapsulado real de la familia candidata, no del producto elegido, y NO INCLUYE EL SOPORTE, que es lo que de verdad ocupa: el mount de Mirrorcle para banco optico es una PCB de 66.04 x 25.40 mm con un zocalo ZIF de ~12.5 mm de alto. Un montaje a medida para vuelo sera otra cosa, pero no menos que el encapsulado.",
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": [
+      {
+       "valor": [
+        66.04,
+        25.4,
+        14.07
+       ],
+       "fuente": "https://mirrorcletech.com/pdf/Mirrorcle_MEMS_Packages_and_Mounts_Guide.pdf",
+       "nota": "MOUNT-DIP.5-KMS: \"PCB Dimensions: 66.04mm x 25.40mm x 1.57mm, ZIF Socket Height: ~12.5mm\". Es el soporte de laboratorio, no de vuelo, pero da el orden de magnitud de lo que hay que reservar de verdad alrededor del encapsulado."
+      }
+     ]
+    },
+    "masa": {
+     "valor": null,
+     "unidad": "g",
+     "estado": "TBD",
+     "fuente": null,
+     "nota": null,
+     "falta": "Masa del MEMS con su soporte de vuelo",
+     "pedir_a": "Mirrorcle Technologies / Equipo de optica de ACSAR",
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  },
+  {
+   "nodo": "dicroico",
+   "componente": "dicroico",
+   "nombre": "Espejo dicroico (separacion beacon / canal cuantico)",
+   "categoria": "payload_optico",
+   "subsistema": "terminal_optico",
+   "zona": "z_payload_banco",
+   "id_drive": "OPT-09",
+   "referencia_comercial": null,
+   "estado_dato": "supuesto",
+   "desde_step": false,
+   "step": null,
+   "step_estado": null,
+   "step_nota": null,
+   "step_esperado": null,
+   "forma": "caja",
+   "montaje": {
+    "cara": "-Y",
+    "eje": "X",
+    "tipo_eje": "optico",
+    "nota": "El sustrato va a 45 grados dentro del soporte; lo que se declara aqui es el soporte, que es lo que ocupa. El eje X es el del canal cuantico, que lo ATRAVIESA; el beacon se refleja hacia +-Y."
+   },
+   "conectores": [],
+   "centro": [
+    64.897,
+    0.0,
+    -46.8
+   ],
+   "rotacion": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     53.397000000000006,
+     -11.5,
+     -58.3
+    ],
+    "max": [
+     76.397,
+     11.5,
+     -35.3
+    ],
+    "centro": [
+     64.897,
+     0.0,
+     -46.8
+    ],
+    "dims": [
+     23.0,
+     23.0,
+     23.0
+    ]
+   },
+   "volumen_cm3": 12.167,
+   "requiere_vista_exterior": false,
+   "nota": "El canal cuantico lo atraviesa; el beacon de subida se refleja hacia la camara. SIN CANDIDATO: lo que se dibuja es una reserva, no una pieza.",
+   "color": [
+    0.6200000002918433,
+    0.6200000002918433,
+    0.6599999923026542
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      23.0,
+      23.0,
+      23.0
+     ],
+     "unidad": "mm",
+     "estado": "supuesto",
+     "fuente": "SUPUESTO. Reserva cubica para el SOPORTE del dicroico, con el sustrato a 45 grados por dentro. La envolvente va alineada con los ejes porque lo que ocupa es la celda, no el sustrato. Un lado de 23 mm admite un sustrato de unos 12-15 mm a 45 grados, que para un haz colimado de pocos milimetros sobra; si el haz sale mas gordo, el soporte crece. NO es ningun producto: no hay candidato elegido. ACOTADA POR ARRIBA POR EL BANCO, ademas: el FSM tiene que estar sobre el eje optico del telescopio, y entre ese eje y la pared +X de la columna de payload quedan unos 56 mm para el colimador y el dicroico juntos, gaps incluidos. Si las piezas reales son mayores no es que el modelo este mal: es que el banco no da, y habra que alargarlo a costa de la bandeja o de la longitud reservada al telescopio. El chequeo 'banco_optico' recalcula ese margen desde el catalogo.",
+     "nota": null,
+     "falta": "Diametro del haz colimado (del que sale el tamano del sustrato), longitudes de onda de corte y envolvente del soporte",
+     "pedir_a": "Equipo de optica de ACSAR",
+     "discrepancia": []
+    },
+    "masa": {
+     "valor": null,
+     "unidad": "g",
+     "estado": "TBD",
+     "fuente": null,
+     "nota": null,
+     "falta": "Masa del dicroico y su soporte",
+     "pedir_a": "Equipo de optica de ACSAR",
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  },
+  {
+   "nodo": "colimador",
+   "componente": "colimador",
+   "nombre": "Colimador fibra a espacio libre",
+   "categoria": "payload_optico",
+   "subsistema": "terminal_optico",
+   "zona": "z_payload_banco",
+   "id_drive": "OPT-08",
+   "referencia_comercial": null,
+   "estado_dato": "supuesto",
+   "desde_step": false,
+   "step": null,
+   "step_estado": null,
+   "step_nota": null,
+   "step_esperado": null,
+   "forma": "cilindro",
+   "montaje": {
+    "cara": "-Y",
+    "eje": "X",
+    "tipo_eje": "optico",
+    "nota": "Es la frontera: le entra fibra por -X y le sale haz libre por +X. Se fija con abrazadera en V al banco."
+   },
+   "conectores": [],
+   "centro": [
+    95.397,
+    0.0,
+    -46.8
+   ],
+   "rotacion": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     81.397,
+     -6.0,
+     -52.8
+    ],
+    "max": [
+     109.397,
+     6.0,
+     -40.8
+    ],
+    "centro": [
+     95.397,
+     0.0,
+     -46.8
+    ],
+    "dims": [
+     28.0,
+     12.0,
+     12.0
+    ]
+   },
+   "volumen_cm3": 4.032,
+   "requiere_vista_exterior": false,
+   "nota": "Frontera entre la cadena de fibra y el camino en espacio libre. SIN CANDIDATO: lo que se dibuja es una reserva.",
+   "color": [
+    0.6200000002918433,
+    0.6200000002918433,
+    0.6599999923026542
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      28.0,
+      12.0,
+      12.0
+     ],
+     "unidad": "mm",
+     "estado": "supuesto",
+     "fuente": "SUPUESTO. Reserva para un colimador de fibra de banco: barrilete cilindrico de unos 12 mm de diametro. NO es ningun producto. El diametro del barrilete lo fija el del haz colimado, que es TBD, asi que esta cifra se movera con el. ACOTADA POR ARRIBA POR EL BANCO, ademas: el FSM tiene que estar sobre el eje optico del telescopio, y entre ese eje y la pared +X de la columna de payload quedan unos 56 mm para el colimador y el dicroico juntos, gaps incluidos. Si las piezas reales son mayores no es que el modelo este mal: es que el banco no da, y habra que alargarlo a costa de la bandeja o de la longitud reservada al telescopio. El chequeo 'banco_optico' recalcula ese margen desde el catalogo.",
+     "nota": null,
+     "falta": "Diametro del haz colimado y modelo de colimador. Es el mismo dato que bloquea los keep-outs del camino optico.",
+     "pedir_a": "Equipo de optica de ACSAR",
+     "discrepancia": []
+    },
+    "masa": {
+     "valor": null,
+     "unidad": "g",
+     "estado": "TBD",
+     "fuente": null,
+     "nota": null,
+     "falta": "Masa del colimador elegido",
+     "pedir_a": "Equipo de optica de ACSAR",
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  },
+  {
+   "nodo": "camara_beacon",
+   "componente": "camara_beacon",
+   "nombre": "Camara / sensor de beacon (medida del error de apuntado)",
+   "categoria": "payload_optico",
+   "subsistema": "terminal_optico",
+   "zona": "z_payload_banco",
+   "id_drive": "OPT-11",
+   "referencia_comercial": null,
+   "estado_dato": "supuesto",
+   "desde_step": false,
+   "step": null,
+   "step_estado": null,
+   "step_nota": null,
+   "step_esperado": null,
+   "forma": "caja",
+   "montaje": {
+    "cara": "-Y",
+    "eje": "Y",
+    "tipo_eje": "optico",
+    "nota": "Mira hacia el dicroico por -Y, que es de donde le llega el beacon reflejado. Se atornilla por su cara trasera al soporte del banco."
+   },
+   "conectores": [],
+   "centro": [
+    64.897,
+    31.5,
+    -46.8
+   ],
+   "rotacion": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     49.897000000000006,
+     16.5,
+     -61.8
+    ],
+    "max": [
+     79.897,
+     46.5,
+     -31.799999999999997
+    ],
+    "centro": [
+     64.897,
+     31.5,
+     -46.8
+    ],
+    "dims": [
+     30.0,
+     30.0,
+     30.0
+    ]
+   },
+   "volumen_cm3": 27.0,
+   "requiere_vista_exterior": false,
+   "nota": "SIN CANDIDATO: lo que se dibuja es una reserva, no una pieza.",
+   "color": [
+    0.6200000002918433,
+    0.6200000002918433,
+    0.6599999923026542
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      30.0,
+      30.0,
+      30.0
+     ],
+     "unidad": "mm",
+     "estado": "supuesto",
+     "fuente": "SUPUESTO. Reserva para una camara de placa unica con su objetivo: un cubo de 30 mm es el orden de magnitud de un sensor pequeno mas la optica de imagen. NO es ningun producto: no hay sensor elegido. El volumen real depende sobre todo de la distancia focal que pida el campo de vision del PAT, que esta sin definir.",
+     "nota": null,
+     "falta": "Modelo de sensor, distancia focal del objetivo y campo de vision exigido por el lazo de apuntado",
+     "pedir_a": "Equipo de PAT de ACSAR",
+     "discrepancia": []
+    },
+    "masa": {
+     "valor": null,
+     "unidad": "g",
+     "estado": "TBD",
+     "fuente": null,
+     "nota": null,
+     "falta": "Masa del sensor elegido",
+     "pedir_a": "Equipo de PAT de ACSAR",
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  },
+  {
+   "nodo": "laser_beacon_bajada",
+   "componente": "laser_beacon_bajada",
+   "nombre": "Laser de beacon de bajada",
+   "categoria": "payload_optico",
+   "subsistema": "terminal_optico",
+   "zona": "z_payload_banco",
+   "id_drive": "OPT-12",
+   "referencia_comercial": null,
+   "estado_dato": "supuesto",
+   "desde_step": false,
+   "step": null,
+   "step_estado": null,
+   "step_nota": null,
+   "step_esperado": null,
+   "forma": "caja",
+   "montaje": {
+    "cara": "-Y",
+    "eje": "Y",
+    "tipo_eje": "optico",
+    "nota": "Emite hacia +Y, contra el dicroico, por el lado opuesto a la camara."
+   },
+   "conectores": [],
+   "centro": [
+    64.897,
+    -31.5,
+    -46.8
+   ],
+   "rotacion": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     52.397000000000006,
+     -46.5,
+     -59.3
+    ],
+    "max": [
+     77.397,
+     -16.5,
+     -34.3
+    ],
+    "centro": [
+     64.897,
+     -31.5,
+     -46.8
+    ],
+    "dims": [
+     25.0,
+     30.0,
+     25.0
+    ]
+   },
+   "volumen_cm3": 18.75,
+   "requiere_vista_exterior": false,
+   "nota": "Longitud de onda distinta de 1550 nm para que la estacion siga al satelite. SIN CANDIDATO: lo que se dibuja es una reserva.",
+   "color": [
+    0.6200000002918433,
+    0.6200000002918433,
+    0.6599999923026542
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      25.0,
+      30.0,
+      25.0
+     ],
+     "unidad": "mm",
+     "estado": "supuesto",
+     "fuente": "SUPUESTO. Reserva para un diodo laser con su optica de colimacion y su disipador. NO es ningun producto: ni la longitud de onda ni la potencia estan decididas, y las dos cambian la envolvente (la potencia, por el disipador).",
+     "nota": null,
+     "falta": "Longitud de onda, potencia optica y envolvente del modulo elegido",
+     "pedir_a": "Equipo de PAT de ACSAR",
+     "discrepancia": []
+    },
+    "masa": {
+     "valor": null,
+     "unidad": "g",
+     "estado": "TBD",
+     "fuente": null,
+     "nota": null,
+     "falta": "Masa del laser de beacon elegido",
+     "pedir_a": "Equipo de PAT de ACSAR",
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  },
+  {
+   "nodo": "telescopio_cassegrain",
+   "componente": "telescopio_cassegrain",
+   "nombre": "Telescopio Cassegrain on-axis, apertura 90 mm",
+   "categoria": "payload_optico",
+   "subsistema": "terminal_optico",
+   "zona": "z_payload_telescopio",
+   "id_drive": "OPT-13",
+   "referencia_comercial": "Aperture Optical Sciences, Cassegrain a medida, apertura 90 mm",
+   "estado_dato": "supuesto",
+   "desde_step": false,
+   "step": null,
+   "step_estado": null,
+   "step_nota": null,
+   "step_esperado": {
+    "ruta": "cad/vendor/aperture_optical_sciences/telescopio_cassegrain.step",
+    "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences",
+    "fuente_prevista": "Telescopio Cassegrain de Aperture Optical Sciences, via Oscar (ACSAR). Existe ya un concepto en Telescopio_concepto.SLDPRT (entrega \"Preliminar viability model\" del 2026-09-20), que hay que reexportar a STEP AP214 o AP242 porque el formato nativo de SolidWorks no hay manera de leerlo."
+   },
+   "forma": "cilindro",
+   "montaje": {
+    "cara": "-Z",
+    "eje": "Z",
+    "tipo_eje": "optico",
+    "nota": "Eje optico segun Z, apuntando a +Z. Se monta por su brida trasera (-Z local), que es por donde le entra el haz desde el FSM."
+   },
+   "conectores": [],
+   "centro": [
+    36.85,
+    0.0,
+    80.7
+   ],
+   "rotacion": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     -10.850000000000001,
+     -47.7,
+     -19.299999999999997
+    ],
+    "max": [
+     84.55000000000001,
+     47.7,
+     180.7
+    ],
+    "centro": [
+     36.85000000000001,
+     0.0,
+     80.69999999999999
+    ],
+    "dims": [
+     95.4,
+     95.4,
+     200.0
+    ]
+   },
+   "volumen_cm3": 1820.2320000000002,
+   "requiere_vista_exterior": true,
+   "nota": null,
+   "color": [
+    0.6200000002918433,
+    0.6200000002918433,
+    0.6599999923026542
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      95.4,
+      95.4,
+      200.0
+     ],
+     "unidad": "mm",
+     "estado": "supuesto",
+     "fuente": "COTA SUPERIOR, no una medida. El diametro es la altura interior del 6U (95.4 mm): el barrilete no puede pasar de ahi, luego este es el telescopio MAS GRANDE que cabe, no el que hay. La longitud es la ya reservada en el layout ('longitud_reservada', 200 mm, provisional). Dibujarlo asi hace visible lo que dice el chequeo 'apertura_vs_altura': con 90 mm de apertura libre quedan 2.7 mm por lado para barrilete, celda y ajuste, que no da para nada. Si el diametro real bajase, la columna de payload se abriria; si no cabe, el telescopio tendra que ser el propio elemento estructural de esa cara.",
+     "nota": "El brief indica \"aprox. 2U\" y apertura libre 90 mm, pero 2U no fija el contorno. El diametro exterior es el numero critico: ver el chequeo 'apertura_vs_altura' en el analisis. OJO con el \"2U\": la U de longitud de la CDS son 113.5 mm, no 100, asi que \"2U\" son ~227 mm. La longitud real saldra del STEP del telescopio (Oscar), no de esta cifra.",
+     "falta": "Diametro exterior del barrilete y longitud optica real. YA EXISTE un concepto en formato nativo SolidWorks (Telescopio_concepto.SLDPRT, entrega \"Preliminar viability model\" del 2026-09-20), ilegible. Hace falta reexportarlo a STEP AP214 o AP242 y dejarlo en la ruta de 'step_esperado'. Ver cad/vendor/MANIFEST.yaml, seccion 'sin_convertir'.",
+     "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences",
+     "discrepancia": []
+    },
+    "masa": {
+     "valor": null,
+     "unidad": "g",
+     "estado": "TBD",
+     "fuente": null,
+     "nota": null,
+     "falta": "Masa",
+     "pedir_a": "Aperture Optical Sciences",
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  },
+  {
+   "nodo": "antena_quasar_wsant",
    "componente": "antena_quasar_wsant",
    "nombre": "AAC Clyde Space Quasar-WSANT (antena banda S)",
    "categoria": "plataforma",
    "subsistema": "comunicaciones",
-   "falta": "Dimensiones y cara de montaje de la antena",
-   "pedir_a": "AAC Clyde Space",
+   "zona": "z_plataforma",
+   "id_drive": "PLAT-03",
+   "referencia_comercial": "AAC Clyde Space Quasar-WSANT",
+   "estado_dato": "supuesto",
+   "desde_step": false,
+   "step": null,
+   "step_estado": null,
+   "step_nota": null,
+   "step_esperado": null,
+   "forma": "caja",
+   "montaje": {
+    "cara": "+Z",
+    "eje": null,
+    "tipo_eje": null,
+    "nota": "Parche: radia por la cara opuesta a la de montaje. Se atornilla por +Z local y radia hacia -Z local, o sea hacia fuera del satelite por la cara -Z."
+   },
+   "conectores": [],
+   "centro": [
+    -60.85,
+    0.0,
+    -175.7
+   ],
+   "rotacion": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     -101.85,
+     -41.0,
+     -180.7
+    ],
+    "max": [
+     -19.849999999999994,
+     41.0,
+     -170.7
+    ],
+    "centro": [
+     -60.849999999999994,
+     0.0,
+     -175.7
+    ],
+    "dims": [
+     82.0,
+     82.0,
+     10.0
+    ]
+   },
+   "volumen_cm3": 67.24,
+   "requiere_vista_exterior": true,
+   "nota": "COLOCADA EN -Z, Y ESO TIENE UN COSTE QUE HAY QUE DECIDIR. Es el unico sitio con hueco: el extremo -Z de la columna de plataforma esta libre desde el final de las baterias. Pero -Z es la cara que entra primero en el dispensador y, sobre todo, apunta al lado CONTRARIO que el telescopio. Con el satelite apuntando +Z a la estacion optica durante un pase de QKD, esta antena mira al cenit. El canal clasico de post-procesado no tiene por que ser simultaneo al pase optico, asi que puede no ser un problema; pero es una decision de operaciones, no de mecanica, y esta sin tomar.",
+   "color": [
+    0.6200000002918433,
+    0.6200000002918433,
+    0.6599999923026542
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      82.0,
+      82.0,
+      10.0
+     ],
+     "unidad": "mm",
+     "estado": "supuesto",
+     "fuente": "SUPUESTO. AAC no publica las cotas del Quasar-WSANT. 82 x 82 x 10 mm es el orden de magnitud de una antena de parche de banda S para cubesat, que a 2.2 GHz necesita del orden de 80 mm de lado con sustrato ceramico. NO es la ficha de este producto.",
+     "nota": "Los 10 mm de espesor PASAN de los 6.5 mm de protrusion que permite la CDS 14.1 req 2.2.3, asi que esta antena NO puede ir pegada por fuera: va por dentro, contra la pared -Z, radiando a traves de ella. Eso es una consecuencia de un numero supuesto; si el espesor real fuera menor de 6.5 mm, podria ir por fuera y liberar volumen interior.",
+     "falta": "Dimensiones reales, ganancia, diagrama de radiacion y cara de montaje",
+     "pedir_a": "AAC Clyde Space",
+     "discrepancia": []
+    },
+    "masa": {
+     "valor": null,
+     "unidad": "g",
+     "estado": "TBD",
+     "fuente": null,
+     "nota": null,
+     "falta": "Masa",
+     "pedir_a": "AAC Clyde Space",
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  },
+  {
+   "nodo": "paneles_photon_side",
+   "componente": "paneles_photon_side",
+   "nombre": "AAC Clyde Space PHOTON-SIDE (paneles de montaje en cuerpo)",
+   "categoria": "plataforma",
+   "subsistema": "EPS",
+   "zona": "exterior",
+   "id_drive": "PLAT-07",
+   "referencia_comercial": "AAC Clyde Space PHOTON-SIDE",
+   "estado_dato": "supuesto",
+   "desde_step": false,
+   "step": null,
+   "step_estado": null,
+   "step_nota": null,
+   "step_esperado": null,
+   "forma": "caja",
+   "montaje": {
+    "cara": "-Y",
+    "eje": null,
+    "tipo_eje": null,
+    "nota": "Panel plano. Se pega por su cara interior a la pared del chasis."
+   },
+   "conectores": [],
+   "centro": [
+    0.0,
+    51.75,
+    0.0
+   ],
+   "rotacion": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     -104.65,
+     50.0,
+     -174.5
+    ],
+    "max": [
+     104.65,
+     53.5,
+     174.5
+    ],
+    "centro": [
+     0.0,
+     51.75,
+     0.0
+    ],
+    "dims": [
+     209.3,
+     3.5,
+     349.0
+    ]
+   },
+   "volumen_cm3": 255.65995,
+   "requiere_vista_exterior": false,
    "nota": null,
    "color": [
-    0.9999999999999999,
-    0.0,
-    0.8000000108774858
-   ]
+    0.6200000002918433,
+    0.6200000002918433,
+    0.6599999923026542
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      209.3,
+      3.5,
+      349.0
+     ],
+     "unidad": "mm",
+     "estado": "supuesto",
+     "fuente": "El ESPESOR, 3.5 mm, es dato de ficha (altura plegada; ver 'altura_plegada' abajo) y cabe de sobra en los 6.5 mm de protrusion que permite la CDS 14.1 req 2.2.3. El CONTORNO esta derivado, no copiado: es la cara +-Y del 6U (226.3 x 366 mm) menos el ancho de rail confirmado (8.5 mm, req 2.2.5) por cada borde. AAC no publica el contorno de cada tamano de PHOTON, asi que el bloque entero va como supuesto.",
+     "nota": null,
+     "falta": "Contorno real de cada tamano de PHOTON-SIDE (1U/2U/3U/6U) y cual de ellos se monta en cada cara",
+     "pedir_a": "AAC Clyde Space / Equipo de potencia de ACSAR",
+     "discrepancia": []
+    },
+    "masa": {
+     "valor": null,
+     "unidad": "g",
+     "estado": "TBD",
+     "fuente": null,
+     "nota": null,
+     "falta": "Masa total segun el numero de caras pobladas (la ficha da 135 g por cara de 3U)",
+     "pedir_a": "Equipo de potencia de ACSAR",
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
   },
+  {
+   "nodo": "paneles_photon_side_2",
+   "componente": "paneles_photon_side",
+   "nombre": "AAC Clyde Space PHOTON-SIDE (paneles de montaje en cuerpo)",
+   "categoria": "plataforma",
+   "subsistema": "EPS",
+   "zona": "exterior",
+   "id_drive": "PLAT-07",
+   "referencia_comercial": "AAC Clyde Space PHOTON-SIDE",
+   "estado_dato": "supuesto",
+   "desde_step": false,
+   "step": null,
+   "step_estado": null,
+   "step_nota": null,
+   "step_esperado": null,
+   "forma": "caja",
+   "montaje": {
+    "cara": "-Y",
+    "eje": null,
+    "tipo_eje": null,
+    "nota": "Panel plano. Se pega por su cara interior a la pared del chasis."
+   },
+   "conectores": [],
+   "centro": [
+    0.0,
+    -51.75,
+    0.0
+   ],
+   "rotacion": [
+    180.0,
+    0.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     -104.65,
+     -53.50000000000002,
+     -174.5
+    ],
+    "max": [
+     104.65,
+     -49.99999999999998,
+     174.5
+    ],
+    "centro": [
+     0.0,
+     -51.75,
+     0.0
+    ],
+    "dims": [
+     209.3,
+     3.5000000000000426,
+     349.0
+    ]
+   },
+   "volumen_cm3": 255.65995000000314,
+   "requiere_vista_exterior": false,
+   "nota": null,
+   "color": [
+    0.6200000002918433,
+    0.6200000002918433,
+    0.6599999923026542
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      209.3,
+      3.5,
+      349.0
+     ],
+     "unidad": "mm",
+     "estado": "supuesto",
+     "fuente": "El ESPESOR, 3.5 mm, es dato de ficha (altura plegada; ver 'altura_plegada' abajo) y cabe de sobra en los 6.5 mm de protrusion que permite la CDS 14.1 req 2.2.3. El CONTORNO esta derivado, no copiado: es la cara +-Y del 6U (226.3 x 366 mm) menos el ancho de rail confirmado (8.5 mm, req 2.2.5) por cada borde. AAC no publica el contorno de cada tamano de PHOTON, asi que el bloque entero va como supuesto.",
+     "nota": null,
+     "falta": "Contorno real de cada tamano de PHOTON-SIDE (1U/2U/3U/6U) y cual de ellos se monta en cada cara",
+     "pedir_a": "AAC Clyde Space / Equipo de potencia de ACSAR",
+     "discrepancia": []
+    },
+    "masa": {
+     "valor": null,
+     "unidad": "g",
+     "estado": "TBD",
+     "fuente": null,
+     "nota": null,
+     "falta": "Masa total segun el numero de caras pobladas (la ficha da 135 g por cara de 3U)",
+     "pedir_a": "Equipo de potencia de ACSAR",
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  }
+ ],
+ "sin_geometria": [
   {
    "componente": "radio_uhf_pulsar_vutrx",
    "nombre": "AAC Clyde Space Pulsar-VUTRX (UHF, TT&C de respaldo)",
@@ -1260,20 +3927,6 @@
    "falta": "Dimensiones",
    "pedir_a": "AAC Clyde Space",
    "nota": "Opcional. Solo se integra si queda volumen tras cerrar el payload.",
-   "color": [
-    0.9999999999999999,
-    0.0,
-    0.8000000108774858
-   ]
-  },
-  {
-   "componente": "paneles_photon_side",
-   "nombre": "AAC Clyde Space PHOTON-SIDE (paneles de montaje en cuerpo)",
-   "categoria": "plataforma",
-   "subsistema": "EPS",
-   "falta": "Dimensiones de cada panel segun la cara elegida (1U/2U/3U/6U)",
-   "pedir_a": "AAC Clyde Space",
-   "nota": null,
    "color": [
     0.9999999999999999,
     0.0,
@@ -1295,209 +3948,13 @@
    ]
   },
   {
-   "componente": "telescopio_cassegrain",
-   "nombre": "Telescopio Cassegrain on-axis, apertura 90 mm",
-   "categoria": "payload_optico",
-   "subsistema": "terminal_optico",
-   "falta": "Diametro exterior del barrilete y longitud optica del tubo. YA EXISTE un concepto en formato nativo SolidWorks (Telescopio_concepto.SLDPRT, entrega 'Preliminar viability model' del 2026-09-20), ilegible. Hace falta reexportarlo a STEP AP214 o AP242. Ver cad/vendor/MANIFEST.yaml, seccion 'sin_convertir'.",
-   "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences",
-   "nota": null,
-   "color": [
-    0.9999999999999999,
-    0.0,
-    0.8000000108774858
-   ]
-  },
-  {
-   "componente": "fsm",
-   "nombre": "Espejo de apuntado fino (FSM)",
-   "categoria": "payload_optico",
-   "subsistema": "terminal_optico",
-   "falta": "Eleccion entre MEMS (Mirrorcle, herencia CLICK-A, espejo 5 mm) y piezo PI S-331, y su envolvente",
-   "pedir_a": "Equipo de optica de ACSAR",
-   "nota": null,
-   "color": [
-    0.9999999999999999,
-    0.0,
-    0.8000000108774858
-   ]
-  },
-  {
-   "componente": "dicroico",
-   "nombre": "Espejo dicroico (separacion beacon / canal cuantico)",
-   "categoria": "payload_optico",
-   "subsistema": "terminal_optico",
-   "falta": "Dimensiones del sustrato y del soporte",
-   "pedir_a": "Equipo de optica de ACSAR",
-   "nota": "El canal cuantico lo atraviesa; el beacon de subida se refleja hacia la camara.",
-   "color": [
-    0.9999999999999999,
-    0.0,
-    0.8000000108774858
-   ]
-  },
-  {
-   "componente": "camara_beacon",
-   "nombre": "Camara / sensor de beacon (medida del error de apuntado)",
-   "categoria": "payload_optico",
-   "subsistema": "terminal_optico",
-   "falta": "Modelo de sensor y su envolvente",
-   "pedir_a": "Equipo de PAT de ACSAR",
-   "nota": null,
-   "color": [
-    0.9999999999999999,
-    0.0,
-    0.8000000108774858
-   ]
-  },
-  {
-   "componente": "laser_beacon_bajada",
-   "nombre": "Laser de beacon de bajada",
-   "categoria": "payload_optico",
-   "subsistema": "terminal_optico",
-   "falta": "Longitud de onda, potencia y envolvente",
-   "pedir_a": "Equipo de PAT de ACSAR",
-   "nota": "Longitud de onda distinta de 1550 nm para que la estacion siga al satelite.",
-   "color": [
-    0.9999999999999999,
-    0.0,
-    0.8000000108774858
-   ]
-  },
-  {
-   "componente": "colimador",
-   "nombre": "Colimador fibra a espacio libre",
-   "categoria": "payload_optico",
-   "subsistema": "terminal_optico",
-   "falta": "Modelo y envolvente (diametro de haz colimado, longitud)",
-   "pedir_a": "Equipo de optica de ACSAR",
-   "nota": "Frontera entre la cadena de fibra y el camino en espacio libre.",
-   "color": [
-    0.9999999999999999,
-    0.0,
-    0.8000000108774858
-   ]
-  },
-  {
-   "componente": "bandeja_optica",
-   "nombre": "Bandeja optica (placa mecanica, no PCB)",
-   "categoria": "payload_bandeja",
-   "subsistema": "bandeja_optica",
-   "falta": "Contorno definitivo, que sale de la distribucion una vez confirmada",
-   "pedir_a": "Este repositorio, tras fijar el layout",
-   "nota": "Necesita control termico propio: la extincion garantizada del modulador de intensidad solo cubre 0 a +70 C. Reservar espacio para sensores y calefactores.",
-   "color": [
-    0.9999999999999999,
-    0.0,
-    0.8000000108774858
-   ]
-  },
-  {
-   "componente": "laser_dfb_1550",
-   "nombre": "Laser DFB 1550 nm, Gooch & Housego (modulo validado para espacio)",
-   "categoria": "payload_bandeja",
-   "subsistema": "bandeja_optica",
-   "falta": "Envolvente del encapsulado butterfly con Peltier (y del disipador)",
-   "pedir_a": "Gooch & Housego",
-   "nota": null,
-   "color": [
-    0.9999999999999999,
-    0.0,
-    0.8000000108774858
-   ]
-  },
-  {
-   "componente": "voa",
-   "nombre": "Atenuador optico variable (VOA)",
-   "categoria": "payload_bandeja",
-   "subsistema": "bandeja_optica",
-   "falta": "Modelo y envolvente",
-   "pedir_a": "Equipo de payload de ACSAR",
-   "nota": "Lleva el flujo al nivel de fotones por pulso exigido por BB84 con decoy.",
-   "color": [
-    0.9999999999999999,
-    0.0,
-    0.8000000108774858
-   ]
-  },
-  {
-   "componente": "aislador",
-   "nombre": "Aislador optico",
-   "categoria": "payload_bandeja",
-   "subsistema": "bandeja_optica",
-   "falta": "Modelo y envolvente",
-   "pedir_a": "Equipo de payload de ACSAR",
-   "nota": null,
-   "color": [
-    0.9999999999999999,
-    0.0,
-    0.8000000108774858
-   ]
-  },
-  {
-   "componente": "filtro_espectral",
-   "nombre": "Filtro espectral",
-   "categoria": "payload_bandeja",
-   "subsistema": "bandeja_optica",
-   "falta": "Modelo y envolvente",
-   "pedir_a": "Equipo de payload de ACSAR",
-   "nota": null,
-   "color": [
-    0.9999999999999999,
-    0.0,
-    0.8000000108774858
-   ]
-  },
-  {
-   "componente": "acoplador_monitor",
-   "nombre": "Acoplador de monitorizacion + fotodiodo",
-   "categoria": "payload_bandeja",
-   "subsistema": "bandeja_optica",
-   "falta": "Modelo y envolvente",
-   "pedir_a": "Equipo de payload de ACSAR",
-   "nota": null,
-   "color": [
-    0.9999999999999999,
-    0.0,
-    0.8000000108774858
-   ]
-  },
-  {
-   "componente": "pcb1_control_qkd",
-   "nombre": "PCB-1 Control QKD (FPGA, QRNG, memoria, reloj)",
-   "categoria": "payload_pcb",
-   "subsistema": "control_qkd",
-   "falta": "Altura de la tarjeta (contorno PC104 propuesto, altura por disenar)",
-   "pedir_a": "Equipo de electronica de ACSAR",
-   "nota": "FPGA, 4 x QRNG, memoria no volatil >=32 GB, reloj disciplinado por el PPS del GNSS.",
-   "color": [
-    0.9999999999999999,
-    0.0,
-    0.8000000108774858
-   ]
-  },
-  {
-   "componente": "pcb2_drivers_opticos",
-   "nombre": "PCB-2 Drivers opticos",
+   "componente": "cables_rf_moduladores",
+   "nombre": "Coaxiales RF de PCB-2 a los dos moduladores",
    "categoria": "payload_pcb",
    "subsistema": "drivers_opticos",
-   "falta": "Altura de la tarjeta",
+   "falta": "Un cable no tiene envolvente hasta que se encamina. Lo que hace falta es el diametro del coaxial elegido y su radio minimo de curvatura; con esos dos, el recorrido se dibuja como KEEP-OUT entre PCB-2 y cada modulador, no como un cuerpo.",
    "pedir_a": "Equipo de electronica de ACSAR",
-   "nota": "Pulsos del laser y su Peltier, 2 drivers RF de moduladores, lazo de punto de trabajo del modulador, control termico de la bandeja. Debe quedar cerca de la bandeja optica: los coaxiales RF a los moduladores han de ser cortos.",
-   "color": [
-    0.9999999999999999,
-    0.0,
-    0.8000000108774858
-   ]
-  },
-  {
-   "componente": "pcb3_pat",
-   "nombre": "PCB-3 PAT (apuntado, adquisicion y seguimiento)",
-   "categoria": "payload_pcb",
-   "subsistema": "pat",
-   "falta": "Altura de la tarjeta, y si el driver del FSM es de alta tension",
-   "pedir_a": "Equipo de electronica de ACSAR",
-   "nota": "Lectura de la camara, driver del FSM, driver del laser de beacon, lazo de apuntado fino. Debe quedar cerca del banco de espacio libre.",
+   "nota": "Los dos coaxiales criticos del payload: llevan la senal de modulacion de PCB-2 (en la pila de plataforma, -X) a los moduladores (en la franja, +X), asi que CRUZAN el satelite a lo ancho. La topologia esta en data/connections.yaml (r02 y r03) y sus conectores de destino SI son dato (6.1 x 10 mm, plano de Exail); lo que falta es el cable.",
    "color": [
     0.9999999999999999,
     0.0,
@@ -1505,13 +3962,335 @@
    ]
   }
  ],
+ "supuestos": [
+  {
+   "componente": "integracion",
+   "magnitud": "integracion.fibra.radio_curvatura_modelado",
+   "estado": "supuesto",
+   "valor_modelado": 30.0,
+   "falta": "Radio minimo de curvatura real, que es 'radio_minimo_curvatura'",
+   "pedir_a": "Equipo de payload de ACSAR"
+  },
+  {
+   "componente": "integracion",
+   "magnitud": "integracion.fibra.longitud_boot_modelada",
+   "estado": "supuesto",
+   "valor_modelado": 20.0,
+   "falta": "Tipo de conector o protector y su tramo recto de salida",
+   "pedir_a": "Equipo de payload de ACSAR"
+  },
+  {
+   "componente": "integracion",
+   "magnitud": "integracion.coaxial.radio_curvatura_modelado",
+   "estado": "supuesto",
+   "valor_modelado": 25.0,
+   "falta": "Radio minimo de curvatura del coaxial elegido. Es el mismo hueco que 'cables_rf_moduladores.radio_minimo_curvatura'.",
+   "pedir_a": "Equipo de electronica de ACSAR"
+  },
+  {
+   "componente": "integracion",
+   "magnitud": "integracion.optica.diametro_haz_modelado",
+   "estado": "supuesto",
+   "valor_modelado": 10.0,
+   "falta": "Diametro de haz de cada tramo (e01 a e05 en data/connections.yaml) y el semiangulo del cono de la apertura",
+   "pedir_a": "Equipo de optica de ACSAR"
+  },
+  {
+   "componente": "antena_quasar_wsant",
+   "magnitud": "antena_quasar_wsant.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    82.0,
+    82.0,
+    10.0
+   ],
+   "falta": "Dimensiones reales, ganancia, diagrama de radiacion y cara de montaje",
+   "pedir_a": "AAC Clyde Space"
+  },
+  {
+   "componente": "paneles_photon_side",
+   "magnitud": "paneles_photon_side.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    209.3,
+    3.5,
+    349.0
+   ],
+   "falta": "Contorno real de cada tamano de PHOTON-SIDE (1U/2U/3U/6U) y cual de ellos se monta en cada cara",
+   "pedir_a": "AAC Clyde Space / Equipo de potencia de ACSAR"
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "magnitud": "telescopio_cassegrain.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    95.4,
+    95.4,
+    200.0
+   ],
+   "falta": "Diametro exterior del barrilete y longitud optica real. YA EXISTE un concepto en formato nativo SolidWorks (Telescopio_concepto.SLDPRT, entrega \"Preliminar viability model\" del 2026-09-20), ilegible. Hace falta reexportarlo a STEP AP214 o AP242 y dejarlo en la ruta de 'step_esperado'. Ver cad/vendor/MANIFEST.yaml, seccion 'sin_convertir'.",
+   "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences"
+  },
+  {
+   "componente": "fsm_piezo_pi_s331",
+   "magnitud": "fsm_piezo_pi_s331.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    50.0,
+    50.0,
+    22.0
+   ],
+   "falta": "Cotas exteriores del S-331 (plano acotado o STEP)",
+   "pedir_a": "Physik Instrumente"
+  },
+  {
+   "componente": "dicroico",
+   "magnitud": "dicroico.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    23.0,
+    23.0,
+    23.0
+   ],
+   "falta": "Diametro del haz colimado (del que sale el tamano del sustrato), longitudes de onda de corte y envolvente del soporte",
+   "pedir_a": "Equipo de optica de ACSAR"
+  },
+  {
+   "componente": "camara_beacon",
+   "magnitud": "camara_beacon.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    30.0,
+    30.0,
+    30.0
+   ],
+   "falta": "Modelo de sensor, distancia focal del objetivo y campo de vision exigido por el lazo de apuntado",
+   "pedir_a": "Equipo de PAT de ACSAR"
+  },
+  {
+   "componente": "laser_beacon_bajada",
+   "magnitud": "laser_beacon_bajada.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    25.0,
+    30.0,
+    25.0
+   ],
+   "falta": "Longitud de onda, potencia optica y envolvente del modulo elegido",
+   "pedir_a": "Equipo de PAT de ACSAR"
+  },
+  {
+   "componente": "colimador",
+   "magnitud": "colimador.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    28.0,
+    12.0,
+    12.0
+   ],
+   "falta": "Diametro del haz colimado y modelo de colimador. Es el mismo dato que bloquea los keep-outs del camino optico.",
+   "pedir_a": "Equipo de optica de ACSAR"
+  },
+  {
+   "componente": "bandeja_optica",
+   "magnitud": "bandeja_optica.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    117.7,
+    3.0,
+    102.4
+   ],
+   "falta": "Material, espesor y patron de taladros de la placa, del analisis estructural y termico",
+   "pedir_a": "Equipo de estructura de ACSAR"
+  },
+  {
+   "componente": "laser_dfb_1550",
+   "magnitud": "laser_dfb_1550.pines_btf14.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    30.0,
+    15.3,
+    4.0
+   ],
+   "falta": "Cotas de la fila de pines del modulo elegido",
+   "pedir_a": "Gooch & Housego"
+  },
+  {
+   "componente": "laser_dfb_1550",
+   "magnitud": "laser_dfb_1550.pines_btf14_b.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    30.0,
+    15.3,
+    4.0
+   ],
+   "falta": "Cotas de la fila de pines del modulo elegido",
+   "pedir_a": "Gooch & Housego"
+  },
+  {
+   "componente": "mod_intensidad_mxer_ln_10",
+   "magnitud": "mod_intensidad_mxer_ln_10.rf.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    6.1,
+    10.0,
+    6.1
+   ],
+   "falta": "Profundidad del conector RF, y holgura de insercion del coaxial",
+   "pedir_a": "Exail / Equipo de electronica de ACSAR"
+  },
+  {
+   "componente": "mod_intensidad_mxer_ln_10",
+   "magnitud": "mod_intensidad_mxer_ln_10.fibra_entrada.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    10.0,
+    3.0,
+    3.0
+   ],
+   "falta": "Diametro del protector de fibra del encapsulado de grado espacial",
+   "pedir_a": "Exail"
+  },
+  {
+   "componente": "mod_intensidad_mxer_ln_10",
+   "magnitud": "mod_intensidad_mxer_ln_10.fibra_salida.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    10.0,
+    3.0,
+    3.0
+   ],
+   "falta": "Diametro del protector de fibra del encapsulado de grado espacial",
+   "pedir_a": "Exail"
+  },
+  {
+   "componente": "mod_fase_mpz_ln_10",
+   "magnitud": "mod_fase_mpz_ln_10.rf.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    6.1,
+    10.0,
+    6.1
+   ],
+   "falta": "Profundidad del conector RF, y holgura de insercion del coaxial",
+   "pedir_a": "Exail / Equipo de electronica de ACSAR"
+  },
+  {
+   "componente": "mod_fase_mpz_ln_10",
+   "magnitud": "mod_fase_mpz_ln_10.fibra_entrada.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    10.0,
+    3.0,
+    3.0
+   ],
+   "falta": "Diametro del protector de fibra del encapsulado de grado espacial",
+   "pedir_a": "Exail"
+  },
+  {
+   "componente": "mod_fase_mpz_ln_10",
+   "magnitud": "mod_fase_mpz_ln_10.fibra_salida.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    10.0,
+    3.0,
+    3.0
+   ],
+   "falta": "Diametro del protector de fibra del encapsulado de grado espacial",
+   "pedir_a": "Exail"
+  },
+  {
+   "componente": "voa",
+   "magnitud": "voa.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    35.0,
+    5.5,
+    5.5
+   ],
+   "falta": "Modelo de VOA elegido y su envolvente",
+   "pedir_a": "Equipo de payload de ACSAR"
+  },
+  {
+   "componente": "aislador",
+   "magnitud": "aislador.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    35.0,
+    5.5,
+    5.5
+   ],
+   "falta": "Modelo de aislador elegido y su envolvente",
+   "pedir_a": "Equipo de payload de ACSAR"
+  },
+  {
+   "componente": "filtro_espectral",
+   "magnitud": "filtro_espectral.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    40.0,
+    5.5,
+    5.5
+   ],
+   "falta": "Modelo de filtro elegido, su ancho de banda y su envolvente",
+   "pedir_a": "Equipo de payload de ACSAR"
+  },
+  {
+   "componente": "acoplador_monitor",
+   "magnitud": "acoplador_monitor.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    60.0,
+    20.0,
+    12.0
+   ],
+   "falta": "Modelo de acoplador y de fotodiodo, y si el fotodiodo va en la bandeja o montado en PCB-2",
+   "pedir_a": "Equipo de payload de ACSAR"
+  },
+  {
+   "componente": "pcb1_control_qkd",
+   "magnitud": "pcb1_control_qkd.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    95.89,
+    90.17,
+    15.0
+   ],
+   "falta": "Altura real de la tarjeta, que la fija el componente mas alto (la FPGA y su disipador, si lleva). Y confirmar el contorno PC104.",
+   "pedir_a": "Equipo de electronica de ACSAR"
+  },
+  {
+   "componente": "pcb2_drivers_opticos",
+   "magnitud": "pcb2_drivers_opticos.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    95.89,
+    90.17,
+    15.0
+   ],
+   "falta": "Altura real de la tarjeta. Los drivers RF y el del Peltier son los candidatos a componente mas alto. Y confirmar el contorno PC104.",
+   "pedir_a": "Equipo de electronica de ACSAR"
+  },
+  {
+   "componente": "pcb3_pat",
+   "magnitud": "pcb3_pat.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    95.89,
+    90.17,
+    15.0
+   ],
+   "falta": "Altura real de la tarjeta, y si el driver del FSM es de alta tension (un driver piezo de 120 V ocupa bastante mas que uno de MEMS). Es el mismo dato que bloquea la eleccion del FSM. Y confirmar el contorno.",
+   "pedir_a": "Equipo de electronica de ACSAR"
+  }
+ ],
  "chequeos": [
   {
    "id": "volumen_total",
    "titulo": "Volumen total frente a la zona util",
    "estado": "atencion",
-   "mensaje": "Los 7 componentes con envolvente conocida ocupan 1394 cm3 de los 7644 cm3 interiores (18%). Quedan 19 componentes sin envolvente: el dato real sera mayor.",
-   "falta": "Envolvente de: antena_quasar_wsant, radio_uhf_pulsar_vutrx, paneles_photon_side, propulsion, telescopio_cassegrain, fsm, dicroico, camara_beacon, laser_beacon_bajada, colimador, bandeja_optica, laser_dfb_1550, voa, aislador, filtro_espectral, acoplador_monitor, pcb1_control_qkd, pcb2_drivers_opticos, pcb3_pat"
+   "mensaje": "Los 24 componentes con envolvente conocida ocupan 4302 cm3 de los 7644 cm3 interiores (56%). Quedan 3 componentes sin envolvente: el dato real sera mayor.",
+   "falta": "Envolvente de: radio_uhf_pulsar_vutrx, propulsion, cables_rf_moduladores"
   },
   {
    "id": "apertura_telescopio",
@@ -1552,32 +4331,138 @@
    "id": "pila_pc104",
    "titulo": "Longitud de la pila PC104",
    "estado": "ok",
-   "mensaje": "Con el paso estandar PC/104 de 15.24 mm, las 6 tarjetas de altura conocida ocupan 14 posiciones de separador, o sea 213 mm. Reservando una posicion por cada una de las 4 tarjetas sin altura (61 mm mas), la pila suma 274 mm frente a 361 mm interiores. El paso REAL del chasis sigue siendo TBD: este numero es una estimacion con el paso de la norma, no el del chasis elegido.",
+   "mensaje": "Con el paso estandar PC/104 de 15.24 mm, las 9 tarjetas de altura conocida ocupan 20 posiciones de separador, o sea 305 mm. Reservando una posicion por cada una de las 1 tarjetas sin altura (15 mm mas), la pila suma 320 mm frente a 361 mm interiores. El paso REAL del chasis sigue siendo TBD: este numero es una estimacion con el paso de la norma, no el del chasis elegido.",
    "falta": "Paso de apilamiento PC104 del chasis elegido"
+  },
+  {
+   "id": "banco_optico",
+   "titulo": "Cadena de espacio libre entre el eje del telescopio y la pared",
+   "estado": "ok",
+   "mensaje": "El FSM va sobre el eje optico del telescopio (X = +36.85 mm) porque es el que dobla el haz de X a Z. Del eje a la pared +X de la columna hay 74.0 mm, y la media anchura del FSM mas el dicroico mas el colimador suman 66.3 mm, sin contar holguras de montaje. Quedan 7.7 mm de margen.",
+   "falta": null
   },
   {
    "id": "bucles_fibra",
    "titulo": "Radio minimo de curvatura de la fibra",
    "estado": "no comprobable",
-   "mensaje": "Sin radio minimo de curvatura no se puede dimensionar la bandeja optica ni comprobar ningun bucle. Es el parametro que mas area consume de toda la bandeja.",
+   "mensaje": "Sin radio minimo de curvatura no se puede dimensionar la bandeja optica ni comprobar ningun bucle. Es el parametro que mas area consume de toda la bandeja. Mientras tanto, los keep-outs se dibujan con un radio SUPUESTO de 30 mm y un tramo recto de 20 mm, o sea 50 mm reservados por puerto. Con esa hipotesis la bandeja NO cumple: ver las invasiones de keep-out en el informe de interferencias. Eso no es un fallo del reparto, es lo que cuesta no tener el dato: si el radio real resulta ser la mitad, la mayoria de esas invasiones desaparecen solas.",
    "falta": "Radio minimo de curvatura de la fibra elegida"
   },
   {
    "id": "masa",
    "titulo": "Presupuesto de masa",
    "estado": "atencion",
-   "mensaje": "Masa conocida 846 g de un limite de 12000 g (CDS 14.1). Faltan 24 componentes por pesar, incluido el chasis y el telescopio, que son de los mas pesados.",
-   "falta": "Masa de: estructura_6u, adcs_iadcs400, antena_quasar_wsant, radio_uhf_pulsar_vutrx, paneles_photon_side, propulsion, telescopio_cassegrain, fsm, dicroico, camara_beacon, laser_beacon_bajada, colimador, bandeja_optica, laser_dfb_1550, mod_intensidad_mxer_ln_10, mod_fase_mpz_ln_10, voa, aislador, filtro_espectral, acoplador_monitor, pcb1_control_qkd, pcb2_drivers_opticos, pcb3_pat, qrng_idq20mc1_s3"
+   "mensaje": "Masa conocida 846 g de un limite de 12000 g (CDS 14.1). Faltan 25 componentes por pesar, incluido el chasis y el telescopio, que son de los mas pesados.",
+   "falta": "Masa de: estructura_6u, adcs_iadcs400, antena_quasar_wsant, radio_uhf_pulsar_vutrx, paneles_photon_side, propulsion, telescopio_cassegrain, fsm, dicroico, camara_beacon, laser_beacon_bajada, colimador, bandeja_optica, laser_dfb_1550, mod_intensidad_mxer_ln_10, mod_fase_mpz_ln_10, voa, aislador, filtro_espectral, acoplador_monitor, pcb1_control_qkd, pcb2_drivers_opticos, pcb3_pat, cables_rf_moduladores, qrng_idq20mc1_s3"
   },
   {
    "id": "step_de_fabricante",
    "titulo": "STEP de fabricante frente al manifiesto",
-   "estado": "ok",
-   "mensaje": "4 de 4 CAD de fabricante presentes y con la huella del manifiesto.",
-   "falta": null
+   "estado": "atencion",
+   "mensaje": "4 de 4 CAD de fabricante presentes y con la huella del manifiesto. 1 piezas esperan un STEP que aun no ha llegado; mientras tanto se dibujan con su envolvente aproximada. Dejar el fichero en la ruta indicada basta para que el modelo lo use: telescopio_cassegrain -> cad/vendor/aperture_optical_sciences/telescopio_cassegrain.step (a Oscar (ACSAR) / Aperture Optical Sciences).",
+   "falta": "STEP por recibir: telescopio_cassegrain (a Oscar (ACSAR) / Aperture Optical Sciences)"
   }
  ],
- "interferencias": [],
+ "interferencias": [
+  {
+   "tipo": "keep_out",
+   "a": "aislador",
+   "b": "keepout_fibra_laser_dfb_1550_salida",
+   "volumen_cm3": 0.019600000000000405,
+   "detalle": "aislador invade el keep-out 'fibra_laser_dfb_1550_salida' (fibra) en 0.02 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
+  },
+  {
+   "tipo": "keep_out",
+   "a": "laser_dfb_1550",
+   "b": "keepout_fibra_voa_salida",
+   "volumen_cm3": 3.6357475000000035,
+   "detalle": "laser_dfb_1550 invade el keep-out 'fibra_voa_salida' (fibra) en 3.64 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
+  },
+  {
+   "tipo": "keep_out",
+   "a": "aislador",
+   "b": "keepout_fibra_voa_salida",
+   "volumen_cm3": 0.15578750000000016,
+   "detalle": "aislador invade el keep-out 'fibra_voa_salida' (fibra) en 0.16 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
+  },
+  {
+   "tipo": "keep_out",
+   "a": "filtro_espectral",
+   "b": "keepout_fibra_voa_salida",
+   "volumen_cm3": 0.075625,
+   "detalle": "filtro_espectral invade el keep-out 'fibra_voa_salida' (fibra) en 0.08 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
+  },
+  {
+   "tipo": "keep_out",
+   "a": "acoplador_monitor",
+   "b": "keepout_fibra_voa_salida",
+   "volumen_cm3": 6.285606250000002,
+   "detalle": "acoplador_monitor invade el keep-out 'fibra_voa_salida' (fibra) en 6.29 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
+  },
+  {
+   "tipo": "keep_out",
+   "a": "laser_dfb_1550",
+   "b": "keepout_fibra_aislador_entrada",
+   "volumen_cm3": 3.6357475000000035,
+   "detalle": "laser_dfb_1550 invade el keep-out 'fibra_aislador_entrada' (fibra) en 3.64 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
+  },
+  {
+   "tipo": "keep_out",
+   "a": "voa",
+   "b": "keepout_fibra_aislador_entrada",
+   "volumen_cm3": 0.15578749999999997,
+   "detalle": "voa invade el keep-out 'fibra_aislador_entrada' (fibra) en 0.16 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
+  },
+  {
+   "tipo": "keep_out",
+   "a": "filtro_espectral",
+   "b": "keepout_fibra_aislador_entrada",
+   "volumen_cm3": 0.23141249999999994,
+   "detalle": "filtro_espectral invade el keep-out 'fibra_aislador_entrada' (fibra) en 0.23 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
+  },
+  {
+   "tipo": "keep_out",
+   "a": "acoplador_monitor",
+   "b": "keepout_fibra_aislador_entrada",
+   "volumen_cm3": 4.4515625,
+   "detalle": "acoplador_monitor invade el keep-out 'fibra_aislador_entrada' (fibra) en 4.45 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
+  },
+  {
+   "tipo": "keep_out",
+   "a": "aislador",
+   "b": "keepout_fibra_filtro_espectral_salida",
+   "volumen_cm3": 0.23141250000000016,
+   "detalle": "aislador invade el keep-out 'fibra_filtro_espectral_salida' (fibra) en 0.23 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
+  },
+  {
+   "tipo": "keep_out",
+   "a": "acoplador_monitor",
+   "b": "keepout_fibra_filtro_espectral_salida",
+   "volumen_cm3": 7.455500000000002,
+   "detalle": "acoplador_monitor invade el keep-out 'fibra_filtro_espectral_salida' (fibra) en 7.46 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
+  },
+  {
+   "tipo": "keep_out",
+   "a": "fsm",
+   "b": "keepout_fibra_colimador_entrada",
+   "volumen_cm3": 2.964138063802284,
+   "detalle": "fsm invade el keep-out 'fibra_colimador_entrada' (fibra) en 2.96 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
+  },
+  {
+   "tipo": "keep_out",
+   "a": "dicroico",
+   "b": "keepout_fibra_colimador_entrada",
+   "volumen_cm3": 6.0835,
+   "detalle": "dicroico invade el keep-out 'fibra_colimador_entrada' (fibra) en 6.08 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
+  },
+  {
+   "tipo": "keep_out",
+   "a": "camara_beacon",
+   "b": "keepout_fibra_colimador_entrada",
+   "volumen_cm3": 27.0,
+   "detalle": "camara_beacon invade el keep-out 'fibra_colimador_entrada' (fibra) en 27.00 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
+  }
+ ],
  "colores": {
   "por_estado": {
    "referencia": [
@@ -1589,6 +4474,11 @@
     0.2,
     0.45,
     0.9
+   ],
+   "supuesto": [
+    0.62,
+    0.62,
+    0.66
    ],
    "TBD": [
     1.0,
@@ -1626,6 +4516,7 @@
  },
  "no_colocados_con_geometria": [
   "adcs_iadcs420",
+  "fsm_piezo_pi_s331",
   "qrng_idq20mc1_s3"
  ]
 }
