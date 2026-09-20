@@ -792,8 +792,10 @@ def chequeo_step_de_fabricante(catalogo: Catalogo) -> Chequeo:
         )
     if esperando:
         partes.append(
-            f"{len(esperando)} piezas esperan un STEP que aun no ha llegado; "
-            f"mientras tanto se dibujan con su envolvente aproximada. Dejar el "
+            f"{len(esperando)} "
+            + ("pieza espera" if len(esperando) == 1 else "piezas esperan")
+            + " un STEP que aun no ha llegado; "
+            f"mientras tanto se dibuja con su envolvente aproximada. Dejar el "
             f"fichero en la ruta indicada basta para que el modelo lo use: "
             + "; ".join(
                 f"{cid} -> {esp.ruta} (a {esp.pedir_a})" for cid, esp in esperando

@@ -168,7 +168,7 @@ Falta: Masa de: estructura_6u, adcs_iadcs400, antena_quasar_wsant, radio_uhf_pul
 
 **Estado: ATENCION**
 
-4 de 4 CAD de fabricante presentes y con la huella del manifiesto. 1 piezas esperan un STEP que aun no ha llegado; mientras tanto se dibujan con su envolvente aproximada. Dejar el fichero en la ruta indicada basta para que el modelo lo use: telescopio_cassegrain -> cad/vendor/aperture_optical_sciences/telescopio_cassegrain.step (a Oscar (ACSAR) / Aperture Optical Sciences).
+4 de 4 CAD de fabricante presentes y con la huella del manifiesto. 1 pieza espera un STEP que aun no ha llegado; mientras tanto se dibuja con su envolvente aproximada. Dejar el fichero en la ruta indicada basta para que el modelo lo use: telescopio_cassegrain -> cad/vendor/aperture_optical_sciences/telescopio_cassegrain.step (a Oscar (ACSAR) / Aperture Optical Sciences).
 
 | magnitud | valor |
 |---|---|
