@@ -4,6 +4,7 @@
     uv run clau3d piezas      exporta cada pieza generada a cad/generated/
     uv run clau3d ensamblar   exporta el ensamblaje a cad/generated/clau_6u.step
     uv run clau3d informe     regenera todo reports/
+    uv run clau3d ver         abre el visor interactivo en localhost
     uv run clau3d todo        validar + piezas + ensamblar + informe
 """
 
@@ -85,6 +86,20 @@ def cmd_informe(_: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_ver(args: argparse.Namespace) -> int:
+    from . import viewer
+
+    catalogo = cargar()
+    problemas = validar(catalogo)
+    if problemas:
+        print(f"{len(problemas)} problemas de integridad; corrigelos antes de mirar nada:")
+        for p in problemas:
+            print(f"  - {p}")
+        return 1
+    viewer.servir(puerto=args.puerto, abrir=not args.sin_abrir)
+    return 0
+
+
 def cmd_todo(args: argparse.Namespace) -> int:
     codigo = cmd_validar(args)
     if codigo:
@@ -114,6 +129,16 @@ def main(argv: list[str] | None = None) -> int:
     p_ens.add_argument("--salida", help="ruta del STEP de salida")
     p_ens.set_defaults(func=cmd_ensamblar)
     sub.add_parser("informe", help="regenera reports/").set_defaults(func=cmd_informe)
+    p_ver = sub.add_parser("ver", help="visor interactivo en localhost")
+    p_ver.add_argument(
+        "--puerto", type=int, default=8000,
+        help="puerto de escucha (si esta ocupado, coge el siguiente libre)",
+    )
+    p_ver.add_argument(
+        "--sin-abrir", action="store_true", dest="sin_abrir",
+        help="no abrir el navegador, solo imprimir la direccion",
+    )
+    p_ver.set_defaults(func=cmd_ver)
     p_todo = sub.add_parser("todo", help="validar + piezas + ensamblar + informe")
     p_todo.add_argument("--salida", help="ruta del STEP de salida")
     p_todo.set_defaults(func=cmd_todo)

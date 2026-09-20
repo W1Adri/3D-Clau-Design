@@ -15,7 +15,7 @@ repositorio; esto explica **por qué** está como está y **qué falta por decid
 | Con envolvente conocida | **9 de 28** |
 | Datos pendientes (TBD) | **49** |
 | Discrepancias entre fuentes | **4** |
-| Tests | **42**, todos en verde |
+| Tests | **54**, todos en verde |
 | Distribución | **CONFIRMADA** el 2026-09-20: dos columnas de 3U, moduladores en la franja lateral |
 | Piezas colocadas | **8 de 27**. Las otras 19 tienen geometría TBD |
 | Riesgos abiertos | **1**: acoplamiento térmico modulador–barrilete (§3.6) |
@@ -24,6 +24,7 @@ repositorio; esto explica **por qué** está como está y **qué falta por decid
 Funciona de punta a punta: catálogo validado, layout generado, ensamblaje
 exportado a STEP, interferencias, conexiones, volumen, presupuestos, vistas e
 informes. Sin interferencias ni desbordes con las 8 piezas colocadas.
+Para mirarlo, `uv run clau3d ver` (§8).
 
 La limitación real no es el modelo, son los datos: **19 de 27 componentes no
 tienen envolvente**, así que el volumen libre de 6.25 L es un techo, no una
@@ -357,3 +358,51 @@ chequeos de sección (`seccion_componentes` y `contorno_pc104`).
   X-Z. Paso de 10 mm por defecto.
 - `clau3d informe` devuelve código de salida **1** si hay chequeos críticos o
   interferencias, para poder engancharlo a CI.
+
+---
+
+## 8. El visor web (`clau3d ver`)
+
+Añadido el 2026-09-20. `uv run clau3d ver` exporta el ensamblaje a
+`cad/generated/clau_6u.glb`, vuelca todo lo demás a `cad/generated/escena.json`
+y sirve `src/clau3d/visor/` en `http://localhost:8000`.
+
+**Por qué un visor propio y no uno de CadQuery.** Los visores genéricos enseñan
+sólidos. Aquí lo que hay que ver no es solo la forma: es **de dónde sale cada
+cota y qué falta**. El visor colorea por estado del dato, lista los 19
+componentes sin envolvente con a quién pedírselos, marca el volumen libre como
+*techo* mientras `resumen.fiable` sea falso y muestra los chequeos con el mismo
+criterio que `reports/`. Un visor genérico no puede decir nada de eso.
+
+**El reparto de responsabilidades.** El GLB lleva geometría, nombres y colores.
+El JSON lleva todo lo que la geometría no sabe decir. El JavaScript **no calcula
+ninguna cota**: solo formatea lo que viene en el JSON. Si hiciera falta un número
+nuevo en pantalla, se añade a `viewer.escena()`, no al JS.
+
+**Se regenera solo.** El servidor compara la fecha de `data/*.yaml` y de los STEP
+de `cad/vendor/` con lo último servido, y rehace GLB y JSON si algo cambió.
+Recargar el navegador basta; no hace falta reiniciar.
+
+### Dos trampas que ya costaron un rato
+
+1. **El GLB sale con los ejes girados.** glTF es Y-arriba, así que OpenCASCADE
+   rota el modelo al exportar: el Z del CAD acaba siendo el Y del fichero. El
+   visor lo deshace con `gltf.scene.rotation.x = Math.PI / 2`. Sin eso, la
+   geometría y las cajas de zona dibujadas desde el JSON **no coinciden**, y el
+   fallo se ve como un desencaje sutil, no como un error.
+2. **Los nombres de malla chocan con los de instancia.** OpenCASCADE parte cada
+   sólido en varias mallas y GLTFLoader les pone sufijo `_1`, `_2`… La segunda
+   cara de `bateria_optimus_30` se llama igual que la segunda batería,
+   `bateria_optimus_30_2`. Por eso el visor **no agrupa por el nombre de la
+   malla** sino por el `Group` que las contiene, que lleva el nombre exacto del
+   nodo del ensamblaje. `tests/test_visor.py` comprueba que cada nodo del JSON
+   existe en el GLB, que es justo lo que se rompe al renombrar una colocación.
+
+### Los STEP de proveedor
+
+`cad/vendor/` tiene ahora **una carpeta por proveedor** y se versiona en git, para
+que cada commit del layout quede ligado al fichero exacto que se usó. Las reglas
+de nombre y el procedimiento de alta están en `cad/vendor/README.md`. Lo que hay
+que mirar al recibir un STEP es **el origen y los ejes**: el modelo espera cada
+pieza centrada en su propio origen, y muchos proveedores la entregan con el
+origen en una esquina.

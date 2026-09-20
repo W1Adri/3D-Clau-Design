@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CLAU 6U — visor</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="visor.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+
+<div id="lienzo"></div>
+
+<header id="barra">
+  <strong>CLAU 6U</strong>
+  <span id="estado-layout" class="pastilla"></span>
+  <span id="resumen-barra"></span>
+  <span class="espaciador"></span>
+  <span id="generado"></span>
+</header>
+
+<nav id="vistas">
+  <button data-vista="iso" title="Isométrica">ISO</button>
+  <button data-vista="planta" title="Planta X-Z, mirando desde +Y">Planta</button>
+  <button data-vista="alzado" title="Alzado X-Y, mirando desde +Z (cara que apunta a tierra)">Alzado</button>
+  <button data-vista="perfil" title="Perfil Y-Z, mirando desde +X">Perfil</button>
+  <button data-vista="ajustar" title="Encuadrar todo">Encuadrar</button>
+</nav>
+
+<aside id="panel">
+  <div class="pestanas">
+    <button data-pestana="modelo" class="activa">Modelo</button>
+    <button data-pestana="datos">Datos</button>
+    <button data-pestana="avisos">Avisos <span id="cuenta-avisos" class="chip"></span></button>
+  </div>
+
+  <section data-hoja="modelo">
+    <h2>Capas</h2>
+    <ul class="capas" id="capas"></ul>
+
+    <h2>Corte</h2>
+    <div class="corte">
+      <label>eje
+        <select id="corte-eje">
+          <option value="ninguno">sin corte</option>
+          <option value="x">X (ancho)</option>
+          <option value="y">Y (alto)</option>
+          <option value="z">Z (largo)</option>
+        </select>
+      </label>
+      <input type="range" id="corte-pos" min="0" max="1" step="0.005" value="1" disabled>
+      <label class="fila"><input type="checkbox" id="corte-invertir"> invertir</label>
+    </div>
+
+    <h2>Piezas <small id="cuenta-piezas"></small></h2>
+    <div id="arbol"></div>
+
+    <h2>Sin geometría <small id="cuenta-sin"></small></h2>
+    <p class="sutil">No se pueden dibujar: falta la envolvente. El hueco libre
+      que ves es un techo, no una cifra de diseño.</p>
+    <ul id="sin-geometria" class="lista-sin"></ul>
+
+    <h2>Leyenda</h2>
+    <ul id="leyenda" class="leyenda"></ul>
+  </section>
+
+  <section data-hoja="datos" hidden>
+    <div id="detalle">
+      <p class="sutil">Haz clic en una pieza del modelo, o en su nombre de la
+        lista, para ver de dónde sale cada cota.</p>
+    </div>
+    <h2>Volumen</h2>
+    <table id="tabla-zonas" class="tabla"></table>
+    <h2>Totales</h2>
+    <table id="tabla-resumen" class="tabla"></table>
+  </section>
+
+  <section data-hoja="avisos" hidden>
+    <h2>Chequeos de viabilidad</h2>
+    <ul id="chequeos" class="lista-chequeos"></ul>
+    <h2>Interferencias</h2>
+    <ul id="interferencias" class="lista-chequeos"></ul>
+  </section>
+</aside>
+
+<div id="cargando">cargando el modelo…</div>
+
+<script type="module" src="visor.js"></script>
+</body>
+</html>

@@ -89,8 +89,48 @@ uv sync
 | `uv run clau3d piezas` | Exporta cada pieza generada a `cad/generated/*.step`. |
 | `uv run clau3d ensamblar` | Exporta el ensamblaje completo a `cad/generated/clau_6u.step`. |
 | `uv run clau3d informe` | Regenera todo `reports/`: informes y vistas. |
-| **`uv run clau3d todo`** | **Las cuatro anteriores, de una vez.** |
+| **`uv run clau3d ver`** | **Abre el visor interactivo en `http://localhost:8000`.** |
+| **`uv run clau3d todo`** | **Las cuatro primeras, de una vez.** |
 | `uv run pytest` | Tests de datos, estructura, interferencias, conexiones y viabilidad. |
+
+## Cómo se mira el modelo: `clau3d ver`
+
+```bash
+uv run clau3d ver
+```
+
+Levanta un servidor en `http://localhost:8000` y abre el navegador. Es la forma
+normal de mirar el satélite: órbita con el botón izquierdo, *pan* con el
+derecho, zoom con la rueda.
+
+| Panel | Qué da |
+|---|---|
+| **Modelo** | Capas (estructura, raíles, zonas, keep-outs, ejes, aristas), plano de **corte** por X, Y o Z, y el árbol de piezas agrupado por zona, con el volumen libre de cada una. |
+| **Datos** | De la pieza seleccionada: cada cota **con su estado y su fuente**, los TBD con a quién hay que pedirlos, y las discrepancias con las dos cifras. Debajo, volumen por zona y totales. |
+| **Avisos** | Los nueve chequeos de viabilidad y las interferencias, con el mismo criterio que `reports/`: *no comprobable* nunca sale como *ok*. |
+
+Los botones **ISO / Planta / Alzado / Perfil** encuadran las mismas vistas que
+`reports/vistas/`. Al pinchar una pieza se resalta y se abre su ficha.
+
+Dos cosas que el visor deja claras a propósito:
+
+- El color dice **de dónde sale el dato**, no qué es la pieza: magenta = falta el
+  dato, naranja = dato de un componente parecido, azul = decisión de ACSAR. Solo
+  las cotas confirmadas se colorean por categoría.
+- La lista **Sin geometría** enseña los 19 componentes que no se pueden dibujar,
+  con a quién hay que pedirles la envolvente. Por eso el hueco libre aparece
+  marcado como *(techo)*: no es una cifra de diseño.
+
+Mientras el visor está levantado **se regenera solo**. Si editas
+`data/*.yaml` o dejas un STEP nuevo en `cad/vendor/`, basta recargar el
+navegador: el servidor rehace el GLB y la escena antes de servirlos.
+
+Opciones: `--puerto N` (si está ocupado coge el siguiente libre) y `--sin-abrir`
+(no lanza el navegador, solo imprime la dirección).
+
+> El visor necesita conexión a internet la primera vez de cada sesión: carga
+> three.js desde un CDN. Todo lo demás —geometría, cotas, informes— sale del
+> repositorio.
 
 ## Cómo se abre el resultado en FreeCAD
 
@@ -116,7 +156,9 @@ nada más del ensamblaje.
 
 ### Añadir un STEP de fabricante y sustituir una caja envolvente
 
-1. Copiar el fichero a `cad/vendor/`, p. ej. `cad/vendor/iadcs400.step`.
+1. Copiar el fichero a la carpeta de su proveedor dentro de `cad/vendor/`,
+   p. ej. `cad/vendor/aac_clyde_space/adcs_iadcs400.step`. Hay una carpeta por
+   proveedor y `cad/vendor/README.md` dice cuál es cuál.
 2. En `data/components.yaml`, en el bloque `forma` de ese componente, añadir la
    línea `step:` con la ruta **relativa a la raíz del repositorio**:
 
@@ -124,7 +166,7 @@ nada más del ensamblaje.
      - id: adcs_iadcs400
        forma:
          tipo: step
-         step: cad/vendor/iadcs400.step
+         step: cad/vendor/aac_clyde_space/adcs_iadcs400.step
          dimensiones:          # se conserva como referencia de ficha
            valor: [95.4, 95.9, 67.3]
            unidad: mm
@@ -150,8 +192,9 @@ data/connections.yaml   conexiones ópticas, RF, datos, potencia y térmicas
 data/layout.yaml        distribución dentro del 6U (GENERADO, no editar)
 tools/generar_layout.py genera data/layout.yaml desde el catálogo
 src/clau3d/             modelo de datos, piezas, ensamblaje, análisis, informes
+src/clau3d/visor/       pagina del visor web (clau3d ver)
 tests/                  interferencias, conexiones, integridad de los datos
-cad/vendor/             STEP de fabricante (no se tocan)
+cad/vendor/             STEP de fabricante, una carpeta por proveedor (no se tocan)
 cad/generated/          STEP generados por este repositorio
 reports/                informes y vistas (generados, no editar)
 CLAUDE.md               estado, decisiones y razonamiento de la distribución

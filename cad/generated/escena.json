@@ -1,0 +1,1550 @@
+{
+ "generado": "2026-09-20T09:18:24+02:00",
+ "glb": "clau_6u.glb",
+ "proyecto": "CLAU",
+ "layout": {
+  "estado": "confirmada",
+  "confirmado": true,
+  "nota": "Dos columnas de 3U a lo largo de todo Z. La pila PC104 queda holgada: 259 mm usados de 361 mm. La columna de payload mide 121.7 mm de ancho y se parte en dos a lo largo del telescopio: 95.4 mm para el barrilete y 26.3 mm de franja lateral, donde van los dos moduladores tumbados segun Z. Asi la bandeja se queda sin cuerpos dentro y el telescopio puede reservar 200 mm. PCB-2 sigue en la otra columna, con lo que el coaxial RF cruza el satelite a lo ancho.",
+  "decidido": "2026-09-20"
+ },
+ "envolvente": {
+  "min": [
+   -113.15,
+   -50.0,
+   -183.0
+  ],
+  "max": [
+   113.15,
+   50.0,
+   183.0
+  ],
+  "centro": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "dims": [
+   226.3,
+   100.0,
+   366.0
+  ]
+ },
+ "zona_util": {
+  "min": [
+   -110.85000000000001,
+   -47.7,
+   -180.7
+  ],
+  "max": [
+   110.85000000000001,
+   47.7,
+   180.7
+  ],
+  "centro": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "dims": [
+   221.70000000000002,
+   95.4,
+   361.4
+  ]
+ },
+ "resumen": {
+  "volumen_exterior_l": 8.28258,
+  "volumen_interior_l": 7.643675052000001,
+  "volumen_ocupado_l": 1.3940639202590006,
+  "volumen_libre_l": 6.249611131741,
+  "fiable": false,
+  "piezas_colocadas": 8,
+  "componentes": 28,
+  "sin_envolvente": [
+   "antena_quasar_wsant",
+   "radio_uhf_pulsar_vutrx",
+   "paneles_photon_side",
+   "propulsion",
+   "telescopio_cassegrain",
+   "fsm",
+   "dicroico",
+   "camara_beacon",
+   "laser_beacon_bajada",
+   "colimador",
+   "bandeja_optica",
+   "laser_dfb_1550",
+   "voa",
+   "aislador",
+   "filtro_espectral",
+   "acoplador_monitor",
+   "pcb1_control_qkd",
+   "pcb2_drivers_opticos",
+   "pcb3_pat"
+  ],
+  "no_colocados": [
+   "antena_quasar_wsant",
+   "radio_uhf_pulsar_vutrx",
+   "paneles_photon_side",
+   "propulsion",
+   "telescopio_cassegrain",
+   "fsm",
+   "dicroico",
+   "camara_beacon",
+   "laser_beacon_bajada",
+   "colimador",
+   "bandeja_optica",
+   "laser_dfb_1550",
+   "voa",
+   "aislador",
+   "filtro_espectral",
+   "acoplador_monitor",
+   "pcb1_control_qkd",
+   "pcb2_drivers_opticos",
+   "pcb3_pat"
+  ],
+  "pendientes_tbd": 49,
+  "discrepancias": 4
+ },
+ "zonas": [
+  {
+   "id": "z_plataforma",
+   "nombre": "Columna de plataforma - pila PC104 a lo largo de todo Z",
+   "nota": "ADCS en +Z, para que el star tracker ST200 mire por la misma cara que el telescopio. Despues OBC, EPS, radio banda S, PCB-3, PCB-1 y PCB-2, y las baterias al final de -Z, que equilibran en Z la masa del telescopio. La pila usa 259 mm de los 361 mm disponibles. Las tres PCBs propias tienen posicion de separador reservada pero no se dibujan: su altura es TBD.",
+   "caja": {
+    "min": [
+     -110.85,
+     -47.7,
+     -180.7
+    ],
+    "max": [
+     -10.85,
+     47.7,
+     180.7
+    ],
+    "centro": [
+     -60.849999999999994,
+     0.0,
+     0.0
+    ],
+    "dims": [
+     100.0,
+     95.4,
+     361.4
+    ]
+   },
+   "volumen_l": 3.447756,
+   "libre_l": 2.0857020797409995,
+   "fraccion_ocupada": 0.3950551953963681
+  },
+  {
+   "id": "z_payload_telescopio",
+   "nombre": "Telescopio",
+   "nota": "Telescopio Cassegrain apuntando por +Z. 200 mm RESERVADOS en Z (dato 'longitud_reservada', estado decision, provisional hasta el STEP). OJO: los \"~2U\" del brief son ~227 mm con la U de longitud de la CDS (113.5 mm), no 200. Esta zona mide 95.4 mm en X, que es el mayor diametro de barrilete que cabe en la altura interior. Su envolvente es TBD y no se dibuja.",
+   "caja": {
+    "min": [
+     -10.85,
+     -47.7,
+     -19.3
+    ],
+    "max": [
+     84.55,
+     47.7,
+     180.7
+    ],
+    "centro": [
+     36.85,
+     0.0,
+     80.69999999999999
+    ],
+    "dims": [
+     95.39999999999999,
+     95.4,
+     200.0
+    ]
+   },
+   "volumen_l": 1.820232,
+   "libre_l": 1.820232,
+   "fraccion_ocupada": 0.0
+  },
+  {
+   "id": "z_payload_franja",
+   "nombre": "Franja lateral - moduladores",
+   "nota": "Los 26.3 mm de X que quedan al lado del telescopio, a lo largo de toda su longitud. Aqui van los dos moduladores tumbados (9.7 mm por X, 15 mm por Y, 110 mm por Z), pegados al extremo -Z para acortar la fibra hasta la bandeja. El ancho no se ha elegido: el barrilete no puede pasar de los 95.4 mm de altura interior, asi que esta franja existe para cualquier diametro que permita montar el telescopio.",
+   "caja": {
+    "min": [
+     84.55,
+     -47.7,
+     -19.3
+    ],
+    "max": [
+     110.85,
+     47.7,
+     180.7
+    ],
+    "centro": [
+     97.69999999999999,
+     0.0,
+     80.69999999999999
+    ],
+    "dims": [
+     26.299999999999997,
+     95.4,
+     200.0
+    ]
+   },
+   "volumen_l": 0.501804,
+   "libre_l": 0.46979399999999993,
+   "fraccion_ocupada": 0.06378984623478501
+  },
+  {
+   "id": "z_payload_banco",
+   "nombre": "Banco optico de espacio libre",
+   "nota": "Colimador, dicroico, FSM y camara de beacon. Camino: colimador -> dicroico -> FSM -> telescopio, y dicroico -> camara.",
+   "caja": {
+    "min": [
+     -10.85,
+     -47.7,
+     -74.3
+    ],
+    "max": [
+     110.85,
+     47.7,
+     -19.3
+    ],
+    "centro": [
+     50.0,
+     0.0,
+     -46.8
+    ],
+    "dims": [
+     121.69999999999999,
+     95.4,
+     55.0
+    ]
+   },
+   "volumen_l": 0.6385599000000001,
+   "libre_l": 0.6385599000000001,
+   "fraccion_ocupada": 0.0
+  },
+  {
+   "id": "z_payload_bandeja",
+   "nombre": "Bandeja optica de fibra",
+   "nota": "106.4 mm de Z con los 121.7 mm de ancho enteros, ya sin cuerpos de modulador dentro: los bucles de fibra pueden curvar en toda la anchura. Aqui se queda el laser DFB, que con sus 4.1 W es la principal fuente de calor del payload y no debe ir junto al barrilete. Zona con control termico propio.",
+   "caja": {
+    "min": [
+     -10.85,
+     -47.7,
+     -180.7
+    ],
+    "max": [
+     110.85,
+     47.7,
+     -74.3
+    ],
+    "centro": [
+     50.0,
+     0.0,
+     -127.5
+    ],
+    "dims": [
+     121.69999999999999,
+     95.4,
+     106.39999999999999
+    ]
+   },
+   "volumen_l": 1.235323152,
+   "libre_l": 1.235323152,
+   "fraccion_ocupada": 0.0
+  }
+ ],
+ "keep_outs": [],
+ "railes": [
+  {
+   "id": "rail_-X-Y",
+   "caja": {
+    "min": [
+     -113.15,
+     -50.0,
+     -183.0
+    ],
+    "max": [
+     -104.65,
+     -41.5,
+     183.0
+    ],
+    "centro": [
+     -108.9,
+     -45.75,
+     0.0
+    ],
+    "dims": [
+     8.5,
+     8.5,
+     366.0
+    ]
+   }
+  },
+  {
+   "id": "rail_-X+Y",
+   "caja": {
+    "min": [
+     -113.15,
+     41.5,
+     -183.0
+    ],
+    "max": [
+     -104.65,
+     50.0,
+     183.0
+    ],
+    "centro": [
+     -108.9,
+     45.75,
+     0.0
+    ],
+    "dims": [
+     8.5,
+     8.5,
+     366.0
+    ]
+   }
+  },
+  {
+   "id": "rail_+X-Y",
+   "caja": {
+    "min": [
+     104.65,
+     -50.0,
+     -183.0
+    ],
+    "max": [
+     113.15,
+     -41.5,
+     183.0
+    ],
+    "centro": [
+     108.9,
+     -45.75,
+     0.0
+    ],
+    "dims": [
+     8.5,
+     8.5,
+     366.0
+    ]
+   }
+  },
+  {
+   "id": "rail_+X+Y",
+   "caja": {
+    "min": [
+     104.65,
+     41.5,
+     -183.0
+    ],
+    "max": [
+     113.15,
+     50.0,
+     183.0
+    ],
+    "centro": [
+     108.9,
+     45.75,
+     0.0
+    ],
+    "dims": [
+     8.5,
+     8.5,
+     366.0
+    ]
+   }
+  }
+ ],
+ "piezas": [
+  {
+   "nodo": "adcs_iadcs400",
+   "componente": "adcs_iadcs400",
+   "nombre": "AAC Clyde Space iADCS400",
+   "categoria": "plataforma",
+   "subsistema": "ADCS",
+   "zona": "z_plataforma",
+   "estado_dato": "confirmado",
+   "desde_step": false,
+   "step": null,
+   "centro": [
+    -60.85,
+    0.0,
+    142.6
+   ],
+   "rotacion": [
+    0.0,
+    0.0,
+    90.0
+   ],
+   "caja": {
+    "min": [
+     -108.80000000000001,
+     -47.70000000000001,
+     108.94999999999999
+    ],
+    "max": [
+     -12.899999999999991,
+     47.70000000000001,
+     176.25
+    ],
+    "centro": [
+     -60.85,
+     0.0,
+     142.6
+    ],
+    "dims": [
+     95.90000000000002,
+     95.40000000000002,
+     67.30000000000001
+    ]
+   },
+   "volumen_cm3": 615.7182780000004,
+   "requiere_vista_exterior": true,
+   "nota": null,
+   "color": [
+    0.2999999961013092,
+    0.700000005816421,
+    0.4500000038597685
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      95.4,
+      95.9,
+      67.3
+     ],
+     "unidad": "mm",
+     "estado": "confirmado",
+     "fuente": "Brief ACSAR 2026-09-19 (cita ficha AAC Clyde Space iADCS400)",
+     "nota": "Formato PC104, aprox. 0.7U. Incluye star tracker ST200 (30 arcsec 3-sigma). Pendiente adjuntar el PDF de la ficha al repositorio.",
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "masa": {
+     "valor": null,
+     "unidad": "g",
+     "estado": "TBD",
+     "fuente": null,
+     "nota": "El rango publicado es 1150-1700 g segun configuracion. No se elige un valor.",
+     "falta": "Masa exacta de la configuracion elegida",
+     "pedir_a": "AAC Clyde Space",
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": 2.0,
+     "unidad": "W",
+     "estado": "confirmado",
+     "fuente": "Brief ACSAR 2026-09-19 (cita ficha AAC Clyde Space)",
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": 4.0,
+     "unidad": "W",
+     "estado": "confirmado",
+     "fuente": "Web AAC Clyde Space (via brief ACSAR 2026-09-19)",
+     "nota": "DISCREPANCIA registrada, ver alternativas.",
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": [
+      {
+       "valor": 5.0,
+       "fuente": "satsearch.co (via brief ACSAR 2026-09-19)",
+       "nota": "satsearch publica 5 W de pico para el mismo producto."
+      }
+     ]
+    }
+   }
+  },
+  {
+   "nodo": "obc_kryten_m3_plus",
+   "componente": "obc_kryten_m3_plus",
+   "nombre": "AAC Clyde Space Kryten-M3-PLUS (OBC con GNSS)",
+   "categoria": "plataforma",
+   "subsistema": "OBC",
+   "zona": "z_plataforma",
+   "estado_dato": "confirmado",
+   "desde_step": false,
+   "step": null,
+   "centro": [
+    -60.85,
+    0.0,
+    96.88
+   ],
+   "rotacion": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     -108.795,
+     -45.085,
+     94.125
+    ],
+    "max": [
+     -12.905000000000001,
+     45.085,
+     99.635
+    ],
+    "centro": [
+     -60.85,
+     0.0,
+     96.88
+    ],
+    "dims": [
+     95.89,
+     90.17,
+     5.510000000000005
+    ]
+   },
+   "volumen_cm3": 47.64167116300004,
+   "requiere_vista_exterior": false,
+   "nota": null,
+   "color": [
+    0.2999999961013092,
+    0.700000005816421,
+    0.4500000038597685
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      95.89,
+      90.17,
+      5.51
+     ],
+     "unidad": "mm",
+     "estado": "confirmado",
+     "fuente": "https://www.aac-clyde.space/wp-content/uploads/2021/10/AAC_DataSheet_Kryten.pdf",
+     "nota": "La ficha cubre la familia KRYTEN-M3; el sufijo PLUS anade GNSS. La altura 5.51 mm es \"from top PCB to lowest component\": NO es el paso de apilamiento PC104, que se trata aparte (ver pila_pc104).",
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "masa": {
+     "valor": 61.9,
+     "unidad": "g",
+     "estado": "confirmado",
+     "fuente": "https://www.aac-clyde.space/wp-content/uploads/2021/10/AAC_DataSheet_Kryten.pdf",
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": 0.4,
+     "unidad": "W",
+     "estado": "confirmado",
+     "fuente": "https://www.aac-clyde.space/wp-content/uploads/2021/10/AAC_DataSheet_Kryten.pdf",
+     "nota": "400 mW tipico.",
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": 1.0,
+     "unidad": "W",
+     "estado": "confirmado",
+     "fuente": "https://www.aac-clyde.space/wp-content/uploads/2021/10/AAC_DataSheet_Kryten.pdf",
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  },
+  {
+   "nodo": "eps_starbuck_nano_plus",
+   "componente": "eps_starbuck_nano_plus",
+   "nombre": "AAC Clyde Space Starbuck-Nano-PLUS",
+   "categoria": "plataforma",
+   "subsistema": "EPS",
+   "zona": "z_plataforma",
+   "estado_dato": "confirmado",
+   "desde_step": false,
+   "step": null,
+   "centro": [
+    -60.85,
+    0.0,
+    74.02
+   ],
+   "rotacion": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     -108.795,
+     -45.085,
+     63.61
+    ],
+    "max": [
+     -12.905000000000001,
+     45.085,
+     84.43
+    ],
+    "centro": [
+     -60.85,
+     0.0,
+     74.02000000000001
+    ],
+    "dims": [
+     95.89,
+     90.17,
+     20.820000000000007
+    ]
+   },
+   "volumen_cm3": 180.01807506600005,
+   "requiere_vista_exterior": false,
+   "nota": "ATENCION: la ficha describe el NANO-PLUS como pensado para 3-12U CON PANELES DESPLEGABLES, mientras que CLAU parte de paneles PHOTON-SIDE de montaje en cuerpo (variante NANO). Decision a revisar con AAC segun la configuracion final de paneles.",
+   "color": [
+    0.2999999961013092,
+    0.700000005816421,
+    0.4500000038597685
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      95.89,
+      90.17,
+      20.82
+     ],
+     "unidad": "mm",
+     "estado": "confirmado",
+     "fuente": "https://www.aac-clyde.space/wp-content/uploads/2021/11/AAC_DataSheet_Starbuck-Nano.pdf",
+     "nota": "Columna NANO-PLUS de la tabla \"Product Information\". Formato PC104.",
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "masa": {
+     "valor": 148.0,
+     "unidad": "g",
+     "estado": "confirmado",
+     "fuente": "https://www.aac-clyde.space/wp-content/uploads/2021/11/AAC_DataSheet_Starbuck-Nano.pdf",
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  },
+  {
+   "nodo": "radio_banda_s_quasar_strx",
+   "componente": "radio_banda_s_quasar_strx",
+   "nombre": "AAC Clyde Space Quasar-STRX (transceptor banda S)",
+   "categoria": "plataforma",
+   "subsistema": "comunicaciones",
+   "zona": "z_plataforma",
+   "estado_dato": "referencia",
+   "desde_step": false,
+   "step": null,
+   "centro": [
+    -60.85,
+    0.0,
+    43.54
+   ],
+   "rotacion": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     -108.85,
+     -45.0,
+     35.09
+    ],
+    "max": [
+     -12.849999999999994,
+     45.0,
+     51.99
+    ],
+    "centro": [
+     -60.849999999999994,
+     0.0,
+     43.540000000000006
+    ],
+    "dims": [
+     96.0,
+     90.0,
+     16.9
+    ]
+   },
+   "volumen_cm3": 146.016,
+   "requiere_vista_exterior": false,
+   "nota": null,
+   "color": [
+    0.9999999999999999,
+    0.5500000090900438,
+    0.0
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      96.0,
+      90.0,
+      16.9
+     ],
+     "unidad": "mm",
+     "estado": "referencia",
+     "fuente": "Ficha AAC Pulsar-STX (via brief ACSAR 2026-09-19)",
+     "nota": "NO es el componente elegido. AAC no publica las dimensiones del Quasar-STRX; se usa el Pulsar-STX de la misma familia como referencia de reserva de volumen. Se renderiza en color de 'referencia'.",
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "masa": {
+     "valor": 100.0,
+     "unidad": "g",
+     "estado": "referencia",
+     "fuente": "Ficha AAC Pulsar-STX (via brief ACSAR 2026-09-19)",
+     "nota": "La ficha del Pulsar-STX indica \"<100 g\". Se toma la cota como referencia.",
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": 5.0,
+     "unidad": "W",
+     "estado": "referencia",
+     "fuente": "Ficha AAC Pulsar-STX (via brief ACSAR 2026-09-19)",
+     "nota": "La ficha del Pulsar-STX indica \"<5 W\".",
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  },
+  {
+   "nodo": "bateria_optimus_30",
+   "componente": "bateria_optimus_30",
+   "nombre": "AAC Clyde Space Optimus-30",
+   "categoria": "plataforma",
+   "subsistema": "EPS",
+   "zona": "z_plataforma",
+   "estado_dato": "confirmado",
+   "desde_step": false,
+   "step": null,
+   "centro": [
+    -60.85,
+    0.0,
+    -32.66
+   ],
+   "rotacion": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     -108.795,
+     -45.085,
+     -43.434999999999995
+    ],
+    "max": [
+     -12.905000000000001,
+     45.085,
+     -21.884999999999994
+    ],
+    "centro": [
+     -60.85,
+     0.0,
+     -32.66
+    ],
+    "dims": [
+     95.89,
+     90.17,
+     21.55
+    ]
+   },
+   "volumen_cm3": 186.329948015,
+   "requiere_vista_exterior": false,
+   "nota": null,
+   "color": [
+    0.2999999961013092,
+    0.700000005816421,
+    0.4500000038597685
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      95.89,
+      90.17,
+      21.55
+     ],
+     "unidad": "mm",
+     "estado": "confirmado",
+     "fuente": "https://www.aac-clyde.space/wp-content/uploads/2021/11/AAC_DataSheet_Optimus.pdf",
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "masa": {
+     "valor": 268.0,
+     "unidad": "g",
+     "estado": "confirmado",
+     "fuente": "https://www.aac-clyde.space/wp-content/uploads/2021/11/AAC_DataSheet_Optimus.pdf",
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  },
+  {
+   "nodo": "bateria_optimus_30_2",
+   "componente": "bateria_optimus_30",
+   "nombre": "AAC Clyde Space Optimus-30",
+   "categoria": "plataforma",
+   "subsistema": "EPS",
+   "zona": "z_plataforma",
+   "estado_dato": "confirmado",
+   "desde_step": false,
+   "step": null,
+   "centro": [
+    -60.85,
+    0.0,
+    -63.14
+   ],
+   "rotacion": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     -108.795,
+     -45.085,
+     -73.915
+    ],
+    "max": [
+     -12.905000000000001,
+     45.085,
+     -52.365
+    ],
+    "centro": [
+     -60.85,
+     0.0,
+     -63.14
+    ],
+    "dims": [
+     95.89,
+     90.17,
+     21.550000000000004
+    ]
+   },
+   "volumen_cm3": 186.32994801500004,
+   "requiere_vista_exterior": false,
+   "nota": null,
+   "color": [
+    0.2999999961013092,
+    0.700000005816421,
+    0.4500000038597685
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      95.89,
+      90.17,
+      21.55
+     ],
+     "unidad": "mm",
+     "estado": "confirmado",
+     "fuente": "https://www.aac-clyde.space/wp-content/uploads/2021/11/AAC_DataSheet_Optimus.pdf",
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "masa": {
+     "valor": 268.0,
+     "unidad": "g",
+     "estado": "confirmado",
+     "fuente": "https://www.aac-clyde.space/wp-content/uploads/2021/11/AAC_DataSheet_Optimus.pdf",
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  },
+  {
+   "nodo": "mod_intensidad_mxer_ln_10",
+   "componente": "mod_intensidad_mxer_ln_10",
+   "nombre": "Exail MXER-LN-10 (modulador de intensidad, grado espacial EM/NS-FM/FM)",
+   "categoria": "payload_bandeja",
+   "subsistema": "bandeja_optica",
+   "zona": "z_payload_franja",
+   "estado_dato": "confirmado",
+   "desde_step": false,
+   "step": null,
+   "centro": [
+    91.125,
+    0.0,
+    45.7
+   ],
+   "rotacion": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     86.27499999999999,
+     -7.5,
+     -9.299999999999997
+    ],
+    "max": [
+     95.97500000000001,
+     7.5,
+     100.7
+    ],
+    "centro": [
+     91.125,
+     0.0,
+     45.7
+    ],
+    "dims": [
+     9.700000000000017,
+     15.0,
+     110.0
+    ]
+   },
+   "volumen_cm3": 16.005000000000027,
+   "requiere_vista_exterior": false,
+   "nota": null,
+   "color": [
+    0.19999999868206275,
+    0.7500000009342138,
+    0.8199999872960941
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      110.0,
+      15.0,
+      9.7
+     ],
+     "unidad": "mm",
+     "estado": "confirmado",
+     "fuente": "https://www.exail.com/media-file/7854/exail-datasheet-em-ns-fm-fm-mxer-ln-10-space-grade-components.pdf",
+     "nota": "Plano mecanico 03_2026_ED2 / 00025851-B p.9. Cuerpo 100 mm, bridas incluidas 110 +/-0.2 mm, ancho 15 +/-0.2, alto 9.7 +/-0.2. DISCREPANCIA IMPORTANTE con el brief, ver alternativas.",
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": [
+      {
+       "valor": [
+        85.0,
+        15.0,
+        9.65
+       ],
+       "fuente": "https://www.exail.com/media-file/7739/datasheet-mpxmpz-ln-series.pdf",
+       "nota": "\"Housing #A\" de la serie comercial MPX/MPZ, que es la cifra que recoge el brief. El encapsulado de GRADO ESPACIAL es mas largo. Para el analisis se usa el de grado espacial, que es el que vuela."
+      }
+     ]
+    },
+    "masa": {
+     "valor": null,
+     "unidad": "g",
+     "estado": "TBD",
+     "fuente": null,
+     "nota": "La version comercial \"Housing",
+     "falta": "Masa del encapsulado de grado espacial",
+     "pedir_a": "Exail",
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  },
+  {
+   "nodo": "mod_fase_mpz_ln_10",
+   "componente": "mod_fase_mpz_ln_10",
+   "nombre": "Exail MPZ-LN-10 (modulador de fase, codificador de polarizacion)",
+   "categoria": "payload_bandeja",
+   "subsistema": "bandeja_optica",
+   "zona": "z_payload_franja",
+   "estado_dato": "referencia",
+   "desde_step": false,
+   "step": null,
+   "centro": [
+    104.275,
+    0.0,
+    45.7
+   ],
+   "rotacion": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     99.425,
+     -7.5,
+     -9.299999999999997
+    ],
+    "max": [
+     109.12500000000001,
+     7.5,
+     100.7
+    ],
+    "centro": [
+     104.275,
+     0.0,
+     45.7
+    ],
+    "dims": [
+     9.700000000000017,
+     15.0,
+     110.0
+    ]
+   },
+   "volumen_cm3": 16.005000000000027,
+   "requiere_vista_exterior": false,
+   "nota": "Esquema ICFO de codificacion de polarizacion con un solo modulador de fase.",
+   "color": [
+    0.9999999999999999,
+    0.5500000090900438,
+    0.0
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      110.0,
+      15.0,
+      9.7
+     ],
+     "unidad": "mm",
+     "estado": "referencia",
+     "fuente": "https://www.exail.com/media-file/7855/exail-datasheet-em-ns-fm-fm-nir-mpx-ln-01-space-grade-components.pdf",
+     "nota": "Exail NO publica ficha de grado espacial del MPZ-LN-10. Se toma como referencia el encapsulado de grado espacial del NIR-MPX-LN-0.1 (plano 03_2026_ED3 / 00025631-B p.9), identico al del MXER-LN-10. Confirmar con Exail antes de cerrar la bandeja.",
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": [
+      {
+       "valor": [
+        85.0,
+        15.0,
+        9.65
+       ],
+       "fuente": "https://www.exail.com/media-file/7739/datasheet-mpxmpz-ln-series.pdf",
+       "nota": "Housing #A comercial. El MPZ-LN-10-LVP usa el Housing #C, de 105 mm."
+      }
+     ]
+    },
+    "masa": {
+     "valor": null,
+     "unidad": "g",
+     "estado": "TBD",
+     "fuente": null,
+     "nota": null,
+     "falta": "Masa del encapsulado de grado espacial",
+     "pedir_a": "Exail",
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  }
+ ],
+ "sin_geometria": [
+  {
+   "componente": "antena_quasar_wsant",
+   "nombre": "AAC Clyde Space Quasar-WSANT (antena banda S)",
+   "categoria": "plataforma",
+   "subsistema": "comunicaciones",
+   "falta": "Dimensiones y cara de montaje de la antena",
+   "pedir_a": "AAC Clyde Space",
+   "nota": null,
+   "color": [
+    0.9999999999999999,
+    0.0,
+    0.8000000108774858
+   ]
+  },
+  {
+   "componente": "radio_uhf_pulsar_vutrx",
+   "nombre": "AAC Clyde Space Pulsar-VUTRX (UHF, TT&C de respaldo)",
+   "categoria": "plataforma",
+   "subsistema": "comunicaciones",
+   "falta": "Dimensiones",
+   "pedir_a": "AAC Clyde Space",
+   "nota": "Opcional. Solo se integra si queda volumen tras cerrar el payload.",
+   "color": [
+    0.9999999999999999,
+    0.0,
+    0.8000000108774858
+   ]
+  },
+  {
+   "componente": "paneles_photon_side",
+   "nombre": "AAC Clyde Space PHOTON-SIDE (paneles de montaje en cuerpo)",
+   "categoria": "plataforma",
+   "subsistema": "EPS",
+   "falta": "Dimensiones de cada panel segun la cara elegida (1U/2U/3U/6U)",
+   "pedir_a": "AAC Clyde Space",
+   "nota": null,
+   "color": [
+    0.9999999999999999,
+    0.0,
+    0.8000000108774858
+   ]
+  },
+  {
+   "componente": "propulsion",
+   "nombre": "Modulo de propulsion (opcional)",
+   "categoria": "plataforma",
+   "subsistema": "propulsion",
+   "falta": "Modelo de propulsor y sus dimensiones",
+   "pedir_a": "ACSAR (decision de mision aun abierta)",
+   "nota": null,
+   "color": [
+    0.9999999999999999,
+    0.0,
+    0.8000000108774858
+   ]
+  },
+  {
+   "componente": "telescopio_cassegrain",
+   "nombre": "Telescopio Cassegrain on-axis, apertura 90 mm",
+   "categoria": "payload_optico",
+   "subsistema": "terminal_optico",
+   "falta": "Diametro exterior del barrilete y longitud optica del tubo",
+   "pedir_a": "Aperture Optical Sciences / equipo de optica de ACSAR",
+   "nota": null,
+   "color": [
+    0.9999999999999999,
+    0.0,
+    0.8000000108774858
+   ]
+  },
+  {
+   "componente": "fsm",
+   "nombre": "Espejo de apuntado fino (FSM)",
+   "categoria": "payload_optico",
+   "subsistema": "terminal_optico",
+   "falta": "Eleccion entre MEMS (Mirrorcle, herencia CLICK-A, espejo 5 mm) y piezo PI S-331, y su envolvente",
+   "pedir_a": "Equipo de optica de ACSAR",
+   "nota": null,
+   "color": [
+    0.9999999999999999,
+    0.0,
+    0.8000000108774858
+   ]
+  },
+  {
+   "componente": "dicroico",
+   "nombre": "Espejo dicroico (separacion beacon / canal cuantico)",
+   "categoria": "payload_optico",
+   "subsistema": "terminal_optico",
+   "falta": "Dimensiones del sustrato y del soporte",
+   "pedir_a": "Equipo de optica de ACSAR",
+   "nota": "El canal cuantico lo atraviesa; el beacon de subida se refleja hacia la camara.",
+   "color": [
+    0.9999999999999999,
+    0.0,
+    0.8000000108774858
+   ]
+  },
+  {
+   "componente": "camara_beacon",
+   "nombre": "Camara / sensor de beacon (medida del error de apuntado)",
+   "categoria": "payload_optico",
+   "subsistema": "terminal_optico",
+   "falta": "Modelo de sensor y su envolvente",
+   "pedir_a": "Equipo de PAT de ACSAR",
+   "nota": null,
+   "color": [
+    0.9999999999999999,
+    0.0,
+    0.8000000108774858
+   ]
+  },
+  {
+   "componente": "laser_beacon_bajada",
+   "nombre": "Laser de beacon de bajada",
+   "categoria": "payload_optico",
+   "subsistema": "terminal_optico",
+   "falta": "Longitud de onda, potencia y envolvente",
+   "pedir_a": "Equipo de PAT de ACSAR",
+   "nota": "Longitud de onda distinta de 1550 nm para que la estacion siga al satelite.",
+   "color": [
+    0.9999999999999999,
+    0.0,
+    0.8000000108774858
+   ]
+  },
+  {
+   "componente": "colimador",
+   "nombre": "Colimador fibra a espacio libre",
+   "categoria": "payload_optico",
+   "subsistema": "terminal_optico",
+   "falta": "Modelo y envolvente (diametro de haz colimado, longitud)",
+   "pedir_a": "Equipo de optica de ACSAR",
+   "nota": "Frontera entre la cadena de fibra y el camino en espacio libre.",
+   "color": [
+    0.9999999999999999,
+    0.0,
+    0.8000000108774858
+   ]
+  },
+  {
+   "componente": "bandeja_optica",
+   "nombre": "Bandeja optica (placa mecanica, no PCB)",
+   "categoria": "payload_bandeja",
+   "subsistema": "bandeja_optica",
+   "falta": "Contorno definitivo, que sale de la distribucion una vez confirmada",
+   "pedir_a": "Este repositorio, tras fijar el layout",
+   "nota": "Necesita control termico propio: la extincion garantizada del modulador de intensidad solo cubre 0 a +70 C. Reservar espacio para sensores y calefactores.",
+   "color": [
+    0.9999999999999999,
+    0.0,
+    0.8000000108774858
+   ]
+  },
+  {
+   "componente": "laser_dfb_1550",
+   "nombre": "Laser DFB 1550 nm, Gooch & Housego (modulo validado para espacio)",
+   "categoria": "payload_bandeja",
+   "subsistema": "bandeja_optica",
+   "falta": "Envolvente del encapsulado butterfly con Peltier (y del disipador)",
+   "pedir_a": "Gooch & Housego",
+   "nota": null,
+   "color": [
+    0.9999999999999999,
+    0.0,
+    0.8000000108774858
+   ]
+  },
+  {
+   "componente": "voa",
+   "nombre": "Atenuador optico variable (VOA)",
+   "categoria": "payload_bandeja",
+   "subsistema": "bandeja_optica",
+   "falta": "Modelo y envolvente",
+   "pedir_a": "Equipo de payload de ACSAR",
+   "nota": "Lleva el flujo al nivel de fotones por pulso exigido por BB84 con decoy.",
+   "color": [
+    0.9999999999999999,
+    0.0,
+    0.8000000108774858
+   ]
+  },
+  {
+   "componente": "aislador",
+   "nombre": "Aislador optico",
+   "categoria": "payload_bandeja",
+   "subsistema": "bandeja_optica",
+   "falta": "Modelo y envolvente",
+   "pedir_a": "Equipo de payload de ACSAR",
+   "nota": null,
+   "color": [
+    0.9999999999999999,
+    0.0,
+    0.8000000108774858
+   ]
+  },
+  {
+   "componente": "filtro_espectral",
+   "nombre": "Filtro espectral",
+   "categoria": "payload_bandeja",
+   "subsistema": "bandeja_optica",
+   "falta": "Modelo y envolvente",
+   "pedir_a": "Equipo de payload de ACSAR",
+   "nota": null,
+   "color": [
+    0.9999999999999999,
+    0.0,
+    0.8000000108774858
+   ]
+  },
+  {
+   "componente": "acoplador_monitor",
+   "nombre": "Acoplador de monitorizacion + fotodiodo",
+   "categoria": "payload_bandeja",
+   "subsistema": "bandeja_optica",
+   "falta": "Modelo y envolvente",
+   "pedir_a": "Equipo de payload de ACSAR",
+   "nota": null,
+   "color": [
+    0.9999999999999999,
+    0.0,
+    0.8000000108774858
+   ]
+  },
+  {
+   "componente": "pcb1_control_qkd",
+   "nombre": "PCB-1 Control QKD (FPGA, QRNG, memoria, reloj)",
+   "categoria": "payload_pcb",
+   "subsistema": "control_qkd",
+   "falta": "Altura de la tarjeta (contorno PC104 propuesto, altura por disenar)",
+   "pedir_a": "Equipo de electronica de ACSAR",
+   "nota": "FPGA, 4 x QRNG, memoria no volatil >=32 GB, reloj disciplinado por el PPS del GNSS.",
+   "color": [
+    0.9999999999999999,
+    0.0,
+    0.8000000108774858
+   ]
+  },
+  {
+   "componente": "pcb2_drivers_opticos",
+   "nombre": "PCB-2 Drivers opticos",
+   "categoria": "payload_pcb",
+   "subsistema": "drivers_opticos",
+   "falta": "Altura de la tarjeta",
+   "pedir_a": "Equipo de electronica de ACSAR",
+   "nota": "Pulsos del laser y su Peltier, 2 drivers RF de moduladores, lazo de punto de trabajo del modulador, control termico de la bandeja. Debe quedar cerca de la bandeja optica: los coaxiales RF a los moduladores han de ser cortos.",
+   "color": [
+    0.9999999999999999,
+    0.0,
+    0.8000000108774858
+   ]
+  },
+  {
+   "componente": "pcb3_pat",
+   "nombre": "PCB-3 PAT (apuntado, adquisicion y seguimiento)",
+   "categoria": "payload_pcb",
+   "subsistema": "pat",
+   "falta": "Altura de la tarjeta, y si el driver del FSM es de alta tension",
+   "pedir_a": "Equipo de electronica de ACSAR",
+   "nota": "Lectura de la camara, driver del FSM, driver del laser de beacon, lazo de apuntado fino. Debe quedar cerca del banco de espacio libre.",
+   "color": [
+    0.9999999999999999,
+    0.0,
+    0.8000000108774858
+   ]
+  }
+ ],
+ "chequeos": [
+  {
+   "id": "volumen_total",
+   "titulo": "Volumen total frente a la zona util",
+   "estado": "atencion",
+   "mensaje": "Los 7 componentes con envolvente conocida ocupan 1394 cm3 de los 7644 cm3 interiores (18%). Quedan 19 componentes sin envolvente: el dato real sera mayor.",
+   "falta": "Envolvente de: antena_quasar_wsant, radio_uhf_pulsar_vutrx, paneles_photon_side, propulsion, telescopio_cassegrain, fsm, dicroico, camara_beacon, laser_beacon_bajada, colimador, bandeja_optica, laser_dfb_1550, voa, aislador, filtro_espectral, acoplador_monitor, pcb1_control_qkd, pcb2_drivers_opticos, pcb3_pat"
+  },
+  {
+   "id": "apertura_telescopio",
+   "titulo": "Apertura del telescopio frente a la seccion interior",
+   "estado": "atencion",
+   "mensaje": "La apertura de 90 mm deja solo 2.7 mm por lado dentro de los 95 mm interiores. No hay sitio para el barrilete, la celda del espejo ni el ajuste de alineacion. El eje optico NO puede ir paralelo a Y, y en cualquier otra orientacion la seccion util sigue limitada por Y.",
+   "falta": "Diametro exterior del barrilete (la apertura libre no basta)"
+  },
+  {
+   "id": "contorno_pc104",
+   "titulo": "Contorno PC104 frente a la seccion interior",
+   "estado": "atencion",
+   "mensaje": "La tarjeta de 95.89 x 90.17 mm cabe en 221.7 x 95.4 mm, pero deja solo 5.23 mm de holgura en Y. El espesor de pared no puede pasar de 4.91 mm, cota mas holgada que la que fija el iADCS400. Ademas, la zona util sale de un modelo de CAJA CON PAREDES de espesor uniforme, y el chasis 6U real es un ARMAZON CON RAILES: el hueco util no es un prisma, varia con Z y con la cara. Este chequeo no sera concluyente hasta sustituir el modelo por el STEP del chasis del equipo.",
+   "falta": "Zona util real del chasis 6U del equipo (STEP o plano con railes)"
+  },
+  {
+   "id": "seccion_componentes",
+   "titulo": "Seccion interior frente a todas las piezas",
+   "estado": "no comprobable",
+   "mensaje": "NO CONCLUYENTE. El espesor de pared supuesto (2.30 mm) coincide con el maximo compatible (2.30 mm): el margen es de 0.00 mm. Pero esa cota se DEDUJO de 'adcs_iadcs400', asi que decir que 'adcs_iadcs400' cabe con 0.00 mm de holgura no comprueba nada; es la hipotesis devuelta tal cual. El resto de piezas si tienen holgura real frente a esta seccion, pero la pieza que manda no. Ademas, la zona util sale de un modelo de CAJA CON PAREDES de espesor uniforme, y el chasis 6U real es un ARMAZON CON RAILES: el hueco util no es un prisma, varia con Z y con la cara. Este chequeo no sera concluyente hasta sustituir el modelo por el STEP del chasis del equipo.",
+   "falta": "Zona util real del chasis 6U del equipo (STEP o plano con railes)"
+  },
+  {
+   "id": "longitud_mod_intensidad_mxer_ln_10",
+   "titulo": "Recorrido recto de Exail MXER-LN-10 (modulador de intensidad, grado espacial EM/NS-FM/FM)",
+   "estado": "ok",
+   "mensaje": "Los 130 mm de recorrido recto solo caben orientados segun X, Z. Esto ya fija la orientacion de la bandeja optica, antes de anadir los bucles de fibra.",
+   "falta": null
+  },
+  {
+   "id": "longitud_mod_fase_mpz_ln_10",
+   "titulo": "Recorrido recto de Exail MPZ-LN-10 (modulador de fase, codificador de polarizacion)",
+   "estado": "ok",
+   "mensaje": "Los 130 mm de recorrido recto solo caben orientados segun X, Z. Esto ya fija la orientacion de la bandeja optica, antes de anadir los bucles de fibra.",
+   "falta": null
+  },
+  {
+   "id": "pila_pc104",
+   "titulo": "Longitud de la pila PC104",
+   "estado": "ok",
+   "mensaje": "Con el paso estandar PC/104 de 15.24 mm, las 6 tarjetas de altura conocida ocupan 14 posiciones de separador, o sea 213 mm. Reservando una posicion por cada una de las 4 tarjetas sin altura (61 mm mas), la pila suma 274 mm frente a 361 mm interiores. El paso REAL del chasis sigue siendo TBD: este numero es una estimacion con el paso de la norma, no el del chasis elegido.",
+   "falta": "Paso de apilamiento PC104 del chasis elegido"
+  },
+  {
+   "id": "bucles_fibra",
+   "titulo": "Radio minimo de curvatura de la fibra",
+   "estado": "no comprobable",
+   "mensaje": "Sin radio minimo de curvatura no se puede dimensionar la bandeja optica ni comprobar ningun bucle. Es el parametro que mas area consume de toda la bandeja.",
+   "falta": "Radio minimo de curvatura de la fibra elegida"
+  },
+  {
+   "id": "masa",
+   "titulo": "Presupuesto de masa",
+   "estado": "atencion",
+   "mensaje": "Masa conocida 846 g de un limite de 12000 g (CDS 14.1). Faltan 24 componentes por pesar, incluido el chasis y el telescopio, que son de los mas pesados.",
+   "falta": "Masa de: estructura_6u, adcs_iadcs400, antena_quasar_wsant, radio_uhf_pulsar_vutrx, paneles_photon_side, propulsion, telescopio_cassegrain, fsm, dicroico, camara_beacon, laser_beacon_bajada, colimador, bandeja_optica, laser_dfb_1550, mod_intensidad_mxer_ln_10, mod_fase_mpz_ln_10, voa, aislador, filtro_espectral, acoplador_monitor, pcb1_control_qkd, pcb2_drivers_opticos, pcb3_pat, qrng_idq20mc1_s3"
+  }
+ ],
+ "interferencias": [],
+ "colores": {
+  "por_estado": {
+   "referencia": [
+    1.0,
+    0.55,
+    0.0
+   ],
+   "decision": [
+    0.2,
+    0.45,
+    0.9
+   ],
+   "TBD": [
+    1.0,
+    0.0,
+    0.8
+   ]
+  },
+  "por_categoria": {
+   "estructura": [
+    0.55,
+    0.55,
+    0.58
+   ],
+   "plataforma": [
+    0.3,
+    0.7,
+    0.45
+   ],
+   "payload_optico": [
+    0.92,
+    0.85,
+    0.2
+   ],
+   "payload_bandeja": [
+    0.2,
+    0.75,
+    0.82
+   ],
+   "payload_pcb": [
+    0.12,
+    0.5,
+    0.35
+   ]
+  }
+ },
+ "no_colocados_con_geometria": [
+  "qrng_idq20mc1_s3"
+ ]
+}
