@@ -143,3 +143,17 @@ Masa conocida 846 g de un limite de 12000 g (CDS 14.1). Faltan 24 componentes po
 
 Falta: Masa de: estructura_6u, adcs_iadcs400, antena_quasar_wsant, radio_uhf_pulsar_vutrx, paneles_photon_side, propulsion, telescopio_cassegrain, fsm, dicroico, camara_beacon, laser_beacon_bajada, colimador, bandeja_optica, laser_dfb_1550, mod_intensidad_mxer_ln_10, mod_fase_mpz_ln_10, voa, aislador, filtro_espectral, acoplador_monitor, pcb1_control_qkd, pcb2_drivers_opticos, pcb3_pat, qrng_idq20mc1_s3
 
+## STEP de fabricante frente al manifiesto
+
+**Estado: OK**
+
+4 de 4 CAD de fabricante presentes y con la huella del manifiesto.
+
+| magnitud | valor |
+|---|---|
+| declarados | 4.00 |
+| presentes | 4.00 |
+| ausentes | 0.00 |
+| huella_distinta | 0.00 |
+| sin_declarar | 0.00 |
+

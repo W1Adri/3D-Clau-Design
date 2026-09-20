@@ -57,6 +57,8 @@ def tabla(
     for componente in catalogo.componentes:
         if componente.categoria == "estructura":
             continue
+        if not componente.cuenta_en_presupuesto:  # alternativa en estudio
+            continue
         colocadas = por_id.get(componente.id, [])
         centro = colocadas[0].caja_mundo.centro if colocadas else None
         filas.append(
@@ -103,6 +105,8 @@ def resumen(catalogo: Catalogo, piezas: list[PiezaColocada]) -> ResumenVolumen:
 
     for componente in catalogo.componentes:
         if componente.categoria == "estructura" or componente.montado_en:
+            continue
+        if not componente.cuenta_en_presupuesto:  # alternativa en estudio
             continue
         volumen = componente.volumen_mm3()
         if volumen is None:

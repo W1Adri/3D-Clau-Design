@@ -11,7 +11,11 @@ import math
 
 from dataclasses import dataclass, field
 
-from ..datamodel import Catalogo
+import hashlib
+
+import yaml
+
+from ..datamodel import DIR_CAD, RAIZ, Catalogo
 
 OK = "ok"
 ATENCION = "atencion"
@@ -59,6 +63,8 @@ def chequeo_volumen_total(catalogo: Catalogo) -> Chequeo:
             continue
         if componente.montado_en:  # ya cuenta dentro de su tarjeta
             continue
+        if not componente.cuenta_en_presupuesto:  # alternativa en estudio
+            continue
         volumen = componente.volumen_mm3()
         if volumen is None:
             sin_dato.append(componente.id)
@@ -76,7 +82,8 @@ def chequeo_volumen_total(catalogo: Catalogo) -> Chequeo:
     con_volumen = sum(
         1
         for c in catalogo.componentes
-        if c.categoria != "estructura" and not c.montado_en and c.volumen_mm3() is not None
+        if c.categoria != "estructura" and not c.montado_en
+        and c.cuenta_en_presupuesto and c.volumen_mm3() is not None
     )
     mensaje = (
         f"Los {con_volumen} componentes con "
@@ -228,9 +235,19 @@ def chequeo_seccion_componentes(catalogo: Catalogo) -> Chequeo:
     for componente in catalogo.componentes:
         if componente.categoria == "estructura" or componente.montado_en:
             continue
-        if not componente.modelable or componente.desde_step:
+        if not componente.cuenta_en_presupuesto:
             continue
-        dx, dy, dz = componente.dimensiones.como_vector()  # type: ignore[misc]
+        # Este chequeo va sobre las cotas de ficha, no sobre la geometria: lo
+        # que necesita es un vector de dimensiones. Que ademas haya un STEP
+        # conectado no le quita ni le anade nada.
+        dims = (
+            componente.dimensiones.como_vector()
+            if componente.dimensiones.esta_declarada and not componente.dimensiones.es_tbd
+            else None
+        )
+        if dims is None:
+            continue
+        dx, dy, dz = dims
 
         if componente.bruto.get("formato") == "pc104":
             # Una tarjeta apilada no se puede tumbar: su altura va por el eje de
@@ -377,6 +394,8 @@ def chequeo_pila_pc104(catalogo: Catalogo) -> Chequeo:
 
     for componente in catalogo.componentes:
         dims = componente.dimensiones
+        if not componente.cuenta_en_presupuesto:
+            continue
         if componente.montado_en or componente.categoria == "estructura":
             continue
         if componente.bruto.get("formato") != "pc104":
@@ -491,6 +510,8 @@ def chequeo_masa(catalogo: Catalogo) -> Chequeo:
     conocida = 0.0
     sin_dato: list[str] = []
     for componente in catalogo.componentes:
+        if not componente.cuenta_en_presupuesto:
+            continue
         masa = componente.masa_total_g()
         if masa is None:
             sin_dato.append(componente.id)
@@ -516,6 +537,115 @@ def chequeo_masa(catalogo: Catalogo) -> Chequeo:
     )
 
 
+def chequeo_step_de_fabricante(catalogo: Catalogo) -> Chequeo:
+    """Los STEP de fabricante presentes frente a cad/vendor/MANIFEST.yaml.
+
+    Los CAD de fabricante no se versionan: el repositorio es publico y sus
+    condiciones de uso estan sin revisar. Lo que se versiona es la huella. Este
+    chequeo dice si lo que hay en disco es lo mismo que se uso al fijar el
+    layout.
+
+    **No falla porque falte un fichero.** Quien clone el repositorio sin ellos
+    tiene que poder ejecutarlo todo con las cajas envolventes. Lo que si es un
+    fallo es tener un fichero con la huella cambiada: entonces el modelo se ha
+    dibujado con una geometria que no es la que el manifiesto declara.
+    """
+    manifiesto = DIR_CAD / "vendor" / "MANIFEST.yaml"
+    if not manifiesto.exists():
+        return Chequeo(
+            id="step_de_fabricante",
+            titulo="STEP de fabricante frente al manifiesto",
+            estado=NO_COMPROBABLE,
+            mensaje="No hay cad/vendor/MANIFEST.yaml.",
+            falta="Manifiesto de los CAD de fabricante",
+        )
+    bruto = yaml.safe_load(manifiesto.read_text(encoding="utf-8")) or {}
+    declarados = bruto.get("ficheros") or []
+
+    presentes: list[str] = []
+    ausentes: list[str] = []
+    corruptos: list[str] = []
+    for entrada in declarados:
+        ruta = DIR_CAD / "vendor" / entrada["ruta"]
+        if not ruta.exists():
+            ausentes.append(entrada["ruta"])
+            continue
+        huella = hashlib.sha256(ruta.read_bytes()).hexdigest()
+        if huella != entrada.get("sha256"):
+            corruptos.append(f"{entrada['ruta']} (sha256 {huella[:12]}...)")
+        else:
+            presentes.append(entrada["ruta"])
+
+    # Ficheros en disco que el manifiesto no menciona: no se sabe de donde
+    # salieron ni si se pueden redistribuir.
+    conocidos = {e["ruta"] for e in declarados}
+    vendor = DIR_CAD / "vendor"
+    sueltos = sorted(
+        str(p.relative_to(vendor))
+        for p in vendor.rglob("*")
+        if p.suffix.lower() in (".step", ".stp") and str(p.relative_to(vendor)) not in conocidos
+    )
+
+    # Un STEP conectado a un componente y que no esta en disco: el componente
+    # se dibuja con su caja, que es el comportamiento correcto, pero conviene
+    # saberlo.
+    conectados_sin_fichero = [
+        c.id
+        for c in catalogo.componentes
+        if c.step is not None and not (RAIZ / c.step.ruta).exists()
+    ]
+
+    numeros = {
+        "declarados": float(len(declarados)),
+        "presentes": float(len(presentes)),
+        "ausentes": float(len(ausentes)),
+        "huella_distinta": float(len(corruptos)),
+        "sin_declarar": float(len(sueltos)),
+    }
+
+    partes = [
+        f"{len(presentes)} de {len(declarados)} CAD de fabricante presentes "
+        f"y con la huella del manifiesto."
+    ]
+    if ausentes:
+        partes.append(
+            f"No estan en disco: {', '.join(ausentes)}. Se bajan de la carpeta "
+            f"de Drive del manifiesto; sin ellos el modelo usa cajas envolventes."
+        )
+    if corruptos:
+        partes.append(
+            f"HUELLA DISTINTA a la declarada: {', '.join(corruptos)}. El modelo "
+            f"no se ha dibujado con el fichero que dice el manifiesto."
+        )
+    if sueltos:
+        partes.append(
+            f"En cad/vendor/ sin declarar en el manifiesto: {', '.join(sueltos)}."
+        )
+    if conectados_sin_fichero:
+        partes.append(
+            f"Componentes con STEP conectado pero sin fichero: "
+            f"{', '.join(conectados_sin_fichero)}."
+        )
+
+    if corruptos:
+        estado = FALLA
+    elif ausentes or sueltos:
+        estado = ATENCION
+    else:
+        estado = OK
+
+    return Chequeo(
+        id="step_de_fabricante",
+        titulo="STEP de fabricante frente al manifiesto",
+        estado=estado,
+        mensaje=" ".join(partes),
+        numeros=numeros,
+        falta=(
+            f"Descargar de Drive: {', '.join(ausentes)}" if ausentes else None
+        ),
+    )
+
+
 def todos(catalogo: Catalogo) -> list[Chequeo]:
     salida = [
         chequeo_volumen_total(catalogo),
@@ -528,5 +658,6 @@ def todos(catalogo: Catalogo) -> list[Chequeo]:
         chequeo_pila_pc104(catalogo),
         chequeo_bucles_fibra(catalogo),
         chequeo_masa(catalogo),
+        chequeo_step_de_fabricante(catalogo),
     ]
     return salida

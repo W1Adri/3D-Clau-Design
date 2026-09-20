@@ -15,9 +15,9 @@ No editar a mano: los numeros salen de `data/components.yaml`.
 |---|---|---|
 | Envolvente exterior (formato 6U) | 8282.6 | 8.28 |
 | Zona util interior | 7643.7 | 7.64 |
-| Ocupado por piezas colocadas | 1394.1 | 1.39 |
+| Ocupado por piezas colocadas | 1804.9 | 1.80 |
 | Ocupado segun catalogo (con o sin colocar) | 1394.1 | 1.39 |
-| Libre dentro de la zona util | 6249.6 | 6.25 |
+| Libre dentro de la zona util | 5838.7 | 5.84 |
 
 > **El volumen libre de arriba NO es el volumen libre real.**
 
@@ -30,10 +30,10 @@ No editar a mano: los numeros salen de `data/components.yaml`.
 | id | componente | categoria | estado del dato | uds | volumen cm3 | centro (x, y, z) mm | colocado |
 |---|---|---|---|---|---|---|---|
 | adcs_iadcs400 | AAC Clyde Space iADCS400 | plataforma | confirmado | 1 | 615.7 | (-61, 0, 143) | si |
-| bateria_optimus_30 | AAC Clyde Space Optimus-30 | plataforma | confirmado | 2 | 372.7 | (-61, 0, -33) | si |
+| bateria_optimus_30 | AAC Clyde Space Optimus-30 | plataforma | referencia | 2 | 372.7 | (-61, 0, -33) | si |
 | eps_starbuck_nano_plus | AAC Clyde Space Starbuck-Nano-PLUS | plataforma | confirmado | 1 | 180.0 | (-61, 0, 74) | si |
 | radio_banda_s_quasar_strx | AAC Clyde Space Quasar-STRX (transceptor banda S) | plataforma | referencia | 1 | 146.0 | (-61, 0, 44) | si |
-| obc_kryten_m3_plus | AAC Clyde Space Kryten-M3-PLUS (OBC con GNSS) | plataforma | confirmado | 1 | 47.6 | (-61, 0, 97) | si |
+| obc_kryten_m3_plus | AAC Clyde Space Kryten-M3-PLUS (OBC con GNSS) | plataforma | referencia | 1 | 47.6 | (-61, 0, 97) | si |
 | mod_fase_mpz_ln_10 | Exail MPZ-LN-10 (modulador de fase, codificador de polarizacion) | payload_bandeja | referencia | 1 | 16.0 | (104, 0, 46) | si |
 | mod_intensidad_mxer_ln_10 | Exail MXER-LN-10 (modulador de intensidad, grado espacial EM/NS-FM/FM) | payload_bandeja | confirmado | 1 | 16.0 | (91, 0, 46) | si |
 | qrng_idq20mc1_s3 | QRNG ID Quantique IDQ20MC1-S3 | payload_pcb | confirmado | 4 | 0.1 | - | no |
@@ -61,7 +61,7 @@ No editar a mano: los numeros salen de `data/components.yaml`.
 
 | zona | nombre | total cm3 | ocupado cm3 | libre cm3 | libre L | % ocupado |
 |---|---|---|---|---|---|---|
-| z_plataforma | Columna de plataforma - pila PC104 a lo largo de todo Z | 3447.8 | 1362.1 | 2085.7 | 2.09 | 40% |
+| z_plataforma | Columna de plataforma - pila PC104 a lo largo de todo Z | 3447.8 | 1772.9 | 1674.8 | 1.67 | 51% |
 | z_payload_telescopio | Telescopio | 1820.2 | 0.0 | 1820.2 | 1.82 | 0% |
 | z_payload_franja | Franja lateral - moduladores | 501.8 | 32.0 | 469.8 | 0.47 | 6% |
 | z_payload_banco | Banco optico de espacio libre | 638.6 | 0.0 | 638.6 | 0.64 | 0% |
@@ -85,15 +85,15 @@ eje vertical X (+X arriba). De ` ` (vacio) a `@` (lleno).
                                     
                                     
                                     
-           @@ @@     @@ @@ @ @@@@@@@
-           @@ @@     @@ @@ @ @@@@@@@
-           @@ @@     @@ @@ @ @@@@@@@
-           @@ @@     @@ @@ @ @@@@@@@
-           @@ @@     @@ @@ @ @@@@@@@
-           @@ @@     @@ @@ @ @@@@@@@
-           @@ @@     @@ @@ @ @@@@@@@
-           @@ @@     @@ @@ @ @@@@@@@
-           @@ @@     @@ @@ @ @@@@@@@
-           @@ @@     @@ @@ @ @@@@@@@
+          @@@@@@@    @@ @@@@@@@@@@@@
+          @@@@@@@    @@ @@@@@@@@@@@@
+          @@@@@@@    @@ @@@@@@@@@@@@
+          @@@@@@@    @@ @@@@@@@@@@@@
+          @@@@@@@    @@ @@@@@@@@@@@@
+          @@@@@@@    @@ @@@@@@@@@@@@
+          @@@@@@@    @@ @@@@@@@@@@@@
+          @@@@@@@    @@ @@@@@@@@@@@@
+          @@@@@@@    @@ @@@@@@@@@@@@
+          @@@@@@@    @@ @@@@@@@@@@@@
 ```
 

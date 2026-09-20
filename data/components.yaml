@@ -102,8 +102,14 @@ zona_util_interior:
       No procede de ninguna ficha. Al sustituir el chasis por el STEP del
       equipo, la zona util se derivara de la geometria real y este parametro
       desaparece.
-    falta: Chasis 6U del equipo en STEP, o plano con espesores y zona util
-    pedir_a: Equipo de estructura de ACSAR
+    falta: >-
+      Chasis 6U del equipo en STEP, o plano con espesores y zona util. YA
+      EXISTE pero en formato nativo SolidWorks (Chasis.SLDPRT y
+      Chasis_base.SLDPRT, entrega 'Preliminar viability model' del
+      2026-09-20), que no hay manera de leer. Hace falta reexportarlo a
+      STEP AP214 o AP242. Ver cad/vendor/MANIFEST.yaml, seccion
+      'sin_convertir'.
+    pedir_a: Oscar (ACSAR) / equipo de estructura
 
 # ---------------------------------------------------------------------
 # 2. PLATAFORMA
@@ -172,6 +178,72 @@ componentes:
     requiere_vista_exterior: true
     nota_vista: El star tracker ST200 necesita linea de vision libre al exterior.
 
+  - id: adcs_iadcs420
+    nombre: AAC Clyde Space iADCS4-20 (alternativa, solo STEP)
+    formato: pc104
+    categoria: plataforma
+    subsistema: ADCS
+    cantidad: 1
+    alternativa_de: adcs_iadcs400
+    forma:
+      tipo: step
+      step:
+        ruta: cad/vendor/aac_clyde_space/iadcs420.step
+        estado: referencia
+        fuente: >-
+          Zip "Preliminar viability model" del equipo de ACSAR, recibido el
+          2026-09-20. El STEP declara el producto
+          'IADCS420-ASM-ST-1.0-defeatured-1.0_defeature'. Huella en
+          cad/vendor/MANIFEST.yaml.
+        orientacion: [90, 0, 0]
+        nota: >-
+          El STEP trae el eje de apilamiento por Y. Se gira 90 grados alrededor
+          de X para llevarlo a Z, que es el eje de la pila en data/layout.yaml.
+          El giro no cambia ninguna cota. El origen del STEP tampoco es el
+          centro de la pieza, asi que se recentra.
+      dimensiones:
+        valor: [95.40, 93.90, 74.10]
+        unidad: mm
+        estado: referencia
+        fuente: >-
+          Medido sobre el propio STEP (210 solidos, caja envolvente calculada
+          solido a solido), ya girado a los ejes del catalogo. AAC NO publica
+          ficha del iADCS4-20: el STEP es la unica fuente que hay de este
+          producto, y por eso el estado es 'referencia' y no 'confirmado'.
+        nota: >-
+          Frente al iADCS400 (95.4 x 95.9 x 67.3): el contorno transversal baja
+          de 95.9 a 93.9 mm en Y y la altura de pila sube de 67.3 a 74.1 mm.
+          Los 2 mm menos en Y IMPORTAN: el iADCS400 es el componente que fija el
+          espesor de pared maximo en 2.30 mm (ver zona_util_interior). Si el
+          satelite lleva el 4-20 y no el 400, esa cota pasa a
+          (100.0 - 93.9) / 2 = 3.05 mm y la zona util crece. Mientras el 4-20
+          sea una alternativa en estudio NO entra en ningun presupuesto ni
+          chequeo, asi que la cota de trabajo sigue siendo la del 400.
+          Los 6.8 mm mas de altura salen del otro lado: son 5 posiciones de
+          separador PC104 igual (ceil(74.1 / 15.24) = 5), asi que la pila no
+          cambia de longitud.
+    modelo_confirmado:
+      valor: null
+      estado: TBD
+      falta: >-
+        Confirmar QUE ADCS lleva CLAU, iADCS400 o iADCS4-20, y por que el modelo
+        preliminar trae el 4-20 cuando el brief cita el 400. Hasta saberlo hay
+        dos componentes en el catalogo para un solo hueco de la pila.
+      pedir_a: Oscar (ACSAR) / AAC Clyde Space
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa del iADCS4-20. No hay ficha publica de este producto.
+      pedir_a: AAC Clyde Space
+    requiere_vista_exterior: true
+    nota_vista: Igual que el iADCS400, el star tracker necesita linea de vision libre.
+    nota: >-
+      NO esta colocado en data/layout.yaml y NO suma en masa, volumen ni
+      potencia: 'alternativa_de' lo declara como candidato en estudio, no como
+      pieza a bordo. Esta en el catalogo porque su geometria es un dato real y
+      porque la alternativa hay que poder verla.
+
   - id: obc_kryten_m3_plus
     nombre: AAC Clyde Space Kryten-M3-PLUS (OBC con GNSS)
     formato: pc104
@@ -179,7 +251,24 @@ componentes:
     subsistema: OBC
     cantidad: 1
     forma:
-      tipo: caja
+      tipo: step
+      step:
+        ruta: cad/vendor/aac_clyde_space/obc_3d_25_02929.step
+        estado: referencia
+        fuente: >-
+          Zip "Preliminar viability model" del equipo de ACSAR, recibido el
+          2026-09-20. El STEP declara '3D-25-02929 RevJ Assembly_defeature'.
+          Huella en cad/vendor/MANIFEST.yaml.
+        orientacion: [0, 0, 90]
+        nota: >-
+          REFERENCIA, no confirmado: el part number 3D-25-02929 NO esta
+          verificado como Kryten-M3-PLUS. Es una tarjeta PC104 de AAC del
+          tamano correcto, y el equipo la llamo "Onboard_computer", pero eso no
+          es la ficha. El STEP viene con el contorno girado respecto al
+          catalogo (90.17 por X, 95.89 por Y); los 90 grados alrededor de Z lo
+          llevan a los ejes de 'dimensiones'. Sin ese giro el lado de 95.89 mm
+          caeria por Y, que solo tiene 95.4 mm de altura interior, y saldria un
+          desborde que no es real.
       dimensiones:
         valor: [95.89, 90.17, 5.51]
         unidad: mm
@@ -189,6 +278,32 @@ componentes:
           La ficha cubre la familia KRYTEN-M3; el sufijo PLUS anade GNSS.
           La altura 5.51 mm es "from top PCB to lowest component": NO es el paso
           de apilamiento PC104, que se trata aparte (ver pila_pc104).
+          DISCREPANCIA con el STEP conectado, ver alternativas. Estas siguen
+          siendo las cotas de FICHA y son las que usan los presupuestos y el
+          chequeo de seccion; lo que se DIBUJA es el STEP.
+        alternativas:
+          - valor: [95.89, 90.17, 16.20]
+            fuente: >-
+              Medido sobre cad/vendor/aac_clyde_space/obc_3d_25_02929.step,
+              excluidos los 104 pines del conector PC104 pasante.
+            nota: >-
+              Casi 11 mm mas de altura que la ficha. La ficha mide "from top PCB
+              to lowest component" y el STEP incluye el cuerpo de los conectores.
+          - valor: [95.89, 90.17, 23.24]
+            fuente: >-
+              Medido sobre el mismo STEP, envolvente completa.
+            nota: >-
+              Con los 104 pines del conector PC104, que bajan 12.45 mm por
+              debajo de la tarjeta. En una pila PC104 esos pines atraviesan la
+              tarjeta de abajo por diseno, asi que este solape es real y
+              esperado, no una interferencia.
+    part_number_verificado:
+      valor: null
+      estado: TBD
+      falta: >-
+        Confirmar que el STEP 3D-25-02929 RevJ es el Kryten-M3-PLUS. Hasta
+        entonces la geometria dibujada es de referencia, no de ficha.
+      pedir_a: Oscar (ACSAR) / AAC Clyde Space
     masa:
       valor: 61.9
       unidad: g
@@ -249,12 +364,53 @@ componentes:
         Se modelan 2 modulos (60 Wh) SOLO para reservar volumen. No es una
         eleccion de diseno cerrada: recalcular al cerrar el presupuesto de energia.
     forma:
-      tipo: caja
+      tipo: step
+      step:
+        ruta: cad/vendor/aac_clyde_space/bateria_3d_01_02686.step
+        estado: referencia
+        fuente: >-
+          Zip "Preliminar viability model" del equipo de ACSAR, recibido el
+          2026-09-20. El STEP declara '3D-01-02686_RevA_defeature'. Huella en
+          cad/vendor/MANIFEST.yaml.
+        orientacion: [0, 0, 90]
+        nota: >-
+          REFERENCIA, no confirmado: el part number 3D-01-02686 NO esta
+          verificado como Optimus-30. Por dentro es UN SOLO modulo PC104 con 8
+          celdas de 35.56 x 57.81 x 5.0 mm en cuatro capas de dos, mas la PCB de
+          1.6 mm; el fichero se llamaba "Batteries" en plural, pero no son dos
+          modulos. Mismo giro de 90 grados alrededor de Z que el OBC, por el
+          mismo motivo.
       dimensiones:
         valor: [95.89, 90.17, 21.55]
         unidad: mm
         estado: confirmado
         fuente: https://www.aac-clyde.space/wp-content/uploads/2021/11/AAC_DataSheet_Optimus.pdf
+        nota: >-
+          DISCREPANCIA con el STEP conectado, ver alternativas. Estas siguen
+          siendo las cotas de FICHA y son las que usan los presupuestos y el
+          chequeo de seccion; lo que se DIBUJA es el STEP.
+        alternativas:
+          - valor: [95.89, 90.17, 27.35]
+            fuente: >-
+              Medido sobre cad/vendor/aac_clyde_space/bateria_3d_01_02686.step,
+              excluidos los 104 pines del conector PC104 pasante.
+            nota: >-
+              5.80 mm mas alto que la ficha. Es la diferencia que mas puede
+              doler de las dos tarjetas: ceil(27.35 / 15.24) = 2 posiciones de
+              separador, las mismas que con 21.55, asi que la pila no crece,
+              pero el margen dentro de esas dos posiciones se queda en 3.1 mm.
+          - valor: [95.89, 90.17, 36.44]
+            fuente: Medido sobre el mismo STEP, envolvente completa.
+            nota: >-
+              Con los 104 pines del conector PC104, que bajan 12.45 mm por
+              debajo de la tarjeta y atraviesan la tarjeta vecina por diseno.
+    part_number_verificado:
+      valor: null
+      estado: TBD
+      falta: >-
+        Confirmar que el STEP 3D-01-02686 RevA es el Optimus-30, y cuantos Wh
+        da: el STEP trae 8 celdas, y de ahi no se deduce la capacidad.
+      pedir_a: Oscar (ACSAR) / AAC Clyde Space
     masa:
       valor: 268.0
       unidad: g
@@ -432,8 +588,13 @@ componentes:
         valor: null
         unidad: mm
         estado: TBD
-        falta: Diametro exterior del barrilete y longitud optica del tubo
-        pedir_a: Aperture Optical Sciences / equipo de optica de ACSAR
+        falta: >-
+          Diametro exterior del barrilete y longitud optica del tubo. YA
+          EXISTE un concepto en formato nativo SolidWorks
+          (Telescopio_concepto.SLDPRT, entrega 'Preliminar viability model'
+          del 2026-09-20), ilegible. Hace falta reexportarlo a STEP AP214 o
+          AP242. Ver cad/vendor/MANIFEST.yaml, seccion 'sin_convertir'.
+        pedir_a: Oscar (ACSAR) / Aperture Optical Sciences
         falta_tambien: STEP del telescopio
         nota: >-
           El brief indica "aprox. 2U" y apertura libre 90 mm, pero 2U no fija el

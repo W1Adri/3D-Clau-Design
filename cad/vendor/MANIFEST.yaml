@@ -1,0 +1,150 @@
+# =====================================================================
+# CLAU - Manifiesto de los STEP de fabricante
+# ---------------------------------------------------------------------
+# Los ficheros CAD de fabricante NO se versionan en git: el repositorio es
+# publico y los CAD de AAC (y de la mayoria de proveedores) suelen venir con
+# condiciones que no permiten redistribuirlos. Hasta revisar esas condiciones,
+# no van a GitHub.
+#
+# Lo que si se versiona es este manifiesto: la huella exacta del fichero que se
+# uso en cada commit del layout. Asi se mantiene la trazabilidad que buscaba
+# cad/vendor/README.md sin publicar el CAD.
+#
+# Quien clona el repositorio SIN los ficheros puede ejecutarlo todo igual: los
+# componentes sin STEP disponible se dibujan con su caja envolvente. El chequeo
+# 'step_de_fabricante' avisa de lo que falta, pero no falla por ello.
+#
+#   uv run clau3d validar   comprueba presencia y huella
+#
+# Para conseguir los ficheros, ver 'origen' mas abajo y cad/vendor/README.md.
+# =====================================================================
+
+meta:
+  actualizado: 2026-09-20
+  nota: >-
+    Entrega "Preliminar viability model" del equipo de ACSAR, recibida el
+    2026-09-20 como un unico zip. De los 10 ficheros del zip solo 4 son STEP;
+    los otros 6 son formato nativo SolidWorks y no hay manera de leerlos.
+
+origen:
+  drive: MySatNotes/components
+  estado: TBD
+  falta: >-
+    Ruta o enlace exacto de la carpeta de Drive donde queda la copia de
+    referencia de estos ficheros.
+  pedir_a: Adria (ACSAR)
+  nota: >-
+    Carpeta acordada: MySatNotes/components. Falta el enlace completo para
+    poder ponerlo en el README.
+
+# ---------------------------------------------------------------------
+# Ficheros legibles, colocados en cad/vendor/
+# ---------------------------------------------------------------------
+ficheros:
+
+  - ruta: aac_clyde_space/iadcs420.step
+    sha256: e913a3541415931b918a8951add76b9dfadf098db73041fadaa5a3b16f5744d9
+    bytes: 70515211
+    producto_declarado: IADCS420-ASM-ST-1.0-defeatured-1.0_defeature (Solid)
+    exportado_con: Open CASCADE STEP processor 7.8 / FreeCAD, 2026-07-27
+    componente: adcs_iadcs420
+    origen: >-
+      Zip "Preliminar viability model" del equipo de ACSAR, recibido el
+      2026-09-20. Fichero original: Attitude_determination_and_control_system.step
+    nota: >-
+      OJO: declara un iADCS4-20, no el iADCS400 del catalogo. Va conectado a un
+      componente aparte, no a adcs_iadcs400. Importarlo tarda del orden de tres
+      minutos y su compound devuelve una caja envolvente infinita: parts.py la
+      calcula solido a solido y cachea el BREP.
+
+  - ruta: aac_clyde_space/obc_3d_25_02929.step
+    sha256: 21aa20bca0fa9fc51f7f40834a47b9b6a68f5e5ecece211ba9adef41d339d4ce
+    bytes: 18458413
+    producto_declarado: 3D-25-02929 RevJ Assembly_defeature
+    exportado_con: SwSTEP 2.0 / SolidWorks 2021, 2022-10-19
+    componente: obc_kryten_m3_plus
+    origen: >-
+      Zip "Preliminar viability model" del equipo de ACSAR, recibido el
+      2026-09-20. Fichero original: Onboard_computer.STEP
+    nota: >-
+      El part number no esta verificado como Kryten-M3-PLUS. Conectado con
+      estado 'referencia' por eso.
+
+  - ruta: aac_clyde_space/bateria_3d_01_02686.step
+    sha256: c08fe371c8e156402cf88f488f5d625ddc930bde7d5352518991711bc0ad74d7
+    bytes: 40639699
+    producto_declarado: 3D-01-02686_RevA_defeature
+    exportado_con: SwSTEP 2.0 / SolidWorks 2021, 2022-10-19
+    componente: bateria_optimus_30
+    origen: >-
+      Zip "Preliminar viability model" del equipo de ACSAR, recibido el
+      2026-09-20. Fichero original: Batteries.STEP
+    nota: >-
+      Un solo modulo PC104, no dos: 8 celdas de 35.56 x 57.81 x 5.0 mm en cuatro
+      capas. El part number no esta verificado como Optimus-30.
+
+  - ruta: descartados/cubecat_terminal_optico.stp
+    sha256: 9c85d0245b0e5f0dc55e4516d566ff14c497f52899a873f0d9ed600f4349bd4f
+    bytes: 13578272
+    producto_declarado: CubeCAT_IF_20230214
+    exportado_con: Spatial InterOp 3D, 2023-02-14
+    componente: null
+    origen: >-
+      Zip "Preliminar viability model" del equipo de ACSAR, recibido el
+      2026-09-20. Fichero original: Modulo_optico_clasico_y_PAT_integrado.stp
+    nota: >-
+      DESCARTADO. Es el terminal laser CubeCAT (AAC Hyperion), un cubo integrado
+      de 97.6 x 102.6 x 97.6 mm: la arquitectura anterior al 2026-09-19, no el
+      payload de CLAU. No se conecta a ningun componente y no entra en el
+      ensamblaje. Se conserva solo como registro de lo que se descarto.
+
+# ---------------------------------------------------------------------
+# Ficheros de la misma entrega que NO se pueden leer
+# ---------------------------------------------------------------------
+# Formato nativo SolidWorks 2015+ (contenedor propietario). Ni CadQuery ni
+# FreeCAD lo abren y no hay conversor libre. Quedan aqui con su huella para
+# poder emparejarlos con el STEP cuando llegue.
+sin_convertir:
+  pedir_a: Oscar (ACSAR)
+  formato_pedido: STEP AP214 o AP242
+  ficheros:
+    - nombre: Chasis.SLDPRT
+      sha256: 24e09ed3e7ed231975b80b3ecd2caa2f029da291b0342f912853236c548a5f95
+      bytes: 2001482
+      bloquea: >-
+        Sustituir el chasis generico de paredes uniformes por el real. Es el
+        punto 4 de "que haria falta a continuacion" y la razon de que los dos
+        chequeos de seccion salgan como no comprobables.
+    - nombre: Chasis_base.SLDPRT
+      sha256: 92281d24ae001d57992f1904125e01956aaf1aeb1cf9315180f48e48d1b3f118
+      bytes: 1791258
+      bloquea: Igual que Chasis.SLDPRT.
+    - nombre: Telescopio_concepto.SLDPRT
+      sha256: 12b42b7847d178d29f5c3758b4e171b2a5e3416d2dad19f6f8b15b8b653338ca
+      bytes: 435682
+      bloquea: >-
+        Diametro exterior del barrilete y longitud real del telescopio. Son dos
+        de los tres datos que mas cosas bloquean.
+    - nombre: Power_control_and_distribution_unit.SLDPRT
+      sha256: 33620645f7a9a99506f4695ead654e8522de0b53195da5a5edc53deefe3ebb1b
+      bytes: 13273037
+      bloquea: >-
+        Ni siquiera se sabe a que componente del catalogo corresponde. Puede ser
+        el Starbuck-Nano-PLUS o una unidad distinta.
+    - nombre: 1U_propulsion_module.sldprt
+      sha256: 4a9128f8ebeda0c77ae8376a4dc45c5f29707caafadc51687d6af0d974cfd380
+      bytes: 13293293
+      bloquea: Geometria del modulo de propulsion, que en el catalogo es opcional.
+    - nombre: Ensamblaje_preliminar.SLDASM
+      sha256: 3cfca12a35a845dbb0f8c2b0e2171d7ceeb542e0cd4adcb170b185ec819cbde5
+      bytes: 109761116
+      bloquea: >-
+        La distribucion que propone el equipo. Sin el no se puede comparar con
+        la de data/layout.yaml.
+
+# Entrega completa, por si hace falta rehacer la extraccion.
+entrega:
+  nombre: Preliminar_viability_model.zip
+  sha256: b439264f59b113ba3999aac908c507c8cb187ab7b575fb0c883d2797925013c1
+  bytes: 164576317
+  recibido: 2026-09-20

@@ -78,6 +78,8 @@ def masa(catalogo: Catalogo) -> Presupuesto:
     filas: list[FilaPresupuesto] = []
     sin_dato: list[str] = []
     for componente in catalogo.componentes:
+        if not componente.cuenta_en_presupuesto:  # alternativa en estudio
+            continue
         fila = _fila(componente, componente.masa)
         if fila is None or fila.total is None:
             sin_dato.append(componente.id)
@@ -98,6 +100,8 @@ def potencia(catalogo: Catalogo, pico: bool = False) -> Presupuesto:
     sin_dato: list[str] = []
     for componente in catalogo.componentes:
         if componente.categoria == "estructura":
+            continue
+        if not componente.cuenta_en_presupuesto:  # alternativa en estudio
             continue
         magnitud = componente.potencia_pico if pico else componente.potencia_nominal
         if not magnitud.esta_declarada:

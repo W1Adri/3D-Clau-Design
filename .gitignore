@@ -11,6 +11,33 @@ __pycache__/
 # cad/generated/
 # reports/
 
+# CAD de fabricante. NO se versionan: el repositorio es publico y las
+# condiciones de uso de los CAD de AAC y demas proveedores estan sin revisar.
+# Lo que si se versiona es cad/vendor/MANIFEST.yaml, con la huella SHA-256 de
+# cada fichero, y los README de las carpetas. Ver cad/vendor/README.md para
+# saber de donde bajarlos.
+cad/vendor/**/*.step
+cad/vendor/**/*.stp
+cad/vendor/**/*.STEP
+cad/vendor/**/*.STP
+cad/vendor/**/*.sldprt
+cad/vendor/**/*.SLDPRT
+cad/vendor/**/*.SLDASM
+cad/vendor/*.zip
+!cad/vendor/MANIFEST.yaml
+!cad/vendor/**/README.md
+
+# El ensamblaje completo, desde que hay geometria de fabricante dentro. Son
+# 175 MB de STEP y 46 MB de GLB, y sobre todo: CONTIENEN el CAD de AAC, asi que
+# versionarlos seria redistribuirlo por la puerta de atras. Se regeneran con
+# `uv run clau3d ensamblar` y `uv run clau3d ver`.
+cad/generated/clau_6u.step
+cad/generated/clau_6u.glb
+
+# Cache de importacion de STEP. Importar el CAD del ADCS tarda minutos; el
+# BREP cacheado se lee en menos de un segundo. Se rehace solo.
+.cache/
+
 # Sistema
 .DS_Store
 *.swp

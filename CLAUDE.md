@@ -11,15 +11,16 @@ repositorio; esto explica **por qué** está como está y **qué falta por decid
 
 | | |
 |---|---|
-| Catálogo | 28 componentes, 0 problemas de integridad |
-| Con envolvente conocida | **9 de 28** |
-| Datos pendientes (TBD) | **49** |
-| Discrepancias entre fuentes | **4** |
-| Tests | **54**, todos en verde |
+| Catálogo | 29 componentes, 0 problemas de integridad |
+| Con envolvente conocida | **10 de 29** |
+| Datos pendientes (TBD) | **53** |
+| Discrepancias entre fuentes | **6** |
+| Tests | **73**, todos en verde |
 | Distribución | **CONFIRMADA** el 2026-09-20: dos columnas de 3U, moduladores en la franja lateral |
 | Piezas colocadas | **8 de 27**. Las otras 19 tienen geometría TBD |
+| Geometría real de fabricante | **3 de las 8** piezas colocadas salen ya de un STEP (§9) |
 | Riesgos abiertos | **1**: acoplamiento térmico modulador–barrilete (§3.6) |
-| Zona útil | 221.7 × 95.4 × 361.4 mm = **7.64 L**, de la que quedan **6.25 L** libres |
+| Zona útil | 221.7 × 95.4 × 361.4 mm = **7.64 L**, de la que quedan **5.84 L** libres |
 
 Funciona de punta a punta: catálogo validado, layout generado, ensamblaje
 exportado a STEP, interferencias, conexiones, volumen, presupuestos, vistas e
@@ -27,7 +28,7 @@ informes. Sin interferencias ni desbordes con las 8 piezas colocadas.
 Para mirarlo, `uv run clau3d ver` (§8).
 
 La limitación real no es el modelo, son los datos: **19 de 27 componentes no
-tienen envolvente**, así que el volumen libre de 6.25 L es un techo, no una
+tienen envolvente**, así que el volumen libre de 5.84 L es un techo, no una
 cifra de diseño.
 
 ---
@@ -51,6 +52,17 @@ cifra de diseño.
   produce frases sin sentido como «la envolvente 6U mide 8.28 U». Aquí los
   volúmenes van en **cm³ y litros**, las longitudes en **mm**, y «6U» se refiere
   siempre al formato de la envolvente exterior (226.3 × 100 × 366 mm).
+- **Un STEP lleva procedencia, igual que un número.** El bloque `forma.step`
+  del catálogo exige `estado` y `fuente`, y `validar` falla sin ellos. Un STEP
+  `referencia` es el de un producto parecido, o el de uno cuyo part number no se
+  ha verificado; se dibuja en naranja y el informe lo dice. La geometría
+  dibujada manda sobre la ficha a la hora de colorear: una pieza con ficha
+  confirmada y STEP de referencia sale como referencia, porque lo que se está
+  viendo es el STEP.
+- **El CAD de fabricante no se versiona; su huella sí.** El repositorio es
+  público y las condiciones de uso de los CAD de AAC están sin revisar. En git
+  va `cad/vendor/MANIFEST.yaml` con el SHA-256 de cada fichero. Quien clone sin
+  los CAD lo ejecuta todo igual, con cajas envolventes. Ver §9.
 - **Una comprobación circular no es una comprobación.** Si una cota se dedujo de
   una pieza, comprobar esa misma pieza contra esa cota devuelve la hipótesis, no
   un resultado. Sale como `no comprobable`, igual que un chequeo sin datos.
@@ -301,6 +313,46 @@ chequeos de sección (`seccion_componentes` y `contorno_pc104`).
 - **PHOTON, potencia por cara de 3U**: 9 W (ficha, "up to 9W") frente a 9.25 W
   (brief).
 
+### 4.5 La entrega del equipo trae otro ADCS y otras alturas de tarjeta
+
+Del zip `Preliminar_viability_model.zip` (2026-09-20). Detalle en §9.
+
+- **El ADCS del modelo preliminar es un iADCS4-20, no el iADCS400 del brief.**
+  El STEP declara `IADCS420-ASM-ST-1.0-defeatured`. Medido: 95.40 × 93.90 ×
+  74.10 mm frente a los 95.4 × 95.9 × 67.3 del 400. AAC **no publica ficha** del
+  4-20: el STEP es la única fuente que hay. Está en el catálogo como
+  `adcs_iadcs420`, marcado `alternativa_de: adcs_iadcs400`, así que **no suma en
+  ningún presupuesto** — habría dos ADCS a bordo.
+- **Los 2 mm de menos en Y importan.** El iADCS400 es lo que fija el espesor de
+  pared máximo en 2.30 mm (§4.3). Con el 4-20, esa cota pasaría a
+  (100.0 − 93.9) / 2 = **3.05 mm** y la zona útil crecería. Mientras el 4-20 sea
+  una alternativa en estudio, la cota de trabajo sigue siendo la del 400.
+  Los 6.8 mm de más de altura no cuestan nada en la pila:
+  `ceil(74.1 / 15.24) = 5` posiciones, las mismas que con 67.3.
+- **Las dos tarjetas AAC del zip son más altas que su ficha.** Con el conector
+  PC104 pasante (104 pines de 0.64 × 0.64 × 12.45 mm) y sin él:
+
+  | | ficha | STEP sin pines | STEP entero |
+  |---|---|---|---|
+  | Kryten-M3-PLUS (`3D-25-02929 RevJ`) | 5.51 mm | **16.20** | **23.24** |
+  | Optimus-30 (`3D-01-02686 RevA`) | 21.55 mm | **27.35** | **36.44** |
+
+  Las tres cifras están registradas en `alternativas`. La de ficha mide «from
+  top PCB to lowest component» (§5) y no incluye el cuerpo de los conectores.
+  **Ninguno de los dos part numbers está verificado** como Kryten ni como
+  Optimus: por eso los dos STEP van conectados con estado `referencia`.
+  Tampoco son dos baterías: el fichero se llamaba «Batteries» en plural, pero
+  por dentro es **un solo módulo** con 8 celdas de 35.56 × 57.81 × 5 mm en
+  cuatro capas.
+- **Lo que no cambia.** Con la geometría real, `data/layout.yaml` sale idéntico
+  y siguen sin aparecer interferencias ni desbordes. El par de baterías es el
+  caso interesante: sus cajas envolventes solapan **51.6 cm³** por los pines
+  pasantes, o sea que el prefiltro las manda a la booleana, y la booleana
+  devuelve **0**. Los pines de una pasan limpios por al lado de la otra, que es
+  como debe funcionar una pila PC104. Lo que sí baja es el volumen libre: de
+  6.25 L a **5.84 L**, porque lo que ocupan las tarjetas ya no es su caja de
+  ficha.
+
 ---
 
 ## 5. Avisos sobre los datos
@@ -323,11 +375,29 @@ chequeos de sección (`seccion_componentes` y `contorno_pc104`).
 
 ## 6. Qué haría falta a continuación
 
-0. **Validar el riesgo térmico de §3.6** con el equipo térmico: los moduladores
+0. **PEDIR A ÓSCAR LOS STEP DE LOS 5 FICHEROS SOLIDWORKS.** Es lo más barato
+   de resolver y lo que más desbloquea. La entrega del 2026-09-20 trae en
+   formato nativo SolidWorks, que **no hay manera de leer**, justo las dos
+   piezas que más bloquean: `Chasis.SLDPRT` + `Chasis_base.SLDPRT` (punto 7 de
+   esta lista, y la razón de que los dos chequeos de sección salgan como no
+   comprobables) y `Telescopio_concepto.SLDPRT` (el diámetro y la longitud del
+   punto 4). Más `Power_control_and_distribution_unit.SLDPRT`, que ni siquiera
+   se sabe a qué componente corresponde, `1U_propulsion_module.sldprt` y
+   `Ensamblaje_preliminar.SLDASM`, con el que se podría comparar la
+   distribución del equipo con la de `data/layout.yaml`. **Formato: STEP AP214
+   o AP242.** Huellas y detalle en `cad/vendor/MANIFEST.yaml`, sección
+   `sin_convertir`.
+1. **Confirmar qué ADCS lleva CLAU**, iADCS400 o iADCS4-20 (§4.5), y por qué el
+   modelo preliminar trae el 4-20 cuando el brief cita el 400. Ahora mismo hay
+   dos componentes en el catálogo para un solo hueco de la pila.
+2. **Verificar los part numbers `3D-25-02929` y `3D-01-02686`** con AAC: si son
+   el Kryten-M3-PLUS y el Optimus-30, sus STEP pasan de `referencia` a
+   `confirmado` y las alturas de ficha dejan de contradecir la geometría.
+3. **Validar el riesgo térmico de §3.6** con el equipo térmico: los moduladores
    acoplados al barrilete del telescopio. No bloquea el layout, pero puede
    obligar a devolverlos a la bandeja, y entonces el telescopio vuelve a tener
    techo de 176.4 mm.
-1. **Los tres datos que bloquean más cosas**:
+4. **Los tres datos que bloquean más cosas**:
    - **STEP del telescopio** (Óscar / Aperture Optical Sciences): diámetro
      exterior del barrilete **y longitud real**. El diámetro decide si el payload
      cabe; la longitud sustituye a los 200 mm provisionales de
@@ -338,14 +408,14 @@ chequeos de sección (`seccion_componentes` y `contorno_pc104`).
      distribución tiene su punto flojo.
    - **Paso de apilamiento real del chasis** (equipo de estructura). Ahora se usa
      el estándar PC/104; el real puede cambiar los 259 mm de pila.
-2. **Alturas de PCB-1, PCB-2 y PCB-3.** Con ellas las tres dejan de ser reservas
+5. **Alturas de PCB-1, PCB-2 y PCB-3.** Con ellas las tres dejan de ser reservas
    y pasan a ser piezas colocadas.
-3. **Declarar los keep-out del haz óptico**, cuando lleguen los diámetros de haz.
+6. **Declarar los keep-out del haz óptico**, cuando lleguen los diámetros de haz.
    Ahora `keep_out: []` a propósito: inventar medidas daría una falsa sensación
    de comprobación.
-4. **Sustituir el chasis genérico por el STEP del equipo**, con lo que desaparece
+7. **Sustituir el chasis genérico por el STEP del equipo**, con lo que desaparece
    la hipótesis de espesor de pared y la zona útil pasa a ser real.
-5. **Cerrar el encaminamiento de los 4.1 W del láser**: directo del bus del EPS o
+8. **Cerrar el encaminamiento de los 4.1 W del láser**: directo del bus del EPS o
    a través de PCB-2.
 
 ## 7. Notas de implementación
@@ -358,6 +428,23 @@ chequeos de sección (`seccion_componentes` y `contorno_pc104`).
   X-Z. Paso de 10 mm por defecto.
 - `clau3d informe` devuelve código de salida **1** si hay chequeos críticos o
   interferencias, para poder engancharlo a CI.
+- **Importar un STEP grande es carísimo.** El del iADCS4-20 tarda ~161 s. Se
+  cachea en BREP bajo `.cache/step/`, con la clave hecha de ruta + tamaño +
+  mtime, y a partir de ahí se lee en menos de un segundo. La caché se rehace
+  sola y no se versiona.
+- **La geometría real cuesta minutos, no segundos.** Con tres piezas de STEP el
+  ensamblaje pasa de 8 sólidos a ~550, y `clau3d todo` se va a **~5 min**:
+  ~57 s de booleanas de interferencia y el resto en las vistas SVG y los
+  exportes, que proyectan todos los sólidos. Conviene saberlo antes de
+  encadenarlo a CI. El importe del STEP ya no es el problema: con la caché son
+  0.7 s y 1.7 s.
+- **`BoundingBox()` sobre un compound importado puede mentir.** El del
+  iADCS4-20 devuelve coordenadas de ~10^97 mm: basta una entidad degenerada
+  entre miles para envenenarlo, y sus 210 sólidos están perfectamente. Por eso
+  `parts.caja_de_solidos()` la calcula **sólido a sólido** y lanza `ErrorDeDatos`
+  por encima de `COORDENADA_ABSURDA_MM`. Si esa caja llegara al prefiltro de
+  interferencias, todo solaparía con todo y el informe dejaría de significar
+  nada. Es el mismo criterio de siempre: antes un error que un `ok` falso.
 
 ---
 
@@ -398,11 +485,101 @@ Recargar el navegador basta; no hace falta reiniciar.
    nodo del ensamblaje. `tests/test_visor.py` comprueba que cada nodo del JSON
    existe en el GLB, que es justo lo que se rompe al renombrar una colocación.
 
-### Los STEP de proveedor
+---
 
-`cad/vendor/` tiene ahora **una carpeta por proveedor** y se versiona en git, para
-que cada commit del layout quede ligado al fichero exacto que se usó. Las reglas
-de nombre y el procedimiento de alta están en `cad/vendor/README.md`. Lo que hay
-que mirar al recibir un STEP es **el origen y los ejes**: el modelo espera cada
-pieza centrada en su propio origen, y muchos proveedores la entregan con el
-origen en una esquina.
+## 9. El CAD de fabricante (`cad/vendor/`)
+
+### Qué trajo la entrega del 2026-09-20
+
+`Preliminar_viability_model.zip`, del equipo. Diez ficheros, de los que **solo
+cuatro son STEP**:
+
+| fichero original | qué es de verdad | dónde está ahora |
+|---|---|---|
+| `Attitude_determination_and_control_system.step` | `IADCS420-ASM-ST-1.0` — un **4-20**, no el 400 | `aac_clyde_space/iadcs420.step` |
+| `Onboard_computer.STEP` | `3D-25-02929 RevJ` (AAC, SolidWorks 2021) | `aac_clyde_space/obc_3d_25_02929.step` |
+| `Batteries.STEP` | `3D-01-02686 RevA` — **un** módulo, no dos | `aac_clyde_space/bateria_3d_01_02686.step` |
+| `Modulo_optico_clasico_y_PAT_integrado.stp` | **`CubeCAT_IF_20230214`** | `descartados/` — ver abajo |
+| `Chasis.SLDPRT`, `Chasis_base.SLDPRT`, `Telescopio_concepto.SLDPRT`, `Power_control_and_distribution_unit.SLDPRT`, `1U_propulsion_module.sldprt`, `Ensamblaje_preliminar.SLDASM` | formato nativo SolidWorks, **ilegible** | pendiente §6.0 |
+
+Lo que las cotas dicen y lo que costó encajarlas está en §4.5.
+
+### Por qué el CubeCAT está en `descartados/`
+
+Es el terminal láser **CubeCAT de AAC Hyperion**: un cubo integrado de
+97.6 × 102.6 × 97.6 mm que resuelve telescopio, banco y PAT de una pieza. Eso es
+la **arquitectura anterior al 2026-09-19**, no el payload de CLAU, que separa el
+Cassegrain de Aperture Optical Sciences, el banco óptico y la bandeja de fibra.
+
+**No se conecta a ningún componente y no entra en el ensamblaje.** Se conserva
+solo como registro de lo que se descartó, con su huella en el manifiesto, para
+que dentro de seis meses nadie tenga que adivinar por qué había un CubeCAT en el
+zip. Si alguien lo conectara al catálogo, la distribución de §3 dejaría de tener
+sentido: no hay dónde meter un cubo de 1U en la columna de payload sin vaciar la
+bandeja y el banco.
+
+### Los ficheros no van a git; su huella sí
+
+El repositorio es **público** y las condiciones de uso de los CAD de AAC (y de la
+mayoría de proveedores) no permiten redistribuirlos, o no se han revisado. Hasta
+aclararlo, `cad/vendor/**/*.step`, `*.stp`, `*.sldprt` y `*.zip` están en
+`.gitignore`.
+
+Lo que se versiona es **`cad/vendor/MANIFEST.yaml`**: por cada fichero, su ruta,
+SHA-256, tamaño, el producto que declara el propio STEP, quién lo pasó y cuándo,
+y la copia de referencia en Drive (`MySatNotes/components`). Así se conserva la
+trazabilidad commit ↔ fichero sin publicar el CAD.
+
+El chequeo **`step_de_fabricante`** compara disco contra manifiesto:
+
+- fichero **ausente** → `atención`, **no falla**. Quien clone el repositorio sin
+  los CAD dibuja esas piezas con su caja envolvente de ficha y puede ejecutarlo
+  todo. Es el comportamiento que había antes de que llegara ningún STEP.
+- **huella distinta** → `falla`. El modelo se dibujó con una geometría que no es
+  la que el manifiesto declara.
+- CAD en `cad/vendor/` **sin declarar** → `atención`. Un fichero sin procedencia.
+
+**`cad/generated/` se parte en dos.** Los STEP **por pieza** (unos 15 KB cada
+uno) y `escena.json` (43 KB) siguen en git: son cajas envolventes generadas desde
+el catálogo y no contienen nada de nadie. El **ensamblaje completo** ya no.
+Desde que hay geometría de fabricante dentro, `clau_6u.step` pesa **175 MB** y
+`clau_6u.glb` **46 MB** — pero el tamaño es lo de menos: **contienen el CAD de
+AAC**, así que versionarlos sería redistribuirlo por la puerta de atrás, justo lo
+que evita el `.gitignore` de `cad/vendor/`. Se regeneran con `clau3d ensamblar` y
+`clau3d ver`.
+
+Y una pieza que pasa de caja a STEP de fabricante **deja de generarse** ahí:
+`exportar_generados()` borra el fichero que hubiera quedado, porque si no el
+repositorio seguiría enseñando una caja envolvente de una pieza que el modelo ya
+dibuja con su geometría real. Pasó con `obc_kryten_m3_plus.step` y
+`bateria_optimus_30.step`.
+
+### Las dos correcciones que el modelo aplica solo
+
+Un STEP de proveedor casi nunca viene como el modelo lo espera, y la respuesta
+**no** es mover coordenadas a mano en el layout. Las dos correcciones viven en el
+catálogo, dentro del bloque `forma.step`:
+
+- **`recentrar`** (por defecto `true`) lleva el centro de la caja envolvente al
+  origen. El ensamblaje coloca cada pieza por su centro; ninguno de los cuatro
+  STEP de esta entrega venía centrado.
+- **`orientacion`** gira el sólido alrededor de X, Y y Z, en ese orden, hasta los
+  ejes que el catálogo declara en `dimensiones`. **No cambia ninguna cota**, y
+  hay un test que lo comprueba. Las tarjetas AAC llegan con X e Y intercambiados
+  (`[0, 0, 90]`); sin ese giro el lado de 95.89 mm caería por Y, que solo tiene
+  95.4 mm de altura interior, y saldría un desborde que no es real. El iADCS4-20
+  llega con el eje de apilamiento por Y (`[90, 0, 0]`).
+
+### Un STEP lleva estado y fuente
+
+`forma.step` exige `estado` y `fuente`, y `validar` falla sin ellos, por el mismo
+motivo que lo exige un número. Los tres STEP conectados están como
+**`referencia`**, no como `confirmado`: de dos no se ha verificado el part
+number, y del tercero AAC no publica ficha. Se dibujan en naranja y el informe lo
+dice. El estado del STEP **manda sobre el de la ficha** a la hora de colorear: lo
+que se está viendo en pantalla es el STEP.
+
+`tests/test_step_fabricante.py` comprueba el mecanismo con geometría inventada,
+por el mismo motivo que `test_interferencias.py`: los STEP reales no se
+versionan, así que un test que solo mirara esos ficheros pasaría o fallaría según
+quién los tenga descargados.

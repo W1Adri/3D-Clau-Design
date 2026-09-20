@@ -7,13 +7,14 @@ No editar a mano: los numeros salen de `data/components.yaml`.
 - Norma: CubeSat Design Specification Rev. 14.1, The CubeSat Program, Cal Poly SLO
 - Estado del layout: **confirmada** (8 piezas colocadas)
 
-Total de datos pendientes: **49**.
+Total de datos pendientes: **53**.
 
-## AAC Clyde Space (6)
+## AAC Clyde Space (7)
 
 | componente | magnitud | que falta |
 |---|---|---|
 | adcs_iadcs400 | adcs_iadcs400.masa | Masa exacta de la configuracion elegida |
+| adcs_iadcs420 | adcs_iadcs420.masa | Masa del iADCS4-20. No hay ficha publica de este producto. |
 | antena_quasar_wsant | antena_quasar_wsant.dimensiones | Dimensiones y cara de montaje de la antena |
 | antena_quasar_wsant | antena_quasar_wsant.masa | Masa |
 | radio_uhf_pulsar_vutrx | radio_uhf_pulsar_vutrx.dimensiones | Dimensiones |
@@ -33,12 +34,6 @@ Total de datos pendientes: **49**.
 |---|---|---|
 | telescopio_cassegrain | telescopio_cassegrain.masa | Masa |
 | telescopio_cassegrain | telescopio_cassegrain.longitud_optica | Longitud del tubo. Interesa distancia focal larga; se admite acortar. |
-
-## Aperture Optical Sciences / equipo de optica de ACSAR (1)
-
-| componente | magnitud | que falta |
-|---|---|---|
-| telescopio_cassegrain | telescopio_cassegrain.dimensiones | Diametro exterior del barrilete y longitud optica del tubo |
 
 ## Equipo de PAT de ACSAR (4)
 
@@ -128,12 +123,38 @@ Total de datos pendientes: **49**.
 |---|---|---|
 | qrng_idq20mc1_s3 | qrng_idq20mc1_s3.masa | Masa por unidad |
 
-## Discrepancias entre fuentes (4)
+## Oscar (ACSAR) / AAC Clyde Space (3)
+
+| componente | magnitud | que falta |
+|---|---|---|
+| adcs_iadcs420 | adcs_iadcs420.modelo_confirmado | Confirmar QUE ADCS lleva CLAU, iADCS400 o iADCS4-20, y por que el modelo preliminar trae el 4-20 cuando el brief cita el 400. Hasta saberlo hay dos componentes en el catalogo para un solo hueco de la pila. |
+| obc_kryten_m3_plus | obc_kryten_m3_plus.part_number_verificado | Confirmar que el STEP 3D-25-02929 RevJ es el Kryten-M3-PLUS. Hasta entonces la geometria dibujada es de referencia, no de ficha. |
+| bateria_optimus_30 | bateria_optimus_30.part_number_verificado | Confirmar que el STEP 3D-01-02686 RevA es el Optimus-30, y cuantos Wh da: el STEP trae 8 celdas, y de ahi no se deduce la capacidad. |
+
+## Oscar (ACSAR) / Aperture Optical Sciences (1)
+
+| componente | magnitud | que falta |
+|---|---|---|
+| telescopio_cassegrain | telescopio_cassegrain.dimensiones | Diametro exterior del barrilete y longitud optica del tubo. YA EXISTE un concepto en formato nativo SolidWorks (Telescopio_concepto.SLDPRT, entrega 'Preliminar viability model' del 2026-09-20), ilegible. Hace falta reexportarlo a STEP AP214 o AP242. Ver cad/vendor/MANIFEST.yaml, seccion 'sin_convertir'. |
+
+## Discrepancias entre fuentes (6)
 
 ### adcs_iadcs400.potencia_pico
 
 - Valor usado: `4.0` - fuente: Web AAC Clyde Space (via brief ACSAR 2026-09-19)
 - Alternativa: `5.0` - fuente: satsearch.co (via brief ACSAR 2026-09-19) - satsearch publica 5 W de pico para el mismo producto.
+
+### obc_kryten_m3_plus.dimensiones
+
+- Valor usado: `[95.89, 90.17, 5.51]` - fuente: https://www.aac-clyde.space/wp-content/uploads/2021/10/AAC_DataSheet_Kryten.pdf
+- Alternativa: `[95.89, 90.17, 16.2]` - fuente: Medido sobre cad/vendor/aac_clyde_space/obc_3d_25_02929.step, excluidos los 104 pines del conector PC104 pasante. - Casi 11 mm mas de altura que la ficha. La ficha mide "from top PCB to lowest component" y el STEP incluye el cuerpo de los conectores.
+- Alternativa: `[95.89, 90.17, 23.24]` - fuente: Medido sobre el mismo STEP, envolvente completa. - Con los 104 pines del conector PC104, que bajan 12.45 mm por debajo de la tarjeta. En una pila PC104 esos pines atraviesan la tarjeta de abajo por diseno, asi que este solape es real y esperado, no una interferencia.
+
+### bateria_optimus_30.dimensiones
+
+- Valor usado: `[95.89, 90.17, 21.55]` - fuente: https://www.aac-clyde.space/wp-content/uploads/2021/11/AAC_DataSheet_Optimus.pdf
+- Alternativa: `[95.89, 90.17, 27.35]` - fuente: Medido sobre cad/vendor/aac_clyde_space/bateria_3d_01_02686.step, excluidos los 104 pines del conector PC104 pasante. - 5.80 mm mas alto que la ficha. Es la diferencia que mas puede doler de las dos tarjetas: ceil(27.35 / 15.24) = 2 posiciones de separador, las mismas que con 21.55, asi que la pila no crece, pero el margen dentro de esas dos posiciones se queda en 3.1 mm.
+- Alternativa: `[95.89, 90.17, 36.44]` - fuente: Medido sobre el mismo STEP, envolvente completa. - Con los 104 pines del conector PC104, que bajan 12.45 mm por debajo de la tarjeta y atraviesan la tarjeta vecina por diseno.
 
 ### paneles_photon_side.potencia_por_cara_3u
 

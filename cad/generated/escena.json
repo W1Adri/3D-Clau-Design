@@ -1,5 +1,5 @@
 {
- "generado": "2026-09-20T09:18:24+02:00",
+ "generado": "2026-09-20T10:42:26+02:00",
  "glb": "clau_6u.glb",
  "proyecto": "CLAU",
  "layout": {
@@ -55,11 +55,11 @@
  "resumen": {
   "volumen_exterior_l": 8.28258,
   "volumen_interior_l": 7.643675052000001,
-  "volumen_ocupado_l": 1.3940639202590006,
-  "volumen_libre_l": 6.249611131741,
+  "volumen_ocupado_l": 1.8049264770857092,
+  "volumen_libre_l": 5.838748574914291,
   "fiable": false,
   "piezas_colocadas": 8,
-  "componentes": 28,
+  "componentes": 29,
   "sin_envolvente": [
    "antena_quasar_wsant",
    "radio_uhf_pulsar_vutrx",
@@ -102,8 +102,8 @@
    "pcb2_drivers_opticos",
    "pcb3_pat"
   ],
-  "pendientes_tbd": 49,
-  "discrepancias": 4
+  "pendientes_tbd": 53,
+  "discrepancias": 6
  },
  "zonas": [
   {
@@ -133,8 +133,8 @@
     ]
    },
    "volumen_l": 3.447756,
-   "libre_l": 2.0857020797409995,
-   "fraccion_ocupada": 0.3950551953963681
+   "libre_l": 1.674839522914291,
+   "fraccion_ocupada": 0.5142233026599646
   },
   {
    "id": "z_payload_telescopio",
@@ -371,6 +371,8 @@
    "estado_dato": "confirmado",
    "desde_step": false,
    "step": null,
+   "step_estado": null,
+   "step_nota": null,
    "centro": [
     -60.85,
     0.0,
@@ -471,9 +473,11 @@
    "categoria": "plataforma",
    "subsistema": "OBC",
    "zona": "z_plataforma",
-   "estado_dato": "confirmado",
-   "desde_step": false,
-   "step": null,
+   "estado_dato": "referencia",
+   "desde_step": true,
+   "step": "cad/vendor/aac_clyde_space/obc_3d_25_02929.step",
+   "step_estado": "referencia",
+   "step_nota": "REFERENCIA, no confirmado: el part number 3D-25-02929 NO esta verificado como Kryten-M3-PLUS. Es una tarjeta PC104 de AAC del tamano correcto, y el equipo la llamo \"Onboard_computer\", pero eso no es la ficha. El STEP viene con el contorno girado respecto al catalogo (90.17 por X, 95.89 por Y); los 90 grados alrededor de Z lo llevan a los ejes de 'dimensiones'. Sin ese giro el lado de 95.89 mm caeria por Y, que solo tiene 95.4 mm de altura interior, y saldria un desborde que no es real.",
    "centro": [
     -60.85,
     0.0,
@@ -486,33 +490,33 @@
    ],
    "caja": {
     "min": [
-     -108.795,
-     -45.085,
-     94.125
+     -108.79285593856055,
+     -45.085000000000015,
+     85.2594999398564
     ],
     "max": [
-     -12.905000000000001,
-     45.085,
-     99.635
+     -12.90714406143944,
+     45.085000000000015,
+     108.5005000601436
     ],
     "centro": [
-     -60.85,
+     -60.849999999999994,
      0.0,
      96.88
     ],
     "dims": [
-     95.89,
-     90.17,
-     5.510000000000005
+     95.88571187712111,
+     90.17000000000003,
+     23.241000120287197
     ]
    },
-   "volumen_cm3": 47.64167116300004,
+   "volumen_cm3": 200.9420272873155,
    "requiere_vista_exterior": false,
    "nota": null,
    "color": [
-    0.2999999961013092,
-    0.700000005816421,
-    0.4500000038597685
+    0.9999999999999999,
+    0.5500000090900438,
+    0.0
    ],
    "magnitudes": {
     "dimensiones": {
@@ -524,10 +528,29 @@
      "unidad": "mm",
      "estado": "confirmado",
      "fuente": "https://www.aac-clyde.space/wp-content/uploads/2021/10/AAC_DataSheet_Kryten.pdf",
-     "nota": "La ficha cubre la familia KRYTEN-M3; el sufijo PLUS anade GNSS. La altura 5.51 mm es \"from top PCB to lowest component\": NO es el paso de apilamiento PC104, que se trata aparte (ver pila_pc104).",
+     "nota": "La ficha cubre la familia KRYTEN-M3; el sufijo PLUS anade GNSS. La altura 5.51 mm es \"from top PCB to lowest component\": NO es el paso de apilamiento PC104, que se trata aparte (ver pila_pc104). DISCREPANCIA con el STEP conectado, ver alternativas. Estas siguen siendo las cotas de FICHA y son las que usan los presupuestos y el chequeo de seccion; lo que se DIBUJA es el STEP.",
      "falta": null,
      "pedir_a": null,
-     "discrepancia": []
+     "discrepancia": [
+      {
+       "valor": [
+        95.89,
+        90.17,
+        16.2
+       ],
+       "fuente": "Medido sobre cad/vendor/aac_clyde_space/obc_3d_25_02929.step, excluidos los 104 pines del conector PC104 pasante.",
+       "nota": "Casi 11 mm mas de altura que la ficha. La ficha mide \"from top PCB to lowest component\" y el STEP incluye el cuerpo de los conectores."
+      },
+      {
+       "valor": [
+        95.89,
+        90.17,
+        23.24
+       ],
+       "fuente": "Medido sobre el mismo STEP, envolvente completa.",
+       "nota": "Con los 104 pines del conector PC104, que bajan 12.45 mm por debajo de la tarjeta. En una pila PC104 esos pines atraviesan la tarjeta de abajo por diseno, asi que este solape es real y esperado, no una interferencia."
+      }
+     ]
     },
     "masa": {
      "valor": 61.9,
@@ -571,6 +594,8 @@
    "estado_dato": "confirmado",
    "desde_step": false,
    "step": null,
+   "step_estado": null,
+   "step_nota": null,
    "centro": [
     -60.85,
     0.0,
@@ -668,6 +693,8 @@
    "estado_dato": "referencia",
    "desde_step": false,
    "step": null,
+   "step_estado": null,
+   "step_nota": null,
    "centro": [
     -60.85,
     0.0,
@@ -762,9 +789,11 @@
    "categoria": "plataforma",
    "subsistema": "EPS",
    "zona": "z_plataforma",
-   "estado_dato": "confirmado",
-   "desde_step": false,
-   "step": null,
+   "estado_dato": "referencia",
+   "desde_step": true,
+   "step": "cad/vendor/aac_clyde_space/bateria_3d_01_02686.step",
+   "step_estado": "referencia",
+   "step_nota": "REFERENCIA, no confirmado: el part number 3D-01-02686 NO esta verificado como Optimus-30. Por dentro es UN SOLO modulo PC104 con 8 celdas de 35.56 x 57.81 x 5.0 mm en cuatro capas de dos, mas la PCB de 1.6 mm; el fichero se llamaba \"Batteries\" en plural, pero no son dos modulos. Mismo giro de 90 grados alrededor de Z que el OBC, por el mismo motivo.",
    "centro": [
     -60.85,
     0.0,
@@ -777,14 +806,14 @@
    ],
    "caja": {
     "min": [
-     -108.795,
-     -45.085,
-     -43.434999999999995
+     -108.79655882475348,
+     -45.085000000000015,
+     -50.881500057270685
     ],
     "max": [
-     -12.905000000000001,
-     45.085,
-     -21.884999999999994
+     -12.903441175246533,
+     45.085000000000015,
+     -14.438499942729308
     ],
     "centro": [
      -60.85,
@@ -792,18 +821,18 @@
      -32.66
     ],
     "dims": [
-     95.89,
-     90.17,
-     21.55
+     95.89311764950695,
+     90.17000000000003,
+     36.44300011454138
     ]
    },
-   "volumen_cm3": 186.329948015,
+   "volumen_cm3": 315.11104836619654,
    "requiere_vista_exterior": false,
    "nota": null,
    "color": [
-    0.2999999961013092,
-    0.700000005816421,
-    0.4500000038597685
+    0.9999999999999999,
+    0.5500000090900438,
+    0.0
    ],
    "magnitudes": {
     "dimensiones": {
@@ -815,10 +844,29 @@
      "unidad": "mm",
      "estado": "confirmado",
      "fuente": "https://www.aac-clyde.space/wp-content/uploads/2021/11/AAC_DataSheet_Optimus.pdf",
-     "nota": null,
+     "nota": "DISCREPANCIA con el STEP conectado, ver alternativas. Estas siguen siendo las cotas de FICHA y son las que usan los presupuestos y el chequeo de seccion; lo que se DIBUJA es el STEP.",
      "falta": null,
      "pedir_a": null,
-     "discrepancia": []
+     "discrepancia": [
+      {
+       "valor": [
+        95.89,
+        90.17,
+        27.35
+       ],
+       "fuente": "Medido sobre cad/vendor/aac_clyde_space/bateria_3d_01_02686.step, excluidos los 104 pines del conector PC104 pasante.",
+       "nota": "5.80 mm mas alto que la ficha. Es la diferencia que mas puede doler de las dos tarjetas: ceil(27.35 / 15.24) = 2 posiciones de separador, las mismas que con 21.55, asi que la pila no crece, pero el margen dentro de esas dos posiciones se queda en 3.1 mm."
+      },
+      {
+       "valor": [
+        95.89,
+        90.17,
+        36.44
+       ],
+       "fuente": "Medido sobre el mismo STEP, envolvente completa.",
+       "nota": "Con los 104 pines del conector PC104, que bajan 12.45 mm por debajo de la tarjeta y atraviesan la tarjeta vecina por diseno."
+      }
+     ]
     },
     "masa": {
      "valor": 268.0,
@@ -859,9 +907,11 @@
    "categoria": "plataforma",
    "subsistema": "EPS",
    "zona": "z_plataforma",
-   "estado_dato": "confirmado",
-   "desde_step": false,
-   "step": null,
+   "estado_dato": "referencia",
+   "desde_step": true,
+   "step": "cad/vendor/aac_clyde_space/bateria_3d_01_02686.step",
+   "step_estado": "referencia",
+   "step_nota": "REFERENCIA, no confirmado: el part number 3D-01-02686 NO esta verificado como Optimus-30. Por dentro es UN SOLO modulo PC104 con 8 celdas de 35.56 x 57.81 x 5.0 mm en cuatro capas de dos, mas la PCB de 1.6 mm; el fichero se llamaba \"Batteries\" en plural, pero no son dos modulos. Mismo giro de 90 grados alrededor de Z que el OBC, por el mismo motivo.",
    "centro": [
     -60.85,
     0.0,
@@ -874,14 +924,14 @@
    ],
    "caja": {
     "min": [
-     -108.795,
-     -45.085,
-     -73.915
+     -108.79655882475348,
+     -45.085000000000015,
+     -81.36150005727069
     ],
     "max": [
-     -12.905000000000001,
-     45.085,
-     -52.365
+     -12.903441175246533,
+     45.085000000000015,
+     -44.91849994272931
     ],
     "centro": [
      -60.85,
@@ -889,18 +939,18 @@
      -63.14
     ],
     "dims": [
-     95.89,
-     90.17,
-     21.550000000000004
+     95.89311764950695,
+     90.17000000000003,
+     36.44300011454138
     ]
    },
-   "volumen_cm3": 186.32994801500004,
+   "volumen_cm3": 315.11104836619654,
    "requiere_vista_exterior": false,
    "nota": null,
    "color": [
-    0.2999999961013092,
-    0.700000005816421,
-    0.4500000038597685
+    0.9999999999999999,
+    0.5500000090900438,
+    0.0
    ],
    "magnitudes": {
     "dimensiones": {
@@ -912,10 +962,29 @@
      "unidad": "mm",
      "estado": "confirmado",
      "fuente": "https://www.aac-clyde.space/wp-content/uploads/2021/11/AAC_DataSheet_Optimus.pdf",
-     "nota": null,
+     "nota": "DISCREPANCIA con el STEP conectado, ver alternativas. Estas siguen siendo las cotas de FICHA y son las que usan los presupuestos y el chequeo de seccion; lo que se DIBUJA es el STEP.",
      "falta": null,
      "pedir_a": null,
-     "discrepancia": []
+     "discrepancia": [
+      {
+       "valor": [
+        95.89,
+        90.17,
+        27.35
+       ],
+       "fuente": "Medido sobre cad/vendor/aac_clyde_space/bateria_3d_01_02686.step, excluidos los 104 pines del conector PC104 pasante.",
+       "nota": "5.80 mm mas alto que la ficha. Es la diferencia que mas puede doler de las dos tarjetas: ceil(27.35 / 15.24) = 2 posiciones de separador, las mismas que con 21.55, asi que la pila no crece, pero el margen dentro de esas dos posiciones se queda en 3.1 mm."
+      },
+      {
+       "valor": [
+        95.89,
+        90.17,
+        36.44
+       ],
+       "fuente": "Medido sobre el mismo STEP, envolvente completa.",
+       "nota": "Con los 104 pines del conector PC104, que bajan 12.45 mm por debajo de la tarjeta y atraviesan la tarjeta vecina por diseno."
+      }
+     ]
     },
     "masa": {
      "valor": 268.0,
@@ -959,6 +1028,8 @@
    "estado_dato": "confirmado",
    "desde_step": false,
    "step": null,
+   "step_estado": null,
+   "step_nota": null,
    "centro": [
     91.125,
     0.0,
@@ -1066,6 +1137,8 @@
    "estado_dato": "referencia",
    "desde_step": false,
    "step": null,
+   "step_estado": null,
+   "step_nota": null,
    "centro": [
     104.275,
     0.0,
@@ -1226,8 +1299,8 @@
    "nombre": "Telescopio Cassegrain on-axis, apertura 90 mm",
    "categoria": "payload_optico",
    "subsistema": "terminal_optico",
-   "falta": "Diametro exterior del barrilete y longitud optica del tubo",
-   "pedir_a": "Aperture Optical Sciences / equipo de optica de ACSAR",
+   "falta": "Diametro exterior del barrilete y longitud optica del tubo. YA EXISTE un concepto en formato nativo SolidWorks (Telescopio_concepto.SLDPRT, entrega 'Preliminar viability model' del 2026-09-20), ilegible. Hace falta reexportarlo a STEP AP214 o AP242. Ver cad/vendor/MANIFEST.yaml, seccion 'sin_convertir'.",
+   "pedir_a": "Oscar (ACSAR) / Aperture Optical Sciences",
    "nota": null,
    "color": [
     0.9999999999999999,
@@ -1495,6 +1568,13 @@
    "estado": "atencion",
    "mensaje": "Masa conocida 846 g de un limite de 12000 g (CDS 14.1). Faltan 24 componentes por pesar, incluido el chasis y el telescopio, que son de los mas pesados.",
    "falta": "Masa de: estructura_6u, adcs_iadcs400, antena_quasar_wsant, radio_uhf_pulsar_vutrx, paneles_photon_side, propulsion, telescopio_cassegrain, fsm, dicroico, camara_beacon, laser_beacon_bajada, colimador, bandeja_optica, laser_dfb_1550, mod_intensidad_mxer_ln_10, mod_fase_mpz_ln_10, voa, aislador, filtro_espectral, acoplador_monitor, pcb1_control_qkd, pcb2_drivers_opticos, pcb3_pat, qrng_idq20mc1_s3"
+  },
+  {
+   "id": "step_de_fabricante",
+   "titulo": "STEP de fabricante frente al manifiesto",
+   "estado": "ok",
+   "mensaje": "4 de 4 CAD de fabricante presentes y con la huella del manifiesto.",
+   "falta": null
   }
  ],
  "interferencias": [],
@@ -1545,6 +1625,7 @@
   }
  },
  "no_colocados_con_geometria": [
+  "adcs_iadcs420",
   "qrng_idq20mc1_s3"
  ]
 }

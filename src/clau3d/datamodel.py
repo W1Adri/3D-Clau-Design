@@ -126,6 +126,67 @@ def _magnitud(nombre: str, bruto: Any) -> Magnitud:
     )
 
 
+@dataclass(frozen=True)
+class FuenteStep:
+    """Un STEP de fabricante conectado a un componente, con su procedencia.
+
+    Un STEP no es una magnitud: no tiene valor ni unidad. Pero si tiene estado y
+    fuente, y por el mismo motivo que los tiene un numero. Un STEP 'referencia'
+    es el modelo de un producto parecido, o de uno cuyo part number todavia no se
+    ha verificado contra la ficha; dibujarlo como si fuera el bueno seria
+    exactamente el error que este catalogo existe para evitar.
+
+    ``orientacion`` son los grados a girar el solido importado alrededor de X, Y
+    y Z, en ese orden, ANTES de recentrarlo. Sirve para deshacer el cambio de
+    ejes con el que muchos proveedores exportan: no mueve ninguna cota, solo
+    lleva la pieza al sistema de ejes que el catalogo declara en 'dimensiones'.
+
+    ``recentrar`` lleva el centro de la caja envolvente al origen. El ensamblaje
+    coloca cada pieza por su centro, asi que un STEP con el origen en una esquina
+    aparece desplazado media pieza. Se puede desactivar cuando el origen del STEP
+    sea el punto de montaje bueno.
+    """
+
+    ruta: str
+    estado: str
+    fuente: str | None = None
+    nota: str | None = None
+    orientacion: tuple[float, float, float] = (0.0, 0.0, 0.0)
+    recentrar: bool = True
+
+    @property
+    def girado(self) -> bool:
+        return any(abs(a) > 1e-9 for a in self.orientacion)
+
+
+def _fuente_step(id_componente: str, bruto: Any) -> FuenteStep | None:
+    if bruto is None:
+        return None
+    if not isinstance(bruto, dict):
+        raise ErrorDeDatos(
+            f"{id_componente}: forma.step es {bruto!r}. Un STEP de fabricante "
+            f"necesita un bloque con ruta/estado/fuente, igual que una magnitud."
+        )
+    try:
+        ruta = bruto["ruta"]
+    except KeyError as exc:
+        raise ErrorDeDatos(f"{id_componente}: forma.step sin 'ruta'") from exc
+    orientacion = bruto.get("orientacion") or (0.0, 0.0, 0.0)
+    if len(orientacion) != 3:
+        raise ErrorDeDatos(
+            f"{id_componente}: forma.step.orientacion se esperaba "
+            f"[gx, gy, gz], hay {orientacion!r}"
+        )
+    return FuenteStep(
+        ruta=str(ruta),
+        estado=bruto.get("estado", TBD),
+        fuente=bruto.get("fuente"),
+        nota=bruto.get("nota"),
+        orientacion=tuple(float(v) for v in orientacion),  # type: ignore[arg-type]
+        recentrar=bool(bruto.get("recentrar", True)),
+    )
+
+
 @dataclass
 class Componente:
     id: str
@@ -134,13 +195,14 @@ class Componente:
     subsistema: str
     cantidad: Magnitud
     dimensiones: Magnitud
-    step: str | None
+    step: FuenteStep | None
     masa: Magnitud
     potencia_nominal: Magnitud
     potencia_pico: Magnitud
     opcional: bool
     requiere_vista_exterior: bool
     montado_en: str | None
+    alternativa_de: str | None
     nota: str | None
     extras: dict[str, Magnitud] = field(default_factory=dict)
     bruto: dict = field(default_factory=dict, repr=False)
@@ -150,6 +212,21 @@ class Componente:
     def desde_step(self) -> bool:
         """True si el solido viene de un STEP de fabricante en vez de una caja."""
         return self.step is not None
+
+    @property
+    def cuenta_en_presupuesto(self) -> bool:
+        """False si la pieza no forma parte de la configuracion actual.
+
+        Un componente con ``alternativa_de`` es un candidato en estudio, no algo
+        que vaya a bordo: sumarlo a masa, volumen o la pila contaria dos veces lo
+        mismo. Se queda en el catalogo porque su geometria SI es un dato, y
+        porque la alternativa hay que poder verla.
+        """
+        return self.alternativa_de is None
+
+    @property
+    def step_ruta(self) -> str | None:
+        return self.step.ruta if self.step is not None else None
 
     @property
     def modelable(self) -> bool:
@@ -190,6 +267,15 @@ class Componente:
     # ---- procedencia agregada --------------------------------------
     @property
     def estado_geometria(self) -> str:
+        """Procedencia de lo que se DIBUJA, que no siempre es 'dimensiones'.
+
+        Con un STEP conectado, el solido del ensamblaje sale del STEP y no de la
+        ficha, asi que el estado que cuenta es el del STEP. Si el STEP es de
+        referencia, la pieza se dibuja de color referencia aunque la ficha este
+        confirmada.
+        """
+        if self.step is not None:
+            return self.step.estado
         return self.dimensiones.estado
 
     def magnitudes(self) -> Iterator[Magnitud]:
@@ -204,14 +290,14 @@ class Componente:
 def _componente(bruto: dict) -> Componente:
     forma = bruto.get("forma") or {}
     dims_brutas = forma.get("dimensiones")
-    step = forma.get("step")
+    step = _fuente_step(bruto["id"], forma.get("step"))
 
     # Campos reservados que ya tienen su propio atributo.
     reservados = {
         "id", "nombre", "categoria", "subsistema", "cantidad", "forma",
         "masa", "potencia_nominal", "potencia_pico", "opcional",
         "requiere_vista_exterior", "nota_vista", "montado_en", "nota",
-        "prioridad",
+        "prioridad", "alternativa_de",
     }
     extras: dict[str, Magnitud] = {}
     for clave, valor in bruto.items():
@@ -246,6 +332,7 @@ def _componente(bruto: dict) -> Componente:
         opcional=bool(bruto.get("opcional", False)),
         requiere_vista_exterior=bool(bruto.get("requiere_vista_exterior", False)),
         montado_en=bruto.get("montado_en"),
+        alternativa_de=bruto.get("alternativa_de"),
         nota=bruto.get("nota"),
         extras=extras,
         bruto=bruto,
@@ -412,6 +499,14 @@ def validar(catalogo: Catalogo) -> list[str]:
             problemas.append(
                 f"{c.id}: montado_en apunta a '{c.montado_en}', que no existe"
             )
+        if c.alternativa_de:
+            if c.alternativa_de == c.id:
+                problemas.append(f"{c.id}: alternativa_de apunta a si mismo")
+            elif not catalogo.existe(c.alternativa_de):
+                problemas.append(
+                    f"{c.id}: alternativa_de apunta a '{c.alternativa_de}', "
+                    f"que no existe"
+                )
 
     todas: list[Magnitud] = []
     todas += list(catalogo.envolvente.values())
@@ -469,6 +564,26 @@ def validar(catalogo: Catalogo) -> list[str]:
             continue
         if dims and any(v <= 0 for v in dims):
             problemas.append(f"{c.id}: dimensiones no positivas {dims}")
+
+    # Un STEP de fabricante lleva procedencia, igual que un numero.
+    for c in catalogo.componentes:
+        if c.step is None:
+            continue
+        if c.step.estado not in ESTADOS:
+            problemas.append(
+                f"{c.id}.step: estado '{c.step.estado}' no valido "
+                f"(admitidos: {ESTADOS})"
+            )
+        elif c.step.estado == TBD:
+            problemas.append(
+                f"{c.id}.step: estado TBD con un fichero conectado. Un STEP que "
+                f"existe no es un hueco; si no se sabe de que producto es, el "
+                f"estado es '{REFERENCIA}'."
+            )
+        if not c.step.fuente:
+            problemas.append(
+                f"{c.id}.step: sin fuente. Hay que decir de donde salio el fichero."
+            )
 
     # Toda conexion apunta a componentes que existen.
     for familia, conexion in catalogo.todas_las_conexiones():
