@@ -119,11 +119,43 @@ def _pieza(pieza: PiezaColocada) -> dict:
         "categoria": componente.categoria,
         "subsistema": componente.subsistema,
         "zona": pieza.colocacion.zona,
+        "id_drive": componente.id_drive,
+        "referencia_comercial": componente.referencia_comercial,
         "estado_dato": parts.estado_geometria(componente),
         "desde_step": parts.step_disponible(componente),
-        "step": componente.step_ruta,
-        "step_estado": componente.step.estado if componente.step else None,
-        "step_nota": componente.step.nota if componente.step else None,
+        "step": fuente.ruta if (fuente := parts.fuente_step(componente)) else None,
+        "step_estado": fuente.estado if fuente else None,
+        "step_nota": fuente.nota if fuente else None,
+        "step_esperado": (
+            None
+            if componente.step_esperado is None
+            else {
+                "ruta": componente.step_esperado.ruta,
+                "pedir_a": componente.step_esperado.pedir_a,
+                "fuente_prevista": componente.step_esperado.fuente_prevista,
+            }
+        ),
+        "forma": componente.tipo_forma,
+        "montaje": (
+            None
+            if componente.montaje is None
+            else {
+                "cara": componente.montaje.cara,
+                "eje": componente.montaje.eje,
+                "tipo_eje": componente.montaje.tipo_eje,
+                "nota": componente.montaje.nota,
+            }
+        ),
+        "conectores": [
+            {
+                "id": k.id,
+                "tipo": k.tipo,
+                "cara": k.cara,
+                "dimensiones": _magnitud(k.dimensiones),
+                "nota": k.nota,
+            }
+            for k in componente.conectores
+        ],
         "centro": list(pieza.colocacion.centro),
         "rotacion": list(pieza.colocacion.rotacion),
         "caja": _caja(pieza.caja_mundo),

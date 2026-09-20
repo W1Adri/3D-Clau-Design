@@ -163,6 +163,78 @@ def _magnitud(nombre: str, bruto: Any) -> Magnitud:
     )
 
 
+EJES = ("X", "Y", "Z")
+CARAS = ("+X", "-X", "+Y", "-Y", "+Z", "-Z")
+
+
+@dataclass(frozen=True)
+class Conector:
+    """Un conector que sobresale de la envolvente del cuerpo.
+
+    El cuerpo de una pieza de fibra no es lo que decide si cabe: lo que decide
+    es por donde sale el cable. El conector RF del modulador Exail mide
+    6.1 x 10 mm y sobresale lateralmente; esos 10 mm son los que obligan a
+    tumbar el modulador para que salgan hacia +-Y, donde sobra sitio, y no
+    hacia la franja, que tiene 26.3 mm para dos moduladores.
+
+    Se pega a una cara de la envolvente del cuerpo y sobresale hacia fuera, asi
+    que la caja envolvente de la pieza CRECE con el. Eso es lo que se quiere:
+    el analisis de interferencias tiene que ver el conector.
+    """
+
+    id: str
+    tipo: str                      # coaxial | fibra | electrico | optico | termico
+    cara: str                      # +X, -X, +Y, ...
+    dimensiones: Magnitud
+    desplazamiento: tuple[float, float] = (0.0, 0.0)
+    nota: str | None = None
+
+
+@dataclass(frozen=True)
+class Montaje:
+    """Origen y ejes de la pieza, iguales los dibuje una caja o un STEP.
+
+    El punto de esta declaracion es que al dejar el STEP del fabricante en su
+    sitio sustituya al modelo aproximado SIN mover nada del layout. Para eso las
+    dos geometrias tienen que compartir dos cosas:
+
+    * ``cara``: con que cara se atornilla la pieza. Fija su orientacion.
+    * ``eje``: por donde entra y sale la senal -- el eje de fibra en la bandeja,
+      el eje optico en el banco. Es lo que hay que alinear con el vecino.
+
+    Ninguna de las dos es geometria: son la declaracion contra la que se
+    comprueba el ``forma.step.orientacion`` de un STEP nuevo. Un STEP que llegue
+    con otros ejes se gira hasta estos, y si no se puede, se ve.
+    """
+
+    cara: str | None = None
+    eje: str | None = None
+    tipo_eje: str | None = None    # fibra | optico
+    nota: str | None = None
+
+
+@dataclass(frozen=True)
+class StepEsperado:
+    """Donde caera el STEP que todavia no ha llegado, y de quien viene.
+
+    Un STEP entra al modelo solo con procedencia declarada. Pero esa
+    procedencia se puede declarar ANTES de tener el fichero: de los STEP que
+    faltan ya se sabe quien los tiene y de que producto son. Declarandolo aqui,
+    dejar el fichero en la ruta indicada basta para que el modelo lo dibuje, sin
+    editar el catalogo y sin que ningun STEP anonimo se cuele.
+
+    Se conecta siempre como 'referencia', nunca como 'confirmado': que el
+    fichero haya aparecido donde se esperaba no verifica su part number.
+    """
+
+    ruta: str
+    pedir_a: str
+    fuente_prevista: str
+    orientacion: tuple[float, float, float] = (0.0, 0.0, 0.0)
+    recentrar: bool = True
+    nota: str | None = None
+
+
 @dataclass(frozen=True)
 class FuenteStep:
     """Un STEP de fabricante conectado a un componente, con su procedencia.
@@ -224,6 +296,78 @@ def _fuente_step(id_componente: str, bruto: Any) -> FuenteStep | None:
     )
 
 
+def _conectores(id_componente: str, bruto: Any) -> tuple[Conector, ...]:
+    if not bruto:
+        return ()
+    salida: list[Conector] = []
+    for i, crudo in enumerate(bruto):
+        cid = crudo.get("id") or f"conector_{i + 1}"
+        cara = crudo.get("cara")
+        if cara not in CARAS:
+            raise ErrorDeDatos(
+                f"{id_componente}.{cid}: cara '{cara}' no valida "
+                f"(admitidas: {CARAS})"
+            )
+        desplazamiento = crudo.get("desplazamiento") or (0.0, 0.0)
+        salida.append(
+            Conector(
+                id=cid,
+                tipo=crudo.get("tipo", "generico"),
+                cara=cara,
+                dimensiones=_magnitud(
+                    f"{id_componente}.{cid}.dimensiones", crudo.get("dimensiones")
+                ),
+                desplazamiento=tuple(float(v) for v in desplazamiento),  # type: ignore[arg-type]
+                nota=crudo.get("nota"),
+            )
+        )
+    return tuple(salida)
+
+
+def _montaje(id_componente: str, bruto: Any) -> Montaje | None:
+    if not bruto:
+        return None
+    cara = bruto.get("cara")
+    eje = bruto.get("eje")
+    if cara is not None and cara not in CARAS:
+        raise ErrorDeDatos(
+            f"{id_componente}.montaje: cara '{cara}' no valida (admitidas: {CARAS})"
+        )
+    if eje is not None and eje not in EJES:
+        raise ErrorDeDatos(
+            f"{id_componente}.montaje: eje '{eje}' no valido (admitidos: {EJES})"
+        )
+    return Montaje(
+        cara=cara, eje=eje, tipo_eje=bruto.get("tipo_eje"), nota=bruto.get("nota")
+    )
+
+
+def _step_esperado(id_componente: str, bruto: Any) -> StepEsperado | None:
+    if not bruto:
+        return None
+    for obligatorio in ("ruta", "pedir_a", "fuente_prevista"):
+        if not bruto.get(obligatorio):
+            raise ErrorDeDatos(
+                f"{id_componente}.forma.step_esperado: sin '{obligatorio}'. Un "
+                f"STEP que se conecta solo necesita su procedencia declarada de "
+                f"antemano, o seria un fichero anonimo entrando al modelo."
+            )
+    orientacion = bruto.get("orientacion") or (0.0, 0.0, 0.0)
+    if len(orientacion) != 3:
+        raise ErrorDeDatos(
+            f"{id_componente}.forma.step_esperado.orientacion: se esperaba "
+            f"[gx, gy, gz], hay {orientacion!r}"
+        )
+    return StepEsperado(
+        ruta=str(bruto["ruta"]),
+        pedir_a=str(bruto["pedir_a"]),
+        fuente_prevista=str(bruto["fuente_prevista"]),
+        orientacion=tuple(float(v) for v in orientacion),  # type: ignore[arg-type]
+        recentrar=bool(bruto.get("recentrar", True)),
+        nota=bruto.get("nota"),
+    )
+
+
 @dataclass
 class Componente:
     id: str
@@ -241,7 +385,12 @@ class Componente:
     referencia_comercial: str | None
     cantidad: Magnitud
     dimensiones: Magnitud
+    tipo_forma: str
+    eje_revolucion: str | None
+    conectores: tuple[Conector, ...]
+    montaje: Montaje | None
     step: FuenteStep | None
+    step_esperado: StepEsperado | None
     masa: Magnitud
     potencia_nominal: Magnitud
     potencia_pico: Magnitud
@@ -331,12 +480,30 @@ class Componente:
         yield self.potencia_nominal
         yield self.potencia_pico
         yield from self.extras.values()
+        # Las cotas de los conectores cuentan como cualquier otra: un conector
+        # sin medidas no se dibuja, y tiene que salir en la lista de pendientes
+        # en vez de desaparecer.
+        for conector in self.conectores:
+            yield conector.dimensiones
+
+
+TIPOS_DE_FORMA = ("caja", "cilindro", "step")
 
 
 def _componente(bruto: dict) -> Componente:
+    cid = bruto["id"]
     forma = bruto.get("forma") or {}
     dims_brutas = forma.get("dimensiones")
-    step = _fuente_step(bruto["id"], forma.get("step"))
+    step = _fuente_step(cid, forma.get("step"))
+    tipo_forma = forma.get("tipo", "caja")
+    if tipo_forma not in TIPOS_DE_FORMA:
+        raise ErrorDeDatos(
+            f"{cid}: forma.tipo '{tipo_forma}' no valido "
+            f"(admitidos: {TIPOS_DE_FORMA})"
+        )
+    eje = forma.get("eje")
+    if eje is not None and eje not in EJES:
+        raise ErrorDeDatos(f"{cid}: forma.eje '{eje}' no valido (admitidos: {EJES})")
 
     # Campos reservados que ya tienen su propio atributo.
     reservados = {
@@ -344,7 +511,7 @@ def _componente(bruto: dict) -> Componente:
         "subsistema", "cantidad", "forma",
         "masa", "potencia_nominal", "potencia_pico", "opcional",
         "requiere_vista_exterior", "nota_vista", "montado_en", "nota",
-        "prioridad", "alternativa_de",
+        "prioridad", "alternativa_de", "montaje",
     }
     extras: dict[str, Magnitud] = {}
     for clave, valor in bruto.items():
@@ -369,8 +536,13 @@ def _componente(bruto: dict) -> Componente:
         id_drive=bruto.get("id_drive"),
         referencia_comercial=bruto.get("referencia_comercial"),
         cantidad=_magnitud(f"{bruto['id']}.cantidad", cantidad_bruta),
-        dimensiones=_magnitud(f"{bruto['id']}.dimensiones", dims_brutas),
+        dimensiones=_magnitud(f"{cid}.dimensiones", dims_brutas),
+        tipo_forma=tipo_forma,
+        eje_revolucion=eje,
+        conectores=_conectores(cid, forma.get("conectores")),
+        montaje=_montaje(cid, bruto.get("montaje")),
         step=step,
+        step_esperado=_step_esperado(cid, forma.get("step_esperado")),
         masa=_magnitud(f"{bruto['id']}.masa", bruto.get("masa")),
         potencia_nominal=_magnitud(
             f"{bruto['id']}.potencia_nominal", bruto.get("potencia_nominal")
@@ -669,6 +841,65 @@ def validar(catalogo: Catalogo) -> list[str]:
         if not c.step.fuente:
             problemas.append(
                 f"{c.id}.step: sin fuente. Hay que decir de donde salio el fichero."
+            )
+
+    # Un cilindro se declara con su caja envolvente y su eje de revolucion. Las
+    # dos cotas que no son el eje son el diametro, asi que tienen que coincidir:
+    # si no, es una cota mal copiada, no una pieza.
+    for c in catalogo.componentes:
+        if c.tipo_forma != "cilindro":
+            continue
+        if c.eje_revolucion is None:
+            problemas.append(
+                f"{c.id}: forma.tipo es cilindro pero no dice 'eje'. Sin el no "
+                f"se sabe cual de las tres cotas es la longitud."
+            )
+            continue
+        if c.dimensiones.es_tbd or not c.dimensiones.esta_declarada:
+            continue
+        dims = c.dimensiones.como_vector()
+        if dims is None:
+            continue
+        indice = EJES.index(c.eje_revolucion)
+        seccion = [d for i, d in enumerate(dims) if i != indice]
+        if abs(seccion[0] - seccion[1]) > 1e-6:
+            problemas.append(
+                f"{c.id}: cilindro de eje {c.eje_revolucion} con seccion "
+                f"{seccion[0]} x {seccion[1]} mm. Las dos cotas que no son el "
+                f"eje son el diametro y tienen que ser iguales."
+            )
+
+    # Un conector sobresale de la envolvente del cuerpo, asi que sin cuerpo no
+    # hay donde pegarlo.
+    for c in catalogo.componentes:
+        if not c.conectores:
+            continue
+        if c.dimensiones.es_tbd or not c.dimensiones.esta_declarada:
+            problemas.append(
+                f"{c.id}: declara conectores pero su envolvente es "
+                f"{c.dimensiones.estado}. Un conector se pega a una cara del "
+                f"cuerpo; sin cuerpo no hay cara."
+            )
+
+    # 'step' y 'step_esperado' son la misma cosa en dos momentos distintos:
+    # declarar los dos deja sin saber cual manda.
+    for c in catalogo.componentes:
+        if c.step is not None and c.step_esperado is not None:
+            problemas.append(
+                f"{c.id}: declara 'forma.step' y 'forma.step_esperado' a la vez. "
+                f"El segundo es para cuando el fichero todavia no ha llegado; "
+                f"cuando llega y se verifica, se sustituye por el primero."
+            )
+
+    # El eje de montaje solo significa algo si la pieza tiene ejes que declarar.
+    for c in catalogo.componentes:
+        if c.montaje is None or c.montaje.eje is None:
+            continue
+        if c.montaje.tipo_eje not in ("fibra", "optico"):
+            problemas.append(
+                f"{c.id}: montaje.eje es '{c.montaje.eje}' pero montaje.tipo_eje "
+                f"es {c.montaje.tipo_eje!r}. Decir por que eje entra la senal "
+                f"sin decir que senal es no alinea nada."
             )
 
     # Toda conexion apunta a componentes que existen.

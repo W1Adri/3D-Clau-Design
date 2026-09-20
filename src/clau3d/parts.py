@@ -40,7 +40,9 @@ from .datamodel import (
     TBD,
     Catalogo,
     Componente,
+    Conector,
     ErrorDeDatos,
+    FuenteStep,
     RAIZ,
 )
 from .structure import Caja
@@ -88,9 +90,9 @@ def estado_geometria(componente: Componente) -> str:
     esta descargado se dibuja con su caja de ficha, y entonces pintarlo de color
     referencia enganaria.
     """
-    if step_disponible(componente):
-        assert componente.step is not None
-        return componente.step.estado
+    fuente = fuente_step(componente)
+    if fuente is not None:
+        return fuente.estado
     return componente.dimensiones.estado
 
 
@@ -104,19 +106,57 @@ def color(componente: Componente) -> cq.Color:
     return cq.Color(*rgb, alfa)
 
 
+def fuente_step(componente: Componente) -> FuenteStep | None:
+    """El STEP que se va a dibujar, venga de donde venga, o None.
+
+    Hay dos maneras de que un componente tenga STEP, y las dos exigen
+    procedencia declarada:
+
+    1. ``forma.step``: el fichero ya llego y alguien escribio de donde salio.
+    2. ``forma.step_esperado``: el fichero TODAVIA no ha llegado, pero ya se
+       sabe quien lo tiene y de que producto es, asi que la procedencia esta
+       escrita por adelantado. Dejarlo en la ruta indicada basta para que el
+       modelo lo dibuje en lugar del aproximado, sin tocar el catalogo. Se
+       conecta siempre como 'referencia': que el fichero haya aparecido donde
+       se esperaba no verifica su part number.
+
+    Lo que NO existe es la tercera manera, la de coger cualquier fichero que se
+    llame como el componente. Un STEP sin procedencia es lo mismo que un numero
+    sin fuente, y este repositorio no admite ninguno de los dos.
+    """
+    if componente.step is not None and (RAIZ / componente.step.ruta).exists():
+        return componente.step
+    esperado = componente.step_esperado
+    if esperado is not None and (RAIZ / esperado.ruta).exists():
+        return FuenteStep(
+            ruta=esperado.ruta,
+            estado=REFERENCIA,
+            fuente=esperado.fuente_prevista,
+            nota=(
+                f"Conectado automaticamente al aparecer en {esperado.ruta} "
+                f"(forma.step_esperado). Procedencia prevista: "
+                f"{esperado.pedir_a}. Estado 'referencia' hasta verificar el "
+                f"part number contra la ficha."
+            ),
+            orientacion=esperado.orientacion,
+            recentrar=esperado.recentrar,
+        )
+    return None
+
+
 def ruta_step(componente: Componente) -> Path | None:
-    """Ruta del STEP de fabricante, o None si no esta disponible.
+    """Ruta del STEP a dibujar, o None si hay que caer a la caja envolvente.
 
     Los CAD de fabricante no se versionan (ver cad/vendor/MANIFEST.yaml), asi
     que un clon recien hecho no los tiene. Eso NO es un error: el componente se
     dibuja con su caja envolvente y el chequeo 'step_de_fabricante' lo dice.
     Solo es un error cuando no hay caja a la que caer.
     """
+    fuente = fuente_step(componente)
+    if fuente is not None:
+        return RAIZ / fuente.ruta
     if componente.step is None:
         return None
-    ruta = RAIZ / componente.step.ruta
-    if ruta.exists():
-        return ruta
     if componente.dimensiones.esta_declarada and not componente.dimensiones.es_tbd:
         return None
     raise ErrorDeDatos(
@@ -129,7 +169,7 @@ def ruta_step(componente: Componente) -> Path | None:
 
 def step_disponible(componente: Componente) -> bool:
     """True si el solido va a salir realmente del STEP y no de la caja."""
-    return componente.step is not None and (RAIZ / componente.step.ruta).exists()
+    return fuente_step(componente) is not None
 
 
 def caja_de_solidos(forma: Shape, origen: str = "solido") -> Caja:
@@ -186,11 +226,80 @@ def importar_step(ruta: Path) -> Shape:
     return forma
 
 
+# Indice de eje por nombre, para pasar de "X" a la componente 0 del vector.
+_INDICE_EJE = {"X": 0, "Y": 1, "Z": 2}
+_DIRECCION_CARA = {
+    "+X": (0, 1.0), "-X": (0, -1.0),
+    "+Y": (1, 1.0), "-Y": (1, -1.0),
+    "+Z": (2, 1.0), "-Z": (2, -1.0),
+}
+
+
+def _cuerpo(componente: Componente) -> cq.Solid:
+    """Envolvente del cuerpo, sin conectores: caja o cilindro."""
+    dims = componente.dimensiones.como_vector()
+    assert dims is not None
+    if componente.tipo_forma != "cilindro":
+        return Caja.centrada(dims).solido()
+
+    # Un cilindro se declara con su caja envolvente igual que todo lo demas
+    # -- asi los presupuestos, el chequeo de seccion y el prefiltro de
+    # interferencias no tienen que saber que forma tiene --, y 'forma.eje' dice
+    # cual de las tres cotas es la longitud. Las otras dos son el diametro, y
+    # 'validar' comprueba que coinciden: un "cilindro" de seccion ovalada seria
+    # una cota mal copiada, no una pieza.
+    eje = componente.eje_revolucion or "Z"
+    indice = _INDICE_EJE[eje]
+    longitud = dims[indice]
+    diametro = max(d for i, d in enumerate(dims) if i != indice)
+    cilindro = cq.Solid.makeCylinder(
+        diametro / 2, longitud, cq.Vector(0, 0, -longitud / 2)
+    )
+    # makeCylinder crece por Z; se lleva al eje declarado.
+    if eje == "X":
+        cilindro = cilindro.rotate(cq.Vector(0, 0, 0), cq.Vector(0, 1, 0), 90)
+    elif eje == "Y":
+        cilindro = cilindro.rotate(cq.Vector(0, 0, 0), cq.Vector(1, 0, 0), -90)
+    return cilindro
+
+
+def _solido_conector(componente: Componente, conector: Conector) -> cq.Solid | None:
+    """Caja del conector, pegada por fuera a la cara que declara.
+
+    Devuelve None si sus cotas son TBD: un conector sin medidas no se dibuja de
+    ningun tamano, igual que una pieza sin envolvente. El cuerpo se dibuja
+    igual, y el hueco sale en la lista de pendientes.
+    """
+    if conector.dimensiones.es_tbd or not conector.dimensiones.esta_declarada:
+        return None
+    cuerpo = componente.dimensiones.como_vector()
+    assert cuerpo is not None
+    dims = conector.dimensiones.como_vector()
+    assert dims is not None
+
+    indice, signo = _DIRECCION_CARA[conector.cara]
+    # El conector arranca en la cara del cuerpo y sobresale hacia fuera, asi que
+    # su centro queda a media altura del conector mas alla de esa cara.
+    centro = [0.0, 0.0, 0.0]
+    centro[indice] = signo * (cuerpo[indice] / 2 + dims[indice] / 2)
+    # El desplazamiento recorre el plano de la cara, en los otros dos ejes y en
+    # su orden natural (para +-X: Y y luego Z).
+    otros = [i for i in range(3) if i != indice]
+    for eje_plano, delta in zip(otros, conector.desplazamiento):
+        centro[eje_plano] += delta
+    return Caja.centrada(dims, tuple(centro)).solido()
+
+
 def solido(componente: Componente) -> cq.Solid | cq.Compound:
-    """Solido del componente en su propio sistema de ejes, centrado en el origen."""
+    """Solido del componente en su propio sistema de ejes, centrado en el origen.
+
+    Con STEP de fabricante, el STEP. Sin el, la envolvente declarada -- caja o
+    cilindro -- mas los conectores que sobresalgan de ella. Los conectores no
+    son decoracion: son lo que decide si la pieza cabe con el cable puesto.
+    """
     ruta = ruta_step(componente)
     if ruta is not None:
-        fuente = componente.step
+        fuente = fuente_step(componente)
         assert fuente is not None
         forma = importar_step(ruta)
         if fuente.girado:
@@ -203,9 +312,15 @@ def solido(componente: Componente) -> cq.Solid | cq.Compound:
         raise ErrorDeDatos(
             f"{componente.id}: sin dimensiones y sin STEP. No se puede dibujar."
         )
-    dims = componente.dimensiones.como_vector()
-    assert dims is not None
-    return Caja.centrada(dims).solido()
+    cuerpo = _cuerpo(componente)
+    conectores = [
+        solido_conector
+        for conector in componente.conectores
+        if (solido_conector := _solido_conector(componente, conector)) is not None
+    ]
+    if not conectores:
+        return cuerpo
+    return cq.Compound.makeCompound([cuerpo, *conectores])
 
 
 def _girado(forma: Shape, grados: tuple[float, float, float]) -> Shape:
@@ -218,11 +333,11 @@ def _girado(forma: Shape, grados: tuple[float, float, float]) -> Shape:
 
 
 def caja_local(componente: Componente) -> Caja | None:
-    """Caja envolvente del componente en sus ejes locales."""
-    if step_disponible(componente):
-        return caja_de_solidos(solido(componente), componente.id)
+    """Caja envolvente del componente en sus ejes locales, conectores incluidos."""
     if not componente.modelable:
         return None
+    if step_disponible(componente) or componente.conectores:
+        return caja_de_solidos(solido(componente), componente.id)
     dims = componente.dimensiones.como_vector()
     assert dims is not None
     return Caja.centrada(dims)

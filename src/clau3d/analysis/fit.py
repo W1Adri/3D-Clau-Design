@@ -595,12 +595,30 @@ def chequeo_step_de_fabricante(catalogo: Catalogo) -> Chequeo:
         if c.step is not None and not (RAIZ / c.step.ruta).exists()
     ]
 
+    # Piezas que esperan un STEP que todavia no ha llegado. Se dibujan con su
+    # envolvente aproximada, y el dia que el fichero aparezca en la ruta que el
+    # catalogo declara se dibujan con el sin tocar nada. Lo util del chequeo es
+    # decir EXACTAMENTE que fichero falta y en que ruta va, para poder pedirlo.
+    esperando = [
+        (c.id, c.step_esperado)
+        for c in catalogo.componentes
+        if c.step_esperado is not None
+        and not (RAIZ / c.step_esperado.ruta).exists()
+    ]
+    aparecidos = [
+        c.id
+        for c in catalogo.componentes
+        if c.step_esperado is not None and (RAIZ / c.step_esperado.ruta).exists()
+    ]
+
     numeros = {
         "declarados": float(len(declarados)),
         "presentes": float(len(presentes)),
         "ausentes": float(len(ausentes)),
         "huella_distinta": float(len(corruptos)),
         "sin_declarar": float(len(sueltos)),
+        "esperando_step": float(len(esperando)),
+        "aparecidos_sin_verificar": float(len(aparecidos)),
     }
 
     partes = [
@@ -626,10 +644,27 @@ def chequeo_step_de_fabricante(catalogo: Catalogo) -> Chequeo:
             f"Componentes con STEP conectado pero sin fichero: "
             f"{', '.join(conectados_sin_fichero)}."
         )
+    if esperando:
+        partes.append(
+            f"{len(esperando)} piezas esperan un STEP que aun no ha llegado; "
+            f"mientras tanto se dibujan con su envolvente aproximada. Dejar el "
+            f"fichero en la ruta indicada basta para que el modelo lo use: "
+            + "; ".join(
+                f"{cid} -> {esp.ruta} (a {esp.pedir_a})" for cid, esp in esperando
+            )
+            + "."
+        )
+    if aparecidos:
+        partes.append(
+            f"STEP aparecidos en su ruta y conectados automaticamente, como "
+            f"REFERENCIA hasta verificar su part number: {', '.join(aparecidos)}. "
+            f"Al verificarlos, sustituir 'forma.step_esperado' por 'forma.step' "
+            f"con estado 'confirmado' y anotar la huella en el manifiesto."
+        )
 
     if corruptos:
         estado = FALLA
-    elif ausentes or sueltos:
+    elif ausentes or sueltos or esperando or aparecidos:
         estado = ATENCION
     else:
         estado = OK
@@ -640,10 +675,24 @@ def chequeo_step_de_fabricante(catalogo: Catalogo) -> Chequeo:
         estado=estado,
         mensaje=" ".join(partes),
         numeros=numeros,
-        falta=(
-            f"Descargar de Drive: {', '.join(ausentes)}" if ausentes else None
-        ),
+        falta=_falta_de_step(ausentes, esperando, aparecidos),
     )
+
+
+def _falta_de_step(ausentes, esperando, aparecidos) -> str | None:
+    trozos = []
+    if ausentes:
+        trozos.append(f"Descargar de Drive: {', '.join(ausentes)}")
+    if esperando:
+        trozos.append(
+            "STEP por recibir: "
+            + ", ".join(f"{cid} (a {esp.pedir_a})" for cid, esp in esperando)
+        )
+    if aparecidos:
+        trozos.append(
+            "Verificar el part number de: " + ", ".join(aparecidos)
+        )
+    return ". ".join(trozos) if trozos else None
 
 
 def todos(catalogo: Catalogo) -> list[Chequeo]:
