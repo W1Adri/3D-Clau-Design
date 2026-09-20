@@ -1,0 +1,373 @@
+"""Chequeos de viabilidad que NO dependen de donde se coloque cada pieza.
+
+Sirven para decidir la distribucion con numeros por delante, antes de fijarla.
+Un chequeo que no se puede hacer por falta de datos sale como 'no comprobable',
+nunca como correcto.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+
+from ..datamodel import Catalogo
+
+OK = "ok"
+ATENCION = "atencion"
+FALLA = "falla"
+NO_COMPROBABLE = "no comprobable"
+
+
+@dataclass
+class Chequeo:
+    id: str
+    titulo: str
+    estado: str
+    mensaje: str
+    numeros: dict[str, float] = field(default_factory=dict)
+    falta: str | None = None
+
+    @property
+    def critico(self) -> bool:
+        return self.estado == FALLA
+
+
+def _seccion_interior(catalogo: Catalogo) -> tuple[float, float, float]:
+    return catalogo.dims_interiores
+
+
+def chequeo_volumen_total(catalogo: Catalogo) -> Chequeo:
+    """Suma de volumenes conocidos frente al volumen interior util."""
+    interior = catalogo.volumen_interior_mm3
+    conocido = 0.0
+    sin_dato: list[str] = []
+    for componente in catalogo.componentes:
+        if componente.categoria == "estructura":
+            continue
+        if componente.montado_en:  # ya cuenta dentro de su tarjeta
+            continue
+        volumen = componente.volumen_mm3()
+        if volumen is None:
+            sin_dato.append(componente.id)
+        else:
+            conocido += volumen
+
+    fraccion = conocido / interior
+    numeros = {
+        "interior_cm3": interior / 1000,
+        "ocupado_conocido_cm3": conocido / 1000,
+        "libre_si_nada_mas_creciera_cm3": (interior - conocido) / 1000,
+        "fraccion_ocupada": fraccion,
+        "componentes_sin_volumen": len(sin_dato),
+    }
+    con_volumen = sum(
+        1
+        for c in catalogo.componentes
+        if c.categoria != "estructura" and not c.montado_en and c.volumen_mm3() is not None
+    )
+    mensaje = (
+        f"Los {con_volumen} componentes con "
+        f"envolvente conocida ocupan {conocido / 1000:.0f} cm3 de los "
+        f"{interior / 1000:.0f} cm3 interiores ({fraccion:.0%}). "
+        f"Quedan {len(sin_dato)} componentes sin envolvente: el dato real sera mayor."
+    )
+    estado = ATENCION if sin_dato else (OK if fraccion < 1 else FALLA)
+    return Chequeo(
+        id="volumen_total",
+        titulo="Volumen total frente a la zona util",
+        estado=estado,
+        mensaje=mensaje,
+        numeros=numeros,
+        falta=(
+            f"Envolvente de: {', '.join(sin_dato)}" if sin_dato else None
+        ),
+    )
+
+
+def chequeo_apertura_telescopio(catalogo: Catalogo) -> Chequeo:
+    """La apertura libre de 90 mm frente a la altura interior del 6U.
+
+    Es el chequeo mas restrictivo del satelite: Y = 100 mm exteriores es la
+    dimension pequena del 6U y la apertura tiene que caber en su seccion.
+    """
+    telescopio = catalogo["telescopio_cassegrain"]
+    apertura = telescopio.extras.get("apertura_libre")
+    if apertura is None or apertura.es_tbd:
+        return Chequeo(
+            id="apertura_telescopio",
+            titulo="Apertura del telescopio frente a la seccion interior",
+            estado=NO_COMPROBABLE,
+            mensaje="No hay apertura declarada.",
+            falta="Apertura libre del telescopio",
+        )
+    diametro = apertura.escalar()
+    assert diametro is not None
+    _, interior_y, _ = _seccion_interior(catalogo)
+    exterior_y = catalogo.dims_exteriores[1]
+    holgura_radial = (interior_y - diametro) / 2
+
+    numeros = {
+        "apertura_libre_mm": diametro,
+        "altura_exterior_mm": exterior_y,
+        "altura_interior_util_mm": interior_y,
+        "holgura_por_lado_mm": holgura_radial,
+    }
+
+    if holgura_radial < 0:
+        estado, mensaje = FALLA, (
+            f"La apertura de {diametro:.0f} mm NO cabe en los {interior_y:.0f} mm "
+            f"de altura interior: faltan {-holgura_radial * 2:.1f} mm de diametro."
+        )
+    elif holgura_radial < 5:
+        estado, mensaje = ATENCION, (
+            f"La apertura de {diametro:.0f} mm deja solo {holgura_radial:.1f} mm por "
+            f"lado dentro de los {interior_y:.0f} mm interiores. No hay sitio para "
+            f"el barrilete, la celda del espejo ni el ajuste de alineacion. "
+            f"El eje optico NO puede ir paralelo a Y, y en cualquier otra "
+            f"orientacion la seccion util sigue limitada por Y."
+        )
+    else:
+        estado, mensaje = OK, (
+            f"La apertura deja {holgura_radial:.1f} mm por lado."
+        )
+
+    return Chequeo(
+        id="apertura_telescopio",
+        titulo="Apertura del telescopio frente a la seccion interior",
+        estado=estado,
+        mensaje=mensaje,
+        numeros=numeros,
+        falta="Diametro exterior del barrilete (la apertura libre no basta)",
+    )
+
+
+def chequeo_contorno_pc104(catalogo: Catalogo) -> Chequeo:
+    """El contorno de tarjeta PC104 frente a la seccion interior del 6U.
+
+    Es la comprobacion que mas aprieta al espesor de pared supuesto: el contorno
+    de tarjeta es un dato confirmado, y el espesor solo una hipotesis.
+    """
+    contorno = catalogo.integracion.get("pila_pc104.contorno")
+    if contorno is None or contorno.es_tbd:
+        return Chequeo(
+            id="contorno_pc104",
+            titulo="Contorno PC104 frente a la seccion interior",
+            estado=NO_COMPROBABLE,
+            mensaje="Sin contorno de tarjeta declarado.",
+            falta="Contorno de la tarjeta PC104",
+        )
+    largo, ancho = contorno.valor[0], contorno.valor[1]
+    interior_x, interior_y, _ = _seccion_interior(catalogo)
+    exterior_y = catalogo.dims_exteriores[1]
+    espesor_max = (exterior_y - ancho) / 2
+    espesor = catalogo.zona_util["espesor_pared"].escalar()
+
+    numeros = {
+        "contorno_largo_mm": largo,
+        "contorno_ancho_mm": ancho,
+        "interior_X_mm": interior_x,
+        "interior_Y_mm": interior_y,
+        "espesor_pared_supuesto_mm": espesor if espesor is not None else float("nan"),
+        "espesor_pared_maximo_mm": espesor_max,
+    }
+
+    if ancho > interior_y or largo > interior_x:
+        estado = FALLA
+        mensaje = (
+            f"La tarjeta de {largo:.2f} x {ancho:.2f} mm NO cabe en la seccion "
+            f"interior de {interior_x:.1f} x {interior_y:.1f} mm. El espesor de "
+            f"pared supuesto no puede pasar de {espesor_max:.2f} mm."
+        )
+    else:
+        estado = ATENCION
+        mensaje = (
+            f"La tarjeta de {largo:.2f} x {ancho:.2f} mm cabe en {interior_x:.1f} x "
+            f"{interior_y:.1f} mm, pero deja solo {interior_y - ancho:.2f} mm de "
+            f"holgura en Y. El espesor de pared no puede pasar de "
+            f"{espesor_max:.2f} mm: es el chasis quien decide, y aun es una hipotesis."
+        )
+    return Chequeo(
+        id="contorno_pc104",
+        titulo="Contorno PC104 frente a la seccion interior",
+        estado=estado,
+        mensaje=mensaje,
+        numeros=numeros,
+        falta="Zona util real del chasis 6U del equipo",
+    )
+
+
+def chequeo_longitud_moduladores(catalogo: Catalogo) -> list[Chequeo]:
+    """Cada modulador necesita un recorrido recto largo dentro de la bandeja."""
+    salida: list[Chequeo] = []
+    interior = _seccion_interior(catalogo)
+    ejes = dict(zip("XYZ", interior))
+
+    for cid in ("mod_intensidad_mxer_ln_10", "mod_fase_mpz_ln_10"):
+        componente = catalogo[cid]
+        longitud = componente.extras.get("longitud_con_fibras")
+        if longitud is None or longitud.es_tbd:
+            salida.append(
+                Chequeo(
+                    id=f"longitud_{cid}",
+                    titulo=f"Recorrido recto de {componente.nombre}",
+                    estado=NO_COMPROBABLE,
+                    mensaje="Sin longitud con fibras declarada.",
+                    falta="Longitud total con protectores de fibra",
+                )
+            )
+            continue
+        largo = longitud.escalar()
+        assert largo is not None
+        caben = [eje for eje, disponible in ejes.items() if disponible >= largo]
+        numeros = {"longitud_con_fibras_mm": largo}
+        numeros.update({f"interior_{eje}_mm": v for eje, v in ejes.items()})
+        if not caben:
+            estado = FALLA
+            mensaje = f"Los {largo:.0f} mm no caben en ningun eje interior."
+        else:
+            estado = OK if len(caben) > 1 else ATENCION
+            mensaje = (
+                f"Los {largo:.0f} mm de recorrido recto solo caben orientados "
+                f"segun {', '.join(caben)}. Esto ya fija la orientacion de la "
+                f"bandeja optica, antes de anadir los bucles de fibra."
+            )
+        salida.append(
+            Chequeo(
+                id=f"longitud_{cid}",
+                titulo=f"Recorrido recto de {componente.nombre}",
+                estado=estado,
+                mensaje=mensaje,
+                numeros=numeros,
+            )
+        )
+    return salida
+
+
+def chequeo_pila_pc104(catalogo: Catalogo) -> Chequeo:
+    """Longitud de la pila PC104. Sin el paso de apilamiento solo hay una cota."""
+    paso = catalogo.integracion.get("pila_pc104.paso_apilamiento")
+    tarjetas: list[tuple[str, float, int]] = []
+    sin_altura: list[str] = []
+
+    for componente in catalogo.componentes:
+        dims = componente.dimensiones
+        if componente.montado_en or componente.categoria == "estructura":
+            continue
+        if componente.bruto.get("formato") != "pc104":
+            continue
+        n = componente.n_unidades
+        if dims.es_tbd or not dims.esta_declarada or n is None:
+            sin_altura.append(componente.id)
+            continue
+        altura = dims.como_vector()[2]  # type: ignore[index]
+        tarjetas.append((componente.id, altura, n))
+
+    suma = sum(altura * n for _, altura, n in tarjetas)
+    n_tarjetas = sum(n for _, _, n in tarjetas)
+    _, _, interior_z = _seccion_interior(catalogo)
+
+    numeros = {
+        "tarjetas_con_altura": float(n_tarjetas),
+        "suma_alturas_mm": suma,
+        "interior_Z_mm": interior_z,
+        "tarjetas_sin_altura": float(len(sin_altura)),
+    }
+
+    if paso is None or paso.es_tbd:
+        return Chequeo(
+            id="pila_pc104",
+            titulo="Longitud de la pila PC104",
+            estado=NO_COMPROBABLE,
+            mensaje=(
+                f"Las {n_tarjetas} tarjetas con altura conocida suman {suma:.0f} mm, "
+                f"pero eso es una COTA INFERIOR: las fichas AAC dan la altura "
+                f"'from top PCB to lowest component', no el paso entre tarjetas. "
+                f"Faltan ademas {len(sin_altura)} tarjetas sin altura "
+                f"({', '.join(sin_altura) or 'ninguna'})."
+            ),
+            numeros=numeros,
+            falta="Paso de apilamiento PC104 del chasis elegido",
+        )
+
+    paso_mm = paso.escalar()
+    assert paso_mm is not None
+    total = sum(max(altura, paso_mm) * n for _, altura, n in tarjetas)
+    numeros["longitud_estimada_mm"] = total
+    estado = OK if total <= interior_z else FALLA
+    return Chequeo(
+        id="pila_pc104",
+        titulo="Longitud de la pila PC104",
+        estado=estado,
+        mensaje=f"La pila mide {total:.0f} mm frente a {interior_z:.0f} mm interiores.",
+        numeros=numeros,
+    )
+
+
+def chequeo_bucles_fibra(catalogo: Catalogo) -> Chequeo:
+    radio = catalogo.integracion.get("fibra.radio_minimo_curvatura")
+    if radio is None or radio.es_tbd:
+        return Chequeo(
+            id="bucles_fibra",
+            titulo="Radio minimo de curvatura de la fibra",
+            estado=NO_COMPROBABLE,
+            mensaje=(
+                "Sin radio minimo de curvatura no se puede dimensionar la bandeja "
+                "optica ni comprobar ningun bucle. Es el parametro que mas area "
+                "consume de toda la bandeja."
+            ),
+            falta="Radio minimo de curvatura de la fibra elegida",
+        )
+    r = radio.escalar()
+    assert r is not None
+    return Chequeo(
+        id="bucles_fibra",
+        titulo="Radio minimo de curvatura de la fibra",
+        estado=OK,
+        mensaje=f"Radio minimo {r:.0f} mm. Cada bucle completo ocupa {2 * r:.0f} mm.",
+        numeros={"radio_minimo_mm": r, "diametro_bucle_mm": 2 * r},
+    )
+
+
+def chequeo_masa(catalogo: Catalogo) -> Chequeo:
+    limite = catalogo.envolvente["masa_maxima"].escalar()
+    assert limite is not None
+    conocida = 0.0
+    sin_dato: list[str] = []
+    for componente in catalogo.componentes:
+        masa = componente.masa_total_g()
+        if masa is None:
+            sin_dato.append(componente.id)
+        else:
+            conocida += masa
+    numeros = {
+        "masa_conocida_g": conocida,
+        "limite_g": limite,
+        "margen_g": limite - conocida,
+        "componentes_sin_masa": float(len(sin_dato)),
+    }
+    return Chequeo(
+        id="masa",
+        titulo="Presupuesto de masa",
+        estado=ATENCION if sin_dato else (OK if conocida <= limite else FALLA),
+        mensaje=(
+            f"Masa conocida {conocida:.0f} g de un limite de {limite:.0f} g "
+            f"(CDS 14.1). Faltan {len(sin_dato)} componentes por pesar, "
+            f"incluido el chasis y el telescopio, que son de los mas pesados."
+        ),
+        numeros=numeros,
+        falta=f"Masa de: {', '.join(sin_dato)}" if sin_dato else None,
+    )
+
+
+def todos(catalogo: Catalogo) -> list[Chequeo]:
+    salida = [
+        chequeo_volumen_total(catalogo),
+        chequeo_apertura_telescopio(catalogo),
+        chequeo_contorno_pc104(catalogo),
+    ]
+    salida += chequeo_longitud_moduladores(catalogo)
+    salida += [
+        chequeo_pila_pc104(catalogo),
+        chequeo_bucles_fibra(catalogo),
+        chequeo_masa(catalogo),
+    ]
+    return salida

@@ -1,0 +1,126 @@
+"""Linea de ordenes de clau3d.
+
+    uv run clau3d validar     comprueba la integridad del catalogo
+    uv run clau3d piezas      exporta cada pieza generada a cad/generated/
+    uv run clau3d ensamblar   exporta el ensamblaje a cad/generated/clau_6u.step
+    uv run clau3d informe     regenera todo reports/
+    uv run clau3d todo        validar + piezas + ensamblar + informe
+"""
+
+from __future__ import annotations
+
+import argparse
+import sys
+from pathlib import Path
+
+from . import assembly, parts
+from .analysis import fit, interference
+from .datamodel import DIR_CAD, DIR_INFORMES, cargar, validar
+
+
+def _cargar_todo():
+    catalogo = cargar()
+    layout = assembly.cargar_layout()
+    piezas = assembly.construir(catalogo, layout)
+    return catalogo, layout, piezas
+
+
+def cmd_validar(_: argparse.Namespace) -> int:
+    catalogo = cargar()
+    problemas = validar(catalogo)
+    if problemas:
+        print(f"{len(problemas)} problemas de integridad:")
+        for p in problemas:
+            print(f"  - {p}")
+        return 1
+    pendientes = catalogo.pendientes()
+    print("Catalogo integro.")
+    print(f"  componentes: {len(catalogo.componentes)}")
+    print(f"  modelables : {len(parts.modelables(catalogo))}")
+    print(f"  pendientes : {len(pendientes)} TBD")
+    print(f"  discrepancias entre fuentes: {len(catalogo.discrepancias())}")
+    return 0
+
+
+def cmd_piezas(_: argparse.Namespace) -> int:
+    catalogo = cargar()
+    escritos = parts.exportar_generados(catalogo)
+    print(f"{len(escritos)} piezas exportadas a {DIR_CAD / 'generated'}")
+    for ruta in escritos:
+        print(f"  - {ruta.name}")
+    sin_geometria = parts.no_modelables(catalogo)
+    if sin_geometria:
+        print(f"\n{len(sin_geometria)} componentes sin geometria (TBD), no exportados:")
+        for componente in sin_geometria:
+            print(f"  - {componente.id}")
+    return 0
+
+
+def cmd_ensamblar(args: argparse.Namespace) -> int:
+    catalogo, layout, piezas = _cargar_todo()
+    destino = Path(args.salida) if args.salida else DIR_CAD / "generated" / "clau_6u.step"
+    assembly.exportar_step(catalogo, layout, destino)
+    print(f"Ensamblaje escrito en {destino}")
+    print(f"  estado del layout: {layout.estado}")
+    print(f"  piezas colocadas : {len(piezas)}")
+    if not layout.confirmado:
+        print("  AVISO: la distribucion aun no esta confirmada.")
+    return 0
+
+
+def cmd_informe(_: argparse.Namespace) -> int:
+    catalogo, layout, piezas = _cargar_todo()
+    from . import report
+
+    escritos = report.generar_todos(catalogo, layout, piezas, DIR_INFORMES)
+    print(f"{len(escritos)} ficheros escritos en {DIR_INFORMES}")
+    for ruta in escritos:
+        print(f"  - {ruta.relative_to(DIR_INFORMES.parent)}")
+
+    criticos = [c for c in fit.todos(catalogo) if c.critico]
+    hallazgos = interference.todas(catalogo, layout, piezas)
+    if criticos or hallazgos:
+        print(f"\n{len(criticos)} chequeos fallidos, {len(hallazgos)} interferencias.")
+        return 1
+    return 0
+
+
+def cmd_todo(args: argparse.Namespace) -> int:
+    codigo = cmd_validar(args)
+    if codigo:
+        return codigo
+    print()
+    cmd_piezas(args)
+    print()
+    cmd_ensamblar(args)
+    print()
+    return cmd_informe(args)
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="clau3d",
+        description="Modelo 3D y analisis volumetrico del CubeSat 6U CLAU",
+    )
+    sub = parser.add_subparsers(dest="orden", required=True)
+
+    sub.add_parser("validar", help="comprueba la integridad del catalogo").set_defaults(
+        func=cmd_validar
+    )
+    sub.add_parser("piezas", help="exporta las piezas a cad/generated/").set_defaults(
+        func=cmd_piezas
+    )
+    p_ens = sub.add_parser("ensamblar", help="exporta el ensamblaje a STEP")
+    p_ens.add_argument("--salida", help="ruta del STEP de salida")
+    p_ens.set_defaults(func=cmd_ensamblar)
+    sub.add_parser("informe", help="regenera reports/").set_defaults(func=cmd_informe)
+    p_todo = sub.add_parser("todo", help="validar + piezas + ensamblar + informe")
+    p_todo.add_argument("--salida", help="ruta del STEP de salida")
+    p_todo.set_defaults(func=cmd_todo)
+
+    args = parser.parse_args(argv)
+    return args.func(args)
+
+
+if __name__ == "__main__":  # pragma: no cover
+    sys.exit(main())

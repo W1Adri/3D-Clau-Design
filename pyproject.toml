@@ -1,0 +1,31 @@
+[project]
+name = "clau3d"
+version = "0.1.0"
+description = "Modelo 3D parametrico y analisis volumetrico del CubeSat 6U CLAU (ACSAR, EETAC-UPC)"
+readme = "README.md"
+authors = [
+    { name = "Adria Sancho", email = "francesc.adria.sancho@estudiantat.upc.edu" },
+]
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "cadquery>=2.5",
+    "pyyaml>=6.0",
+    "numpy>=1.26",
+    "jinja2>=3.1",
+]
+
+[project.scripts]
+clau3d = "clau3d.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.0,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

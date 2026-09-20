@@ -1,0 +1,938 @@
+# =====================================================================
+# CLAU - Catalogo unico de componentes
+# ---------------------------------------------------------------------
+# REGLA PRINCIPAL: ningun numero inventado.
+# Cada magnitud es un bloque con: valor, unidad, estado y fuente.
+#
+# estado:
+#   confirmado  -> ficha tecnica / norma del componente elegido
+#   referencia  -> dato de un componente parecido, NO el elegido
+#   decision    -> decision de diseno de ACSAR (no viene de ninguna ficha)
+#   TBD         -> falta el dato. valor: null. Obliga a 'falta' y 'pedir_a'.
+#
+# 'alternativas' guarda cifras discrepantes entre fuentes (no se elige una).
+# Ejes locales de cada pieza: valor: [dx, dy, dz] en mm.
+# =====================================================================
+
+meta:
+  mision: CLAU - CubeSat Laser per a Aplicacions Ultrasegures
+  organizacion: ACSAR (EETAC, UPC)
+  arquitectura: >-
+    Opcion B (19-09-2026): transmisor BB84 con decoy states en componentes de
+    fibra comerciales (DFB pulsado 1550 nm + moduladores de niobato de litio),
+    polarizacion. Sin PIC en vuelo y sin canal optico clasico.
+    Canal clasico de post-procesado por radio en banda S.
+  revision_datos: 2026-09-19
+
+# ---------------------------------------------------------------------
+# 1. NORMA Y ENVOLVENTE
+# ---------------------------------------------------------------------
+norma:
+  documento: CubeSat Design Specification Rev. 14.1, The CubeSat Program, Cal Poly SLO
+  fecha: 2022-02-09
+  url: https://static1.squarespace.com/static/5418c831e4b0fa4ecac1bacd/t/62193b7fc9e72e0053f00910/1645820809779/CDS+REV14_1+2022-02-09.pdf
+  nota: >-
+    CDS Rev 14 sustituye a CDS Rev 13 y a la 6U CDS Rev 1.0. El plano 6U es
+    CDS-14-007 (Appendix B). Verificado contra el PDF original el 2026-09-19.
+
+envolvente_6u:
+  dimensiones:
+    valor: [226.3, 100.0, 366.0]
+    unidad: mm
+    estado: confirmado
+    fuente: CDS Rev 14.1, Appendix B, plano CDS-14-007 "6U CUBESAT"
+    nota: X = 226.3 (ancho), Y = 100.0 (alto), Z = 366.0 (largo). Origen en el centro geometrico.
+  masa_maxima:
+    valor: 12000
+    unidad: g
+    estado: confirmado
+    fuente: CDS Rev 14.1, Tabla 1 "CubeSat Mass Specifications"
+  cdg_maximo:
+    valor: [45.0, 20.0, 70.0]
+    unidad: mm
+    estado: confirmado
+    fuente: CDS Rev 14.1, Tabla 2
+    nota: Desviacion maxima del centro de gravedad respecto del centro geometrico, por eje.
+  ancho_rail_minimo:
+    valor: 8.5
+    unidad: mm
+    estado: confirmado
+    fuente: CDS Rev 14.1, requisito 2.2.5
+    nota: Distancia del borde del rail a la primera protuberancia, en cada cara.
+  protrusion_maxima:
+    valor: 6.5
+    unidad: mm
+    estado: confirmado
+    fuente: CDS Rev 14.1, requisito 2.2.3
+    nota: Ningun componente sobresale mas de 6.5 mm del plano del rail en las caras permitidas.
+  contacto_extremo_rail:
+    valor: [6.5, 6.5]
+    unidad: mm
+    estado: confirmado
+    fuente: CDS Rev 14.1, requisito 2.2.8
+  cara_insercion:
+    valor: "-Z"
+    unidad: null
+    estado: confirmado
+    fuente: CDS Rev 14.1, requisito 2.2.2
+    nota: La cara -Z entra primero en el dispensador.
+
+# Espesor de pared: NO viene de ninguna norma. Depende del chasis real.
+# Se aisla aqui como unico parametro para no esparcir hipotesis por el codigo.
+zona_util_interior:
+  espesor_pared:
+    valor: 4.9
+    unidad: mm
+    estado: decision
+    fuente: >-
+      Cota superior derivada de datos confirmados: el contorno PC104 de la gama
+      AAC (90.17 mm) tiene que caber en los 100.0 mm exteriores del 6U, luego
+      el espesor no puede pasar de (100.0 - 90.17) / 2 = 4.915 mm.
+    nota: >-
+      Valor UNICO de trabajo mientras no llegue el chasis real. Es el CASO MAS
+      DESFAVORABLE compatible con las tarjetas PC104: un chasis real tendra
+      paredes mas finas y MAS zona util, asi que todo informe de volumen libre
+      que salga de aqui se queda corto, nunca se pasa. No procede de ninguna
+      ficha. Al sustituir el chasis por el STEP del equipo, la zona util se
+      derivara de la geometria real y este parametro desaparece.
+    falta: Chasis 6U del equipo en STEP, o plano con espesores y zona util
+    pedir_a: Equipo de estructura de ACSAR
+
+# ---------------------------------------------------------------------
+# 2. PLATAFORMA
+# ---------------------------------------------------------------------
+componentes:
+
+  - id: estructura_6u
+    nombre: Estructura 6U (chasis)
+    categoria: estructura
+    subsistema: estructura
+    cantidad: 1
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: [226.3, 100.0, 366.0]
+        unidad: mm
+        estado: confirmado
+        fuente: CDS Rev 14.1, plano CDS-14-007
+        nota: Envolvente generica. Se sustituira por el STEP del chasis del equipo.
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa del chasis 6U elegido
+      pedir_a: Equipo de estructura de ACSAR
+
+  - id: adcs_iadcs400
+    nombre: AAC Clyde Space iADCS400
+    formato: pc104
+    categoria: plataforma
+    subsistema: ADCS
+    cantidad: 1
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: [95.4, 95.9, 67.3]
+        unidad: mm
+        estado: confirmado
+        fuente: Brief ACSAR 2026-09-19 (cita ficha AAC Clyde Space iADCS400)
+        nota: >-
+          Formato PC104, aprox. 0.7U. Incluye star tracker ST200 (30 arcsec 3-sigma).
+          Pendiente adjuntar el PDF de la ficha al repositorio.
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa exacta de la configuracion elegida
+      pedir_a: AAC Clyde Space
+      nota: El rango publicado es 1150-1700 g segun configuracion. No se elige un valor.
+      rango: [1150, 1700]
+    potencia_nominal:
+      valor: 2.0
+      unidad: W
+      estado: confirmado
+      fuente: Brief ACSAR 2026-09-19 (cita ficha AAC Clyde Space)
+    potencia_pico:
+      valor: 4.0
+      unidad: W
+      estado: confirmado
+      fuente: Web AAC Clyde Space (via brief ACSAR 2026-09-19)
+      nota: DISCREPANCIA registrada, ver alternativas.
+      alternativas:
+        - valor: 5.0
+          fuente: satsearch.co (via brief ACSAR 2026-09-19)
+          nota: satsearch publica 5 W de pico para el mismo producto.
+    requiere_vista_exterior: true
+    nota_vista: El star tracker ST200 necesita linea de vision libre al exterior.
+
+  - id: obc_kryten_m3_plus
+    nombre: AAC Clyde Space Kryten-M3-PLUS (OBC con GNSS)
+    formato: pc104
+    categoria: plataforma
+    subsistema: OBC
+    cantidad: 1
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: [95.89, 90.17, 5.51]
+        unidad: mm
+        estado: confirmado
+        fuente: https://www.aac-clyde.space/wp-content/uploads/2021/10/AAC_DataSheet_Kryten.pdf
+        nota: >-
+          La ficha cubre la familia KRYTEN-M3; el sufijo PLUS anade GNSS.
+          La altura 5.51 mm es "from top PCB to lowest component": NO es el paso
+          de apilamiento PC104, que se trata aparte (ver pila_pc104).
+    masa:
+      valor: 61.9
+      unidad: g
+      estado: confirmado
+      fuente: https://www.aac-clyde.space/wp-content/uploads/2021/10/AAC_DataSheet_Kryten.pdf
+    potencia_nominal:
+      valor: 0.4
+      unidad: W
+      estado: confirmado
+      fuente: https://www.aac-clyde.space/wp-content/uploads/2021/10/AAC_DataSheet_Kryten.pdf
+      nota: 400 mW tipico.
+    potencia_pico:
+      valor: 1.0
+      unidad: W
+      estado: confirmado
+      fuente: https://www.aac-clyde.space/wp-content/uploads/2021/10/AAC_DataSheet_Kryten.pdf
+
+  - id: eps_starbuck_nano_plus
+    nombre: AAC Clyde Space Starbuck-Nano-PLUS
+    formato: pc104
+    categoria: plataforma
+    subsistema: EPS
+    cantidad: 1
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: [95.89, 90.17, 20.82]
+        unidad: mm
+        estado: confirmado
+        fuente: https://www.aac-clyde.space/wp-content/uploads/2021/11/AAC_DataSheet_Starbuck-Nano.pdf
+        nota: Columna NANO-PLUS de la tabla "Product Information". Formato PC104.
+    masa:
+      valor: 148.0
+      unidad: g
+      estado: confirmado
+      fuente: https://www.aac-clyde.space/wp-content/uploads/2021/11/AAC_DataSheet_Starbuck-Nano.pdf
+    nota: >-
+      ATENCION: la ficha describe el NANO-PLUS como pensado para 3-12U CON PANELES
+      DESPLEGABLES, mientras que CLAU parte de paneles PHOTON-SIDE de montaje en
+      cuerpo (variante NANO). Decision a revisar con AAC segun la configuracion
+      final de paneles.
+
+  - id: bateria_optimus_30
+    nombre: AAC Clyde Space Optimus-30
+    formato: pc104
+    categoria: plataforma
+    subsistema: EPS
+    cantidad:
+      valor: null
+      estado: TBD
+      falta: Numero de modulos de bateria N segun el presupuesto de energia
+      pedir_a: Equipo de potencia de ACSAR
+    cantidad_modelada:
+      valor: 2
+      estado: decision
+      fuente: Hipotesis de trabajo para el analisis volumetrico
+      nota: >-
+        Se modelan 2 modulos (60 Wh) SOLO para reservar volumen. No es una
+        eleccion de diseno cerrada: recalcular al cerrar el presupuesto de energia.
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: [95.89, 90.17, 21.55]
+        unidad: mm
+        estado: confirmado
+        fuente: https://www.aac-clyde.space/wp-content/uploads/2021/11/AAC_DataSheet_Optimus.pdf
+    masa:
+      valor: 268.0
+      unidad: g
+      estado: confirmado
+      fuente: https://www.aac-clyde.space/wp-content/uploads/2021/11/AAC_DataSheet_Optimus.pdf
+    capacidad:
+      valor: 30.0
+      unidad: Wh
+      estado: confirmado
+      fuente: https://www.aac-clyde.space/wp-content/uploads/2021/11/AAC_DataSheet_Optimus.pdf
+    temperatura_operacion:
+      valor: [-10.0, 50.0]
+      unidad: C
+      estado: confirmado
+      fuente: https://www.aac-clyde.space/wp-content/uploads/2021/11/AAC_DataSheet_Optimus.pdf
+      nota: Restriccion termica mas estrecha de la plataforma. Condiciona la ubicacion.
+
+  - id: radio_banda_s_quasar_strx
+    nombre: AAC Clyde Space Quasar-STRX (transceptor banda S)
+    formato: pc104
+    categoria: plataforma
+    subsistema: comunicaciones
+    cantidad: 1
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: [96.0, 90.0, 16.9]
+        unidad: mm
+        estado: referencia
+        fuente: Ficha AAC Pulsar-STX (via brief ACSAR 2026-09-19)
+        nota: >-
+          NO es el componente elegido. AAC no publica las dimensiones del
+          Quasar-STRX; se usa el Pulsar-STX de la misma familia como referencia
+          de reserva de volumen. Se renderiza en color de 'referencia'.
+    masa:
+      valor: 100.0
+      unidad: g
+      estado: referencia
+      fuente: Ficha AAC Pulsar-STX (via brief ACSAR 2026-09-19)
+      nota: La ficha del Pulsar-STX indica "<100 g". Se toma la cota como referencia.
+    potencia_pico:
+      valor: 5.0
+      unidad: W
+      estado: referencia
+      fuente: Ficha AAC Pulsar-STX (via brief ACSAR 2026-09-19)
+      nota: La ficha del Pulsar-STX indica "<5 W".
+
+  - id: antena_quasar_wsant
+    nombre: AAC Clyde Space Quasar-WSANT (antena banda S)
+    categoria: plataforma
+    subsistema: comunicaciones
+    cantidad: 1
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: null
+        unidad: mm
+        estado: TBD
+        falta: Dimensiones y cara de montaje de la antena
+        pedir_a: AAC Clyde Space
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa
+      pedir_a: AAC Clyde Space
+    requiere_vista_exterior: true
+    nota_vista: Debe apuntar a tierra. Compite por superficie con el telescopio y los paneles.
+
+  - id: radio_uhf_pulsar_vutrx
+    nombre: AAC Clyde Space Pulsar-VUTRX (UHF, TT&C de respaldo)
+    formato: pc104
+    categoria: plataforma
+    subsistema: comunicaciones
+    cantidad: 1
+    opcional: true
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: null
+        unidad: mm
+        estado: TBD
+        falta: Dimensiones
+        pedir_a: AAC Clyde Space
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa
+      pedir_a: AAC Clyde Space
+    nota: Opcional. Solo se integra si queda volumen tras cerrar el payload.
+
+  - id: paneles_photon_side
+    nombre: AAC Clyde Space PHOTON-SIDE (paneles de montaje en cuerpo)
+    categoria: plataforma
+    subsistema: EPS
+    cantidad:
+      valor: null
+      estado: TBD
+      falta: Numero de caras pobladas y tamano de cada una
+      pedir_a: Equipo de potencia de ACSAR
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: null
+        unidad: mm
+        estado: TBD
+        falta: Dimensiones de cada panel segun la cara elegida (1U/2U/3U/6U)
+        pedir_a: AAC Clyde Space
+        nota: La ficha solo publica la altura plegada, no el contorno de cada tamano.
+    altura_plegada:
+      valor: 3.5
+      unidad: mm
+      estado: confirmado
+      fuente: https://www.aac-clyde.space/wp-content/uploads/2021/11/AAC_DataSheet_Photon.pdf
+      nota: >-
+        Cabe dentro de los 6.5 mm de protrusion permitidos por CDS 14.1 req 2.2.3.
+    masa_por_cara_3u:
+      valor: 135.0
+      unidad: g
+      estado: confirmado
+      fuente: https://www.aac-clyde.space/wp-content/uploads/2021/11/AAC_DataSheet_Photon.pdf
+    potencia_por_cara_3u:
+      valor: 9.0
+      unidad: W
+      estado: confirmado
+      fuente: https://www.aac-clyde.space/wp-content/uploads/2021/11/AAC_DataSheet_Photon.pdf
+      nota: DISCREPANCIA registrada. La ficha dice "Up to 9W per 3U populated face".
+      alternativas:
+        - valor: 9.25
+          fuente: Brief ACSAR 2026-09-19
+          nota: El brief indica 9.25 W por cara de 3U.
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa total segun el numero de caras pobladas (la ficha da 135 g por cara de 3U)
+      pedir_a: Equipo de potencia de ACSAR
+
+  - id: propulsion
+    nombre: Modulo de propulsion (opcional)
+    categoria: plataforma
+    subsistema: propulsion
+    cantidad: 1
+    opcional: true
+    prioridad: baja
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: null
+        unidad: mm
+        estado: TBD
+        falta: Modelo de propulsor y sus dimensiones
+        pedir_a: ACSAR (decision de mision aun abierta)
+        nota: El rango declarado es 0.1U a 1U segun modelo. No se fija un valor.
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa del propulsor elegido
+      pedir_a: ACSAR (decision de mision aun abierta)
+
+# ---------------------------------------------------------------------
+# 3. PAYLOAD - TERMINAL OPTICO (ESPACIO LIBRE)
+# ---------------------------------------------------------------------
+
+  - id: telescopio_cassegrain
+    nombre: Telescopio Cassegrain on-axis, apertura 90 mm
+    categoria: payload_optico
+    subsistema: terminal_optico
+    cantidad: 1
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: null
+        unidad: mm
+        estado: TBD
+        falta: Diametro exterior del barrilete y longitud optica del tubo
+        pedir_a: Aperture Optical Sciences / equipo de optica de ACSAR
+        nota: >-
+          El brief indica "aprox. 2U" y apertura libre 90 mm, pero 2U no fija el
+          contorno. El diametro exterior es el numero critico: ver el chequeo
+          'apertura_vs_altura' en el analisis.
+    apertura_libre:
+      valor: 90.0
+      unidad: mm
+      estado: decision
+      fuente: Decision de diseno ACSAR (arquitectura opcion B, 19-09-2026)
+      nota: Tipo empleado en QUBE-II. Fabricacion a medida.
+    longitud_optica:
+      valor: null
+      unidad: mm
+      estado: TBD
+      falta: Longitud del tubo. Interesa distancia focal larga; se admite acortar.
+      pedir_a: Aperture Optical Sciences
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa
+      pedir_a: Aperture Optical Sciences
+    requiere_vista_exterior: true
+    nota_vista: La apertura necesita vision despejada hacia el exterior (keep-out del haz).
+
+  - id: fsm
+    nombre: Espejo de apuntado fino (FSM)
+    categoria: payload_optico
+    subsistema: terminal_optico
+    cantidad: 1
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: null
+        unidad: mm
+        estado: TBD
+        falta: Eleccion entre MEMS (Mirrorcle, herencia CLICK-A, espejo 5 mm) y piezo PI S-331, y su envolvente
+        pedir_a: Equipo de optica de ACSAR
+        nota: >-
+          Las dos familias tienen envolventes muy distintas (MEMS de pocos mm
+          frente a piezo de varias decenas de mm). No se modela hasta decidir.
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa del FSM elegido (MEMS o piezo)
+      pedir_a: Equipo de optica de ACSAR
+
+  - id: dicroico
+    nombre: Espejo dicroico (separacion beacon / canal cuantico)
+    categoria: payload_optico
+    subsistema: terminal_optico
+    cantidad: 1
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: null
+        unidad: mm
+        estado: TBD
+        falta: Dimensiones del sustrato y del soporte
+        pedir_a: Equipo de optica de ACSAR
+    nota: El canal cuantico lo atraviesa; el beacon de subida se refleja hacia la camara.
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa del dicroico y su soporte
+      pedir_a: Equipo de optica de ACSAR
+
+  - id: camara_beacon
+    nombre: Camara / sensor de beacon (medida del error de apuntado)
+    categoria: payload_optico
+    subsistema: terminal_optico
+    cantidad: 1
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: null
+        unidad: mm
+        estado: TBD
+        falta: Modelo de sensor y su envolvente
+        pedir_a: Equipo de PAT de ACSAR
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa del sensor elegido
+      pedir_a: Equipo de PAT de ACSAR
+
+  - id: laser_beacon_bajada
+    nombre: Laser de beacon de bajada
+    categoria: payload_optico
+    subsistema: terminal_optico
+    cantidad: 1
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: null
+        unidad: mm
+        estado: TBD
+        falta: Longitud de onda, potencia y envolvente
+        pedir_a: Equipo de PAT de ACSAR
+    nota: Longitud de onda distinta de 1550 nm para que la estacion siga al satelite.
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa del laser de beacon elegido
+      pedir_a: Equipo de PAT de ACSAR
+
+  - id: colimador
+    nombre: Colimador fibra a espacio libre
+    categoria: payload_optico
+    subsistema: terminal_optico
+    cantidad: 1
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: null
+        unidad: mm
+        estado: TBD
+        falta: Modelo y envolvente (diametro de haz colimado, longitud)
+        pedir_a: Equipo de optica de ACSAR
+    nota: Frontera entre la cadena de fibra y el camino en espacio libre.
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa del colimador elegido
+      pedir_a: Equipo de optica de ACSAR
+
+# ---------------------------------------------------------------------
+# 4. PAYLOAD - BANDEJA OPTICA (FIBRA)
+# ---------------------------------------------------------------------
+
+  - id: bandeja_optica
+    nombre: Bandeja optica (placa mecanica, no PCB)
+    categoria: payload_bandeja
+    subsistema: bandeja_optica
+    cantidad: 1
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: null
+        unidad: mm
+        estado: TBD
+        falta: Contorno definitivo, que sale de la distribucion una vez confirmada
+        pedir_a: Este repositorio, tras fijar el layout
+    nota: >-
+      Necesita control termico propio: la extincion garantizada del modulador de
+      intensidad solo cubre 0 a +70 C. Reservar espacio para sensores y calefactores.
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa de la placa, que sale del contorno y el material una vez fijado el layout
+      pedir_a: Este repositorio, tras fijar el layout
+
+  - id: laser_dfb_1550
+    nombre: Laser DFB 1550 nm, Gooch & Housego (modulo validado para espacio)
+    categoria: payload_bandeja
+    subsistema: bandeja_optica
+    cantidad: 1
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: null
+        unidad: mm
+        estado: TBD
+        falta: Envolvente del encapsulado butterfly con Peltier (y del disipador)
+        pedir_a: Gooch & Housego
+        nota: Formato butterfly con TEC. Calificacion ESCC-23201.
+    potencia_nominal:
+      valor: 4.1
+      unidad: W
+      estado: confirmado
+      fuente: Brief ACSAR 2026-09-19 (cita ficha Gooch & Housego)
+      nota: >-
+        La ficha indica "<4.1 W" electricos, incluido el Peltier. Es el mayor
+        consumo del payload. Se toma la cota como valor nominal.
+    potencia_optica:
+      valor: 90.0
+      unidad: mW
+      estado: confirmado
+      fuente: Brief ACSAR 2026-09-19 (cita ficha Gooch & Housego)
+      nota: La ficha indica ">90 mW".
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa del modulo butterfly con Peltier
+      pedir_a: Gooch & Housego
+
+  - id: mod_intensidad_mxer_ln_10
+    nombre: Exail MXER-LN-10 (modulador de intensidad, grado espacial EM/NS-FM/FM)
+    categoria: payload_bandeja
+    subsistema: bandeja_optica
+    cantidad: 1
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: [110.0, 15.0, 9.7]
+        unidad: mm
+        estado: confirmado
+        fuente: https://www.exail.com/media-file/7854/exail-datasheet-em-ns-fm-fm-mxer-ln-10-space-grade-components.pdf
+        nota: >-
+          Plano mecanico 03_2026_ED2 / 00025851-B p.9. Cuerpo 100 mm, bridas
+          incluidas 110 +/-0.2 mm, ancho 15 +/-0.2, alto 9.7 +/-0.2.
+          DISCREPANCIA IMPORTANTE con el brief, ver alternativas.
+        alternativas:
+          - valor: [85.0, 15.0, 9.65]
+            fuente: https://www.exail.com/media-file/7739/datasheet-mpxmpz-ln-series.pdf
+            nota: >-
+              "Housing #A" de la serie comercial MPX/MPZ, que es la cifra que
+              recoge el brief. El encapsulado de GRADO ESPACIAL es mas largo.
+              Para el analisis se usa el de grado espacial, que es el que vuela.
+    longitud_con_fibras:
+      valor: 130.0
+      unidad: mm
+      estado: confirmado
+      fuente: https://www.exail.com/media-file/7854/exail-datasheet-em-ns-fm-fm-mxer-ln-10-space-grade-components.pdf
+      nota: >-
+        Cota (130) del plano, incluye los protectores de fibra. Es la longitud
+        recta minima que hay que reservar en la bandeja, ANTES de los bucles.
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa del encapsulado de grado espacial
+      pedir_a: Exail
+      nota: La version comercial "Housing #A" pesa 12.95 g (plano PLA13242-AA). No aplica al grado espacial.
+    temperatura_extincion_garantizada:
+      valor: [0.0, 70.0]
+      unidad: C
+      estado: confirmado
+      fuente: https://www.exail.com/media-file/7854/exail-datasheet-em-ns-fm-fm-mxer-ln-10-space-grade-components.pdf
+      nota: >-
+        "The modulator's ER is warrantied in the range [0 C, +70 C]". Es el
+        requisito que obliga a control termico dedicado en la bandeja optica.
+    interfaz_rf:
+      valor: [6.1, 10.0]
+      unidad: mm
+      estado: confirmado
+      fuente: https://www.exail.com/media-file/7854/exail-datasheet-em-ns-fm-fm-mxer-ln-10-space-grade-components.pdf
+      nota: Conector RF lateral, 6.1 mm de ancho y 10 mm de alto sobre el cuerpo. Necesita holgura para el coaxial.
+    altura_eje_fibra:
+      valor: 4.8
+      unidad: mm
+      estado: confirmado
+      fuente: https://www.exail.com/media-file/7854/exail-datasheet-em-ns-fm-fm-mxer-ln-10-space-grade-components.pdf
+      nota: Altura del eje optico sobre la base. Fija el plano de los bucles de fibra.
+
+  - id: mod_fase_mpz_ln_10
+    nombre: Exail MPZ-LN-10 (modulador de fase, codificador de polarizacion)
+    categoria: payload_bandeja
+    subsistema: bandeja_optica
+    cantidad: 1
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: [110.0, 15.0, 9.7]
+        unidad: mm
+        estado: referencia
+        fuente: https://www.exail.com/media-file/7855/exail-datasheet-em-ns-fm-fm-nir-mpx-ln-01-space-grade-components.pdf
+        nota: >-
+          Exail NO publica ficha de grado espacial del MPZ-LN-10. Se toma como
+          referencia el encapsulado de grado espacial del NIR-MPX-LN-0.1
+          (plano 03_2026_ED3 / 00025631-B p.9), identico al del MXER-LN-10.
+          Confirmar con Exail antes de cerrar la bandeja.
+        alternativas:
+          - valor: [85.0, 15.0, 9.65]
+            fuente: https://www.exail.com/media-file/7739/datasheet-mpxmpz-ln-series.pdf
+            nota: >-
+              Housing #A comercial. El MPZ-LN-10-LVP usa el Housing #C, de 105 mm.
+    longitud_con_fibras:
+      valor: 130.0
+      unidad: mm
+      estado: referencia
+      fuente: https://www.exail.com/media-file/7855/exail-datasheet-em-ns-fm-fm-nir-mpx-ln-01-space-grade-components.pdf
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa del encapsulado de grado espacial
+      pedir_a: Exail
+    nota: Esquema ICFO de codificacion de polarizacion con un solo modulador de fase.
+
+  - id: voa
+    nombre: Atenuador optico variable (VOA)
+    categoria: payload_bandeja
+    subsistema: bandeja_optica
+    cantidad: 1
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: null
+        unidad: mm
+        estado: TBD
+        falta: Modelo y envolvente
+        pedir_a: Equipo de payload de ACSAR
+    nota: Lleva el flujo al nivel de fotones por pulso exigido por BB84 con decoy.
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa del VOA elegido
+      pedir_a: Equipo de payload de ACSAR
+
+  - id: aislador
+    nombre: Aislador optico
+    categoria: payload_bandeja
+    subsistema: bandeja_optica
+    cantidad: 1
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: null
+        unidad: mm
+        estado: TBD
+        falta: Modelo y envolvente
+        pedir_a: Equipo de payload de ACSAR
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa del aislador elegido
+      pedir_a: Equipo de payload de ACSAR
+
+  - id: filtro_espectral
+    nombre: Filtro espectral
+    categoria: payload_bandeja
+    subsistema: bandeja_optica
+    cantidad: 1
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: null
+        unidad: mm
+        estado: TBD
+        falta: Modelo y envolvente
+        pedir_a: Equipo de payload de ACSAR
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa del filtro elegido
+      pedir_a: Equipo de payload de ACSAR
+
+  - id: acoplador_monitor
+    nombre: Acoplador de monitorizacion + fotodiodo
+    categoria: payload_bandeja
+    subsistema: bandeja_optica
+    cantidad: 1
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: null
+        unidad: mm
+        estado: TBD
+        falta: Modelo y envolvente
+        pedir_a: Equipo de payload de ACSAR
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa del acoplador y el fotodiodo
+      pedir_a: Equipo de payload de ACSAR
+
+# ---------------------------------------------------------------------
+# 5. PAYLOAD - PCBs PROPIAS
+# ---------------------------------------------------------------------
+
+  - id: pcb1_control_qkd
+    nombre: PCB-1 Control QKD (FPGA, QRNG, memoria, reloj)
+    formato: pc104
+    categoria: payload_pcb
+    subsistema: control_qkd
+    cantidad: 1
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: null
+        unidad: mm
+        estado: TBD
+        falta: Altura de la tarjeta (contorno PC104 propuesto, altura por disenar)
+        pedir_a: Equipo de electronica de ACSAR
+        nota: >-
+          El contorno PC104 (95.89 x 90.17 mm) esta PROPUESTO, no confirmado.
+          La altura depende del componente mas alto, aun sin elegir.
+    nota: FPGA, 4 x QRNG, memoria no volatil >=32 GB, reloj disciplinado por el PPS del GNSS.
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa de la tarjeta poblada
+      pedir_a: Equipo de electronica de ACSAR
+
+  - id: pcb2_drivers_opticos
+    nombre: PCB-2 Drivers opticos
+    formato: pc104
+    categoria: payload_pcb
+    subsistema: drivers_opticos
+    cantidad: 1
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: null
+        unidad: mm
+        estado: TBD
+        falta: Altura de la tarjeta
+        pedir_a: Equipo de electronica de ACSAR
+    nota: >-
+      Pulsos del laser y su Peltier, 2 drivers RF de moduladores, lazo de punto
+      de trabajo del modulador, control termico de la bandeja. Debe quedar cerca
+      de la bandeja optica: los coaxiales RF a los moduladores han de ser cortos.
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa de la tarjeta poblada
+      pedir_a: Equipo de electronica de ACSAR
+
+  - id: pcb3_pat
+    nombre: PCB-3 PAT (apuntado, adquisicion y seguimiento)
+    formato: pc104
+    categoria: payload_pcb
+    subsistema: pat
+    cantidad: 1
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: null
+        unidad: mm
+        estado: TBD
+        falta: Altura de la tarjeta, y si el driver del FSM es de alta tension
+        pedir_a: Equipo de electronica de ACSAR
+    nota: >-
+      Lectura de la camara, driver del FSM, driver del laser de beacon, lazo de
+      apuntado fino. Debe quedar cerca del banco de espacio libre.
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa de la tarjeta poblada
+      pedir_a: Equipo de electronica de ACSAR
+
+  - id: qrng_idq20mc1_s3
+    nombre: QRNG ID Quantique IDQ20MC1-S3
+    categoria: payload_pcb
+    subsistema: control_qkd
+    cantidad: 4
+    montado_en: pcb1_control_qkd
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: [4.2, 5.0, 1.1]
+        unidad: mm
+        estado: confirmado
+        fuente: Brief ACSAR 2026-09-19 (cita ficha ID Quantique IDQ20MC1-S3)
+    potencia_nominal:
+      valor: 0.08344
+      unidad: W
+      estado: confirmado
+      fuente: Brief ACSAR 2026-09-19 (cita ficha ID Quantique)
+      nota: 83.44 mW por unidad. Con 4 unidades, 333.76 mW.
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa por unidad
+      pedir_a: ID Quantique
+
+# ---------------------------------------------------------------------
+# 6. PARAMETROS DE INTEGRACION (no son componentes)
+# ---------------------------------------------------------------------
+integracion:
+  pila_pc104:
+    contorno:
+      valor: [95.89, 90.17]
+      unidad: mm
+      estado: confirmado
+      fuente: Fichas AAC (Kryten-M3, Starbuck-Nano, Optimus) - contorno comun
+      nota: Contorno de tarjeta comun a toda la gama AAC usada en CLAU.
+    paso_apilamiento:
+      valor: null
+      unidad: mm
+      estado: TBD
+      falta: Paso real entre tarjetas (separadores) del chasis elegido
+      pedir_a: Equipo de estructura de ACSAR
+      nota: >-
+        El paso NO es la altura de la ficha: las fichas AAC dan la altura "from
+        top PCB to lowest component". El paso lo fijan los separadores.
+        Sin este dato no se puede cerrar la longitud de la pila.
+  fibra:
+    radio_minimo_curvatura:
+      valor: null
+      unidad: mm
+      estado: TBD
+      falta: Radio minimo de curvatura de la fibra elegida (probablemente PM a 1550 nm)
+      pedir_a: Equipo de payload de ACSAR
+      nota: >-
+        Es el parametro que mas area consume en la bandeja optica. Sin el no se
+        puede dimensionar la bandeja ni comprobar los bucles.
+  holgura_conector:
+    valor: null
+    unidad: mm
+    estado: TBD
+    falta: Holgura de insercion por tipo de conector (coaxial RF, AVIM optico, conectores de datos)
+    pedir_a: Equipo de electronica de ACSAR

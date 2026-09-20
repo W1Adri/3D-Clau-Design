@@ -1,0 +1,16 @@
+# Entorno
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# Salidas generadas: se regeneran con `uv run clau3d todo`.
+# Se versionan de todos modos para poder revisarlas en el repositorio;
+# si molestan en los diffs, descomentar estas dos lineas.
+# cad/generated/
+# reports/
+
+# Sistema
+.DS_Store
+*.swp
