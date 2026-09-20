@@ -7,11 +7,13 @@ No editar a mano: los numeros salen de `data/components.yaml`.
 - Norma: CubeSat Design Specification Rev. 14.1, The CubeSat Program, Cal Poly SLO
 - Estado del layout: **confirmada** (8 piezas colocadas)
 
+> **Unidades.** Los volumenes van en **cm3** y en **litros**; las longitudes, en **mm**. La **U** de la CDS es un *formato* (una ranura de dispensador de 100 x 100 x 113.5 mm), no una unidad de volumen, asi que aqui no se usa para medir hueco libre: decir que la envolvente 6U "mide 8.28 U" mezcla las dos cosas. Cuando aparece "6U" se refiere al formato de la envolvente exterior (226.3 x 100 x 366 mm), nunca a un volumen calculado.
+
 ## Resumen
 
-| Concepto | cm3 | U |
+| Concepto | cm3 | L |
 |---|---|---|
-| Envolvente exterior 6U | 8282.6 | 8.28 |
+| Envolvente exterior (formato 6U) | 8282.6 | 8.28 |
 | Zona util interior | 7643.7 | 7.64 |
 | Ocupado por piezas colocadas | 1394.1 | 1.39 |
 | Ocupado segun catalogo (con o sin colocar) | 1394.1 | 1.39 |
@@ -57,7 +59,7 @@ No editar a mano: los numeros salen de `data/components.yaml`.
 
 ## Hueco libre por zona
 
-| zona | nombre | total cm3 | ocupado cm3 | libre cm3 | libre U | % ocupado |
+| zona | nombre | total cm3 | ocupado cm3 | libre cm3 | libre L | % ocupado |
 |---|---|---|---|---|---|---|
 | z_plataforma | Columna de plataforma - pila PC104 a lo largo de todo Z | 3447.8 | 1362.1 | 2085.7 | 2.09 | 40% |
 | z_payload_telescopio | Telescopio | 1857.6 | 0.0 | 1857.6 | 1.86 | 0% |

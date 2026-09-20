@@ -11,6 +11,15 @@ from .assembly import Layout, PiezaColocada
 from .datamodel import CONFIRMADO, Catalogo, validar
 from .structure import zona_util
 
+NOTA_UNIDADES = (
+    "> **Unidades.** Los volumenes van en **cm3** y en **litros**; las longitudes, "
+    "en **mm**. La **U** de la CDS es un *formato* (una ranura de dispensador de "
+    "100 x 100 x 113.5 mm), no una unidad de volumen, asi que aqui no se usa para "
+    "medir hueco libre: decir que la envolvente 6U \"mide 8.28 U\" mezcla las dos "
+    "cosas. Cuando aparece \"6U\" se refiere al formato de la envolvente exterior "
+    "(226.3 x 100 x 366 mm), nunca a un volumen calculado."
+)
+
 AVISO_LAYOUT = (
     "> **La distribucion aun NO esta confirmada.** Las posiciones de este "
     "informe son una propuesta pendiente de validar por el equipo. El analisis "
@@ -59,22 +68,24 @@ def informe_volumen(
     lineas = _cabecera("Informe de volumen", catalogo, layout)
 
     lineas += [
+        NOTA_UNIDADES,
+        "",
         "## Resumen",
         "",
         *_tabla(
-            ["Concepto", "cm3", "U"],
+            ["Concepto", "cm3", "L"],
             [
-                ["Envolvente exterior 6U", _n(volume.a_cm3(resumen.exterior_mm3)),
-                 _n(volume.a_u(resumen.exterior_mm3), 2)],
+                ["Envolvente exterior (formato 6U)", _n(volume.a_cm3(resumen.exterior_mm3)),
+                 _n(volume.a_litros(resumen.exterior_mm3), 2)],
                 ["Zona util interior", _n(volume.a_cm3(resumen.interior_mm3)),
-                 _n(volume.a_u(resumen.interior_mm3), 2)],
+                 _n(volume.a_litros(resumen.interior_mm3), 2)],
                 ["Ocupado por piezas colocadas", _n(volume.a_cm3(resumen.ocupado_colocado_mm3)),
-                 _n(volume.a_u(resumen.ocupado_colocado_mm3), 2)],
+                 _n(volume.a_litros(resumen.ocupado_colocado_mm3), 2)],
                 ["Ocupado segun catalogo (con o sin colocar)",
                  _n(volume.a_cm3(resumen.ocupado_catalogo_mm3)),
-                 _n(volume.a_u(resumen.ocupado_catalogo_mm3), 2)],
+                 _n(volume.a_litros(resumen.ocupado_catalogo_mm3), 2)],
                 ["Libre dentro de la zona util", _n(volume.a_cm3(resumen.libre_mm3)),
-                 _n(volume.a_u(resumen.libre_mm3), 2)],
+                 _n(volume.a_litros(resumen.libre_mm3), 2)],
             ],
         ),
     ]
@@ -120,10 +131,10 @@ def informe_volumen(
     if layout.zonas:
         lineas += ["## Hueco libre por zona", ""]
         lineas += _tabla(
-            ["zona", "nombre", "total cm3", "ocupado cm3", "libre cm3", "libre U", "% ocupado"],
+            ["zona", "nombre", "total cm3", "ocupado cm3", "libre cm3", "libre L", "% ocupado"],
             [
                 [f["zona"], f["nombre"], _n(f["total_cm3"]), _n(f["ocupado_cm3"]),
-                 _n(f["libre_cm3"]), _n(f["libre_U"], 2), f"{f['fraccion_ocupada']:.0%}"]
+                 _n(f["libre_cm3"]), _n(f["libre_L"], 2), f"{f['fraccion_ocupada']:.0%}"]
                 for f in volume.libre_por_zona(layout, piezas)
             ],
         )

@@ -18,14 +18,14 @@ repositorio; esto explica **por qué** está como está y **qué falta por decid
 | Tests | **40**, todos en verde |
 | Distribución | **CONFIRMADA** el 2026-09-20: dos columnas de 3U |
 | Piezas colocadas | **8 de 27**. Las otras 19 tienen geometría TBD |
-| Zona útil | 221.7 × 95.4 × 361.4 mm = **7.64 U**, de la que quedan **6.25 U** libres |
+| Zona útil | 221.7 × 95.4 × 361.4 mm = **7.64 L**, de la que quedan **6.25 L** libres |
 
 Funciona de punta a punta: catálogo validado, layout generado, ensamblaje
 exportado a STEP, interferencias, conexiones, volumen, presupuestos, vistas e
 informes. Sin interferencias ni desbordes con las 8 piezas colocadas.
 
 La limitación real no es el modelo, son los datos: **19 de 27 componentes no
-tienen envolvente**, así que el volumen libre de 6.25 U es un techo, no una
+tienen envolvente**, así que el volumen libre de 6.25 L es un techo, no una
 cifra de diseño.
 
 ---
@@ -44,6 +44,14 @@ cifra de diseño.
 - **Verificar contra la fuente primaria.** Las cifras de este repositorio se han
   sacado de los PDF originales, no de agregadores. Dos de ellas contradecían el
   brief de partida (ver §4).
+- **La U no es una unidad de volumen.** La U de la CDS es un *formato*: una
+  ranura de dispensador de 100 × 100 × 113.5 mm. Usarla además como 1000 cm³
+  produce frases sin sentido como «la envolvente 6U mide 8.28 U». Aquí los
+  volúmenes van en **cm³ y litros**, las longitudes en **mm**, y «6U» se refiere
+  siempre al formato de la envolvente exterior (226.3 × 100 × 366 mm).
+- **Una comprobación circular no es una comprobación.** Si una cota se dedujo de
+  una pieza, comprobar esa misma pieza contra esa cota devuelve la hipótesis, no
+  un resultado. Sale como `no comprobable`, igual que un chequeo sin datos.
 
 ---
 
@@ -56,7 +64,7 @@ Elegida entre dos opciones: **dos columnas de 3U a lo largo de todo Z**.
 Origen en el centro geométrico (CDS 14.1 req 2.2.1).
 X = ±113.15 (ancho, 226.3) · Y = ±50.00 (alto, 100.0) · Z = ±183.00 (largo, 366.0).
 La cara **−Z entra primero** en el dispensador. Zona útil interior con el espesor
-declarado: **221.7 × 95.4 × 361.4 mm** ≈ 7.64 U.
+declarado: **221.7 × 95.4 × 361.4 mm** ≈ 7.64 L.
 
 ### El reparto
 
@@ -66,14 +74,14 @@ declarado: **221.7 × 95.4 × 361.4 mm** ≈ 7.64 U.
 
  +110.85 ┌──────────────────────┬─────────────┬─────────────────────────┐
          │ z_payload_bandeja    │ z_payload   │ z_payload_telescopio    │
-         │ 1.70 U               │  _banco     │ 1.86 U                  │
-  PAYLOAD│ moduladores según Z  │ 0.64 U      │ telescopio →→ +Z        │
+         │ 1.70 L               │  _banco     │ 1.86 L                  │
+  PAYLOAD│ moduladores según Z  │ 0.64 L      │ telescopio →→ +Z        │
   121.7  │ (130 mm no caben     │ colimador   │ 160 mm reservados       │
    mm    │  en 121.7 mm de X)   │ dicroico    │                         │
          │                      │ FSM, cámara │                         │
   −10.85 ├──────────────────────┴─────────────┴─────────────────────────┤
-         │ z_plataforma  3.45 U                                         │
-  PLATAF.│ pila PC104 a lo largo de todo Z — 274 mm usados de 361 mm     │
+         │ z_plataforma  3.45 L                                         │
+  PLATAF.│ pila PC104 a lo largo de todo Z — 259 mm usados de 361 mm     │
   100 mm │ −Z ← baterías·baterías·PCB-2·PCB-1·PCB-3·radio·EPS·OBC·ADCS → │
  −110.85 └──────────────────────────────────────────────────────────────┘
              146.4 mm             55 mm            160 mm
@@ -81,10 +89,10 @@ declarado: **221.7 × 95.4 × 361.4 mm** ≈ 7.64 U.
 
 | zona | volumen | libre | contenido |
 |---|---|---|---|
-| `z_plataforma` | 3.45 U | 2.09 U | Pila PC104 completa |
-| `z_payload_telescopio` | 1.86 U | 1.86 U | Telescopio (TBD, sin dibujar) |
-| `z_payload_banco` | 0.64 U | 0.64 U | Colimador, dicroico, FSM, cámara |
-| `z_payload_bandeja` | 1.70 U | 1.67 U | Bandeja de fibra, 2 moduladores colocados |
+| `z_plataforma` | 3.45 L | 2.09 L | Pila PC104 completa |
+| `z_payload_telescopio` | 1.86 L | 1.86 L | Telescopio (TBD, sin dibujar) |
+| `z_payload_banco` | 0.64 L | 0.64 L | Colimador, dicroico, FSM, cámara |
+| `z_payload_bandeja` | 1.70 L | 1.67 L | Bandeja de fibra, 2 moduladores colocados |
 
 Las cuatro zonas **embaldosan exactamente** la zona útil; hay un test que lo
 comprueba.
@@ -104,7 +112,7 @@ Con el paso estándar PC/104 de 15.24 mm; una tarjeta más alta ocupa
 | 6 | PCB-1 Control QKD | TBD | 1 reservada | |
 | 7 | PCB-2 Drivers | TBD | 1 reservada | Lo más cerca posible de la bandeja |
 | 8-9 | Optimus-30 ×2 | 21.55 mm | 2 cada una | En −Z, equilibran la masa del telescopio |
-| | **total** | | | **274 mm de 361 mm** |
+| | **total** | | | **259 mm de 361 mm** |
 
 ### Por qué así
 
@@ -131,7 +139,7 @@ Con el paso estándar PC/104 de 15.24 mm; una tarjeta más alta ocupa
 
 ### Lo bueno que compra
 
-La pila PC104 deja de ser el problema: **274 mm usados de 361 mm**, con 87 mm de
+La pila PC104 deja de ser el problema: **259 mm usados de 361 mm**, con 102 mm de
 margen para que las tres PCBs propias crezcan más de una posición de separador.
 En la otra opción la pila tenía 198 mm y ya iba justa.
 
@@ -210,6 +218,20 @@ El chequeo `seccion_componentes` recalcula esta cota desde el catálogo y dice q
 componente la fija, así que al añadir una pieza nueva más grande la cota baja
 sola en vez de quedarse obsoleta.
 
+**Y por eso mismo ese chequeo sale como `no comprobable`, no como correcto.** El
+espesor de trabajo (2.30 mm) *es* la cota que fija el iADCS400, así que el
+iADCS400 «cabe» con 0.00 mm de holgura. Eso no valida nada: es la hipótesis
+devuelta tal cual. El chequeo lo detecta solo, comparando el espesor supuesto con
+el máximo compatible (`margen_de_espesor_mm`), y por debajo de
+`fit.HOLGURA_NULA_MM` = 0.5 mm se declara no concluyente.
+
+Hay un segundo motivo, más de fondo: **el chasis 6U real es un armazón con
+raíles, no una caja de paredes de espesor uniforme.** El hueco útil no es un
+prisma; cambia con Z y con la cara. El modelo de paredes es una cota inferior
+conservadora que sirve para no engañarse, no una zona útil. Queda pendiente
+sustituirlo por el STEP del chasis del equipo y recalcular con él los dos
+chequeos de sección (`seccion_componentes` y `contorno_pc104`).
+
 ### 4.4 Otras discrepancias registradas
 
 - **iADCS400, potencia de pico**: 4 W (web AAC) frente a 5 W (satsearch).
@@ -238,6 +260,15 @@ sola en vez de quedarse obsoleta.
 
 ## 6. Qué haría falta a continuación
 
+0. **DECISIÓN ABIERTA (2026-09-20): dónde van los moduladores.** La distribución
+   confirmada los pone en la bandeja, según Z, y eso le cuesta 146.4 mm de Z al
+   payload. Con el banco fijo en 55 mm, el telescopio no puede pasar de
+   **176.4 mm** ni vaciando la bandeja: **la opción confirmada no llega a los
+   ~2U (200 mm) del brief.** La alternativa es meter los moduladores en la franja
+   de 121.7 − Ø_barrilete mm que queda al lado del telescopio, a lo largo de Z.
+   Evaluada, cabe y sube el techo del telescopio a 306.4 mm; ver el detalle en la
+   propuesta. **Pendiente de que el equipo la acepte antes de tocar
+   `tools/generar_layout.py`.**
 1. **Los tres datos que bloquean más cosas**:
    - **Diámetro exterior del barrilete del telescopio** (Aperture Optical
      Sciences). Decide si el payload cabe, y si los 160 mm reservados bastan.
@@ -245,7 +276,7 @@ sola en vez de quedarse obsoleta.
      puede comprobar ni un bucle de la bandeja, que es justo donde esta
      distribución tiene su punto flojo.
    - **Paso de apilamiento real del chasis** (equipo de estructura). Ahora se usa
-     el estándar PC/104; el real puede cambiar los 274 mm de pila.
+     el estándar PC/104; el real puede cambiar los 259 mm de pila.
 2. **Alturas de PCB-1, PCB-2 y PCB-3.** Con ellas las tres dejan de ser reservas
    y pasan a ser piezas colocadas.
 3. **Declarar los keep-out del haz óptico**, cuando lleguen los diámetros de haz.

@@ -44,7 +44,7 @@ Falta: Diametro exterior del barrilete (la apertura libre no basta)
 
 **Estado: ATENCION**
 
-La tarjeta de 95.89 x 90.17 mm cabe en 221.7 x 95.4 mm, pero deja solo 5.23 mm de holgura en Y. El espesor de pared no puede pasar de 4.91 mm: es el chasis quien decide, y aun es una hipotesis.
+La tarjeta de 95.89 x 90.17 mm cabe en 221.7 x 95.4 mm, pero deja solo 5.23 mm de holgura en Y. El espesor de pared no puede pasar de 4.91 mm, cota mas holgada que la que fija el iADCS400. Ademas, la zona util sale de un modelo de CAJA CON PAREDES de espesor uniforme, y el chasis 6U real es un ARMAZON CON RAILES: el hueco util no es un prisma, varia con Z y con la cara. Este chequeo no sera concluyente hasta sustituir el modelo por el STEP del chasis del equipo.
 
 | magnitud | valor |
 |---|---|
@@ -55,13 +55,13 @@ La tarjeta de 95.89 x 90.17 mm cabe en 221.7 x 95.4 mm, pero deja solo 5.23 mm d
 | espesor_pared_supuesto_mm | 2.30 |
 | espesor_pared_maximo_mm | 4.91 |
 
-Falta: Zona util real del chasis 6U del equipo
+Falta: Zona util real del chasis 6U del equipo (STEP o plano con railes)
 
 ## Seccion interior frente a todas las piezas
 
-**Estado: ATENCION**
+**Estado: NO COMPROBABLE**
 
-Todas las piezas con envolvente conocida caben. El espesor de pared no puede pasar de 2.30 mm, cota que fija 'adcs_iadcs400'. Las tarjetas PC104 se cuentan sin poder tumbarse: su altura va por el eje de la pila. Sigue siendo una hipotesis: manda el chasis real.
+NO CONCLUYENTE. El espesor de pared supuesto (2.30 mm) coincide con el maximo compatible (2.30 mm): el margen es de 0.00 mm. Pero esa cota se DEDUJO de 'adcs_iadcs400', asi que decir que 'adcs_iadcs400' cabe con 0.00 mm de holgura no comprueba nada; es la hipotesis devuelta tal cual. El resto de piezas si tienen holgura real frente a esta seccion, pero la pieza que manda no. Ademas, la zona util sale de un modelo de CAJA CON PAREDES de espesor uniforme, y el chasis 6U real es un ARMAZON CON RAILES: el hueco util no es un prisma, varia con Z y con la cara. Este chequeo no sera concluyente hasta sustituir el modelo por el STEP del chasis del equipo.
 
 | magnitud | valor |
 |---|---|
@@ -71,8 +71,9 @@ Todas las piezas con envolvente conocida caben. El espesor de pared no puede pas
 | interior_Y_mm | 95.40 |
 | interior_Z_mm | 361.40 |
 | piezas_que_no_caben | 0.00 |
+| margen_de_espesor_mm | 0.00 |
 
-Falta: Zona util real del chasis 6U del equipo
+Falta: Zona util real del chasis 6U del equipo (STEP o plano con railes)
 
 ## Recorrido recto de Exail MXER-LN-10 (modulador de intensidad, grado espacial EM/NS-FM/FM)
 

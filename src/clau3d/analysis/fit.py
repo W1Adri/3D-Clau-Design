@@ -18,6 +18,18 @@ ATENCION = "atencion"
 FALLA = "falla"
 NO_COMPROBABLE = "no comprobable"
 
+# Por debajo de esta holgura, decir que una pieza "cabe" no significa nada: el
+# espesor de pared supuesto SE DEDUJO de la pieza mas apretada, asi que el
+# chequeo se estaria comprobando a si mismo.
+HOLGURA_NULA_MM = 0.5
+
+MODELO_DE_PAREDES = (
+    "Ademas, la zona util sale de un modelo de CAJA CON PAREDES de espesor "
+    "uniforme, y el chasis 6U real es un ARMAZON CON RAILES: el hueco util no "
+    "es un prisma, varia con Z y con la cara. Este chequeo no sera concluyente "
+    "hasta sustituir el modelo por el STEP del chasis del equipo."
+)
+
 
 @dataclass
 class Chequeo:
@@ -185,7 +197,8 @@ def chequeo_contorno_pc104(catalogo: Catalogo) -> Chequeo:
             f"La tarjeta de {largo:.2f} x {ancho:.2f} mm cabe en {interior_x:.1f} x "
             f"{interior_y:.1f} mm, pero deja solo {interior_y - ancho:.2f} mm de "
             f"holgura en Y. El espesor de pared no puede pasar de "
-            f"{espesor_max:.2f} mm: es el chasis quien decide, y aun es una hipotesis."
+            f"{espesor_max:.2f} mm, cota mas holgada que la que fija el iADCS400. "
+            + MODELO_DE_PAREDES
         )
     return Chequeo(
         id="contorno_pc104",
@@ -193,7 +206,7 @@ def chequeo_contorno_pc104(catalogo: Catalogo) -> Chequeo:
         estado=estado,
         mensaje=mensaje,
         numeros=numeros,
-        falta="Zona util real del chasis 6U del equipo",
+        falta="Zona util real del chasis 6U del equipo (STEP o plano con railes)",
     )
 
 
@@ -255,6 +268,12 @@ def chequeo_seccion_componentes(catalogo: Catalogo) -> Chequeo:
         "piezas_que_no_caben": float(len(no_caben)),
     }
 
+    margen = None if espesor is None else espesor_maximo - espesor
+    if margen is not None and abs(margen) < 1e-9:
+        margen = 0.0  # evita que la coma flotante saque un "-0.00 mm"
+    if margen is not None:
+        numeros["margen_de_espesor_mm"] = margen
+
     if no_caben:
         estado = FALLA
         mensaje = (
@@ -268,14 +287,30 @@ def chequeo_seccion_componentes(catalogo: Catalogo) -> Chequeo:
             f"El espesor supuesto ({espesor:.2f} mm) es mayor que el maximo "
             f"compatible ({espesor_maximo:.2f} mm), que fija '{critico}'."
         )
+    elif margen is not None and margen < HOLGURA_NULA_MM:
+        # Caso circular: el espesor supuesto ES la cota que fija '{critico}'.
+        # '{critico}' entonces "cabe" con {margen} mm de holgura, que es
+        # exactamente lo que se le impuso al elegir el espesor. No es un
+        # resultado: es la hipotesis devuelta.
+        estado = NO_COMPROBABLE
+        mensaje = (
+            f"NO CONCLUYENTE. El espesor de pared supuesto ({espesor:.2f} mm) "
+            f"coincide con el maximo compatible ({espesor_maximo:.2f} mm): el "
+            f"margen es de {margen:.2f} mm. Pero esa cota se DEDUJO de "
+            f"'{critico}', asi que decir que '{critico}' cabe con "
+            f"{margen:.2f} mm de holgura no comprueba nada; es la hipotesis "
+            f"devuelta tal cual. El resto de piezas si tienen holgura real "
+            f"frente a esta seccion, pero la pieza que manda no. "
+            + MODELO_DE_PAREDES
+        )
     else:
         estado = ATENCION
         mensaje = (
-            f"Todas las piezas con envolvente conocida caben. El espesor de "
-            f"pared no puede pasar de {espesor_maximo:.2f} mm, cota que fija "
-            f"'{critico}'. Las tarjetas PC104 se cuentan sin poder tumbarse: su "
-            f"altura va por el eje de la pila. Sigue siendo una hipotesis: "
-            f"manda el chasis real."
+            f"Todas las piezas con envolvente conocida caben, y la mas apretada "
+            f"('{critico}') deja {margen:.2f} mm de margen sobre el espesor "
+            f"supuesto de {espesor:.2f} mm. Las tarjetas PC104 se cuentan sin "
+            f"poder tumbarse: su altura va por el eje de la pila. "
+            + MODELO_DE_PAREDES
         )
     return Chequeo(
         id="seccion_componentes",
@@ -283,7 +318,7 @@ def chequeo_seccion_componentes(catalogo: Catalogo) -> Chequeo:
         estado=estado,
         mensaje=mensaje,
         numeros=numeros,
-        falta="Zona util real del chasis 6U del equipo",
+        falta="Zona util real del chasis 6U del equipo (STEP o plano con railes)",
     )
 
 

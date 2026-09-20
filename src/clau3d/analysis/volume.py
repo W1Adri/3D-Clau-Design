@@ -10,15 +10,23 @@ from ..assembly import Layout, PiezaColocada
 from ..datamodel import Catalogo
 from ..structure import Caja
 
-MM3_POR_U = 100.0 * 100.0 * 100.0  # 1U = 10 x 10 x 10 cm
-
-
-def a_u(mm3: float) -> float:
-    return mm3 / MM3_POR_U
+# UNIDADES DE VOLUMEN. Aqui NO se usa la "U" como unidad de volumen.
+#
+# La U de la CDS es un FORMATO, no un volumen: una ranura de dispensador de
+# 100 x 100 x 113.5 mm. Llamar "U" a 1000 cm3 lleva a frases sin sentido como
+# "el 6U mide 8.28 U". Todos los volumenes de este repositorio van en cm3 y en
+# litros, y las longitudes en mm. Si hace falta hablar de U, se dice "formato
+# 6U" y se refiere a la envolvente, nunca a un volumen calculado.
+MM3_POR_CM3 = 1000.0
+MM3_POR_LITRO = 1_000_000.0
 
 
 def a_cm3(mm3: float) -> float:
-    return mm3 / 1000.0
+    return mm3 / MM3_POR_CM3
+
+
+def a_litros(mm3: float) -> float:
+    return mm3 / MM3_POR_LITRO
 
 
 @dataclass
@@ -172,7 +180,7 @@ def libre_por_zona(layout: Layout, piezas: list[PiezaColocada]) -> list[dict]:
                 "total_cm3": a_cm3(total),
                 "ocupado_cm3": a_cm3(ocupado),
                 "libre_cm3": a_cm3(total - ocupado),
-                "libre_U": a_u(total - ocupado),
+                "libre_L": a_litros(total - ocupado),
                 "fraccion_ocupada": ocupado / total if total else 0.0,
             }
         )
