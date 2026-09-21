@@ -1,13 +1,13 @@
 # Lista de pendientes
 
-Generado automaticamente el 2026-09-20 por `clau3d informe`.
+Generado automaticamente el 2026-09-21 por `clau3d informe`.
 No editar a mano: los numeros salen de `data/components.yaml`.
 
 - Mision: CLAU - CubeSat Laser per a Aplicacions Ultrasegures
 - Norma: CubeSat Design Specification Rev. 14.1, The CubeSat Program, Cal Poly SLO
 - Estado del layout: **confirmada** (28 piezas colocadas)
 
-Total de huecos abiertos: **119**, de los cuales **51** son TBD sin ninguna aproximacion y **68** son SUPUESTOS: numeros que se ha inventado este repositorio para poder dibujar y colocar la pieza.
+Total de huecos abiertos: **136**, de los cuales **61** son TBD sin ninguna aproximacion y **75** son SUPUESTOS: numeros que se ha inventado este repositorio para poder dibujar y colocar la pieza.
 
 > **Un supuesto no es un dato.** No suma en los presupuestos de masa ni de potencia, se dibuja en gris y aparece aqui hasta que alguien lo sustituya por una cifra con fuente. La lista de abajo es, literalmente, lo que hay que preguntar.
 
@@ -101,7 +101,13 @@ Total de huecos abiertos: **119**, de los cuales **51** son TBD sin ninguna apro
 | telescopio_cassegrain | telescopio_cassegrain.optica.espesor_mamparo | supuesto | `3.0` | Espesor real de los mamparos |
 | telescopio_cassegrain | telescopio_cassegrain.optica.espesor_vane | supuesto | `0.8` | Espesor real de los vanes |
 
-## Equipo de optica de ACSAR (24)
+## Equipo de optica / de payload de ACSAR (1)
+
+| componente | magnitud | estado | valor modelado | que falta |
+|---|---|---|---|---|
+| integracion | integracion.fibra.tolerancia_coaxialidad | supuesto | `0.5` | Tolerancia de alineacion del colimador elegido, y presupuesto de alineacion del montaje |
+
+## Equipo de optica de ACSAR (27)
 
 | componente | magnitud | estado | valor modelado | que falta |
 |---|---|---|---|---|
@@ -127,24 +133,51 @@ Total de huecos abiertos: **119**, de los cuales **51** son TBD sin ninguna apro
 | trampa_luz_d1 | trampa_luz_d1.masa | TBD | - | Masa de la trampa elegida |
 | trampa_luz_d2 | trampa_luz_d2.dimensiones | supuesto | `[15.0, 15.0, 15.0]` | Tipo de absorbedor, su envolvente y el rechazo exigido |
 | trampa_luz_d2 | trampa_luz_d2.masa | TBD | - | Masa de la trampa elegida |
+| espejo_plegado_cuantico | espejo_plegado_cuantico.dimensiones | supuesto | `[20.0, 20.0, 20.0]` | Diametro del haz colimado (del que sale el tamano del sustrato) y envolvente del soporte del espejo elegido |
+| espejo_plegado_cuantico | espejo_plegado_cuantico.masa | TBD | - | Masa del espejo y su soporte |
+| espejo_plegado_cuantico | espejo_plegado_cuantico.retardancia_45_1550 | TBD | - | DIFERENCIA DE FASE s-p DEL RECUBRIMIENTO A 45 GRADOS Y 1550 nm, CON LA CURVA DE FASE MEDIDA, no solo la reflectancia. Hay que especificar PLATA PROTEGIDA u ORO PROTEGIDO exigiendo esa curva al fabricante: la reflectancia alta es facil y la casi todos los recubrimientos la dan, pero la retardancia a 45 grados es lo que transforma los estados de polarizacion, y casi ningun catalogo la publica. LO QUE SE PIDE ES ESTABILIDAD, NO VALOR ABSOLUTO: ver la nota. |
 | colimador | colimador.dimensiones | supuesto | `[28.0, 12.0, 12.0]` | Diametro del haz colimado y modelo de colimador. Es el mismo dato que bloquea los keep-outs del camino optico. |
 | colimador | colimador.masa | TBD | - | Masa del colimador elegido |
 
-## Equipo de payload de ACSAR (11)
+## Equipo de optica de ACSAR / Equipo de estacion de tierra (1)
+
+| componente | magnitud | estado | valor modelado | que falta |
+|---|---|---|---|---|
+| integracion | integracion.optica.lamina_cuarto_onda_fija | TBD | - | QUE PAR DE BASES USA EL ENLACE, que es lo que decide si hace falta una lamina de cuarto de onda fija. Dos opciones, y las dos son validas para BB84: (a) SIN LAMINA: el esquema ICFO de un solo modulador de fase entrega de forma natural las bases D/A y R/L (diagonal y circular). No hace falta ninguna pieza mas, y el camino cuantico no gana ninguna superficie. (b) CON LAMINA: una lamina de cuarto de onda fija a 45 grados DESPUES del codificador convierte esas bases en H/V y D/A, que es el par clasico y el que muchas estaciones de tierra tienen ya montado. BB84 solo necesita dos bases mutuamente insesgadas, y los dos pares lo son, asi que esto NO es una decision de fisica del protocolo: es una decision de COMPATIBILIDAD CON LA ESTACION DE TIERRA. |
+
+## Equipo de payload / Equipo de ADCS de ACSAR (1)
+
+| componente | magnitud | estado | valor modelado | que falta |
+|---|---|---|---|---|
+| aislador | aislador.momento_dipolar_magnetico | TBD | - | MOMENTO DIPOLAR MAGNETICO RESIDUAL DE LA PIEZA. Un aislador lleva un ROTADOR DE FARADAY con IMAN PERMANENTE: no es un componente pasivo desde el punto de vista magnetico. Ese iman lo ve el magnetometro del ADCS y suma al dipolo residual del satelite, que es lo que produce par perturbador contra el campo terrestre. Con dos aisladores (si el butterfly del laser lleva uno interno) se suman. |
+
+## Equipo de payload de ACSAR (17)
 
 | componente | magnitud | estado | valor modelado | que falta |
 |---|---|---|---|---|
 | integracion | integracion.fibra.radio_minimo_curvatura | TBD | - | Radio minimo de curvatura de la fibra elegida (probablemente PM a 1550 nm) |
 | integracion | integracion.fibra.radio_curvatura_modelado | supuesto | `30.0` | Radio minimo de curvatura real, que es 'radio_minimo_curvatura' |
+| integracion | integracion.fibra.longitud_protector_empalme | supuesto | `60.0` | Protector de empalme elegido y su tramo recto real |
 | integracion | integracion.fibra.longitud_boot_modelada | supuesto | `20.0` | Tipo de conector o protector y su tramo recto de salida |
 | voa | voa.dimensiones | supuesto | `[35.0, 5.5, 5.5]` | Modelo de VOA elegido y su envolvente |
 | voa | voa.masa | TBD | - | Masa del VOA elegido |
+| atenuador_fijo | atenuador_fijo.dimensiones | supuesto | `[25.0, 5.5, 5.5]` | Modelo de atenuador fijo elegido y su envolvente |
+| atenuador_fijo | atenuador_fijo.masa | TBD | - | Masa del atenuador fijo elegido |
 | aislador | aislador.dimensiones | supuesto | `[35.0, 5.5, 5.5]` | Modelo de aislador elegido y su envolvente |
 | aislador | aislador.masa | TBD | - | Masa del aislador elegido |
+| aislador | aislador.aislamiento | supuesto | `50.0` | Aislamiento del aislador elegido, medido a 1550 nm |
 | filtro_espectral | filtro_espectral.dimensiones | supuesto | `[40.0, 5.5, 5.5]` | Modelo de filtro elegido, su ancho de banda y su envolvente |
 | filtro_espectral | filtro_espectral.masa | TBD | - | Masa del filtro elegido |
-| acoplador_monitor | acoplador_monitor.dimensiones | supuesto | `[60.0, 20.0, 12.0]` | Modelo de acoplador y de fotodiodo, y si el fotodiodo va en la bandeja o montado en PCB-2 |
-| acoplador_monitor | acoplador_monitor.masa | TBD | - | Masa del acoplador y el fotodiodo |
+| filtro_espectral | filtro_espectral.ancho_banda | supuesto | `0.8` | Ancho espectral real del pulso del DFB conmutado en ganancia, y ancho de banda del filtro elegido |
+| acoplador_monitor | acoplador_monitor.dimensiones | supuesto | `[60.0, 20.0, 12.0]` | Modelo de acoplador 2x2 y de los dos fotodiodos, y si van en la bandeja o montados en PCB-2 |
+| acoplador_monitor | acoplador_monitor.masa | TBD | - | Masa del acoplador 2x2 y los dos fotodiodos |
+| acoplador_monitor | acoplador_monitor.razon_acoplamiento | supuesto | `[99.0, 1.0]` | Razon de acoplamiento del acoplador elegido, y sensibilidad del fotodiodo, que es lo que la fija |
+
+## Equipo de payload de ACSAR (medida, no ficha) (1)
+
+| componente | magnitud | estado | valor modelado | que falta |
+|---|---|---|---|---|
+| integracion | integracion.fibra.sensibilidad_termica_fase_pm | TBD | - | SENSIBILIDAD TERMICA DE LA FASE ENTRE LOS DOS EJES DE LA FIBRA PM, MEDIDA, en rad por metro y por kelvin. Es lo que fija CUANTA FIBRA POST-CODIFICACION ES TOLERABLE, y por tanto si el tramo recto que el layout reserva sirve o hay que acortarlo todavia mas. Por que importa solo despues del codificador: antes, la luz va en polarizacion lineal fija alineada al eje lento, que ES un autoestado de la fibra, y la birrefringencia no le hace nada. Despues, los estados diagonales (y los circulares) viajan a 45 grados de los ejes, NO son autoestados, y la birrefringencia les mete una fase proporcional a la longitud que ademas DERIVA CON LA TEMPERATURA. El resultado seria una base limpia y la otra rota, que es la peor forma de fallar: el enlace parece funcionar. |
 
 ## Equipo de potencia de ACSAR (3)
 
@@ -160,7 +193,7 @@ Total de huecos abiertos: **119**, de los cuales **51** son TBD sin ninguna apro
 |---|---|---|---|---|
 | bandeja_optica | bandeja_optica.masa | TBD | - | Masa de la placa, que sale del contorno y el material una vez fijado el layout |
 
-## Exail (6)
+## Exail (8)
 
 | componente | magnitud | estado | valor modelado | que falta |
 |---|---|---|---|---|
@@ -168,6 +201,8 @@ Total de huecos abiertos: **119**, de los cuales **51** son TBD sin ninguna apro
 | mod_intensidad_mxer_ln_10 | mod_intensidad_mxer_ln_10.fibra_entrada.dimensiones | supuesto | `[10.0, 3.0, 3.0]` | Diametro del protector de fibra del encapsulado de grado espacial |
 | mod_intensidad_mxer_ln_10 | mod_intensidad_mxer_ln_10.fibra_salida.dimensiones | supuesto | `[10.0, 3.0, 3.0]` | Diametro del protector de fibra del encapsulado de grado espacial |
 | mod_fase_mpz_ln_10 | mod_fase_mpz_ln_10.masa | TBD | - | Masa del encapsulado de grado espacial |
+| mod_fase_mpz_ln_10 | mod_fase_mpz_ln_10.guia_bipolarizacion | TBD | - | SI LA GUIA DE LiNbO3 DEL MPZ-LN-10 TRANSMITE LAS DOS POLARIZACIONES (TE y TM). Las guias de INTERCAMBIO PROTONICO guian una sola y se comportan como un polarizador integrado: con una de esas, el esquema de codificacion de polarizacion con UN SOLO modulador de fase es IMPOSIBLE, no peor. Solo una guia bipolarizacion (difusion de titanio o equivalente) permite meter la luz a 45 grados de los ejes y desfasar una componente contra la otra. |
+| mod_fase_mpz_ln_10 | mod_fase_mpz_ln_10.pigtail_salida_minimo | TBD | - | Longitud minima de pigtail de salida que Exail puede suministrar en el encapsulado de grado espacial, y SI OFRECE SALIDA CON COLIMADOR INTEGRADO. Lo segundo eliminaria el empalme posterior al codificador y con el los 60 mm de 'integracion.fibra.longitud_protector_empalme', que es justo lo que hoy hace que el tramo recto no quepa en la franja (ver el chequeo 'fibra_post_codificacion'). |
 | mod_fase_mpz_ln_10 | mod_fase_mpz_ln_10.fibra_entrada.dimensiones | supuesto | `[10.0, 3.0, 3.0]` | Diametro del protector de fibra del encapsulado de grado espacial |
 | mod_fase_mpz_ln_10 | mod_fase_mpz_ln_10.fibra_salida.dimensiones | supuesto | `[10.0, 3.0, 3.0]` | Diametro del protector de fibra del encapsulado de grado espacial |
 
@@ -178,6 +213,12 @@ Total de huecos abiertos: **119**, de los cuales **51** son TBD sin ninguna apro
 | mod_intensidad_mxer_ln_10 | mod_intensidad_mxer_ln_10.rf.dimensiones | supuesto | `[6.1, 10.0, 6.1]` | Profundidad del conector RF, y holgura de insercion del coaxial |
 | mod_fase_mpz_ln_10 | mod_fase_mpz_ln_10.rf.dimensiones | supuesto | `[6.1, 10.0, 6.1]` | Profundidad del conector RF, y holgura de insercion del coaxial |
 
+## Exail / Equipo de payload de ACSAR (1)
+
+| componente | magnitud | estado | valor modelado | que falta |
+|---|---|---|---|---|
+| mod_intensidad_mxer_ln_10 | mod_intensidad_mxer_ln_10.extincion_suficiente_para_vacio | TBD | - | SI LA RAZON DE EXTINCION DEL MXER-LN-10 DE GRADO ESPACIAL BASTA PARA EL ESTADO VACIO, o hacen falta DOS EN CASCADA. El metodo de decoy necesita tres niveles -- senal, decoy y vacio -- y el vacio tiene que ser vacio de verdad: lo que se escape por ahi es un fondo que el analisis de seguridad se come entero. La ficha garantiza la extincion entre 0 y +70 C pero no dice cuanta, y la extincion de un Mach-Zehnder en el punto nulo depende ademas de lo bien que se mantenga el bias. |
+
 ## Gooch & Housego (3)
 
 | componente | magnitud | estado | valor modelado | que falta |
@@ -185,6 +226,12 @@ Total de huecos abiertos: **119**, de los cuales **51** son TBD sin ninguna apro
 | laser_dfb_1550 | laser_dfb_1550.masa | TBD | - | Masa del modulo butterfly con Peltier |
 | laser_dfb_1550 | laser_dfb_1550.pines_btf14.dimensiones | supuesto | `[30.0, 15.3, 4.0]` | Cotas de la fila de pines del modulo elegido |
 | laser_dfb_1550 | laser_dfb_1550.pines_btf14_b.dimensiones | supuesto | `[30.0, 15.3, 4.0]` | Cotas de la fila de pines del modulo elegido |
+
+## ICFO / Equipo de payload de ACSAR (1)
+
+| componente | magnitud | estado | valor modelado | que falta |
+|---|---|---|---|---|
+| mod_fase_mpz_ln_10 | mod_fase_mpz_ln_10.configuracion_esquema_icfo | TBD | - | SI EL ESQUEMA ES DE PASO SIMPLE con entrada a 45 grados, EN LAZO SAGNAC o DE IDA Y VUELTA. No es un detalle de implementacion: un esquema en lazo anade componentes en el camino -- un circulador o un divisor de polarizacion -- y ESO CAMBIA LA CADENA declarada en data/connections.yaml y la reserva de volumen de la franja. |
 
 ## ID Quantique (1)
 
@@ -245,13 +292,15 @@ Total de huecos abiertos: **119**, de los cuales **51** son TBD sin ninguna apro
 |---|---|---|---|---|
 | fsm_piezo_pi_s331 | fsm_piezo_pi_s331.dimensiones | supuesto | `[50.0, 50.0, 22.0]` | Cotas exteriores del S-331 (plano acotado o STEP) |
 
-## Solo los supuestos, para sustituirlos (68)
+## Solo los supuestos, para sustituirlos (75)
 
 Cada fila es un numero que hoy sostiene el modelo sin sostenerse en nada.
 
 | componente | magnitud | valor modelado | que falta | pedir a |
 |---|---|---|---|---|
 | integracion | integracion.fibra.radio_curvatura_modelado | `30.0` | Radio minimo de curvatura real, que es 'radio_minimo_curvatura' | Equipo de payload de ACSAR |
+| integracion | integracion.fibra.longitud_protector_empalme | `60.0` | Protector de empalme elegido y su tramo recto real | Equipo de payload de ACSAR |
+| integracion | integracion.fibra.tolerancia_coaxialidad | `0.5` | Tolerancia de alineacion del colimador elegido, y presupuesto de alineacion del montaje | Equipo de optica / de payload de ACSAR |
 | integracion | integracion.fibra.longitud_boot_modelada | `20.0` | Tipo de conector o protector y su tramo recto de salida | Equipo de payload de ACSAR |
 | integracion | integracion.coaxial.radio_curvatura_modelado | `25.0` | Radio minimo de curvatura del coaxial elegido. Es el mismo hueco que 'cables_rf_moduladores.radio_minimo_curvatura'. | Equipo de electronica de ACSAR |
 | integracion | integracion.optica.diametro_haz_modelado | `10.0` | Diametro de haz de cada tramo (e01 a e05 en data/connections.yaml) y el semiangulo del cono de la apertura | Equipo de optica de ACSAR |
@@ -302,6 +351,7 @@ Cada fila es un numero que hoy sostiene el modelo sin sostenerse en nada.
 | fotodiodo_monitor_beacon | fotodiodo_monitor_beacon.dimensiones | `[12.0, 12.0, 12.0]` | Modelo de fotodiodo, encapsulado y electronica de acondicionamiento | Equipo de PAT de ACSAR |
 | trampa_luz_d1 | trampa_luz_d1.dimensiones | `[15.0, 15.0, 15.0]` | Tipo de absorbedor, su envolvente y el rechazo exigido | Equipo de optica de ACSAR |
 | trampa_luz_d2 | trampa_luz_d2.dimensiones | `[15.0, 15.0, 15.0]` | Tipo de absorbedor, su envolvente y el rechazo exigido | Equipo de optica de ACSAR |
+| espejo_plegado_cuantico | espejo_plegado_cuantico.dimensiones | `[20.0, 20.0, 20.0]` | Diametro del haz colimado (del que sale el tamano del sustrato) y envolvente del soporte del espejo elegido | Equipo de optica de ACSAR |
 | colimador | colimador.dimensiones | `[28.0, 12.0, 12.0]` | Diametro del haz colimado y modelo de colimador. Es el mismo dato que bloquea los keep-outs del camino optico. | Equipo de optica de ACSAR |
 | bandeja_optica | bandeja_optica.dimensiones | `[117.7, 3.0, 102.4]` | Material, espesor y patron de taladros de la placa, del analisis estructural y termico | Equipo de estructura de ACSAR |
 | laser_dfb_1550 | laser_dfb_1550.pines_btf14.dimensiones | `[30.0, 15.3, 4.0]` | Cotas de la fila de pines del modulo elegido | Gooch & Housego |
@@ -313,9 +363,13 @@ Cada fila es un numero que hoy sostiene el modelo sin sostenerse en nada.
 | mod_fase_mpz_ln_10 | mod_fase_mpz_ln_10.fibra_entrada.dimensiones | `[10.0, 3.0, 3.0]` | Diametro del protector de fibra del encapsulado de grado espacial | Exail |
 | mod_fase_mpz_ln_10 | mod_fase_mpz_ln_10.fibra_salida.dimensiones | `[10.0, 3.0, 3.0]` | Diametro del protector de fibra del encapsulado de grado espacial | Exail |
 | voa | voa.dimensiones | `[35.0, 5.5, 5.5]` | Modelo de VOA elegido y su envolvente | Equipo de payload de ACSAR |
+| atenuador_fijo | atenuador_fijo.dimensiones | `[25.0, 5.5, 5.5]` | Modelo de atenuador fijo elegido y su envolvente | Equipo de payload de ACSAR |
 | aislador | aislador.dimensiones | `[35.0, 5.5, 5.5]` | Modelo de aislador elegido y su envolvente | Equipo de payload de ACSAR |
+| aislador | aislador.aislamiento | `50.0` | Aislamiento del aislador elegido, medido a 1550 nm | Equipo de payload de ACSAR |
 | filtro_espectral | filtro_espectral.dimensiones | `[40.0, 5.5, 5.5]` | Modelo de filtro elegido, su ancho de banda y su envolvente | Equipo de payload de ACSAR |
-| acoplador_monitor | acoplador_monitor.dimensiones | `[60.0, 20.0, 12.0]` | Modelo de acoplador y de fotodiodo, y si el fotodiodo va en la bandeja o montado en PCB-2 | Equipo de payload de ACSAR |
+| filtro_espectral | filtro_espectral.ancho_banda | `0.8` | Ancho espectral real del pulso del DFB conmutado en ganancia, y ancho de banda del filtro elegido | Equipo de payload de ACSAR |
+| acoplador_monitor | acoplador_monitor.dimensiones | `[60.0, 20.0, 12.0]` | Modelo de acoplador 2x2 y de los dos fotodiodos, y si van en la bandeja o montados en PCB-2 | Equipo de payload de ACSAR |
+| acoplador_monitor | acoplador_monitor.razon_acoplamiento | `[99.0, 1.0]` | Razon de acoplamiento del acoplador elegido, y sensibilidad del fotodiodo, que es lo que la fija | Equipo de payload de ACSAR |
 | pcb1_control_qkd | pcb1_control_qkd.dimensiones | `[95.89, 90.17, 15.0]` | Altura real de la tarjeta, que la fija el componente mas alto (la FPGA y su disipador, si lleva). Y confirmar el contorno PC104. | Equipo de electronica de ACSAR |
 | pcb2_drivers_opticos | pcb2_drivers_opticos.dimensiones | `[95.89, 90.17, 15.0]` | Altura real de la tarjeta. Los drivers RF y el del Peltier son los candidatos a componente mas alto. Y confirmar el contorno PC104. | Equipo de electronica de ACSAR |
 | pcb3_pat | pcb3_pat.dimensiones | `[95.89, 90.17, 15.0]` | Altura real de la tarjeta, y si el driver del FSM es de alta tension (un driver piezo de 120 V ocupa bastante mas que uno de MEMS). Es el mismo dato que bloquea la eleccion del FSM. Y confirmar el contorno. | Equipo de electronica de ACSAR |

@@ -1426,10 +1426,10 @@ componentes:
         emite contra la cara trasera de D1 no tiene camino hacia el FSM.
     puertos:
       valor:
-        - "+X (transmision): canal cuantico 1550 nm hacia el FSM (e02)"
-        - "-X (transmision): entrada del colimador (e01)"
-        - "+Y (reflexion): brazo compartido de los dos beacons, hacia D2 (e04/e08)"
-        - "-Y (reflexion): fuga del 1550 en reflexion -> trampa_luz_d1 (e09)"
+        - "+X (transmision): canal cuantico 1550 nm hacia el FSM (e03)"
+        - "-X (transmision): entrada del canal cuantico, que llega del espejo de plegado (e02)"
+        - "+Y (reflexion): brazo compartido de los dos beacons, hacia D2 (e06/e09)"
+        - "-Y (reflexion): fuga del 1550 en reflexion -> trampa_luz_d1 (e10)"
       estado: decision
       fuente: >-
         Decision de arquitectura de ACSAR del 2026-09-20. Se declara aqui para
@@ -1499,11 +1499,11 @@ componentes:
         que proteger.
     puertos:
       valor:
-        - "-Y (transmision, entrada): beacon de subida 976 nm desde D1 (e04)"
-        - "+Y (transmision, salida): camara de seguimiento (e06)"
-        - "-X (reflexion, entrada): beacon de bajada 1064 nm desde el laser (e07)"
-        - "-Y (reflexion, salida): de vuelta a D1 -> FSM -> telescopio (e08)"
-        - "+X (transmision): fuga del beacon -> fotodiodo_monitor_beacon (e10)"
+        - "-Y (transmision, entrada): beacon de subida 976 nm desde D1 (e06)"
+        - "+Y (transmision, salida): camara de seguimiento (e07)"
+        - "-X (reflexion, entrada): beacon de bajada 1064 nm desde el laser (e08)"
+        - "-Y (reflexion, salida): de vuelta a D1 -> FSM -> telescopio (e09)"
+        - "+X (transmision): fuga del beacon -> fotodiodo_monitor_beacon (e11)"
       estado: decision
       fuente: >-
         Decision de arquitectura de ACSAR del 2026-09-20. Son cuatro puertos
@@ -1732,6 +1732,89 @@ componentes:
       falta: Masa de la trampa elegida
       pedir_a: Equipo de optica de ACSAR
 
+  - id: espejo_plegado_cuantico
+    id_drive: OPT-19
+    referencia_comercial: null
+    nombre: Espejo de plegado del canal cuantico (plano metalico a 45 grados)
+    categoria: payload_optico
+    subsistema: terminal_optico
+    cantidad: 1
+    montaje:
+      cara: "-Y"
+      eje: Z
+      tipo_eje: optico
+      nota: >-
+        El sustrato va a 45 grados dentro del soporte; lo que se declara aqui
+        es el soporte, que es lo que ocupa, y por eso la envolvente va alineada
+        con los ejes (mismo criterio que los dos divisores). El eje declarado
+        es Z porque es por donde le ENTRA el haz, bajando del colimador; sale
+        hacia -X, hacia D1.
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: [20.0, 20.0, 20.0]
+        unidad: mm
+        estado: supuesto
+        fuente: >-
+          SUPUESTO, y ACOTADO POR ABAJO POR EL HAZ. Un haz de d mm que incide a
+          45 grados deja una huella de d x d*raiz(2) sobre el espejo -- el
+          mismo razonamiento que decide si el MEMS del FSM vale, ver CLAUDE.md
+          4.7(c) --, asi que con el diametro de haz modelado
+          ('integracion.optica.diametro_haz_modelado', 10 mm, SUPUESTO) la
+          huella es de 10 x 14.1 mm y el sustrato no puede bajar de ahi. Se
+          reserva un CUBO DE 20 mm para el soporte, que admite un sustrato de
+          unos 14 mm a 45 grados con margen de apertura libre y celda. NO es
+          ningun producto: no hay candidato elegido.
+          Y ESTA ACOTADO POR ARRIBA POR EL BANCO, igual que el colimador y D1:
+          esta pieza ocupa en la linea en X el sitio que antes ocupaba el
+          colimador, y el chequeo 'banco_optico' recalcula ese margen desde el
+          catalogo.
+        falta: >-
+          Diametro del haz colimado (del que sale el tamano del sustrato) y
+          envolvente del soporte del espejo elegido
+        pedir_a: Equipo de optica de ACSAR
+    retardancia_45_1550:
+      valor: null
+      unidad: grados
+      estado: TBD
+      falta: >-
+        DIFERENCIA DE FASE s-p DEL RECUBRIMIENTO A 45 GRADOS Y 1550 nm, CON LA
+        CURVA DE FASE MEDIDA, no solo la reflectancia. Hay que especificar
+        PLATA PROTEGIDA u ORO PROTEGIDO exigiendo esa curva al fabricante: la
+        reflectancia alta es facil y la casi todos los recubrimientos la dan,
+        pero la retardancia a 45 grados es lo que transforma los estados de
+        polarizacion, y casi ningun catalogo la publica.
+        LO QUE SE PIDE ES ESTABILIDAD, NO VALOR ABSOLUTO: ver la nota.
+      pedir_a: Equipo de optica de ACSAR
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa del espejo y su soporte
+      pedir_a: Equipo de optica de ACSAR
+    nota: >-
+      SIN CANDIDATO: lo que se dibuja es una reserva, no una pieza.
+      QUE HACE: dobla el canal cuantico de -Z a -X. Existe porque el
+      codificador de polarizacion tiene que alimentar al colimador EN LINEA
+      RECTA -- nada de fibra curvada despues de la codificacion --, y eso obliga
+      al colimador a apuntar segun Z, mientras que la linea D1 -> FSM ->
+      telescopio va segun X y no se mueve. Ver CLAUDE.md 3.10.
+      LO QUE CUESTA, y hay que escribirlo: es una SEGUNDA SUPERFICIE A 45
+      GRADOS en el camino cuantico, y esta EN EL MISMO PLANO DE INCIDENCIA que
+      el FSM -- los dos pliegan en X-Z --, asi que sus retardancias SE SUMAN en
+      vez de compensarse. Si estuvieran en planos perpendiculares se
+      cancelarian en primer orden; no es el caso y no se puede fingir que lo
+      sea.
+      POR QUE AUN ASI NO ES UN PROBLEMA: el efecto es UNITARIO Y ESTATICO. Una
+      retardancia fija no destruye informacion, solo gira el marco de
+      referencia de polarizacion, y la estacion de tierra ya tiene que calibrar
+      ese marco de todas formas (el satelite pasa girando sobre su cabeza). La
+      diatenuacion -- que si atenuaria unos estados mas que otros -- es
+      despreciable en un metal protegido a 45 grados. Por eso el requisito es
+      de ESTABILIDAD: que la retardancia no DERIVE con la temperatura ni con el
+      envejecimiento entre calibraciones. Eso es lo que pide
+      'retardancia_45_1550'.
+
   - id: colimador
     id_drive: OPT-08
     referencia_comercial: null
@@ -1746,6 +1829,11 @@ componentes:
       nota: >-
         Es la frontera: le entra fibra por -X y le sale haz libre por +X. Se
         fija con abrazadera en V al banco.
+        EN EL LAYOUT VA GIRADO PARA QUE SU EJE VAYA SEGUN Z, con la fibra
+        entrando por +Z y el haz saliendo hacia -Z, contra el espejo de
+        plegado. No es un capricho de reparto: lo alimenta el codificador de
+        polarizacion EN LINEA RECTA, y el codificador esta en la franja, que
+        esta en +Z. Ver CLAUDE.md 3.10.
     forma:
       tipo: cilindro
       eje: X
@@ -1772,6 +1860,13 @@ componentes:
     nota: >-
       Frontera entre la cadena de fibra y el camino en espacio libre.
       SIN CANDIDATO: lo que se dibuja es una reserva.
+      ES LA UNICA PIEZA QUE PUEDE IR DETRAS DEL CODIFICADOR. Todo lo demas de
+      la cadena -- aislador, filtro, VOA, acopladores -- va delante, porque
+      cualquiera de ellos proyecta o deforma los cuatro estados BB84. Y el
+      tramo de fibra que lo alimenta tiene que ser RECTO: los estados
+      diagonales viajan a 45 grados de los ejes de la fibra PM, no son
+      autoestados, y cualquier curva les mete una fase que deriva con la
+      temperatura.
     masa:
       valor: null
       unidad: g
@@ -2028,7 +2123,40 @@ componentes:
       unidad: mm
       estado: confirmado
       fuente: https://www.exail.com/media-file/7854/exail-datasheet-em-ns-fm-fm-mxer-ln-10-space-grade-components.pdf
-      nota: Altura del eje optico sobre la base. Fija el plano de los bucles de fibra.
+      nota: >-
+        Altura del eje optico sobre la base. Fija el plano de los bucles de
+        fibra, y en el codificador fija ademas la altura a la que tiene que
+        quedar el eje para ser coaxial con el colimador: ver el chequeo
+        'altura_eje_codificador'.
+    extincion_suficiente_para_vacio:
+      valor: null
+      estado: TBD
+      falta: >-
+        SI LA RAZON DE EXTINCION DEL MXER-LN-10 DE GRADO ESPACIAL BASTA PARA EL
+        ESTADO VACIO, o hacen falta DOS EN CASCADA. El metodo de decoy necesita
+        tres niveles -- senal, decoy y vacio -- y el vacio tiene que ser vacio
+        de verdad: lo que se escape por ahi es un fondo que el analisis de
+        seguridad se come entero. La ficha garantiza la extincion entre 0 y
+        +70 C pero no dice cuanta, y la extincion de un Mach-Zehnder en el
+        punto nulo depende ademas de lo bien que se mantenga el bias.
+      pedir_a: Exail / Equipo de payload de ACSAR
+      nota: >-
+        CONSECUENCIA GEOMETRICA SI HACEN FALTA DOS, calculada con los numeros
+        de este catalogo y del reparto del 2026-09-21. La franja se reparte en
+        BANDAS DE Y, y sus 95.4 mm estan repartidos asi: 20 mm de acoplador,
+        25 mm de codificador (15 de cuerpo mas 10 de conector RF), 25 mm de
+        MXER, dos huecos de 8 mm entre bandas y 9.4 mm de margen contra las dos
+        paredes. Un tercer modulador pide una banda entera: 25 mm mas otros
+        8 mm de hueco, o sea 33 mm, y solo quedan 9.4. FALTAN 23.6 mm.
+        En X tampoco: la franja tiene 26.3 mm y la X del codificador NO ES
+        LIBRE -- tiene que quedar coaxial con el colimador --, asi que a su
+        lado quedan 14.6 mm, que dan para un modulador pero no para dos. Y en Z
+        menos aun: cada uno pide 130 mm de recorrido recto de los 200 que hay,
+        y de esos 200 el tramo post-codificacion ya se lleva 218 (no cabe: ver
+        el chequeo 'fibra_post_codificacion').
+        Asi que un segundo MXER no es "una pieza mas": obliga a repartir otra
+        vez el payload. AQUI NO SE ANADE -- solo se deja escrito lo que
+        costaria.
 
   - id: mod_fase_mpz_ln_10
     id_drive: OPT-03
@@ -2037,6 +2165,11 @@ componentes:
     categoria: payload_bandeja
     subsistema: bandeja_optica
     cantidad: 1
+    # ES LA FRONTERA DE LA CADENA. Despues de esta pieza existen los cuatro
+    # estados BB84, y eso cambia lo que puede ir detras. Los chequeos de orden
+    # leen este campo y no el id: ver 'orden_cadena_fibra' y
+    # 'fibra_post_codificacion' en src/clau3d/analysis/fit.py.
+    funcion: codificador_polarizacion
     montaje:
       cara: "-Z"
       eje: X
@@ -2112,7 +2245,71 @@ componentes:
       estado: TBD
       falta: Masa del encapsulado de grado espacial
       pedir_a: Exail
-    nota: Esquema ICFO de codificacion de polarizacion con un solo modulador de fase.
+    altura_eje_fibra:
+      valor: 4.8
+      unidad: mm
+      estado: referencia
+      fuente: >-
+        Misma cota y misma fuente que la envolvente: plano Exail
+        03_2026_ED3 / 00025631-B p.9 del NIR-MPX-LN-0.1 de grado espacial, que
+        es el encapsulado que se toma como referencia porque Exail NO publica
+        ficha de grado espacial del MPZ-LN-10.
+      nota: >-
+        EN EL CODIFICADOR ESTA COTA NO ES UN DETALLE. El eje optico no pasa por
+        el centro del cuerpo: pasa a 4.8 mm de la cara de montaje sobre una
+        altura de 9.7, o sea 0.05 mm por debajo del centro. Lo que tiene que
+        quedar coaxial con el colimador -- y a la altura del plano optico del
+        banco -- es el EJE, no la caja, asi que el generador coloca la pieza
+        por aqui. Ver el chequeo 'altura_eje_codificador'.
+    guia_bipolarizacion:
+      valor: null
+      estado: TBD
+      falta: >-
+        SI LA GUIA DE LiNbO3 DEL MPZ-LN-10 TRANSMITE LAS DOS POLARIZACIONES
+        (TE y TM). Las guias de INTERCAMBIO PROTONICO guian una sola y se
+        comportan como un polarizador integrado: con una de esas, el esquema de
+        codificacion de polarizacion con UN SOLO modulador de fase es
+        IMPOSIBLE, no peor. Solo una guia bipolarizacion (difusion de titanio o
+        equivalente) permite meter la luz a 45 grados de los ejes y desfasar
+        una componente contra la otra.
+      pedir_a: Exail
+      nota: >-
+        Es el dato que decide si esta pieza puede hacer de codificador. Si la
+        respuesta es que no, la arquitectura del transmisor cambia entera: hace
+        falta otro modulador o un esquema con dos elementos.
+    configuracion_esquema_icfo:
+      valor: null
+      estado: TBD
+      falta: >-
+        SI EL ESQUEMA ES DE PASO SIMPLE con entrada a 45 grados, EN LAZO SAGNAC
+        o DE IDA Y VUELTA. No es un detalle de implementacion: un esquema en
+        lazo anade componentes en el camino -- un circulador o un divisor de
+        polarizacion -- y ESO CAMBIA LA CADENA declarada en
+        data/connections.yaml y la reserva de volumen de la franja.
+      pedir_a: ICFO / Equipo de payload de ACSAR
+    pigtail_salida_minimo:
+      valor: null
+      unidad: mm
+      estado: TBD
+      falta: >-
+        Longitud minima de pigtail de salida que Exail puede suministrar en el
+        encapsulado de grado espacial, y SI OFRECE SALIDA CON COLIMADOR
+        INTEGRADO. Lo segundo eliminaria el empalme posterior al codificador y
+        con el los 60 mm de 'integracion.fibra.longitud_protector_empalme', que
+        es justo lo que hoy hace que el tramo recto no quepa en la franja (ver
+        el chequeo 'fibra_post_codificacion').
+      pedir_a: Exail
+    nota: >-
+      Esquema ICFO de codificacion de polarizacion con un solo modulador de
+      fase. ES EL ULTIMO ELEMENTO DE FIBRA DE LA CADENA: detras de el solo
+      puede ir el colimador, con el tramo de fibra mas corto que permita la
+      fabricacion, recto y sin curvas. Ver CLAUDE.md 3.10.
+      CUIDADO CON LA DERIVA TERMICA: la birrefringencia estatica TE/TM del
+      niobato de litio es grande y depende de la temperatura, asi que el "cero"
+      del codificador -- el punto en que las dos componentes salen en fase --
+      SE MUEVE CON T. Eso obliga a control termico propio o a calibracion
+      continua contra la estacion, y es independiente del control termico que
+      ya pide el MXER por su razon de extincion.
 
   - id: voa
     id_drive: OPT-04
@@ -2146,12 +2343,72 @@ componentes:
     nota: >-
       Lleva el flujo al nivel de fotones por pulso exigido por BB84 con decoy.
       SIN CANDIDATO: la envolvente que se dibuja es una reserva, no una pieza.
+      VA ANTES DEL CODIFICADOR POR LA PDL. Todo componente de fibra tiene
+      PERDIDA DEPENDIENTE DE LA POLARIZACION, y un atenuador variable la tiene
+      por construccion: atenua unos estados mas que otros. Puesto detras del
+      codificador, eso DEFORMA el conjunto BB84 -- los cuatro estados dejan de
+      tener la misma intensidad -- y se lo regala a un atacante. Puesto delante,
+      la luz va en una sola polarizacion fija y la PDL es una perdida constante
+      mas, sin ninguna consecuencia. Y no cuesta nada ponerlo delante: la
+      atenuacion es LINEAL, asi que da igual en que punto de la cadena se haga.
     masa:
       valor: null
       unidad: g
       estado: TBD
       falta: Masa del VOA elegido
       pedir_a: Equipo de payload de ACSAR
+
+  - id: atenuador_fijo
+    id_drive: OPT-04-ALT
+    referencia_comercial: null
+    nombre: Atenuador fijo calibrado en tierra (alternativa al VOA)
+    categoria: payload_bandeja
+    subsistema: bandeja_optica
+    # EXCLUYENTE con el VOA, igual que 'trampa_luz_d2' lo es con el fotodiodo
+    # de monitor: o va uno o va el otro, nunca los dos. Por eso no suma en
+    # ningun presupuesto y el generador no lo coloca.
+    alternativa_de: voa
+    cantidad: 1
+    montaje:
+      cara: "-Z"
+      eje: X
+      tipo_eje: fibra
+      nota: Componente en linea, igual que el VOA al que sustituiria.
+    forma:
+      tipo: cilindro
+      eje: X
+      dimensiones:
+        valor: [25.0, 5.5, 5.5]
+        unidad: mm
+        estado: supuesto
+        fuente: >-
+          SUPUESTO. Encapsulado cilindrico en linea de un atenuador FIJO, que
+          es mas corto que el variable porque no lleva ni actuador ni
+          electronica: solo el elemento atenuante y los dos empalmes. NO es
+          ningun producto. Se declara para que la alternativa se pueda comparar
+          en volumen, no para dibujarla: al ser excluyente no se coloca.
+        falta: Modelo de atenuador fijo elegido y su envolvente
+        pedir_a: Equipo de payload de ACSAR
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa del atenuador fijo elegido
+      pedir_a: Equipo de payload de ACSAR
+    nota: >-
+      ALTERNATIVA EXCLUYENTE AL VOA, no una pieza adicional. Lo que compra:
+      NO TIENE PARTES MOVILES. Los VOA de fibra habituales son MEMS o de
+      motor, y las dos familias meten un mecanismo en el camino cuantico, con
+      lo que eso significa en lanzamiento y en vida en orbita. El ajuste fino
+      del flujo lo haria el MXER con sus niveles, que ya tiene que producirlos
+      con precision para el metodo de decoy, asi que la atenuacion gruesa puede
+      ser un valor fijo calibrado en tierra.
+      LO QUE CUESTA: el valor queda fijado antes del lanzamiento. Si el
+      presupuesto de enlace cambia en orbita -- degradacion del laser, otra
+      estacion, otro angulo de pase -- no hay forma de recuperar el margen por
+      aqui, y todo el rango de ajuste tiene que salir del MXER.
+      LA DECISION ES DE ACSAR y depende de cuanto rango de ajuste necesite el
+      enlace, que es un dato que no existe todavia.
 
   - id: aislador
     id_drive: OPT-05
@@ -2182,8 +2439,56 @@ componentes:
           cambiara, y puede cambiar mucho si se elige un encapsulado en caja.
         falta: Modelo de aislador elegido y su envolvente
         pedir_a: Equipo de payload de ACSAR
+    tipo:
+      valor: PM_doble_etapa
+      estado: decision
+      fuente: >-
+        Decision de ACSAR (Adri), 2026-09-21, analisis de polarizacion del
+        transmisor BB84. Aislador PM -- transmite el eje lento, que es el eje al
+        que va alineada la polarizacion lineal fija de todo el tramo
+        pre-codificacion -- y de DOBLE ETAPA. Doble etapa por las dos funciones
+        que cumple: proteger el DFB de retrorreflexiones (una sola etapa no da
+        margen suficiente con los dos moduladores detras) y ser la primera
+        defensa contra ataques de CABALLO DE TROYA, que es luz que entra por el
+        canal y recorre la cadena al reves.
+      nota: >-
+        QUE SEA PM ES LO QUE LO OBLIGA A IR ANTES DEL CODIFICADOR. Un aislador
+        PM transmite un solo eje de polarizacion: puesto detras del codificador
+        proyectaria los cuatro estados BB84 sobre la misma polarizacion y
+        BORRARIA la codificacion entera. Ver CLAUDE.md 3.10.
+    aislamiento:
+      valor: 50.0
+      unidad: dB
+      estado: supuesto
+      fuente: >-
+        SUPUESTO. Valor tipico de un aislador de fibra de DOBLE ETAPA a
+        1550 nm (una etapa da del orden de 25-30 dB y dos etapas en cascada
+        suman); NO sale de ninguna ficha porque no hay producto elegido. Se
+        declara porque es lo que dimensiona la proteccion del DFB y el margen
+        frente a la luz de Troya, no para cerrar ningun presupuesto.
+      falta: Aislamiento del aislador elegido, medido a 1550 nm
+      pedir_a: Equipo de payload de ACSAR
+    momento_dipolar_magnetico:
+      valor: null
+      unidad: A*m2
+      estado: TBD
+      falta: >-
+        MOMENTO DIPOLAR MAGNETICO RESIDUAL DE LA PIEZA. Un aislador lleva un
+        ROTADOR DE FARADAY con IMAN PERMANENTE: no es un componente pasivo
+        desde el punto de vista magnetico. Ese iman lo ve el magnetometro del
+        ADCS y suma al dipolo residual del satelite, que es lo que produce par
+        perturbador contra el campo terrestre. Con dos aisladores (si el
+        butterfly del laser lleva uno interno) se suman.
+      pedir_a: Equipo de payload / Equipo de ADCS de ACSAR
     nota: >-
       SIN CANDIDATO: la envolvente que se dibuja es una reserva, no una pieza.
+      VA JUSTO DETRAS DEL LASER, que es donde protege de verdad: cualquier
+      retrorreflexion de los moduladores desestabiliza un DFB, y eso se
+      traduce en salto de modo y en deriva de longitud de onda.
+      COMPROBAR SI EL BUTTERFLY DEL G&H YA INTEGRA AISLADOR INTERNO: es
+      frecuente en los modulos DFB de telecomunicaciones, y si lo lleva, esta
+      pieza puede sobrar o quedarse en una sola etapa. Eso libera volumen en la
+      bandeja y quita un iman permanente del satelite.
     masa:
       valor: null
       unidad: g
@@ -2220,8 +2525,43 @@ componentes:
           cambiara, y puede cambiar mucho si se elige un encapsulado en caja.
         falta: Modelo de filtro elegido, su ancho de banda y su envolvente
         pedir_a: Equipo de payload de ACSAR
+    tipo:
+      valor: DWDM_pelicula_delgada_fibra_PM
+      estado: decision
+      fuente: >-
+        Decision de ACSAR (Adri), 2026-09-21, analisis de polarizacion del
+        transmisor BB84. Filtro DWDM de pelicula delgada en fibra PM, en linea.
+        En fibra PM porque esta antes del codificador, en el tramo donde la luz
+        va en polarizacion lineal fija alineada al eje lento.
+    ancho_banda:
+      valor: 0.8
+      unidad: nm
+      estado: supuesto
+      fuente: >-
+        SUPUESTO. Canal DWDM de 100 GHz, que a 1550 nm son unos 0.8 nm. El
+        razonamiento es por los dos lados: un pulso de CONMUTACION DE GANANCIA
+        lleva chirp y ocupa DECIMAS DE NM, asi que un filtro mas estrecho lo
+        recorta y lo deforma -- y deformar el pulso es deformar la senal que
+        mide el enlace --; y un filtro mas ancho deja pasar mas ASE y abre mas
+        la ventana por la que puede entrar luz de Troya. 100 GHz es la rejilla
+        DWDM comercial que cae en ese hueco. NO sale de ninguna ficha: no hay
+        filtro elegido ni medida del ancho espectral del pulso.
+      falta: >-
+        Ancho espectral real del pulso del DFB conmutado en ganancia, y ancho de
+        banda del filtro elegido
+      pedir_a: Equipo de payload de ACSAR
     nota: >-
       SIN CANDIDATO: la envolvente que se dibuja es una reserva, no una pieza.
+      QUE HACE AQUI, que no es lo que se suele suponer: en esta arquitectura --
+      UN SOLO LASER y moduladores externos -- todos los pulsos salen IDENTICOS
+      del DFB, asi que el canal lateral espectral entre estados es pequeno por
+      construccion (el problema clasico es el de varios laseres, uno por
+      estado, que nunca son identicos). Lo que este filtro hace de verdad es
+      QUITAR LA ASE del laser y ESTRECHAR LA VENTANA DE TROYA: cuanto mas
+      estrecha la banda por la que puede entrar luz del canal, menos margen
+      tiene un atacante para sondear los moduladores.
+      VA ANTES DE LOS MODULADORES para que todo lo que se module ya este
+      espectralmente limpio.
     masa:
       valor: null
       unidad: g
@@ -2232,7 +2572,7 @@ componentes:
   - id: acoplador_monitor
     id_drive: OPT-07
     referencia_comercial: null
-    nombre: Acoplador de monitorizacion + fotodiodo tap
+    nombre: Acoplador 2x2 de monitorizacion + dos fotodiodos
     categoria: payload_bandeja
     subsistema: bandeja_optica
     cantidad: 1
@@ -2241,9 +2581,9 @@ componentes:
       eje: X
       tipo_eje: fibra
       nota: >-
-        Son DOS cosas en una envolvente: el acoplador (un tubo de empalme en
-        linea) y el fotodiodo con su encapsulado. Se modelan juntas porque van
-        juntas; al elegir modelo habra que separarlas.
+        Son TRES cosas en una envolvente: el acoplador 2x2 (un tubo de empalme
+        en linea) y los DOS fotodiodos con sus encapsulados. Se modelan juntas
+        porque van juntas; al elegir modelo habra que separarlas.
     forma:
       tipo: caja
       dimensiones:
@@ -2251,23 +2591,71 @@ componentes:
         unidad: mm
         estado: supuesto
         fuente: >-
-          SUPUESTO. Reserva para un acoplador de derivacion en linea (tubo de
-          unos 60 mm) mas el encapsulado de un fotodiodo InGaAs con su
-          transimpedancia. NO es ningun producto: no hay candidato elegido.
-          Es la pieza de la bandeja con el supuesto mas flojo de todos, porque
-          la geometria depende por completo de si el fotodiodo va en la bandeja
-          o en PCB-2.
+          SUPUESTO. Reserva para un acoplador de derivacion 2x2 en linea (tubo
+          de unos 60 mm) mas el encapsulado de DOS fotodiodos InGaAs con su
+          transimpedancia: el de monitorizacion hacia delante y el VIGIA DE
+          TROYA hacia atras. NO es ningun producto: no hay candidato elegido.
+          LOS DOS FOTODIODOS VAN DENTRO DE ESTA RESERVA y no como piezas
+          sueltas: separarlos anadiria dos cuerpos mas a la franja, que es
+          donde aprieta, y la geometria de cada uno depende por completo de si
+          el detector va aqui o montado en PCB-2, que es la decision que falta.
+          El volumen no crece respecto a la version de un solo fotodiodo porque
+          la reserva ya era generosa para uno; si los dos detectores acaban
+          siendo dos encapsulados separados, crece.
         falta: >-
-          Modelo de acoplador y de fotodiodo, y si el fotodiodo va en la bandeja
-          o montado en PCB-2
+          Modelo de acoplador 2x2 y de los dos fotodiodos, y si van en la
+          bandeja o montados en PCB-2
         pedir_a: Equipo de payload de ACSAR
+    razon_acoplamiento:
+      valor: [99.0, 1.0]
+      estado: supuesto
+      fuente: >-
+        SUPUESTO. 99:1, la razon habitual de un tap de monitorizacion: deriva el
+        1 % justo para medir y deja el 99 % en el canal. NO sale de ninguna
+        ficha. El valor que de verdad haga falta depende de la sensibilidad del
+        fotodiodo elegido y del nivel al que trabaje el MXER, y sobre todo de
+        que se pueda medir el nivel de VACIO, que es el mas bajo de los tres.
+      falta: >-
+        Razon de acoplamiento del acoplador elegido, y sensibilidad del
+        fotodiodo, que es lo que la fija
+      pedir_a: Equipo de payload de ACSAR
+    puertos:
+      valor:
+        - "entrada: senal que llega del MXER (f04)"
+        - "salida: senal que sigue hacia el VOA (f05)"
+        - "derivacion HACIA DELANTE: fotodiodo de monitorizacion -- lazo de bias del MXER y razones decoy/senal (m01)"
+        - "derivacion HACIA ATRAS: fotodiodo VIGIA DE TROYA -- luz que entra desde el canal (m02)"
+      estado: decision
+      fuente: >-
+        Decision de ACSAR (Adri), 2026-09-21, analisis de polarizacion del
+        transmisor BB84. Pasa de acoplador de derivacion simple a ACOPLADOR 2x2
+        CON DOS FOTODIODOS, por el mismo motivo por el que los dicroicos
+        declaran sus cuatro puertos: un acoplador 2x2 tiene cuatro puertos y los
+        cuatro reciben luz, se dibujen o no. El de delante es el tap de siempre.
+        El de atras ve la luz que entra DESDE EL CANAL, que ha recorrido el
+        codificador y el VOA en sentido inverso, y es el unico sitio de la
+        cadena donde se puede ver venir un ataque de CABALLO DE TROYA sin tocar
+        el haz util.
     nota: >-
       SIN CANDIDATO: la envolvente que se dibuja es una reserva, no una pieza.
+      VA DETRAS DEL MXER, que es lo que monitoriza, Y ANTES DEL VOA, donde
+      todavia hay luz suficiente para medir: detras del VOA la senal esta ya a
+      fracciones de foton por pulso y no hay nada que medir con un fotodiodo.
+      "BIAS" AQUI ES EL PUNTO DE TRABAJO, NO LA LONGITUD DE ONDA. Un modulador
+      Mach-Zehnder de niobato tiene una transmision en cos^2 del voltaje, y esa
+      curva SE DESPLAZA EN VOLTAJE con la temperatura y con la deriva de carga
+      del sustrato. El lazo de bias mide con este fotodiodo y corrige el voltaje
+      de continua para mantener el punto de trabajo; no toca el laser.
+      PARA VERIFICAR CADA NIVEL POR SEPARADO -- senal, decoy, vacio -- no basta
+      un fotodiodo lento promediando: hace falta un fotodiodo RAPIDO capaz de
+      resolver pulso a pulso, o secuencias de calibracion de patron conocido
+      intercaladas en la transmision. Es una decision de PCB-2 y del lazo de
+      control, no de mecanica, pero decide el fotodiodo y con el esta reserva.
     masa:
       valor: null
       unidad: g
       estado: TBD
-      falta: Masa del acoplador y el fotodiodo
+      falta: Masa del acoplador 2x2 y los dos fotodiodos
       pedir_a: Equipo de payload de ACSAR
 
 # ---------------------------------------------------------------------
@@ -2569,6 +2957,87 @@ integracion:
       nota: >-
         Mismo patron que 'paso_apilamiento_modelado': un valor de trabajo al
         lado del hueco de verdad, no en su lugar.
+    empalme:
+      valor: fusion
+      estado: decision
+      fuente: >-
+        Decision de ACSAR (Adri), 2026-09-21, analisis de polarizacion del
+        transmisor BB84. TODOS los tramos de fibra del camino cuantico van por
+        EMPALME POR FUSION: CERO CONECTORES. Tres motivos, y los tres son del
+        enlace, no del montaje. (1) Un conector es una interfaz
+        desmontable y por tanto una entrada para luz de TROYA y un punto de
+        retrorreflexion hacia el DFB. (2) Un conector PM tiene una tolerancia
+        de alineacion angular de los ejes que un empalme por fusion no tiene, y
+        cada grado de desalineacion es diafonia entre los dos ejes. (3) Un
+        conector se puede mover con la vibracion del lanzamiento, y lo que se
+        mueve en polarizacion no vuelve solo a su sitio.
+        LO QUE CUESTA: la bandeja y la franja dejan de ser desmontables pieza a
+        pieza. Una vez fusionada, la cadena se monta y se desmonta entera.
+      nota: >-
+        Esto sustituye al hueco 'conector' que cada tramo f0x llevaba en
+        data/connections.yaml. Lo que sigue faltando no es el tipo de union,
+        que ya esta decidido, sino el PROTECTOR de empalme:
+        'longitud_protector_empalme'.
+    longitud_protector_empalme:
+      valor: 60.0
+      unidad: mm
+      estado: supuesto
+      fuente: >-
+        SUPUESTO. Tramo RECTO que hay que reservar por cada empalme por fusion:
+        el protector (la ferula termorretractil con su varilla metalica) NO SE
+        PUEDE CURVAR, y el tramo inmovilizado es mas largo que el protector
+        mismo. Los protectores habituales miden 40-60 mm y hay que dejar algo a
+        cada lado, asi que 60 mm es el orden correcto del tramo RIGIDO total.
+        NO sale de ninguna ficha: no hay protector elegido.
+        ES EL NUMERO QUE DECIDE SI EL TRAMO POST-CODIFICACION CABE: el empalme
+        entre el codificador y el colimador es el unico que cae en un tramo que
+        ademas tiene que ser recto, asi que sus 60 mm se suman enteros a la
+        longitud que hay que reservar en la franja. Ver el chequeo
+        'fibra_post_codificacion'.
+      falta: Protector de empalme elegido y su tramo recto real
+      pedir_a: Equipo de payload de ACSAR
+    sensibilidad_termica_fase_pm:
+      valor: null
+      unidad: rad/(m*K)
+      estado: TBD
+      falta: >-
+        SENSIBILIDAD TERMICA DE LA FASE ENTRE LOS DOS EJES DE LA FIBRA PM,
+        MEDIDA, en rad por metro y por kelvin. Es lo que fija CUANTA FIBRA
+        POST-CODIFICACION ES TOLERABLE, y por tanto si el tramo recto que el
+        layout reserva sirve o hay que acortarlo todavia mas.
+        Por que importa solo despues del codificador: antes, la luz va en
+        polarizacion lineal fija alineada al eje lento, que ES un autoestado de
+        la fibra, y la birrefringencia no le hace nada. Despues, los estados
+        diagonales (y los circulares) viajan a 45 grados de los ejes, NO son
+        autoestados, y la birrefringencia les mete una fase proporcional a la
+        longitud que ademas DERIVA CON LA TEMPERATURA. El resultado seria una
+        base limpia y la otra rota, que es la peor forma de fallar: el enlace
+        parece funcionar.
+      pedir_a: Equipo de payload de ACSAR (medida, no ficha)
+      nota: >-
+        Mientras falte, el chequeo 'fibra_post_codificacion' informa de la
+        longitud del tramo pero su veredicto sobre si esa longitud es
+        aceptable sale como NO COMPROBABLE, nunca como ok.
+    tolerancia_coaxialidad:
+      valor: 0.5
+      unidad: mm
+      estado: supuesto
+      fuente: >-
+        SUPUESTO. Cuanto se admite que el eje de fibra del codificador se
+        aparte del eje del colimador antes de decir que el tramo ya no es
+        recto. Medio milimetro sobre un tramo de decenas de milimetros es un
+        angulo de pocos miliradianes, que una abrazadera en V corrige; mas que
+        eso obliga a curvar la fibra, y curvar es lo que este tramo tiene
+        prohibido. NO sale de ninguna ficha: depende del colimador elegido, de
+        su apertura de acoplamiento y del utillaje de alineacion.
+      falta: >-
+        Tolerancia de alineacion del colimador elegido, y presupuesto de
+        alineacion del montaje
+      pedir_a: Equipo de optica / de payload de ACSAR
+      nota: >-
+        Es la tolerancia que usa el chequeo 'fibra_post_codificacion' para
+        decir si el colimador y el codificador siguen siendo coaxiales despues
+        de colocarlos. No es una tolerancia de fabricacion.
     longitud_boot_modelada:
       valor: 20.0
       unidad: mm
@@ -2755,6 +3224,35 @@ integracion:
       nota: >-
         Es lo unico que hoy hace que 'clau3d informe' devuelva codigo 1. Ver el
         chequeo 'brazo_beacon' y CLAUDE.md 3.9.
+    lamina_cuarto_onda_fija:
+      valor: null
+      estado: TBD
+      falta: >-
+        QUE PAR DE BASES USA EL ENLACE, que es lo que decide si hace falta una
+        lamina de cuarto de onda fija. Dos opciones, y las dos son validas para
+        BB84:
+        (a) SIN LAMINA: el esquema ICFO de un solo modulador de fase entrega de
+        forma natural las bases D/A y R/L (diagonal y circular). No hace falta
+        ninguna pieza mas, y el camino cuantico no gana ninguna superficie.
+        (b) CON LAMINA: una lamina de cuarto de onda fija a 45 grados DESPUES
+        del codificador convierte esas bases en H/V y D/A, que es el par
+        clasico y el que muchas estaciones de tierra tienen ya montado.
+        BB84 solo necesita dos bases mutuamente insesgadas, y los dos pares lo
+        son, asi que esto NO es una decision de fisica del protocolo: es una
+        decision de COMPATIBILIDAD CON LA ESTACION DE TIERRA.
+      pedir_a: Equipo de optica de ACSAR / Equipo de estacion de tierra
+      nota: >-
+        NO SE DIBUJA NI SE COLOCA, y por eso esta aqui y no como componente: lo
+        que esta en duda es SI LA PIEZA EXISTE. Un componente en el catalogo
+        que quiza no este en el camino o no tiene conexiones declaradas -- y
+        entonces es una pieza suelta, que es justo lo que
+        tests/test_brazo_beacon.py existe para cazar -- o las tiene y el modelo
+        afirma un camino optico que nadie ha decidido. Un hueco se queda como
+        hueco, y este hueco es una decision, no una envolvente.
+        SI SE DECIDE (b): la lamina va en espacio libre entre el colimador y el
+        espejo de plegado, y ENTONCES se da de alta como componente con su
+        id_drive, su envolvente y sus dos tramos. Reservar sitio hoy seria
+        reservarlo para algo que puede no existir.
     perdida_obstruccion_convenio:
       valor: intensidad_en_eje
       estado: decision

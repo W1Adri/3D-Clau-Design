@@ -3,8 +3,9 @@
 Documento de continuidad entre sesiones. El README explica **qué** es el
 repositorio; esto explica **por qué** está como está y **qué falta por decidir**.
 
-Última actualización: **2026-09-20** (noche: telescopio paramétrico §4.7, y
-brazo de los beacons con dos dicroicos §3.9).
+Última actualización: **2026-09-21** (cadena óptica reordenada y frontera de la
+codificación §3.10; antes: telescopio paramétrico §4.7 y brazo de los beacons
+con dos dicroicos §3.9).
 
 ---
 
@@ -12,19 +13,19 @@ brazo de los beacons con dos dicroicos §3.9).
 
 | | |
 |---|---|
-| Catálogo | 35 componentes, 0 problemas de integridad |
-| Con envolvente | **32 de 35**. Los 3 que faltan, por buenos motivos (§1.1) |
-| Huecos sin ninguna aproximación (TBD) | **51**. Los 6 nuevos son del brazo de los beacons (§3.9): el aislamiento de la cámara a 1064 nm, que sostiene la elección de longitudes de onda entera, y la decisión de cómo hacer que el brazo quepa |
-| Números inventados aquí (SUPUESTO) | **68** — se dibujan, no son datos (§2). Subieron de 28 a 61 con el telescopio paramétrico (§4.7) y de 61 a 68 con el brazo de los beacons (§3.9), cada uno con su razonamiento y a quién pedirlo |
+| Catálogo | 37 componentes, 0 problemas de integridad |
+| Con envolvente | **34 de 37**. Los 3 que faltan, por buenos motivos (§1.1) |
+| Huecos sin ninguna aproximación (TBD) | **61**. Los 10 nuevos son de la cadena de fibra (§3.10): si la guía del MPZ es bipolarización —sin eso el esquema de un solo modulador es imposible—, la sensibilidad térmica de la fase en PM, la retardancia del espejo de plegado y qué par de bases usa el enlace |
+| Números inventados aquí (SUPUESTO) | **75** — se dibujan, no son datos (§2). 28 → 61 con el telescopio paramétrico (§4.7), → 68 con el brazo de los beacons (§3.9) y → 75 con la cadena de fibra (§3.10), cada uno con su razonamiento y a quién pedirlo |
 | Discrepancias entre fuentes | **10** |
-| Tests | **162**, todos en verde |
-| Distribución | **CONFIRMADA** el 2026-09-20: dos columnas de 3U, moduladores en la franja lateral |
-| Piezas colocadas | **28**, y **una que no cabe**: `camara_beacon` no está colocada porque el brazo de los beacons no da de sí (§3.9). Una pieza sin sitio no se dibuja en un sitio inventado |
+| Tests | **180**, todos en verde |
+| Distribución | **CONFIRMADA** el 2026-09-20 y **repartida otra vez el 2026-09-21** (§3.10): la bandeja es sólo la fuente y la franja lleva modulación, monitorización, atenuación y codificación, apiladas en Y |
+| Piezas colocadas | **28**, y **dos que no caben**: `camara_beacon` (§3.9) y `mod_fase_mpz_ln_10` (§3.10). Una pieza sin sitio no se dibuja en un sitio inventado |
 | Geometría real de fabricante | **3** piezas salen de un STEP de AAC (§9); el telescopio tiene sitio reservado para el suyo |
-| Keep-outs | **23**, todos dibujados con números supuestos (§3.7, §4.7, §3.9). El del brazo de los beacons lo comparten dos tramos en sentidos contrarios y se declara una sola vez |
-| Choques de geometría | **0**. `clau3d informe` devuelve 1 de todas formas: `brazo_beacon` es un chequeo crítico y falla (§3.9) |
-| Riesgos abiertos | **5**: térmico modulador–barrilete (§3.6), fibra del colimador (§3.7), antena en −Z (§3.8), la longitud del telescopio, que cabe en los 200 mm por 1.2 mm (§4.7), y **el brazo de los beacons, que no cabe por 6.8 mm** (§3.9) |
-| Zona útil | 221.7 × 95.4 × 361.4 mm = **7.64 L**, de la que quedan **2.89 L** libres |
+| Keep-outs | **19**, todos dibujados con números supuestos (§3.7, §4.7, §3.9). El del brazo de los beacons lo comparten dos tramos en sentidos contrarios y se declara una sola vez; el tramo post-codificación **no lleva ninguno**, porque no se puede curvar (§3.10) |
+| Choques de geometría | **0**. `clau3d informe` devuelve 1 de todas formas, y ahora por **dos** chequeos críticos: `brazo_beacon` (§3.9) y `fibra_post_codificacion` (§3.10) |
+| Riesgos abiertos | **5**: térmico modulador–barrilete (§3.6), antena en −Z (§3.8), la longitud del telescopio, que cabe en los 200 mm por 1.2 mm (§4.7), **el brazo de los beacons, que no cabe por 6.8 mm** (§3.9) y **el tramo recto post-codificación, que no cabe por 18.0 mm** (§3.10). El de la fibra del colimador (§3.7.1) **está resuelto** |
+| Zona útil | 221.7 × 95.4 × 361.4 mm = **7.64 L**, de la que quedan **2.92 L** libres |
 
 Funciona de punta a punta: catálogo validado, layout generado, ensamblaje
 exportado a STEP —completo y por subsistema—, interferencias, conexiones,
@@ -59,7 +60,9 @@ abajo:
 2. **El banco óptico es el punto apretado del payload**, y no se ve mirando
    volúmenes: sobra hueco en el banco, pero no *en la línea* que va del eje del
    telescopio a la pared. Ver §3.7.
-3. **El colimador no tiene por dónde sacar su latiguillo.** Ver §3.7.
+3. **El colimador no tenía por dónde sacar su latiguillo.** Ver §3.7.
+   **Resuelto el 2026-09-21** por la reordenación de la cadena (§3.10): ahora lo
+   alimenta el codificador en línea recta y ese keep-out ya no existe.
 4. **La antena de banda S no tiene cara libre** y acaba en −Z, apuntando al
    lado contrario que el telescopio. Ver §3.8.
 
@@ -189,14 +192,16 @@ declarado: **221.7 × 95.4 × 361.4 mm** ≈ 7.64 L.
 
  +110.85 ┌──────────────────────┬─────────────┬─────────────────────────┐
          │                      │             │ z_payload_franja 0.50 L │
-         │                      │             │ 26.3 mm · 2 moduladores │
-         │                      │             │ tumbados, pegados a −Z  │
-  PAYLOAD│ z_payload_bandeja    │ z_payload   ├─────────────────────────┤
-  121.7  │ 1.24 L               │  _banco     │ z_payload_telescopio    │
-   mm    │ láser DFB (4.1 W),   │ 0.64 L      │ 1.82 L · 95.4 mm de X   │
-         │ bucles en los 121.7  │ colimador   │ telescopio →→ +Z        │
-         │ mm de ancho enteros  │ D1, D2      │ 200 mm RESERVADOS       │
-         │                      │ FSM, brazo  │ (provisional)           │
+         │                      │             │ 26.3 mm de X, 3 bandas  │
+         │                      │             │ en Y: acoplador+VOA /   │
+         │                      │             │ colimador+codificador / │
+  PAYLOAD│ z_payload_bandeja    │ z_payload   │ MXER. §3.10             │
+  121.7  │ 1.24 L               │  _banco     ├─────────────────────────┤
+   mm    │ LA FUENTE: láser DFB │ 0.64 L      │ z_payload_telescopio    │
+         │ (4.1 W), aislador y  │ espejo de   │ 1.82 L · 95.4 mm de X   │
+         │ filtro. Bucles en    │ plegado,    │ telescopio →→ +Z        │
+         │ los 121.7 mm de      │ D1, D2      │ 200 mm RESERVADOS       │
+         │ ancho enteros        │ FSM, brazo  │ (provisional)           │
   −10.85 ├──────────────────────┴─────────────┴─────────────────────────┤
          │ z_plataforma  3.45 L                                         │
   PLATAF.│ pila PC104 a lo largo de todo Z — 305 mm usados de 361 mm     │
@@ -209,9 +214,9 @@ declarado: **221.7 × 95.4 × 361.4 mm** ≈ 7.64 L.
 |---|---|---|---|
 | `z_plataforma` | 3.45 L | 1.22 L | Pila PC104 (305 mm) + antena en el extremo −Z |
 | `z_payload_telescopio` | 1.82 L | 0.00 L | Telescopio, dibujado **llenando la zona** a propósito (§4.2) |
-| `z_payload_franja` | 0.50 L | 0.44 L | Los 2 moduladores, tumbados, con sus conectores |
-| `z_payload_banco` | 0.64 L | 0.58 L | Colimador, D1, FSM y el brazo de los beacons: D2, láser, trampa y fotodiodo. **La cámara no cabe** (§3.9) |
-| `z_payload_bandeja` | 1.24 L | 1.17 L | Placa, láser DFB, VOA, aislador, filtro y tap |
+| `z_payload_franja` | 0.50 L | 0.45 L | Colimador, MXER, acoplador 2×2 y VOA, **apilados en Y**. **El codificador no cabe** (§3.10) |
+| `z_payload_banco` | 0.64 L | 0.57 L | Espejo de plegado, D1, FSM y el brazo de los beacons: D2, láser, trampa y fotodiodo. **La cámara no cabe** (§3.9) |
+| `z_payload_bandeja` | 1.24 L | 1.18 L | Placa, láser DFB, aislador y filtro — **sólo la fuente** (§3.10) |
 
 Los paneles solares no están en ninguna zona: van **por fuera**, sobre las dos
 caras grandes, con la protrusión que concede la CDS 14.1 req 2.2.3. El layout
@@ -337,15 +342,19 @@ porque no cabe (§3.9).
 
 **Por qué esa línea no se puede mover.** El FSM dobla el haz que llega según X
 hacia el telescopio, que apunta según +Z. Para doblarlo tiene que estar *sobre
-el eje óptico del telescopio*, en X = +36.85 mm. Eso deja al colimador y a D1
-en fila con él, hacia +X, y lo que tienen es lo que va del eje a la
+el eje óptico del telescopio*, en X = +36.85 mm. Eso deja a D1 y al **espejo de
+plegado** en fila con él, hacia +X, y lo que tienen es lo que va del eje a la
 pared de la columna: **74.0 mm**.
 
+**Desde el 2026-09-21 el tercero de la fila es el espejo de plegado y no el
+colimador** (§3.10), y eso desahoga esta línea: el espejo reserva 20 mm donde el
+colimador reservaba 28.
+
 Las reservas iniciales (colimador de 40 mm, D1 de 30) **no cabían**. Están
-ahora en 28 y 23, y su `fuente` en el catálogo lo dice: la cota está *acotada
+ahora en 20 y 23, y su `fuente` en el catálogo lo dice: la cota está *acotada
 por arriba por el banco*, no solo elegida a ojo. Sumando la media anchura del
-FSM a 45°, la línea ocupa 66.3 mm y quedan **7.7 mm**, que no dan para holguras
-de montaje. El chequeo `banco_optico` lo recalcula desde el catálogo, avisa por
+FSM a 45°, la línea ocupa 58.3 mm y quedan **15.7 mm** —eran 7.7 antes de que el
+colimador saliera de la fila—. El chequeo `banco_optico` lo recalcula desde el catálogo, avisa por
 debajo de 5 mm y falla si se pasa. Mira además los dos puertos laterales de D2
 —el láser de beacon hacia −X y el fotodiodo hacia +X—, que están dentro del
 mismo ancho de banco y hoy tienen 33.0 y 23.7 mm de margen.
@@ -354,25 +363,36 @@ mismo ancho de banco y hoy tienen 33.0 y 23.7 mm de margen.
 banco no da.** La salida sería alargarlo a costa de la bandeja o de la longitud
 reservada al telescopio, no apretar las piezas.
 
-### 3.7.1 El colimador no tiene por dónde sacar su latiguillo
+### 3.7.1 El colimador no tenía por dónde sacar su latiguillo — RESUELTO
 
-Está pegado a la pared +X con 7.7 mm, y su fibra tiene que volver a la bandeja,
-que está en −Z. Con la reserva supuesta de fibra (20 mm de tramo recto + 30 mm
-de radio de curvatura = 50 mm por puerto), su keep-out se come al FSM, a D1,
-a D2 y al láser de beacon: cuatro de las quince invasiones del modelo.
+**Lo que pasaba** hasta el 2026-09-21: estaba pegado a la pared +X con 7.7 mm y
+su fibra tenía que volver a la bandeja, que está en −Z. Con la reserva supuesta
+de fibra (20 mm de tramo recto + 30 mm de radio de curvatura = 50 mm por
+puerto), su keep-out se comía al FSM, a D1, a D2 y al láser de beacon: cuatro de
+las quince invasiones del modelo.
 
-**Esto no es un fallo del reparto: es lo que cuesta no tener el radio de
-curvatura.** Si el radio real resulta ser la mitad, buena parte del problema
-desaparece sola. Si no, hay tres salidas y las tres son decisiones de alguien:
-mover D1 al tramo +Z (entre el FSM y el telescopio, lo que cambia el
-orden de la cadena óptica declarada en `connections.yaml`), alargar el banco, o
-sacar el colimador del banco y ponerlo en el borde de la bandeja.
+**Lo resolvió la reordenación de la cadena (§3.10)**, y no por casualidad: el
+tramo que alimenta al colimador sale del codificador de polarización y **tiene
+prohibido curvarse**, así que ahora el colimador apunta según −Z, lo alimenta el
+codificador en línea recta y su tramo lleva `recto: true`. Un tramo que no se
+puede curvar no tiene codo que reservar, así que **ya no genera keep-out de
+curvatura** y las cuatro invasiones desaparecen.
+
+La alternativa —dejar el colimador según X, como estaba, con la fibra curvada—
+no era incómoda, era **imposible**: exigiría un radio de curvatura menor o igual
+que el margen que tenía a la pared, 7.7 mm, y el radio modelado es 30.
+
+Lo que el arreglo cuesta está en §3.10: una superficie reflectante más en el
+camino cuántico, y un tramo recto de 218 mm que **no cabe por 18.0 mm**.
 
 ### 3.7.2 La bandeja tampoco respeta un radio de 30 mm
 
-Mismo origen, mismo dato. Las filas de la bandeja están a 8 mm y cada puerto de
-fibra querría 50. De las 15 invasiones de keep-out que reporta el modelo, 11 son
-de la bandeja.
+Mismo origen, mismo dato. Las filas están a 8 mm y cada puerto de fibra querría
+50. Con el reparto del 2026-09-21 la bandeja tiene tres piezas en vez de cinco,
+así que de las **7** invasiones de keep-out que reporta el modelo —eran 15— 5
+son de la bandeja y 2 de la franja. Bajaron porque hay menos puertos de fibra en
+la bandeja y porque el colimador ya no tiene keep-out de curvatura (§3.7.1), no
+porque el problema esté resuelto: **el dato que falta sigue siendo el mismo**.
 
 `reports/03_interferencias.md` las lista en una sección aparte que empieza
 diciendo que **no es una lista de errores**. La manera de resolverlas no es
@@ -544,6 +564,237 @@ compartido no existe, no tiene keep-out propio o une otros extremos. Declararlo
 dos veces no reservaría nada nuevo: reservaría lo mismo otra vez, y el detector
 de interferencias vería dos cajas idénticas solapando al 100 % e informaría de
 una invasión que no existe.
+
+### 3.10 La cadena de fibra y la frontera de la codificación
+
+Añadido el 2026-09-21. Es el cambio que hace que el transmisor BB84 **funcione**,
+y el que enseña que la franja tiene su propio punto apretado, esta vez en Z.
+
+**Lo que estaba mal, y no era una degradación.** La cadena declarada era:
+
+```
+láser → MXER (intensidad) → MPZ (codificador) → VOA → aislador → filtro → acoplador → colimador
+```
+
+El `mod_fase_mpz_ln_10` es el **codificador de polarización** (su propia nota:
+esquema ICFO con un solo modulador de fase). Después de él existen los cuatro
+estados BB84, incluidos los diagonales. Y detrás de él había esto:
+
+- Un **aislador PM transmite un solo eje de polarización**. Colocado después del
+  codificador proyecta los cuatro estados sobre la misma polarización: **borra
+  la codificación entera**. No es que el enlace vaya peor; es que no hay enlace.
+- Cualquier tramo de **fibra PM** después del codificador tampoco vale. Los
+  estados D/A viajan a 45° de los ejes de la fibra, **no son autoestados**, y la
+  birrefringencia les mete una fase que deriva con la temperatura. Los H/V
+  sobrevivirían y los diagonales no: una base limpia y la otra rota, que es la
+  peor forma de fallar porque el enlace *parece* funcionar.
+- VOA, filtro y acoplador añaden **PDL**, que atenúa unos estados más que otros
+  y deforma el conjunto.
+
+**Por qué no lo cazaba nadie.** `test_la_cadena_de_fibra_esta_completa` fijaba
+una lista escrita a mano y comprobaba que la cadena coincidiera con ella. Lo que
+hacía no era proteger el orden: era **congelar el equivocado**. Mismo patrón que
+§3.9: los tests miraban que la cadena estuviera *encadenada*, no que estuviera
+*bien*.
+
+#### La regla que manda
+
+> Todo componente de fibra va **antes** del codificador de polarización. Después
+> de él sólo puede ir el colimador, con el tramo de fibra más corto que permita
+> la fabricación, **recto y sin curvas**.
+
+Antes del codificador la luz va en polarización lineal fija alineada al eje
+lento de la PM, que **sí** es un autoestado: ese tramo puede ser largo y
+curvarse libremente. **Esta asimetría es la que decide la distribución física**,
+y es la razón de todo lo que viene después.
+
+#### La cadena corregida [decisión de ACSAR, 2026-09-21]
+
+```
+láser → aislador → filtro → MXER → acoplador 2×2 → VOA → MPZ → colimador
+└──────────── fibra PM, eje lento, empalmes por fusión ────────┘ └ recto ┘
+```
+
+| # | pieza | por qué en esa posición |
+|---|---|---|
+| 1 | `laser_dfb_1550` | origen |
+| 2 | `aislador` | pegado al láser: cualquier retrorreflexión de los moduladores desestabiliza el DFB. Primera defensa contra Troya |
+| 3 | `filtro_espectral` | antes de los moduladores, para que todo lo que se module ya esté limpio de ASE |
+| 4 | `mod_intensidad_mxer_ln_10` | señal / decoy / vacío |
+| 5 | `acoplador_monitor` | detrás del MXER, que es lo que monitoriza; **antes** del VOA, donde todavía hay luz que medir |
+| 6 | `voa` | antes del codificador por la PDL. La atenuación es lineal: da igual dónde se haga |
+| 7 | `mod_fase_mpz_ln_10` | **último elemento de fibra** |
+| 8 | `colimador` | pegado al codificador |
+
+**Las restricciones son datos, no código.** Viven en `meta.restricciones_orden`
+de `connections.yaml`, cada una con su motivo al lado, y el chequeo
+`orden_cadena_fibra` las aplica. Nombran al codificador por su **papel**
+(`funcion: codificador_polarizacion`, campo nuevo del catálogo) y no por su
+`id`: el día que el codificador sea otra pieza —y puede serlo, ver
+`configuracion_esquema_icfo`— la restricción sigue diciendo lo mismo.
+
+#### El acoplador pasa a 2×2, con dos fotodiodos
+
+Por el mismo motivo por el que los divisores declaran sus cuatro puertos: un
+acoplador 2×2 tiene cuatro y los cuatro reciben luz, se dibujen o no. El de
+delante es el tap de siempre (lazo de bias del MXER —su **punto de trabajo** en
+voltaje, no la longitud de onda— y razones decoy/señal). El de atrás es el
+**vigía de Troya**: ve la luz que entra desde el canal y que ha recorrido el
+codificador y el VOA en sentido inverso. Es el único punto de la cadena donde
+se puede ver venir ese ataque sin tocar el haz útil. Los dos van **dentro de la
+misma envolvente**: separarlos añade dos cuerpos a la franja, que es donde
+aprieta.
+
+#### El reparto físico que sale de la regla
+
+| zona | contenido |
+|---|---|
+| `z_payload_bandeja` | **la fuente**: láser DFB (4.1 W, lejos del barrilete), aislador, filtro |
+| travesía PM | **una sola**, en `f03`, pre-codificación: puede ser larga y curvarse |
+| `z_payload_franja` | MXER, acoplador, VOA y codificador, apilados **en Y** |
+| `z_payload_banco` | espejo de plegado, D1, FSM, brazo de beacons |
+
+**El reparto en Y no se ha elegido.** La franja tiene 26.3 mm de X y 95.4 de Y,
+y la X del codificador **está pinchada**: tiene que quedar coaxial con el
+colimador, que está sobre el espejo de plegado, que está donde lo deja la línea
+del banco. El único eje libre para apilar es Y. Las bandas salen así:
+
+| banda | Y | margen |
+|---|---|---|
+| acoplador + VOA | +25.5 … +45.5 | 2.20 mm a la pared |
+| codificador (eje de fibra en Y = 0) | −7.5 … +17.5 | — |
+| MXER (conector RF hacia −Y) | −40.5 … −15.5 | 7.20 mm a la pared |
+
+Los dos conectores RF apuntan a caras **opuestas**, así que ningún coaxial pasa
+por encima del otro modulador. Y los bucles de fibra van en el plano **Y-Z**:
+con el radio modelado de 30 mm hacen falta 60 de diámetro, y en Y hay 95.4
+(sobran 35.4) mientras que en X hay 26.3 (**faltan 33.7**).
+
+#### El espejo de plegado, y lo que cuesta
+
+Si el codificador alimenta al colimador en línea recta, y el codificador está en
+la franja (+Z), entonces **el colimador apunta según −Z**. Pero la línea
+D1 → FSM → telescopio va según X y no se mueve. Hace falta doblar el haz de −Z a
+−X: `espejo_plegado_cuantico` (OPT-19), un plano metálico a 45° en el banco.
+
+**Lo que compra**, y está verificado con los chequeos, no supuesto:
+
+- **§3.7.1 queda resuelto.** El colimador ya no tiene que sacar un latiguillo
+  curvado hacia la pared +X: lo alimenta el codificador en línea recta, y el
+  tramo `f07` lleva `recto: true`, así que **no genera keep-out de curvatura** —
+  no por ahorrar volumen, sino porque ahí no hay codo que reservar. Las cuatro
+  invasiones del colimador desaparecen. La alternativa (colimador según X, como
+  antes, con la fibra curvada) era **imposible**, no incómoda: exigiría un radio
+  de curvatura ≤ 7.7 mm, que es el margen que el colimador tenía a la pared, y
+  el radio modelado es 30.
+- **Mejora la línea en X de §3.7**: el colimador (28 mm) sale de esa fila y entra
+  el espejo (20 mm). El margen de `banco_optico` pasa de **7.71 a 15.71 mm**.
+- **Una sola travesía de fibra** entre zonas, en vez de ir y volver.
+- Las invasiones de keep-out bajan de **15 a 7**.
+
+**Lo que cuesta, y hay que escribirlo.** El espejo es una **segunda superficie a
+45° en el camino cuántico**, y está en el **mismo plano de incidencia** que el
+FSM —los dos pliegan en X-Z—, así que sus retardancias **se suman** en vez de
+compensarse. Si estuvieran en planos perpendiculares se cancelarían en primer
+orden; no es el caso y no se puede fingir que lo sea.
+
+Aun así no es un problema de fondo: el efecto es **unitario y estático**. Una
+retardancia fija no destruye información, sólo gira el marco de referencia de
+polarización, y la estación de tierra ya tiene que calibrar ese marco de todas
+formas. La diatenuación de un metal protegido a 45° es despreciable. **Por eso
+el requisito es de estabilidad, no de valor absoluto**: que no derive con la
+temperatura entre calibraciones. Eso es `retardancia_45_1550`, TBD, y hay que
+pedir plata u oro protegido **con la curva de fase medida**, que es lo que casi
+ningún catálogo publica.
+
+#### Y el tramo recto no cabe, por 18.0 mm
+
+Aquí está el precio, y es geométrico. El codificador, el protector del empalme y
+el colimador van **en fila según Z** y ninguno de los tres se puede apretar:
+
+| | mm |
+|---|---|
+| colimador | 28.0 |
+| protector de empalme (`longitud_protector_empalme`) | 60.0 |
+| codificador, protectores de fibra incluidos | 130.0 |
+| **necesario** | **218.0** |
+| disponible: la franja en Z | 200.0 |
+| **falta** | **18.0** |
+
+**La longitud de la franja es la longitud reservada al telescopio**, así que
+—y esto corrige lo que uno esperaría— **alargar el banco no ayuda**: el banco no
+entra en esta cuenta. El colimador está en la franja y no en el banco porque el
+banco sólo tiene 27.5 mm por encima del espejo y el colimador mide 28.
+
+Lo que **no** se suma: el boot del colimador. En un tramo recto no hay codo que
+iniciar. Si el colimador real necesitara su propio tramo rígido de strain
+relief, el déficit sube en esa cantidad. Queda dicho para que nadie lo descubra
+después.
+
+**Las tres salidas, todas calculadas, y las tres decisiones de ACSAR:**
+
+1. **Subir `longitud_reservada` del telescopio a ≥ 218 mm.** Con los **«~2U» de
+   verdad del brief (227 mm, no 200 — la U de longitud de la CDS son 113.5)**
+   sobran **9.0 mm**. Se paga con la bandeja, que baja de 106.4 a 79.4 mm; con
+   sólo tres piezas dentro le sobran 16.6 mm. Es la salida más barata y la que
+   además arregla el margen de 1.2 mm de §4.7(d).
+2. **Codificador con salida colimada de fábrica**, que quitaría el empalme
+   entero: `pigtail_salida_minimo`, TBD, es de Exail. Sin los 60 mm del
+   protector sobran **42.0 mm**.
+3. **Alargar el banco a ≥ 86 mm**, que es lo que hace falta para que el
+   colimador quepa *dentro del banco* (10 de semiespejo + 5 de holgura + 28).
+   Entonces la franja sólo necesita 190 y sobran 10.0 mm. Cuesta 31 mm de
+   bandeja, que se queda en 75.4 y sigue dando.
+
+Lo que **no** es una salida es bajar el protector de empalme hasta que el
+chequeo pase: los 60 mm ya son el orden correcto del tramo rígido.
+
+**Y el codificador no está colocado.** Igual que `camara_beacon` en §3.9: una
+pieza sin sitio no se dibuja en un sitio inventado. `chequeo_fibra_post_codificacion`
+**falla**, y se queda fallando. Consecuencia visible: `altura_eje_codificador`
+sale como **no comprobable** porque no hay eje que medir, y lo dice.
+
+#### Lo que se sabría si el codificador cupiera
+
+El generador lo coloca **por su eje de fibra**, no por su caja: el eje pasa a
+4.8 mm de la cara de montaje sobre una altura de 9.7, o sea 0.05 mm por debajo
+del centro. Con la colocación que le tocaría:
+
+- **coaxialidad con el colimador**: exacta por construcción, y el margen de la
+  envolvente contra la pared −X de la franja es de **2.05 mm**;
+- **altura del eje**: Y = 0.000, que es el plano óptico del banco. Desvío
+  **0.00 mm** contra una tolerancia supuesta de 0.5.
+
+Un plegado en el plano X-Z conserva Y; cualquier desfase en Y obligaría a una
+curva en S **después** del codificador, que es donde está prohibida. Por eso el
+chequeo existe aunque hoy no pueda concluir.
+
+#### Los empalmes: cero conectores
+
+[Decisión de ACSAR, 2026-09-21] Todos los tramos van por **fusión**, declarado
+una sola vez en `integracion.fibra.empalme` en vez de repetido en los siete
+tramos. Tres motivos, y los tres son del enlace: un conector es una entrada para
+luz de Troya y un punto de retrorreflexión; un conector PM tiene una tolerancia
+angular de alineación de ejes que un empalme no tiene, y cada grado es diafonía;
+y un conector se puede mover con la vibración, y lo que se mueve en polarización
+no vuelve solo a su sitio. **Lo que cuesta**: la cadena deja de ser desmontable
+pieza a pieza.
+
+#### Los `id_drive` nuevos
+
+Sólo dos, y hay que **dar de alta esas filas** en la hoja índice del equipo:
+**OPT-19** (`espejo_plegado_cuantico`) y **OPT-04-ALT** (`atenuador_fijo`, la
+alternativa excluyente al VOA, que no suma en ningún presupuesto ni se coloca).
+
+El `fotodiodo_vigia_troya` **no** es una pieza del catálogo: va dentro de la
+reserva del acoplador y se dice en su `fuente`. Y la `lamina_cuarto_onda_fija`
+tampoco, a propósito: lo que está en duda es **si la pieza existe**, así que
+entra como TBD de decisión en `integracion.optica`, no como componente. Un
+componente que quizá no esté en el camino o no tiene conexiones declaradas —y
+entonces es una pieza suelta, que es lo que `test_brazo_beacon.py` existe para
+cazar— o las tiene, y el modelo afirma un camino óptico que nadie ha decidido.
+Si se decide instalarla, se da de alta con su `id_drive`, su envolvente y sus
+dos tramos.
 
 ### Cómo se regenera
 
@@ -747,7 +998,8 @@ con 33 filas en vez de una. Sigue siendo el **fallback**: el día que aparezca
 `cad/vendor/aperture_optical_sciences/telescopio_cassegrain.step`, lo sustituye
 sin tocar el catálogo, exactamente igual que sustituía al cilindro. Y sigue
 reservando lo mismo: **el volumen libre y las interferencias no se han movido**
-(2.89 L libres, 0 choques, 15 invasiones de keep-out supuesto). Ver más abajo
+(0 choques, y las invasiones de keep-out siguen siendo sólo del radio de
+curvatura de la fibra). Ver más abajo
 por qué eso no es casualidad.
 
 #### (a) La sección pasa a ser cuadrada
@@ -781,7 +1033,8 @@ Dos parábolas confocales, primario cóncavo y secundario convexo: entra colimad
 y sale colimado. El motivo no es óptico, es **el banco**. Un Cassegrain focal
 clásico (f/12, EFL 1080 mm) deja el foco real ~40 mm detrás del vértice del
 primario, o sea **dentro de `z_payload_banco`**, y obliga a meter una lente de
-enfoque en la línea que solo tiene 7.7 mm de margen (§3.7). El afocal no
+enfoque en la línea apretada de §3.7 (15.7 mm de margen desde que el colimador
+salió de ella, y eran 7.7). El afocal no
 necesita ningún elemento adicional, y en particular **ninguna superficie
 transmisiva en el camino del canal cuántico**, donde un refractivo mete
 birrefringencia por tensión y se come justo lo que el enlace mide.
@@ -866,7 +1119,7 @@ reserva quedan **22.2 mm** para los dos mamparos, la celda y los dos espejos:
 | **margen** | **1.2** |
 
 Todos esos espesores están en su **cota superior**, no elegidos, y su `fuente` en
-el catálogo lo dice —el mismo patrón que el colimador y D1 de §3.7—.
+el catálogo lo dice —el mismo patrón que el espejo de plegado y D1 de §3.7—.
 Una celda de 3 mm no es una celda, y un primario de Ø92 × 8 mm tiene una relación
 de aspecto de 11.5. `chequeo_longitud_telescopio` sale como **atención** y dice
 la salida: con los **~2U de verdad del brief (227 mm, no 200)** la misma óptica
@@ -957,13 +1210,14 @@ su propio haz.
    acoplados al barrilete del telescopio. No bloquea el layout, pero puede
    obligar a devolverlos a la bandeja, y entonces el telescopio vuelve a tener
    techo de 176.4 mm.
-4. **EL RADIO MÍNIMO DE CURVATURA DE LA FIBRA** (equipo de payload). Ha pasado
-   a ser el dato que más desbloquea, por delante del resto. De las 15
-   invasiones de keep-out que reporta el modelo, **las 15** salen de él: 11 en
-   la bandeja y 4 en el colimador. Mientras no exista, la bandeja no se puede
-   validar y el colimador no se puede encaminar (§3.7.1, §3.7.2). Con él, el
-   chequeo `bucles_fibra` pasa de `no comprobable` a decir algo, y los
-   keep-outs pasan de `supuesto` a `confirmado` sin tocar una línea de código.
+4. **EL RADIO MÍNIMO DE CURVATURA DE LA FIBRA** (equipo de payload). Sigue
+   siendo el dato que más desbloquea. De las **7** invasiones de keep-out que
+   reporta el modelo —eran 15 antes de §3.10— **las 7** salen de él: 5 en la
+   bandeja y 2 en la franja. Mientras no exista, la bandeja no se puede validar
+   (§3.7.2). Con él, el chequeo `bucles_fibra` pasa de `no comprobable` a decir
+   algo, y los keep-outs pasan de `supuesto` a `confirmado` sin tocar una línea
+   de código. Lo que **ya no** depende de él es el encaminamiento del colimador:
+   §3.7.1 está resuelto.
 5. **Los otros dos datos que bloquean mucho**:
    - **STEP del telescopio** (Óscar / Aperture Optical Sciences): contorno
      exterior del barrilete **y longitud real**. Hay sitio reservado para él en
@@ -1021,6 +1275,44 @@ su propio haz.
     **si el cuarto puerto de D2 se instrumenta** con el fotodiodo o se tapa con
     `trampa_luz_d2`. Lo segundo no cambia la geometría del brazo; lo primero sí
     cambia el disipador del láser, que es lo que fija su envolvente.
+
+16. **DECIDIR CÓMO CABE EL TRAMO RECTO POST-CODIFICACIÓN** (§3.10). Es la
+    segunda cosa que hoy hace **fallar** `clau3d informe`, y por la que
+    `mod_fase_mpz_ln_10` no está colocado. Faltan **18.0 mm** de los 218 que
+    piden en fila el colimador, el protector del empalme y el codificador. Las
+    tres salidas están calculadas en §3.10 y las tres son de ACSAR: subir la
+    longitud reservada al telescopio a ≥ 218 mm (con los 227 del brief sobran
+    9.0), conseguir de Exail un codificador con salida colimada (sobran 42.0) o
+    alargar el banco a ≥ 86 mm (sobran 10.0). Ojo: **alargar el banco a secas no
+    sirve** si no llega a 86, porque la cuenta es de la franja, no del banco.
+17. **SI LA GUÍA DEL MPZ-LN-10 ES BIPOLARIZACIÓN** (Exail). Es el TBD que más
+    riesgo esconde de todos los nuevos: las guías de intercambio protónico
+    guían una sola polarización y actúan como polarizador integrado, y con una
+    de ésas el esquema de codificación con **un solo modulador de fase es
+    imposible**, no peor. Si la respuesta es que no, la arquitectura del
+    transmisor cambia entera.
+18. **LA SENSIBILIDAD TÉRMICA DE LA FASE EN FIBRA PM** (equipo de payload,
+    medida). Es lo que fija cuánta fibra post-codificación es tolerable.
+    Mientras falte, `fibra_post_codificacion` no puede decir si la longitud del
+    tramo sirve, sólo si cabe.
+19. **LA RETARDANCIA s–p DEL ESPEJO DE PLEGADO A 45° Y 1550 nm, CON LA CURVA DE
+    FASE MEDIDA** (equipo de óptica). Lo que se pide es **estabilidad**, no
+    valor: el efecto es unitario y estático y la estación lo calibra, siempre
+    que no derive. Hay que exigirla al fabricante porque casi ningún catálogo
+    la publica (§3.10).
+20. **QUÉ PAR DE BASES USA EL ENLACE** (equipo de óptica / de estación de
+    tierra): D/A + R/L sin lámina, o H/V + D/A con una λ/4 fija después del
+    codificador. Los dos pares valen para BB84, así que no es física del
+    protocolo: es **compatibilidad con la estación**. Está como TBD en
+    `integracion.optica.lamina_cuarto_onda_fija` y no como componente, porque
+    lo que está en duda es si la pieza existe.
+21. **SI LA EXTINCIÓN DEL MXER BASTA PARA EL ESTADO VACÍO** (Exail / payload).
+    Si hacen falta dos en cascada, el tercer modulador **no cabe en la franja**:
+    faltan 23.6 mm de Y, y el cálculo está escrito en el catálogo.
+22. **EL MOMENTO DIPOLAR MAGNÉTICO DEL AISLADOR** (payload / ADCS). Lleva imán
+    permanente —rotador de Faraday—, así que no es un componente pasivo para el
+    magnetómetro del ADCS. Y de paso: **comprobar si el butterfly del G&H ya
+    integra aislador interno**, que quitaría la pieza y el imán.
 
 > **La lista de supuestos a sustituir, entera y con el valor concreto de cada
 > uno, está en `reports/06_pendientes.md` y en `reports/components_status.csv`.**

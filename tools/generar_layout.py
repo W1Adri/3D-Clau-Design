@@ -47,14 +47,18 @@ ORDEN_PILA = [
 #
 # El ORDEN ES EL DE LA CADENA OPTICA, y el sentido tambien: el laser al extremo
 # -Z, lo mas lejos posible del barrilete del telescopio, porque con sus 4.1 W es
-# la principal fuente de calor del payload; y la salida hacia el colimador al
-# extremo +Z, que es por donde se sale al banco. Los dos moduladores NO estan
-# aqui: van en la franja lateral (ver CLAUDE.md 3.6), asi que la fibra sale de
-# la bandeja hacia la franja y vuelve.
+# la principal fuente de calor del payload; y la salida hacia la franja al
+# extremo +Z.
+#
+# DESDE EL 2026-09-21 LA BANDEJA ES SOLO LA FUENTE: laser, aislador y filtro.
+# Todo lo que modula, monitoriza, atenua y codifica esta en la franja, y la
+# cadena cruza UNA SOLA VEZ de una zona a la otra, en el tramo f03, que es
+# pre-codificacion y por tanto puede curvarse. Con el orden anterior la cadena
+# iba y volvia entre bandeja y franja, y ademas ponia el aislador y el filtro
+# DETRAS del codificador de polarizacion, que los borra. Ver CLAUDE.md 3.10.
 FILAS_BANDEJA = [
     ("laser_dfb_1550",),
-    ("voa", "aislador"),
-    ("filtro_espectral", "acoplador_monitor"),
+    ("aislador", "filtro_espectral"),
 ]
 # Holgura entre filas y contra los bordes de la zona. No es una cota de nada:
 # es sitio para el tramo recto de fibra que sale de cada pieza antes de curvar.
@@ -62,12 +66,19 @@ HOLGURA_BANDEJA = 8.0
 MARGEN_BANDEJA = 6.0
 
 # --- el banco de espacio libre ----------------------------------------
-# El camino es colimador -> D1 -> FSM -> telescopio, y el FSM es el que
-# dobla: el haz llega segun +X y sale segun +Z hacia el telescopio. Eso obliga
-# a dos cosas que no son negociables:
+# El camino es colimador -> espejo de plegado -> D1 -> FSM -> telescopio. El
+# FSM es el que dobla hacia el telescopio: el haz llega segun +X y sale segun
+# +Z. Eso obliga a dos cosas que no son negociables:
 #
 #   1. El FSM esta sobre el EJE OPTICO DEL TELESCOPIO. No se puede mover.
-#   2. El colimador y D1 van en linea con el, segun X.
+#   2. D1 y el espejo de plegado van en linea con el, segun X.
+#
+# EL ESPEJO DE PLEGADO ES NUEVO (2026-09-21) y ocupa en esa linea el sitio que
+# antes ocupaba el colimador. Existe porque el codificador de polarizacion
+# tiene que alimentar al colimador EN LINEA RECTA -- nada de fibra curvada
+# despues de la codificacion --, el codificador esta en la franja y la franja
+# esta en +Z, asi que el colimador apunta segun -Z y hace falta doblar el haz
+# de -Z a -X para meterlo en la linea de D1. Ver CLAUDE.md 3.10.
 #
 # Y de ahi sale el numero que aprieta: entre el eje del telescopio y la pared
 # +X de la columna de payload solo hay sitio para esos dos. El chequeo
@@ -96,7 +107,13 @@ MARGEN_BANDEJA = 6.0
 # avisa por stderr. Las otras dos opciones eran apretarla, que esconde el
 # resultado, o dibujarla saliendose del satelite, que ademas choca con el panel
 # solar. Ver CLAUDE.md 3.9.
-CADENA_BANCO = ("colimador", "dicroico_d1")   # de +X hacia el FSM
+CADENA_BANCO = ("espejo_plegado_cuantico", "dicroico_d1")  # de +X hacia el FSM
+# El colimador ya no esta en esta linea: esta encima del espejo, apuntando -Z.
+# Su giro lleva su eje local X (fibra por -X, haz por +X) al -Z del satelite,
+# manteniendo la cara de montaje contra el suelo del banco.
+GIRO_COLIMADOR = [0, 90, 0]
+# Y los moduladores van tumbados con el eje de fibra segun Z, igual que antes.
+GIRO_MODULADOR = [0, 90, 0]
 RAMAS_BRAZO = (
     ("dicroico_d1", "+Y", ("dicroico_d2", "camara_beacon")),
     ("dicroico_d1", "-Y", ("trampa_luz_d1",)),
@@ -107,6 +124,34 @@ RAMAS_BRAZO = (
 )
 HOLGURA_BANCO = 5.0
 MARGEN_BANCO = 2.0
+
+# --- la franja lateral -------------------------------------------------
+# Desde el 2026-09-21 la franja no es solo "los dos moduladores": es MODULACION,
+# MONITORIZACION, ATENUACION Y CODIFICACION, o sea todo lo que va entre la
+# fuente y el colimador. La razon es la regla que manda en la cadena: todo
+# componente de fibra va ANTES del codificador de polarizacion, y el codificador
+# tiene que acabar pegado al banco para alimentar al colimador en linea recta.
+# Ver CLAUDE.md 3.10.
+#
+# EL REPARTO ES EN Y, NO EN X, y no se ha elegido: la franja tiene 26.3 mm de X
+# y 95.4 mm de Y, y el codificador ademas tiene la X PINCHADA -- tiene que
+# quedar coaxial con el colimador, que esta sobre el espejo de plegado, que esta
+# en la linea de D1 --. Asi que el unico eje libre para apilar es Y.
+#
+#   Y arriba    acoplador 2x2 + VOA        <- sin conectores, lo que mejor se apila
+#   Y = 0       COLIMADOR y CODIFICADOR    <- eje de fibra en el plano optico del banco
+#   Y abajo     MXER (intensidad)          <- conector RF hacia -Y, lejos del otro
+#
+# Los bucles de fibra de la franja van en el plano Y-Z, que es el unico donde
+# caben: con el radio modelado de 30 mm hacen falta 60 mm de diametro y en X
+# solo hay 26.3.
+LANES_FRANJA_ARRIBA = ("acoplador_monitor", "voa")
+LANES_FRANJA_ABAJO = ("mod_intensidad_mxer_ln_10",)
+HOLGURA_FRANJA = 8.0
+# El MXER va girado 180 grados alrededor del eje de fibra respecto al
+# codificador, para que los dos conectores RF apunten a caras opuestas: asi
+# ninguno de los dos coaxiales tiene que pasar por encima del otro modulador.
+GIRO_MODULADOR_INVERTIDO = [0, 90, 180]
 # El FSM a 45 grados alrededor de Y: lleva la normal del espejo del +Z local a
 # la bisectriz entre +X y +Z, que es lo que dobla el haz de X a Z.
 GIRO_FSM = [0, 45, 0]
@@ -180,6 +225,29 @@ def dims_en_mundo(catalogo, componente, rotacion) -> tuple[float, float, float]:
         if angulo:
             solido = solido.rotate(origen, eje, angulo)
     return parts.caja_de_solidos(solido, componente.id).dims
+
+
+def caja_en_mundo(catalogo, componente, rotacion):
+    """Caja envolvente YA girada, RELATIVA al origen local de la pieza.
+
+    ``dims_en_mundo`` da solo el tamano, y con eso basta mientras la pieza sea
+    simetrica. Una pieza con conector NO lo es: el modulador crece 10 mm hacia
+    +Y y nada hacia -Y, asi que colocarla por el centro de su envolvente la
+    desplazaria medio conector. Aqui se devuelven los dos extremos para poder
+    apilar por el borde de verdad.
+    """
+    import cadquery as cq
+
+    from clau3d import parts
+
+    solido = parts.solido_envolvente(componente, catalogo)
+    origen = cq.Vector(0, 0, 0)
+    for eje, angulo in zip(
+        (cq.Vector(1, 0, 0), cq.Vector(0, 1, 0), cq.Vector(0, 0, 1)), rotacion
+    ):
+        if angulo:
+            solido = solido.rotate(origen, eje, angulo)
+    return parts.caja_de_solidos(solido, componente.id)
 
 
 # Direcciones de las seis caras, en ejes locales.
@@ -375,9 +443,19 @@ def generar_keep_outs(catalogo, colocaciones, zonas_por_id) -> list[dict]:
         f"fibra que declara 'montaje', porque el encaminamiento real esta sin "
         f"decidir."
     )
+    # Un tramo marcado RECTO no genera keep-out de curvatura en sus dos
+    # extremos, y no por ahorrar volumen: es que no hay codo que reservar. El
+    # tramo que sale del codificador de polarizacion no se puede curvar --
+    # los estados diagonales no son autoestados de la fibra PM y cualquier
+    # curva les mete una fase que deriva con la temperatura --, asi que
+    # dibujarle el envolvente de un codo estaria reservando sitio para algo
+    # que tiene prohibido pasar. Lo que ese tramo necesita es longitud RECTA,
+    # y eso lo mide el chequeo 'fibra_post_codificacion', no un keep-out.
     puertos: dict[str, set[str]] = {}
     for familia, con in catalogo.todas_las_conexiones():
         if familia != "opticas_fibra":
+            continue
+        if con.get("recto") or con.get("keep_out") is False:
             continue
         if con.get("desde"):
             puertos.setdefault(con["desde"], set()).add("salida")
@@ -701,6 +779,149 @@ def _ramas_del_brazo(catalogo, colocaciones, recinto):
     return salida, sin_sitio
 
 
+def _franja(catalogo, x_espejo, recinto):
+    """Colimador y cadena pre-codificacion en la franja, apilados en Y.
+
+    ``recinto`` es ((xmin, ymin, zmin), (xmax, ymax, zmax)) de la franja, salvo
+    que el colimador y el codificador SE SALEN de ella hacia -Z: el colimador
+    arranca justo en el limite y el haz baja al banco. El limite en Z que
+    manda para lo que hay que reservar es el otro, el +Z, que si es pared del
+    6U.
+
+    El orden en Z de la fila optica NO SE ELIGE: es el unico que permite que
+    el tramo de fibra post-codificacion sea recto. De -Z a +Z van el colimador,
+    el protector del empalme y el codificador, y lo que sobra -- o lo que falta
+    -- se ve al final. Si el codificador se sale de la pared +Z, NO SE COLOCA:
+    mismo criterio que la camara del brazo de los beacons.
+
+    Devuelve (colocaciones, sin_sitio, datos), donde 'datos' lleva los numeros
+    del tramo recto para que la cabecera del layout los pueda contar.
+    """
+    (xmin, ymin, zmin), (xmax, ymax, zmax) = recinto
+    salida: list[dict] = []
+    sin_sitio: list[tuple[str, float]] = []
+    datos: dict[str, float] = {}
+
+    codificador = next(
+        (
+            c for c in catalogo.componentes
+            if c.funcion == "codificador_polarizacion" and c.cuenta_en_presupuesto
+        ),
+        None,
+    )
+    colimador = catalogo["colimador"] if catalogo.existe("colimador") else None
+
+    # --- fila optica: colimador, empalme, codificador, de -Z a +Z ----------
+    cursor_z = zmin
+    banda_optica: list[tuple[float, float]] = []   # (ymin, ymax) de lo colocado
+    if colimador is not None and colimador.modelable and x_espejo is not None:
+        caja = caja_en_mundo(catalogo, colimador, GIRO_COLIMADOR)
+        # El eje del colimador es el de su cilindro, o sea su propio centro: se
+        # pone sobre el eje del espejo de plegado, que es lo que le devuelve el
+        # haz a la linea de D1, y a Y = 0, que es el plano optico del banco.
+        salida.append({
+            "componente": colimador.id,
+            "instancia": 1,
+            "centro": [
+                round(x_espejo, 3), 0.0,
+                round(cursor_z - caja.zmin, 3),
+            ],
+            "rotacion": GIRO_COLIMADOR,
+            "zona": "z_payload_franja",
+        })
+        banda_optica.append((caja.ymin, caja.ymax))
+        cursor_z += caja.dims[2]
+        datos["colimador_mm"] = caja.dims[2]
+
+    protector = catalogo.integracion.get("fibra.longitud_protector_empalme")
+    empalme = protector.escalar() if protector is not None else None
+    if empalme is not None:
+        cursor_z += empalme
+        datos["protector_empalme_mm"] = empalme
+
+    if codificador is not None and codificador.modelable:
+        caja = caja_en_mundo(catalogo, codificador, GIRO_MODULADOR)
+        datos["codificador_mm"] = caja.dims[2]
+        banda_optica.append((caja.ymin, caja.ymax))
+        # Coaxial con el colimador: lo que se alinea es el EJE DE FIBRA, que no
+        # pasa por el centro del cuerpo.
+        from clau3d import parts as _parts
+
+        eje = _parts.eje_de_fibra_en_mundo(codificador, GIRO_MODULADOR)
+        dx = 0.0 if eje is None else eje[0]
+        dy = 0.0 if eje is None else eje[1]
+        centro_z = cursor_z - caja.zmin
+        extremo = centro_z + caja.zmax
+        datos["necesario_mm"] = extremo - zmin
+        datos["disponible_mm"] = zmax - zmin
+        if extremo > zmax:
+            sin_sitio.append((codificador.id, extremo - zmax))
+        elif x_espejo is not None:
+            salida.append({
+                "componente": codificador.id,
+                "instancia": 1,
+                "centro": [
+                    round(x_espejo - dx, 3), round(-dy, 3), round(centro_z, 3),
+                ],
+                "rotacion": GIRO_MODULADOR,
+                "zona": "z_payload_franja",
+            })
+
+    # --- las dos bandas de Y, a partir de lo que ocupa la fila optica -------
+    # Se miden sobre la GEOMETRIA del codificador y del colimador, este colocado
+    # o no: si el reparto dependiera de que el codificador quepa, el layout
+    # cambiaria de forma segun un resultado, que es justo lo que no puede pasar.
+    y_alto = max((b[1] for b in banda_optica), default=0.0)
+    y_bajo = min((b[0] for b in banda_optica), default=0.0)
+    x_centro = (xmin + xmax) / 2
+
+    for piezas, signo, borde in (
+        (LANES_FRANJA_ARRIBA, +1, y_alto),
+        (LANES_FRANJA_ABAJO, -1, y_bajo),
+    ):
+        cursor_y = borde + signo * HOLGURA_FRANJA
+        cursor_z = zmin
+        for cid in piezas:
+            if not catalogo.existe(cid):
+                continue
+            componente = catalogo[cid]
+            if not componente.modelable or not componente.cuenta_en_presupuesto:
+                continue
+            rotacion = (
+                GIRO_MODULADOR_INVERTIDO if signo < 0 and componente.conectores
+                else GIRO_MODULADOR
+            )
+            caja = caja_en_mundo(catalogo, componente, rotacion)
+            centro_y = cursor_y - (caja.ymin if signo > 0 else caja.ymax)
+            extremo_y = centro_y + (caja.ymax if signo > 0 else caja.ymin)
+            pared = ymax if signo > 0 else ymin
+            if signo * (extremo_y - pared) > 0:
+                sin_sitio.append((cid, abs(extremo_y - pared)))
+                break
+            salida.append({
+                "componente": cid,
+                "instancia": 1,
+                "centro": [
+                    round(x_centro, 3), round(centro_y, 3),
+                    round(cursor_z - caja.zmin, 3),
+                ],
+                "rotacion": rotacion,
+                "zona": "z_payload_franja",
+            })
+            cursor_z += caja.dims[2] + HOLGURA_FRANJA
+        # Las piezas de una misma banda comparten altura: van en fila segun Z,
+        # no apiladas otra vez.
+
+    for cid, falta in sin_sitio:
+        print(
+            f"AVISO: {cid} no cabe en la franja por {falta:.1f} mm y NO se "
+            f"coloca. Ver el chequeo 'fibra_post_codificacion' y CLAUDE.md "
+            f"3.10.",
+            file=sys.stderr,
+        )
+    return salida, sin_sitio, datos
+
+
 def _caja_mundo(catalogo, colocacion):
     """(min, max) de la pieza ya girada y situada."""
     componente = catalogo[colocacion["componente"]]
@@ -779,36 +1000,6 @@ def generar() -> str:
             cursor -= ranura
 
     usado = Z - cursor
-
-    # Los moduladores van TUMBADOS en la franja: el lado de 9.7 mm por X, que es
-    # el eje escaso, y el de 15 mm por Y, donde sobra sitio. Asi el conector RF
-    # lateral (6.1 x 10 mm) sobresale hacia +-Y y no hacia la franja. Los dos
-    # caben en paralelo, y se reparten el ancho de la franja a partes iguales.
-    #
-    # En Z se pegan al extremo -Z de la franja: es el lado del banco y de la
-    # bandeja, y asi los tramos extra de fibra salen lo mas cortos posible.
-    moduladores = ("mod_intensidad_mxer_ln_10", "mod_fase_mpz_ln_10")
-    for indice, cid in enumerate(moduladores):
-        recorrido = catalogo[cid].extras["longitud_con_fibras"].escalar()
-        assert recorrido is not None
-        colocaciones.append(
-            {
-                "componente": cid,
-                "instancia": 1,
-                # [0, 90, 0] lleva [110, 15, 9.7] a [9.7, 15, 110].
-                "centro": [
-                    round(
-                        x_franja_min
-                        + ancho_franja * (indice + 0.5) / len(moduladores),
-                        3,
-                    ),
-                    0.0,
-                    round(z_tel_min + recorrido / 2, 3),
-                ],
-                "rotacion": [0, 90, 0],
-                "zona": "z_payload_franja",
-            }
-        )
 
     # ---------------------------------------------------------------- bandeja
     # La placa, al fondo de la zona, y encima las piezas de la cadena de fibra.
@@ -892,6 +1083,7 @@ def generar() -> str:
 
     fsm = catalogo["fsm"]
     margen_banco = None
+    x_espejo = None
     sin_sitio_brazo: list[tuple[str, str, float]] = []
     if fsm.modelable:
         colocaciones.append(
@@ -905,8 +1097,10 @@ def generar() -> str:
                 "zona": "z_payload_banco",
             }
         )
-        # Hacia +X desde el FSM: D1 y colimador, en orden inverso al de
-        # la cadena porque la cadena viene de fuera hacia el espejo.
+        # Hacia +X desde el FSM: D1 y el espejo de plegado, en orden inverso
+        # al de la cadena porque la cadena viene de fuera hacia el espejo del
+        # FSM. El colimador YA NO ESTA EN ESTA LINEA: esta encima del espejo de
+        # plegado, apuntando -Z, y se coloca con la franja.
         cursor_x = x_eje_telescopio + dims_en_mundo(catalogo, fsm, GIRO_FSM)[0] / 2
         x_d1 = None
         for cid in reversed(CADENA_BANCO):
@@ -928,6 +1122,8 @@ def generar() -> str:
             )
             if cid == "dicroico_d1":
                 x_d1 = centro_x
+            if cid == "espejo_plegado_cuantico":
+                x_espejo = centro_x
             cursor_x += dx
         margen_banco = X - MARGEN_BANCO - cursor_x
 
@@ -942,6 +1138,17 @@ def generar() -> str:
                 ([x_sep, -Y, z_banco_min], [X, Y, z_tel_min]),
             )
             colocaciones += del_brazo
+
+    # --------------------------------------------------------------- franja
+    # Va DESPUES del banco a proposito: la X del codificador y la del colimador
+    # no son libres, salen de donde cae el espejo de plegado, y el espejo cae
+    # donde lo deja la linea del banco.
+    del_franja, sin_sitio_franja, franja = _franja(
+        catalogo,
+        x_espejo,
+        ([x_franja_min, -Y, z_tel_min], [X, Y, Z]),
+    )
+    colocaciones += del_franja
 
     # ------------------------------------------------------------ telescopio
     # El barrilete llena su zona: su envolvente es la COTA SUPERIOR (el
@@ -1058,28 +1265,49 @@ def generar() -> str:
         ),
         (
             "z_payload_franja",
-            "Franja lateral - moduladores",
+            "Franja lateral - modulacion, monitorizacion, atenuacion y codificacion",
             (x_franja_min, -Y, z_tel_min), (X, Y, Z),
             f"Los {ancho_franja:.1f} mm de X que quedan al lado del telescopio, "
-            f"a lo largo de toda su longitud. Aqui van los dos moduladores "
-            f"tumbados (9.7 mm por X, 15 mm por Y, 110 mm por Z), pegados al "
-            f"extremo -Z para acortar la fibra hasta la bandeja. El ancho no se "
-            f"ha elegido: el barrilete no puede pasar de los {iy:.1f} mm de "
-            f"altura interior, asi que esta franja existe para cualquier "
-            f"diametro que permita montar el telescopio.",
+            f"a lo largo de toda su longitud. El ancho no se ha elegido: el "
+            f"barrilete no puede pasar de los {iy:.1f} mm de altura interior, "
+            f"asi que esta franja existe para cualquier diametro que permita "
+            f"montar el telescopio. Desde el 2026-09-21 aqui va TODO lo que hay "
+            f"entre la fuente y el colimador -- MXER, acoplador 2x2, VOA y el "
+            f"codificador de polarizacion -- mas el propio colimador, porque "
+            f"todo componente de fibra tiene que ir ANTES del codificador y el "
+            f"codificador tiene que alimentar al colimador en linea recta. "
+            f"EL REPARTO ES EN BANDAS DE Y, y no se ha elegido: la franja tiene "
+            f"{ancho_franja:.1f} mm de X contra {iy:.1f} mm de Y, y la X del "
+            f"codificador esta PINCHADA por la coaxialidad con el colimador. "
+            f"Los bucles de fibra van en el plano Y-Z por el mismo motivo: con "
+            f"el radio modelado hacen falta 60 mm de diametro y en X no caben. "
+            + (
+                "EL TRAMO RECTO NO CABE: "
+                + "; ".join(
+                    f"{cid} se sale por {falta:.1f} mm y NO esta colocado"
+                    for cid, falta in sin_sitio_franja
+                )
+                + ". Ver el chequeo 'fibra_post_codificacion' y CLAUDE.md 3.10."
+                if sin_sitio_franja
+                else f"El tramo recto del codificador al colimador cabe: pide "
+                     f"{franja.get('necesario_mm', 0):.1f} mm de los "
+                     f"{franja.get('disponible_mm', 0):.1f} que hay."
+            ),
         ),
         (
             "z_payload_banco",
             "Banco optico de espacio libre",
             (x_sep, -Y, z_banco_min), (X, Y, z_tel_min),
-            f"Canal cuantico: colimador -> D1 -> FSM -> telescopio. De D1 "
+            f"Canal cuantico: el colimador baja el haz segun -Z desde la "
+            f"franja, el espejo de plegado lo dobla hacia -X y de ahi "
+            f"D1 -> FSM -> telescopio. De D1 "
             f"sale hacia +Y UN SOLO brazo para los dos beacons, y dentro de el "
             f"D2 los separa: la camara en transmision (976 nm) y el laser de "
             f"bajada inyectando lateralmente en reflexion (1064 nm). Los dos "
             f"cuartos puertos llevan su trampa y su fotodiodo. El FSM esta "
             f"sobre el eje optico del telescopio (X = {x_eje_telescopio:+.2f}) "
-            f"porque es el que dobla el haz de X a Z, y eso deja el colimador "
-            f"y D1 en linea hacia +X. Margen contra la pared +X: "
+            f"porque es el que dobla el haz de X a Z, y eso deja D1 y el "
+            f"espejo de plegado en linea hacia +X. Margen contra la pared +X: "
             + (f"{margen_banco:.1f} mm." if margen_banco is not None
                else "no calculable, faltan envolventes.")
             + (
@@ -1101,13 +1329,16 @@ def generar() -> str:
             "Bandeja optica de fibra",
             (x_sep, -Y, -Z), (X, Y, z_banco_min),
             f"{iz - l_telescopio - L_BANCO:.1f} mm de Z con los "
-            f"{ancho_payload:.1f} mm de ancho enteros, ya sin cuerpos de "
-            f"modulador dentro. La cadena va en filas que avanzan segun Z, en "
-            f"el orden y el sentido de la cadena optica: el laser DFB al "
-            f"extremo -Z, lo mas lejos posible del barrilete porque con sus "
-            f"4.1 W es la principal fuente de calor del payload, y la salida "
-            f"hacia el colimador en +Z. Quedan {z_libre_bandeja:.1f} mm de Z "
-            f"libres al final para los bucles, mas los huecos entre filas. "
+            f"{ancho_payload:.1f} mm de ancho enteros. Desde el 2026-09-21 "
+            f"aqui esta SOLO LA FUENTE: el laser DFB, el aislador y el filtro. "
+            f"Todo lo que modula, monitoriza, atenua y codifica esta en la "
+            f"franja, asi que la cadena cruza de zona UNA SOLA VEZ, y esa vez "
+            f"cae en el tramo pre-codificacion, que es el que se puede curvar. "
+            f"Las filas avanzan segun Z en el orden y el sentido de la cadena: "
+            f"el laser al extremo -Z, lo mas lejos posible del barrilete porque "
+            f"con sus 4.1 W es la principal fuente de calor del payload, y la "
+            f"salida hacia la franja en +Z. Quedan {z_libre_bandeja:.1f} mm de "
+            f"Z libres al final para los bucles, mas los huecos entre filas. "
             f"Cuanta fibra cabe ahi NO se puede decir: falta el radio minimo de "
             f"curvatura. Zona con control termico propio.",
         ),
@@ -1138,14 +1369,19 @@ def generar() -> str:
         "",
         "meta:",
         "  estado: confirmada",
-        "  fecha: 2026-09-20",
+        "  fecha: 2026-09-21",
         "  nota: >-",
         f"    Dos columnas de 3U a lo largo de todo Z. La pila PC104 queda holgada:",
         f"    {usado:.0f} mm usados de {iz:.0f} mm. La columna de payload mide",
         f"    {ancho_payload:.1f} mm de ancho y se parte en dos a lo largo del telescopio:",
-        f"    {iy:.1f} mm para el barrilete y {ancho_franja:.1f} mm de franja lateral, donde van",
-        "    los dos moduladores tumbados segun Z. Asi la bandeja se queda sin",
-        f"    cuerpos dentro y el telescopio puede reservar {l_telescopio:.0f} mm. PCB-2 sigue",
+        f"    {iy:.1f} mm para el barrilete y {ancho_franja:.1f} mm de franja lateral.",
+        "    REPARTO REVISADO EL 2026-09-21 (CLAUDE.md 3.10): la bandeja se queda",
+        "    con la FUENTE -- laser, aislador y filtro -- y la franja lleva todo lo",
+        "    que modula, monitoriza, atenua y codifica, apilado en BANDAS DE Y,",
+        "    porque todo componente de fibra tiene que ir antes del codificador de",
+        "    polarizacion y despues de el la fibra no se puede curvar. Asi la",
+        "    cadena cruza de zona una sola vez, y esa vez es pre-codificacion.",
+        f"    El telescopio reserva {l_telescopio:.0f} mm. PCB-2 sigue",
         "    en la otra columna, con lo que el coaxial RF cruza el satelite a lo",
         "    ancho.",
         "",

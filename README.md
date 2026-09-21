@@ -231,7 +231,7 @@ tools/generar_layout.py genera data/layout.yaml desde el catálogo
 src/clau3d/             modelo de datos, piezas, ensamblaje, análisis, informes
 src/clau3d/optica/      modelo parametrico del telescopio Cassegrain
 src/clau3d/visor/       pagina del visor web (clau3d ver)
-tests/                  162 tests: datos, formas, supuestos, keep-outs, STEP, visor, telescopio, beacons
+tests/                  180 tests: datos, formas, supuestos, keep-outs, STEP, visor, telescopio, beacons, cadena optica
 cad/vendor/             STEP de fabricante, una carpeta por proveedor (no se tocan)
 cad/generated/          STEP generados: uno por pieza, mas el ensamblaje completo
 cad/generated/subsistemas/  un STEP por subsistema, con las coordenadas del conjunto
@@ -250,24 +250,26 @@ lista a mano, que se quedaría obsoleta con el siguiente STEP de proveedor— y 
 - **Norma**: CubeSat Design Specification **Rev. 14.1** (2022-02-09), que
   sustituye a la Rev. 13 y a la 6U CDS Rev 1.0. Envolvente 6U del plano
   CDS-14-007: **226.3 × 100.0 × 366.0 mm**, masa máxima 12.00 kg.
-- **35 componentes** en el catálogo, **32 con envolvente**. Los tres que no la
+- **37 componentes** en el catálogo, **34 con envolvente**. Los tres que no la
   tienen son el UHF de respaldo y el módulo de propulsión (los dos opcionales y
   sin decidir) y los coaxiales RF, que no son un cuerpo sino un keep-out.
-- **51 huecos sin aproximación** (`TBD`), **68 números inventados aquí**
+- **61 huecos sin aproximación** (`TBD`), **75 números inventados aquí**
   (`supuesto`) y **10 discrepancias** entre fuentes.
 - **Distribución confirmada** (2026-09-20): **dos columnas de 3U** a lo largo de
   todo Z — plataforma en −X, payload en +X. `data/layout.yaml` no se escribe a
   mano: lo genera `tools/generar_layout.py` desde el catálogo.
-- **28 piezas colocadas** y **0 choques de geometría**. Falta una por colocar
-  que no es un olvido: `camara_beacon` **no cabe** en el brazo de los beacons y
-  no se dibuja en un sitio inventado. `clau3d informe` devuelve 1 por eso.
-- **23 keep-outs**, todos dibujados con números supuestos, porque las tres cotas
+- **28 piezas colocadas** y **0 choques de geometría**. Faltan dos por colocar
+  que no son un olvido: `camara_beacon` **no cabe** en el brazo de los beacons y
+  `mod_fase_mpz_ln_10` **no cabe** en el tramo recto que tiene que alimentar al
+  colimador. Ninguna de las dos se dibuja en un sitio inventado, y `clau3d
+  informe` devuelve 1 por las dos.
+- **19 keep-outs**, todos dibujados con números supuestos, porque las tres cotas
   que los dimensionan —radio de curvatura de la fibra, el del coaxial y el
-  diámetro de haz— siguen siendo TBD. Hay 15 invasiones, y el informe las
+  diámetro de haz— siguen siendo TBD. Hay 7 invasiones, y el informe las
   separa de los choques de geometría porque **no son lo mismo**: dicen "con la
   hipótesis de hoy, aquí no cabe".
 - Zona útil interior **221.7 × 95.4 × 361.4 mm = 7.64 L**, de la que quedan
-  **2.89 L libres**. Era 5.84 L cuando 19 componentes no ocupaban nada; la
+  **2.92 L libres**. Era 5.84 L cuando 19 componentes no ocupaban nada; la
   cifra de antes no era mejor noticia, era menos información.
 
 ### Lo que ya aprieta, con números
@@ -280,9 +282,10 @@ lista a mano, que se quedaría obsoleta con el siguiente STEP de proveedor— y 
 | El **iADCS400** (95.4 mm de lado corto) dentro de los 100 mm exteriores | El espesor de pared no puede pasar de **2.30 mm**. Es la pieza que más aprieta, por delante del contorno PC104 desnudo, que daba 4.91 mm. |
 | Moduladores Exail de **grado espacial** | **130 mm** de recorrido recto cada uno, protectores de fibra incluidos. Es **45 mm más largo** que la cifra del encapsulado comercial. En la columna de payload, de 121.7 mm de ancho, **no caben según X**: van según Z. |
 | Longitud de la pila PC104 | **305 mm de 361 mm**, con el paso estándar PC/104 de 15.24 mm. Eran 274 hasta descubrir que las ranuras se reservaban con la altura de **ficha** y se dibujaban con el **STEP**: las fichas de AAC no incluyen el conector PC104 pasante, que baja 12.45 mm. El paso **real** del chasis sigue siendo TBD, y ahora el margen es la mitad. |
-| El banco óptico, en la línea que va del eje del telescopio a la pared | **7.7 mm** de margen. El FSM tiene que estar sobre el eje óptico porque es el que dobla el haz, y eso deja al colimador y a D1 en fila con él: 74.0 mm para 66.3 mm de piezas. No se ve mirando volúmenes —en el banco sobra hueco— y las dos envolventes que lo llenan son **supuestas**. |
+| El banco óptico, en la línea que va del eje del telescopio a la pared | **15.7 mm** de margen, y eran 7.7 hasta que el colimador salió de esa fila. El FSM tiene que estar sobre el eje óptico porque es el que dobla el haz, y eso deja a D1 y al espejo de plegado en fila con él: 74.0 mm para 58.3 mm de piezas. No se ve mirando volúmenes —en el banco sobra hueco— y las dos envolventes que lo llenan son **supuestas**. |
+| El tramo recto que alimenta al colimador, en Z | **NO CABE por 18.0 mm**. Después del codificador de polarización la fibra no se puede curvar, así que el colimador (28), el protector del empalme (60) y el codificador (130) van **en fila**: 218 mm en una franja de 200. Alargar el banco **no ayuda** —la cuenta es de la franja—; las salidas son subir la longitud reservada al telescopio a ≥ 218 mm (con los 227 mm del brief sobran 9.0), conseguir de Exail una salida colimada de fábrica (sobran 42.0) o alargar el banco hasta ≥ 86 mm (sobran 10.0). |
 | El brazo de los beacons, en la línea que va de D1 a la pared en Y | **NO CABE por 6.8 mm**, y es lo único que hoy hace fallar `clau3d informe`. Los dos beacons comparten un brazo y dentro de él un segundo dicroico los separa: semi-D1 (11.5) + D2 (23) + cámara (20, ya bajada de 30) = 54.5 mm para 47.7 mm. Con holguras de montaje faltan 16.8, así que la cámara **no está colocada**. Las salidas —plegar el brazo hacia −Z o alargar el banco— se pagan y son decisiones de ACSAR. |
-| Bucles de fibra | **No comprobable**: falta el radio mínimo de curvatura. Con el valor supuesto de 30 mm, la bandeja **no cumple** y el colimador no tiene por dónde sacar su latiguillo. Es el dato que más desbloquea del proyecto. |
+| Bucles de fibra | **No comprobable**: falta el radio mínimo de curvatura. Con el valor supuesto de 30 mm, la bandeja **no cumple**. Es el dato que más desbloquea del proyecto. Lo que ya **no** depende de él es el colimador: su latiguillo dejó de existir al reordenar la cadena. |
 | La antena de banda S | **No hay cara libre**. +Z la ocupan el telescopio y el star tracker, contra ±X y ±Y la pila deja 2–3 mm, y sus 10 mm de espesor no caben en los 6.5 mm de protrusión que permite la CDS. Acaba en −Z, apuntando al lado contrario que el telescopio: es una decisión de operaciones sin tomar. |
 
 ## Decisiones de diseño tomadas
@@ -328,6 +331,17 @@ lista a mano, que se quedaría obsoleta con el siguiente STEP de proveedor— y 
   dentro de él un segundo dicroico los separa, y eso **no cabe por 6.8 mm**.
   Plegarlo hacia −Z con un espejo de doblado o alargar el banco: las dos se
   pagan, las dos son de ACSAR, y hasta entonces la cámara no está colocada.
+- **Cómo cabe el tramo recto que alimenta al colimador.** Después del
+  codificador de polarización la fibra no se puede curvar, así que el
+  codificador, el empalme y el colimador van en fila y piden 218 mm de los 200
+  que tiene la franja. Subir la longitud del telescopio, pedirle a Exail salida
+  colimada o alargar el banco: las tres están calculadas y las tres son de
+  ACSAR.
+- **Qué par de bases usa el enlace**: D/A + R/L sin lámina, o H/V + D/A con una
+  λ/4 fija. Los dos valen para BB84, así que la decide la estación de tierra.
+- **Si la guía del MPZ-LN-10 transmite las dos polarizaciones.** Si no —si es de
+  intercambio protónico— el esquema de codificación con un solo modulador de
+  fase es imposible, y la arquitectura del transmisor cambia entera.
 - **El aislamiento de la cámara a 1064 nm.** Es el número que sostiene la
   elección de longitudes de onda (976 arriba, 1064 abajo, por la ceguera del
   silicio a 1064) y hoy no está medido.
@@ -357,8 +371,8 @@ Se regeneran con `uv run clau3d informe`.
 
 ### Los que más desbloquean
 
-1. **El radio mínimo de curvatura de la fibra** (equipo de payload). 14 de las
-   15 invasiones de keep-out del modelo salen de él.
+1. **El radio mínimo de curvatura de la fibra** (equipo de payload). Las 7
+   invasiones de keep-out del modelo salen de él.
 2. **El diámetro del haz comprimido** (equipo de óptica). De él salen la
    magnificación del telescopio y con ella su geometría entera, y decide si el
    FSM puede ser el MEMS de 5 mm o tiene que ser el piezo.

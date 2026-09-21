@@ -1,6 +1,6 @@
 # Chequeos de viabilidad
 
-Generado automaticamente el 2026-09-20 por `clau3d informe`.
+Generado automaticamente el 2026-09-21 por `clau3d informe`.
 No editar a mano: los numeros salen de `data/components.yaml`.
 
 - Mision: CLAU - CubeSat Laser per a Aplicacions Ultrasegures
@@ -13,13 +13,13 @@ Comprobaciones que no dependen de donde se coloque cada pieza.
 
 **Estado: ATENCION**
 
-Los 27 componentes con envolvente conocida ocupan 4301 cm3 de los 7644 cm3 interiores (56%). Quedan 3 componentes sin envolvente: el dato real sera mayor.
+Los 28 componentes con envolvente conocida ocupan 4309 cm3 de los 7644 cm3 interiores (56%). Quedan 3 componentes sin envolvente: el dato real sera mayor.
 
 | magnitud | valor |
 |---|---|
 | interior_cm3 | 7643.68 |
-| ocupado_conocido_cm3 | 4300.75 |
-| libre_si_nada_mas_creciera_cm3 | 3342.93 |
+| ocupado_conocido_cm3 | 4308.75 |
+| libre_si_nada_mas_creciera_cm3 | 3334.93 |
 | fraccion_ocupada | 0.56 |
 | componentes_sin_volumen | 3 |
 
@@ -126,16 +126,16 @@ Falta: Paso de apilamiento PC104 del chasis elegido
 
 **Estado: OK**
 
-El FSM va sobre el eje optico del telescopio (X = +36.85 mm) porque es el que dobla el haz de X a Z. Del eje a la pared +X de la columna hay 74.0 mm, y la media anchura del FSM mas el D1 mas el colimador suman 66.3 mm, sin contar holguras de montaje. Quedan 7.7 mm de margen.
+El FSM va sobre el eje optico del telescopio (X = +36.85 mm) porque es el que dobla el haz de X a Z. Del eje a la pared +X de la columna hay 74.0 mm, y la media anchura del FSM mas el D1 mas el espejo de plegado suman 58.3 mm, sin contar holguras de montaje. Quedan 15.7 mm de margen.
 
 | magnitud | valor |
 |---|---|
 | fsm | 15.29 |
 | dicroico_d1 | 23.00 |
-| colimador | 28.00 |
-| necesario_mm | 66.29 |
+| espejo_plegado_cuantico | 20.00 |
+| necesario_mm | 58.29 |
 | disponible_mm | 74.00 |
-| margen_mm | 7.71 |
+| margen_mm | 15.71 |
 | laser_beacon_bajada_mm | 30.00 |
 | margen_-X_D2_mm | 32.99 |
 | fotodiodo_monitor_beacon_mm | 12.00 |
@@ -168,6 +168,47 @@ Los dos beacons comparten el brazo que refleja D1, y dentro de el D2 los separa.
 | margen_+X_mm | 23.71 |
 
 Falta: Decision de ACSAR: plegar el brazo hacia -Z o alargar el banco
+
+## Orden de la cadena de fibra frente a las restricciones declaradas
+
+**Estado: OK**
+
+La cadena laser_dfb_1550 -> aislador -> filtro_espectral -> mod_intensidad_mxer_ln_10 -> acoplador_monitor -> voa -> mod_fase_mpz_ln_10 -> colimador cumple las 7 restricciones declaradas. Todo componente de fibra va antes del codificador de polarizacion, y detras de el solo esta el colimador.
+
+| magnitud | valor |
+|---|---|
+| restricciones | 7.00 |
+| piezas_en_la_cadena | 8.00 |
+| violaciones | 0.00 |
+
+## Tramo de fibra posterior al codificador de polarizacion
+
+**Estado: FALLA**
+
+El tramo va en fila segun Z y suma 218.0 mm: 130 mm del codificador (protectores de fibra incluidos), 60 mm de protector de empalme y 28 mm de colimador. La franja mide 200.0 mm en Z, asi que NO CABE por 18.0 mm. Por eso data/layout.yaml NO coloca mod_fase_mpz_ln_10: una pieza sin sitio no se dibuja en uno inventado. La longitud de la franja es la reservada al telescopio, asi que alargar el banco NO ayuda: el banco no entra en esta cuenta. Las salidas son subir 'telescopio_cassegrain.longitud_reservada' (los "~2U" de verdad del brief son 227 mm, no 200) o que Exail sirva el codificador con salida colimada, que quitaria el empalme entero -- ver el TBD 'pigtail_salida_minimo'. Las dos son decisiones que no toma este modelo. Lo que NO es una salida es bajar el protector de empalme hasta que esto pase.
+
+| magnitud | valor |
+|---|---|
+| codificador_mm | 130.00 |
+| protector_empalme_mm | 60.00 |
+| colimador_mm | 28.00 |
+| necesario_mm | 218.00 |
+| disponible_mm | 200.00 |
+| margen_mm | -18.00 |
+
+Falta: Decision de ACSAR: alargar la franja (longitud reservada al telescopio) o codificador con salida colimada
+
+## Eje de fibra del codificador frente al plano optico del banco
+
+**Estado: NO COMPROBABLE**
+
+mod_fase_mpz_ln_10 NO ESTA COLOCADO en data/layout.yaml, asi que no hay eje que medir. No esta colocado porque el tramo recto que tiene que alimentar no cabe: ver el chequeo 'fibra_post_codificacion'. Decir que la altura esta bien cuando la pieza no esta seria inventarse el resultado.
+
+| magnitud | valor |
+|---|---|
+| plano_optico_Y_mm | 0.00 |
+
+Falta: Colocacion del codificador, que hoy no cabe en la franja
 
 ## Configuracion optica del telescopio
 
@@ -241,16 +282,16 @@ Falta: Radio minimo de curvatura de la fibra elegida
 
 **Estado: ATENCION**
 
-Masa conocida 846 g de un limite de 12000 g (CDS 14.1). Faltan 28 componentes por pesar, incluido el chasis y el telescopio, que son de los mas pesados.
+Masa conocida 846 g de un limite de 12000 g (CDS 14.1). Faltan 29 componentes por pesar, incluido el chasis y el telescopio, que son de los mas pesados.
 
 | magnitud | valor |
 |---|---|
 | masa_conocida_g | 845.90 |
 | limite_g | 12000.00 |
 | margen_g | 11154.10 |
-| componentes_sin_masa | 28.00 |
+| componentes_sin_masa | 29.00 |
 
-Falta: Masa de: estructura_6u, adcs_iadcs400, antena_quasar_wsant, radio_uhf_pulsar_vutrx, paneles_photon_side, propulsion, telescopio_cassegrain, fsm, dicroico_d1, dicroico_d2, camara_beacon, laser_beacon_bajada, fotodiodo_monitor_beacon, trampa_luz_d1, colimador, bandeja_optica, laser_dfb_1550, mod_intensidad_mxer_ln_10, mod_fase_mpz_ln_10, voa, aislador, filtro_espectral, acoplador_monitor, pcb1_control_qkd, pcb2_drivers_opticos, pcb3_pat, cables_rf_moduladores, qrng_idq20mc1_s3
+Falta: Masa de: estructura_6u, adcs_iadcs400, antena_quasar_wsant, radio_uhf_pulsar_vutrx, paneles_photon_side, propulsion, telescopio_cassegrain, fsm, dicroico_d1, dicroico_d2, camara_beacon, laser_beacon_bajada, fotodiodo_monitor_beacon, trampa_luz_d1, espejo_plegado_cuantico, colimador, bandeja_optica, laser_dfb_1550, mod_intensidad_mxer_ln_10, mod_fase_mpz_ln_10, voa, aislador, filtro_espectral, acoplador_monitor, pcb1_control_qkd, pcb2_drivers_opticos, pcb3_pat, cables_rf_moduladores, qrng_idq20mc1_s3
 
 ## STEP de fabricante frente al manifiesto
 

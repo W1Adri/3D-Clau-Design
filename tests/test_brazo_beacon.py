@@ -138,18 +138,29 @@ def test_los_cuartos_puertos_tienen_donde_acabar(catalogo):
 
 
 def test_el_tramo_de_ida_y_vuelta_no_duplica_su_keep_out(catalogo, layout):
-    """e08 recorre el mismo tubo que e04, y el volumen se declara una vez."""
-    por_id = {t["id"]: t for t in _tramos(catalogo)}
-    e08 = por_id["e08"]
-    assert e08.get("keep_out") is False
-    assert e08["keep_out_compartido_con"] == "e04"
-    # Los dos unen los mismos extremos, al reves.
-    e04 = por_id["e04"]
-    assert {e04["desde"], e04["hasta"]} == {e08["desde"], e08["hasta"]}
+    """El tramo de bajada recorre el mismo tubo que el de subida, y el volumen
+    se declara una vez.
+
+    Los ids no se escriben aqui: se buscan por los extremos. El camino en
+    espacio libre se renumero el 2026-09-21 al meter el espejo de plegado, y un
+    test que fijara 'e04' habria fallado por el motivo equivocado.
+    """
+    tramos = _tramos(catalogo)
+    subida = next(
+        t for t in tramos
+        if t["desde"] == "dicroico_d1" and t["hasta"] == "dicroico_d2"
+    )
+    bajada = next(
+        t for t in tramos
+        if t["desde"] == "dicroico_d2" and t["hasta"] == "dicroico_d1"
+    )
+    assert bajada.get("keep_out") is False
+    assert bajada["keep_out_compartido_con"] == subida["id"]
+    assert subida.get("keep_out") is True
     # Y en el layout hay uno, no dos.
     ids = [k.id for k in layout.keep_outs]
-    assert "haz_e04" in ids
-    assert "haz_e08" not in ids
+    assert f"haz_{subida['id']}" in ids
+    assert f"haz_{bajada['id']}" not in ids
 
 
 def test_la_trampa_de_d2_es_excluyente_con_el_fotodiodo(catalogo, layout):

@@ -404,6 +404,9 @@ class Componente:
     requiere_vista_exterior: bool
     montado_en: str | None
     alternativa_de: str | None
+    # Papel de la pieza en su cadena, de FUNCIONES. None para casi todas: solo
+    # se declara cuando el papel tiene consecuencias para el resto del modelo.
+    funcion: str | None
     nota: str | None
     extras: dict[str, Magnitud] = field(default_factory=dict)
     bruto: dict = field(default_factory=dict, repr=False)
@@ -495,6 +498,19 @@ class Componente:
 
 TIPOS_DE_FORMA = ("caja", "cilindro", "step", "cassegrain")
 
+# El PAPEL de una pieza dentro de una cadena, cuando ese papel tiene
+# consecuencias que el resto del modelo necesita conocer. No es una categoria
+# mas: es el campo que permite preguntar "donde esta la frontera de la
+# codificacion" sin escribir un id en el codigo.
+#
+# 'codificador_polarizacion' es hoy el unico. Marca la pieza despues de la cual
+# los cuatro estados BB84 ya existen, y eso cambia lo que puede ir detras: un
+# aislador PM proyecta los cuatro estados sobre un solo eje y BORRA la
+# codificacion entera, y cualquier fibra PM le mete a los estados diagonales
+# una fase que deriva con la temperatura, porque no son autoestados de la
+# fibra. Los chequeos de orden leen este campo, no un id.
+FUNCIONES = ("codificador_polarizacion",)
+
 # Los parametros que un 'cassegrain' tiene que declarar en su bloque 'optica'.
 # Aqui solo estan los NOMBRES: los valores viven en data/components.yaml como
 # cualquier otra magnitud, con su estado y su fuente. Lo que se exige es lo
@@ -572,7 +588,7 @@ def _componente(bruto: dict) -> Componente:
         "masa", "potencia_nominal", "potencia_pico", "opcional",
         "requiere_vista_exterior", "nota_vista", "montado_en", "nota",
         "prioridad", "alternativa_de", "montaje", "exterior",
-        "nota_hoja_drive",
+        "nota_hoja_drive", "funcion",
     }
     extras: dict[str, Magnitud] = {}
     for clave, valor in bruto.items():
@@ -629,6 +645,7 @@ def _componente(bruto: dict) -> Componente:
         requiere_vista_exterior=bool(bruto.get("requiere_vista_exterior", False)),
         montado_en=bruto.get("montado_en"),
         alternativa_de=bruto.get("alternativa_de"),
+        funcion=bruto.get("funcion"),
         nota=bruto.get("nota"),
         extras=extras,
         bruto=bruto,
@@ -664,6 +681,17 @@ class Catalogo:
                 continue
             for conexion in lista:
                 yield familia, conexion
+
+    @property
+    def restricciones_orden(self) -> list[dict]:
+        """Las restricciones de orden de la cadena de fibra, o lista vacia.
+
+        Viven en 'meta' de data/connections.yaml, junto a las conexiones que
+        restringen, y no en el codigo: cada una lleva su motivo escrito al
+        lado, y anadir una es editar datos.
+        """
+        meta = self.conexiones.get("meta") or {}
+        return meta.get("restricciones_orden") or []
 
     # ---- geometria de la envolvente --------------------------------
     @property
@@ -990,6 +1018,30 @@ def validar(catalogo: Catalogo) -> list[str]:
                 f"{c.id}: declara 'forma.step' y 'forma.step_esperado' a la vez. "
                 f"El segundo es para cuando el fichero todavia no ha llegado; "
                 f"cuando llega y se verifica, se sustituye por el primero."
+            )
+
+    # Una 'funcion' declara el papel de la pieza, y los chequeos de orden la
+    # leen en vez de un id escrito a mano. Dos piezas con el mismo papel
+    # dejarian sin saber cual es la frontera; ninguna deja el chequeo sin
+    # ancla. Las dos cosas se avisan aqui y no en el chequeo, porque son un
+    # problema del catalogo.
+    por_funcion: dict[str, list[str]] = {}
+    for c in catalogo.componentes:
+        if c.funcion is None:
+            continue
+        if c.funcion not in FUNCIONES:
+            problemas.append(
+                f"{c.id}: funcion '{c.funcion}' no valida (admitidas: {FUNCIONES})"
+            )
+            continue
+        if c.cuenta_en_presupuesto:
+            por_funcion.setdefault(c.funcion, []).append(c.id)
+    for funcion, cids in por_funcion.items():
+        if len(cids) > 1:
+            problemas.append(
+                f"funcion '{funcion}' declarada por {', '.join(sorted(cids))}. "
+                f"Un papel del que dependen los chequeos de orden lo tiene una "
+                f"pieza o ninguna, no dos."
             )
 
     # El eje de montaje solo significa algo si la pieza tiene ejes que declarar.

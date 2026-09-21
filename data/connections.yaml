@@ -12,105 +12,207 @@
 # =====================================================================
 
 meta:
-  revision: 2026-09-20
+  revision: 2026-09-21
   nota: >-
     El orden de cada cadena sigue el camino fisico de la senal. Los campos
     'longitud_mm' se rellenan automaticamente desde el ensamblaje una vez
     confirmada la distribucion; aqui solo se declara la topologia.
 
+  # -------------------------------------------------------------------
+  # RESTRICCIONES DE ORDEN DE LA CADENA DE FIBRA
+  # -------------------------------------------------------------------
+  # Son DATOS, no codigo: el chequeo 'orden_cadena_fibra' las lee de aqui y
+  # las aplica sobre 'opticas_fibra'. Escribirlas en Python las escondia; aqui
+  # cada una lleva su motivo al lado, y anadir una no toca ninguna linea de
+  # codigo.
+  #
+  # 'antes' y 'despues' nombran componentes por su id, salvo cuando nombran un
+  # PAPEL: 'funcion:codificador_polarizacion' resuelve a la pieza que declara
+  # ese campo en data/components.yaml. Asi, el dia que el codificador sea otra
+  # pieza, la restriccion sigue diciendo lo mismo.
+  #
+  # 'directamente: true' exige que el segundo venga JUSTO detras del primero,
+  # sin nada en medio.
+  restricciones_orden:
+    - antes: aislador
+      despues: mod_intensidad_mxer_ln_10
+      motivo: >-
+        El aislador protege el DFB de retrorreflexiones, y lo que mas
+        retrorrefleja de la cadena son los moduladores. Detras de ellos ya no
+        protege de nada. Es ademas la primera defensa contra los ataques de
+        caballo de Troya.
+    - antes: aislador
+      despues: "funcion:codificador_polarizacion"
+      motivo: >-
+        UN AISLADOR PM TRANSMITE UN SOLO EJE DE POLARIZACION. Detras del
+        codificador proyectaria los cuatro estados BB84 sobre la misma
+        polarizacion y BORRARIA LA CODIFICACION ENTERA. No es degradacion: es
+        perdida total de la informacion.
+    - antes: filtro_espectral
+      despues: mod_intensidad_mxer_ln_10
+      motivo: >-
+        El filtro quita la ASE del laser. Puesto antes de los moduladores, todo
+        lo que se modula ya esta espectralmente limpio, y la ventana por la que
+        puede entrar luz de Troya es la mas estrecha posible.
+    - antes: mod_intensidad_mxer_ln_10
+      despues: acoplador_monitor
+      motivo: >-
+        El acoplador monitoriza el MXER: cierra su lazo de bias y verifica las
+        razones de intensidad decoy/senal. Delante de el no hay nada que
+        monitorizar.
+    - antes: acoplador_monitor
+      despues: voa
+      motivo: >-
+        Detras del VOA la senal esta ya a fracciones de foton por pulso: no hay
+        luz que medir con un fotodiodo. El acoplador tiene que ver la senal
+        mientras todavia existe.
+    - antes: voa
+      despues: "funcion:codificador_polarizacion"
+      motivo: >-
+        Todo componente de fibra tiene perdida dependiente de la polarizacion, y
+        un atenuador variable la tiene por construccion. Detras del codificador
+        atenuaria unos estados BB84 mas que otros y DEFORMARIA el conjunto.
+        Delante no cuesta nada: la atenuacion es lineal y da igual donde se
+        haga.
+    - antes: "funcion:codificador_polarizacion"
+      despues: colimador
+      directamente: true
+      motivo: >-
+        DESPUES DEL CODIFICADOR SOLO PUEDE IR EL COLIMADOR. Cualquier otro
+        componente de fibra proyecta o deforma los cuatro estados, y cualquier
+        tramo de fibra PM les mete una fase que deriva con la temperatura,
+        porque los estados diagonales viajan a 45 grados de los ejes y NO son
+        autoestados de la fibra. El tramo que los une es el mas corto que
+        permita la fabricacion, y va recto.
+
 # ---------------------------------------------------------------------
 # 1. CADENA OPTICA EN FIBRA
 # ---------------------------------------------------------------------
-# laser -> mod. intensidad -> codificador de polarizacion (mod. fase) ->
-# VOA -> aislador -> filtro -> acoplador/fotodiodo -> colimador
+# ORDEN CORREGIDO el 2026-09-21 (decision de ACSAR). El de antes ponia el
+# aislador, el filtro, el VOA y el acoplador DETRAS del codificador de
+# polarizacion, y eso no funciona -- ver 'restricciones_orden' arriba y
+# CLAUDE.md 3.10.
+#
+#   laser -> aislador -> filtro -> MXER (intensidad) -> acoplador 2x2 ->
+#   VOA -> MPZ (codificador de polarizacion) -> colimador
+#   |______________ fibra PM, eje lento, empalmes por fusion ______|__recto__|
+#
+# LA REGLA QUE MANDA: todo componente de fibra va ANTES del codificador de
+# polarizacion. Antes de el la luz va en polarizacion lineal fija alineada al
+# eje lento de la PM, que ES un autoestado: ese tramo puede ser largo y
+# curvarse libremente, respetando el radio minimo. Despues de el existen los
+# cuatro estados BB84 y NO hay autoestado que valga: el tramo tiene que ser
+# corto y recto, y no puede llevar nada dentro.
+#
+# TODOS los tramos van por EMPALME POR FUSION, cero conectores: la decision
+# esta en 'integracion.fibra.empalme' de data/components.yaml, una vez, en vez
+# de repetida en los siete tramos. Lo que cada tramo declara es lo suyo.
 opticas_fibra:
   - id: f01
     desde: laser_dfb_1550
-    hasta: mod_intensidad_mxer_ln_10
+    hasta: aislador
     tipo: fibra_pm
-    conector:
-      valor: null
-      estado: TBD
-      falta: Tipo de conector optico (AVIM / Mini-AVIM de grado espacial, o empalme por fusion)
-      pedir_a: Equipo de payload de ACSAR
-    holgura_mm:
-      valor: null
-      estado: TBD
-      falta: Holgura de insercion del conector elegido
-      pedir_a: Equipo de payload de ACSAR
+    union: fusion
+    nota: >-
+      El aislador va lo mas cerca posible del laser: cualquier retrorreflexion
+      que llegue al DFB lo desestabiliza.
 
   - id: f02
-    desde: mod_intensidad_mxer_ln_10
-    hasta: mod_fase_mpz_ln_10
+    desde: aislador
+    hasta: filtro_espectral
     tipo: fibra_pm
-    conector: {valor: null, estado: TBD, falta: Tipo de conector optico, pedir_a: Equipo de payload de ACSAR}
-    holgura_mm: {valor: null, estado: TBD, falta: Holgura de insercion, pedir_a: Equipo de payload de ACSAR}
+    union: fusion
+
+  - id: f03
+    desde: filtro_espectral
+    hasta: mod_intensidad_mxer_ln_10
+    tipo: fibra_pm
+    union: fusion
+    nota: >-
+      TRAVESIA DE ZONA: el filtro es la ultima pieza de la bandeja y el MXER la
+      primera de la franja. Es la UNICA vez que la cadena cruza de una zona a
+      la otra, y esta en el tramo pre-codificacion, donde la fibra puede ser
+      larga y curvarse. Que sea una sola travesia es una consecuencia del orden
+      nuevo: con el de antes la cadena iba y volvia entre bandeja y franja.
+
+  - id: f04
+    desde: mod_intensidad_mxer_ln_10
+    hasta: acoplador_monitor
+    tipo: fibra_pm
+    union: fusion
     nota: >-
       Union critica para el layout. Cada modulador reserva 130 mm de recorrido
       recto (cota del plano de Exail, protectores de fibra incluidos) ANTES de
       cualquier bucle.
 
-  - id: f03
-    desde: mod_fase_mpz_ln_10
+  - id: f05
+    desde: acoplador_monitor
     hasta: voa
     tipo: fibra_pm
-    conector: {valor: null, estado: TBD, falta: Tipo de conector optico, pedir_a: Equipo de payload de ACSAR}
-    holgura_mm: {valor: null, estado: TBD, falta: Holgura de insercion, pedir_a: Equipo de payload de ACSAR}
-
-  - id: f04
-    desde: voa
-    hasta: aislador
-    tipo: fibra_pm
-    conector: {valor: null, estado: TBD, falta: Tipo de conector optico, pedir_a: Equipo de payload de ACSAR}
-    holgura_mm: {valor: null, estado: TBD, falta: Holgura de insercion, pedir_a: Equipo de payload de ACSAR}
-
-  - id: f05
-    desde: aislador
-    hasta: filtro_espectral
-    tipo: fibra_pm
-    conector: {valor: null, estado: TBD, falta: Tipo de conector optico, pedir_a: Equipo de payload de ACSAR}
-    holgura_mm: {valor: null, estado: TBD, falta: Holgura de insercion, pedir_a: Equipo de payload de ACSAR}
+    union: fusion
 
   - id: f06
-    desde: filtro_espectral
-    hasta: acoplador_monitor
+    desde: voa
+    hasta: mod_fase_mpz_ln_10
     tipo: fibra_pm
-    conector: {valor: null, estado: TBD, falta: Tipo de conector optico, pedir_a: Equipo de payload de ACSAR}
-    holgura_mm: {valor: null, estado: TBD, falta: Holgura de insercion, pedir_a: Equipo de payload de ACSAR}
+    union: fusion
+    nota: >-
+      Ultimo tramo pre-codificacion. A partir de la pieza siguiente ya existen
+      los cuatro estados BB84.
 
   - id: f07
-    desde: acoplador_monitor
+    desde: mod_fase_mpz_ln_10
     hasta: colimador
     tipo: fibra_pm
-    conector: {valor: null, estado: TBD, falta: Tipo de conector optico, pedir_a: Equipo de payload de ACSAR}
-    holgura_mm: {valor: null, estado: TBD, falta: Holgura de insercion, pedir_a: Equipo de payload de ACSAR}
-    nota: Salida de la bandeja optica hacia el banco de espacio libre.
+    union: fusion
+    post_codificacion: true
+    recto: true
+    keep_out: false
+    nota: >-
+      EL TRAMO QUE NO SE PUEDE CURVAR. Sale del codificador de polarizacion y
+      entra en el colimador, y lleva los cuatro estados BB84. Los diagonales
+      viajan a 45 grados de los ejes de la fibra PM, no son autoestados, y
+      cualquier curva -- y la propia longitud -- les mete una fase que deriva
+      con la temperatura: los estados H/V sobrevivirian y los diagonales no, o
+      sea una base limpia y la otra rota.
+      POR ESO NO GENERA KEEP-OUT DE CURVATURA: no hay codo que reservar, porque
+      no hay codo. Lo que hay que reservar es un TRAMO RECTO, y eso lo mide el
+      chequeo 'fibra_post_codificacion' contra
+      'integracion.fibra.longitud_protector_empalme'.
+      Cuanta fibra es tolerable aqui NO SE PUEDE DECIR todavia: falta
+      'integracion.fibra.sensibilidad_termica_fase_pm', que es TBD.
 
 # ---------------------------------------------------------------------
 # 2. CAMINO OPTICO EN ESPACIO LIBRE
 # ---------------------------------------------------------------------
-# Arquitectura de DOS DICROICOS (decision de ACSAR, 2026-09-20). Los dos
-# beacons comparten UN SOLO brazo lateral, el que refleja D1, y dentro de ese
-# brazo los separa D2:
+# El canal cuantico entra en el banco BAJANDO SEGUN -Z desde el colimador, y
+# un espejo plano a 45 grados lo dobla hacia -X, que es la linea de D1, el FSM
+# y el telescopio. Ese espejo existe porque el codificador tiene que alimentar
+# al colimador en linea recta; ver CLAUDE.md 3.10.
 #
-#   canal cuantico  colimador --e01--> D1 --e02--> FSM --e03--> telescopio --e05--> EXTERIOR
-#   beacon subida               D1 --e04--> D2 --e06--> camara          (976 nm)
-#   beacon bajada     laser --e07--> D2 --e08--> D1 -> FSM              (1064 nm)
-#   fugas                       D1 --e09--> trampa_luz_d1               (1550 en reflexion)
-#                               D2 --e10--> fotodiodo_monitor_beacon    (beacon en transmision)
+# Arquitectura de DOS DIVISORES en el brazo de los beacons (decision de ACSAR,
+# 2026-09-20), que NO cambia: los dos beacons comparten UN SOLO brazo lateral,
+# el que refleja D1, y dentro de ese brazo los separa D2:
+#
+#   canal cuantico  colimador --e01--> espejo --e02--> D1 --e03--> FSM
+#                                      --e04--> telescopio --e05--> EXTERIOR
+#   beacon subida               D1 --e06--> D2 --e07--> camara      (976 nm)
+#   beacon bajada     laser --e08--> D2 --e09--> D1 -> FSM          (1064 nm)
+#   fugas                       D1 --e10--> trampa_luz_d1           (1550 en reflexion)
+#                               D2 --e11--> fotodiodo_monitor_beacon (beacon en transmision)
 #
 # Los cuatro puertos de cada divisor tienen destino declarado, y hay un test
 # que lo comprueba: un puerto sin destino no desaparece porque no se dibuje.
 #
-# e04 y e08 son EL MISMO TRAMO FISICO recorrido en sentidos contrarios y con
-# colores distintos. El keep-out se declara UNA VEZ, en e04, y e08 lo comparte
+# e06 y e09 son EL MISMO TRAMO FISICO recorrido en sentidos contrarios y con
+# colores distintos. El keep-out se declara UNA VEZ, en e06, y e09 lo comparte
 # con 'keep_out_compartido_con': duplicar el volumen contaria dos veces el
 # mismo tubo y ensuciaria el informe de interferencias con una invasion que no
 # existe.
 opticas_espacio_libre:
   - id: e01
     desde: colimador
-    hasta: dicroico_d1
+    hasta: espejo_plegado_cuantico
     tipo: haz_libre
     longitud_onda_nm: 1550
     diametro_haz_mm:
@@ -119,8 +221,23 @@ opticas_espacio_libre:
       falta: Diametro del haz colimado
       pedir_a: Equipo de optica de ACSAR
     keep_out: true
+    nota: >-
+      El colimador apunta segun -Z y el espejo esta debajo, en el banco. Este
+      tramo es la consecuencia geometrica de que el codificador tenga que
+      alimentar al colimador en linea recta.
 
   - id: e02
+    desde: espejo_plegado_cuantico
+    hasta: dicroico_d1
+    tipo: haz_libre
+    longitud_onda_nm: 1550
+    diametro_haz_mm: {valor: null, estado: TBD, falta: Diametro del haz colimado, pedir_a: Equipo de optica de ACSAR}
+    keep_out: true
+    nota: >-
+      El espejo dobla el haz de -Z a -X y lo pone en la linea de D1. A partir
+      de aqui el camino es el de siempre y no se ha movido.
+
+  - id: e03
     desde: dicroico_d1
     hasta: fsm
     tipo: haz_libre
@@ -131,7 +248,7 @@ opticas_espacio_libre:
       El canal cuantico ATRAVIESA D1 (paso largo, borde ~1300 nm); los dos
       beacons se reflejan hacia el brazo lateral.
 
-  - id: e03
+  - id: e04
     desde: fsm
     hasta: telescopio_cassegrain
     tipo: haz_libre
@@ -144,21 +261,6 @@ opticas_espacio_libre:
       ahi que reciba el mismo punto de adelanto; ver
       'integracion.optica.punto_de_adelanto' en data/components.yaml.
 
-  - id: e04
-    desde: dicroico_d1
-    hasta: dicroico_d2
-    tipo: haz_libre
-    longitud_onda_nm: 976
-    diametro_haz_mm: {valor: null, estado: TBD, falta: Diametro del haz de beacon, pedir_a: Equipo de PAT de ACSAR}
-    keep_out: true
-    bidireccional: true
-    bicolor: true
-    nota: >-
-      Brazo compartido de los dos beacons, en reflexion de D1. BIDIRECCIONAL Y
-      BICOLOR: por este mismo tubo suben los 976 nm del beacon de subida hacia
-      D2 y bajan los 1064 nm del de bajada hacia D1 (e08). El keep-out se
-      declara aqui una sola vez.
-
   - id: e05
     desde: telescopio_cassegrain
     hasta: EXTERIOR
@@ -170,6 +272,21 @@ opticas_espacio_libre:
       cuantico y el beacon de bajada, y entra el de subida.
 
   - id: e06
+    desde: dicroico_d1
+    hasta: dicroico_d2
+    tipo: haz_libre
+    longitud_onda_nm: 976
+    diametro_haz_mm: {valor: null, estado: TBD, falta: Diametro del haz de beacon, pedir_a: Equipo de PAT de ACSAR}
+    keep_out: true
+    bidireccional: true
+    bicolor: true
+    nota: >-
+      Brazo compartido de los dos beacons, en reflexion de D1. BIDIRECCIONAL Y
+      BICOLOR: por este mismo tubo suben los 976 nm del beacon de subida hacia
+      D2 y bajan los 1064 nm del de bajada hacia D1 (e09). El keep-out se
+      declara aqui una sola vez.
+
+  - id: e07
     desde: dicroico_d2
     hasta: camara_beacon
     tipo: haz_libre
@@ -182,7 +299,7 @@ opticas_espacio_libre:
       DENTRO de la reserva de 'camara_beacon', no como pieza suelta: modelarlo
       aparte anade una pieza mas a la fila del brazo, que ya no cabe.
 
-  - id: e07
+  - id: e08
     desde: laser_beacon_bajada
     hasta: dicroico_d2
     tipo: haz_libre
@@ -193,22 +310,22 @@ opticas_espacio_libre:
       Inyeccion LATERAL en D2 segun X. Es el unico tramo del beacon de bajada
       que no comparte camino con nada.
 
-  - id: e08
+  - id: e09
     desde: dicroico_d2
     hasta: dicroico_d1
     tipo: haz_libre
     longitud_onda_nm: 1064
     diametro_haz_mm: {valor: null, estado: TBD, falta: Diametro del haz de beacon, pedir_a: Equipo de PAT de ACSAR}
     keep_out: false
-    keep_out_compartido_con: e04
+    keep_out_compartido_con: e06
     nota: >-
       D2 refleja el beacon de bajada hacia -Y, de vuelta a D1, que lo refleja
       otra vez hacia el FSM y el telescopio. RECORRE EL MISMO TRAMO FISICO QUE
-      e04 EN SENTIDO CONTRARIO, asi que no lleva keep-out propio: comparte el
-      de e04. Un segundo volumen sobre el mismo tubo no reserva nada nuevo y si
+      e06 EN SENTIDO CONTRARIO, asi que no lleva keep-out propio: comparte el
+      de e06. Un segundo volumen sobre el mismo tubo no reserva nada nuevo y si
       genera una invasion de keep-out que no significa nada.
 
-  - id: e09
+  - id: e10
     desde: dicroico_d1
     hasta: trampa_luz_d1
     tipo: haz_libre
@@ -221,7 +338,7 @@ opticas_espacio_libre:
       La trampa es OBLIGATORIA: sin ella esa luz se queda rebotando en el banco
       hasta llegar a la camara de seguimiento o de vuelta al canal cuantico.
 
-  - id: e10
+  - id: e11
     desde: dicroico_d2
     hasta: fotodiodo_monitor_beacon
     tipo: haz_libre
@@ -311,6 +428,48 @@ datos:
     tipo: bus_datos
     bidireccional: true
     nota: Actitud para el traspaso de apuntado grueso a fino.
+
+  # Los dos fotodiodos del acoplador 2x2. Se declaran para que ninguno de los
+  # dos puertos de derivacion se quede sin destino -- el mismo criterio que los
+  # cuartos puertos de los divisores --, y SOLO eso: el cableado detallado es
+  # de la fase de electronica y aqui no se inventa.
+  - id: m01
+    desde: acoplador_monitor
+    hasta: pcb2_drivers_opticos
+    tipo: senal_fotodiodo
+    bidireccional: false
+    nota: >-
+      Fotodiodo de MONITORIZACION (derivacion hacia delante). Cierra el lazo de
+      bias del MXER -- el punto de trabajo de su curva en cos^2, que deriva con
+      la temperatura y con la carga del sustrato -- y verifica las razones de
+      intensidad decoy/senal.
+    encaminamiento:
+      valor: null
+      estado: TBD
+      falta: >-
+        Por donde va el cable del fotodiodo, y si el detector va en la bandeja
+        con su transimpedancia o montado directamente en PCB-2. Lo segundo
+        cambia la envolvente de 'acoplador_monitor'.
+      pedir_a: Equipo de electronica de ACSAR
+
+  - id: m02
+    desde: acoplador_monitor
+    hasta: pcb2_drivers_opticos
+    tipo: senal_fotodiodo
+    bidireccional: false
+    nota: >-
+      Fotodiodo VIGIA DE TROYA (derivacion hacia atras). Ve la luz que entra
+      DESDE EL CANAL y que ha recorrido el codificador y el VOA en sentido
+      inverso. Es el unico punto de la cadena donde se puede detectar un ataque
+      de caballo de Troya sin tocar el haz util.
+    encaminamiento:
+      valor: null
+      estado: TBD
+      falta: >-
+        Por donde va el cable, y sobre todo QUE UMBRAL Y QUE CADENCIA de
+        lectura hacen falta para que esto sirva de contramedida y no solo de
+        telemetria. Eso es analisis de seguridad, no electronica.
+      pedir_a: Equipo de electronica / de payload de ACSAR
 
 # ---------------------------------------------------------------------
 # 5. POTENCIA

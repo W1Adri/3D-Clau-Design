@@ -312,10 +312,10 @@ def informe_interferencias(
     ]
     if blandos:
         lineas += [
-            "Lo que estas filas estan diciendo, en una frase: **la bandeja de "
+            "Lo que estas filas estan diciendo, en una frase: **la cadena de "
             "fibra, tal y como esta repartida, no respeta un radio de "
-            "curvatura de 30 mm**, y el colimador no tiene por donde sacar su "
-            "latiguillo. Las dos cosas se deciden con el mismo dato.",
+            "curvatura de 30 mm**. Todas salen del mismo dato que falta, y "
+            "ninguna es un error del reparto.",
             "",
         ]
     lineas += _tabla(

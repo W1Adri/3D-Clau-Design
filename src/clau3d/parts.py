@@ -172,6 +172,67 @@ def step_disponible(componente: Componente) -> bool:
     return fuente_step(componente) is not None
 
 
+# Direcciones de las seis caras, en ejes locales. Viven aqui, y no en el
+# generador, porque el generador coloca por el eje de fibra y los chequeos
+# comprueban donde acabo ese eje: si cada uno lo calculara por su cuenta, el
+# chequeo podria dejar de hablar de lo que el generador coloco sin que nadie
+# se enterara.
+VECTOR_CARA = {
+    "+X": (1.0, 0.0, 0.0), "-X": (-1.0, 0.0, 0.0),
+    "+Y": (0.0, 1.0, 0.0), "-Y": (0.0, -1.0, 0.0),
+    "+Z": (0.0, 0.0, 1.0), "-Z": (0.0, 0.0, -1.0),
+}
+
+
+def gira_vector(v, rotacion):
+    """Gira un vector por los mismos giros, y en el mismo orden, que una pieza."""
+    import math as _m
+
+    x, y, z = v
+    gx, gy, gz = (_m.radians(a) for a in rotacion)
+    y, z = y * _m.cos(gx) - z * _m.sin(gx), y * _m.sin(gx) + z * _m.cos(gx)
+    z, x = z * _m.cos(gy) - x * _m.sin(gy), z * _m.sin(gy) + x * _m.cos(gy)
+    x, y = x * _m.cos(gz) - y * _m.sin(gz), x * _m.sin(gz) + y * _m.cos(gz)
+    return (x, y, z)
+
+
+def eje_de_fibra_local(componente) -> tuple[float, float, float] | None:
+    """Desplazamiento del eje de fibra respecto al CENTRO del cuerpo.
+
+    El eje optico de un modulador no pasa por el centro de su envolvente: pasa
+    a ``altura_eje_fibra`` de la cara con la que se atornilla. En el MXER son
+    4.8 mm sobre un cuerpo de 9.7, o sea 0.05 mm por debajo del centro. Es
+    poco, y es justo la diferencia entre colocar la pieza por su caja y
+    colocarla por su eje. Lo que tiene que quedar coaxial con el colimador es
+    el EJE.
+
+    Devuelve None si la pieza no declara la cota: entonces no hay eje que
+    alinear y lo unico que se sabe es donde esta el cuerpo.
+    """
+    altura = componente.extras.get("altura_eje_fibra")
+    if altura is None or altura.es_tbd or componente.montaje is None:
+        return None
+    if componente.montaje.cara is None:
+        return None
+    valor = altura.escalar()
+    cuerpo = componente.dimensiones.como_vector()
+    if valor is None or cuerpo is None:
+        return None
+    normal = VECTOR_CARA[componente.montaje.cara]
+    eje = max(range(3), key=lambda i: abs(normal[i]))
+    # La cota se mide desde la cara de montaje HACIA DENTRO de la pieza.
+    signo = -1.0 if normal[eje] > 0 else 1.0
+    salida = [0.0, 0.0, 0.0]
+    salida[eje] = signo * (valor - cuerpo[eje] / 2)
+    return (salida[0], salida[1], salida[2])
+
+
+def eje_de_fibra_en_mundo(componente, rotacion):
+    """``eje_de_fibra_local`` ya girado por la rotacion de la colocacion."""
+    local = eje_de_fibra_local(componente)
+    return None if local is None else gira_vector(local, rotacion)
+
+
 def caja_de_solidos(forma: Shape, origen: str = "solido") -> Caja:
     """Caja envolvente de un solido o compound, calculada solido a solido.
 

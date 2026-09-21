@@ -10,15 +10,29 @@ def test_ninguna_conexion_apunta_a_un_componente_inexistente(catalogo, layout, p
     assert fallos == [], "\n".join(f"{r.id}: {r.mensaje}" for r in fallos)
 
 
-def test_la_cadena_de_fibra_esta_completa(catalogo):
-    """El camino laser -> ... -> colimador tiene que estar encadenado."""
+def test_la_cadena_de_fibra_esta_encadenada(catalogo):
+    """Cada tramo empieza donde acaba el anterior, del laser al colimador.
+
+    Solo eso: que este ENCADENADA. Que este en el ORDEN CORRECTO es otra cosa,
+    y la comprueba 'orden_cadena_fibra' contra 'meta.restricciones_orden' --
+    ver tests/test_cadena_optica.py. Fijar aqui una lista a mano es lo que hubo
+    hasta el 2026-09-21, y lo que hacia era CONGELAR el orden equivocado: la
+    lista decia que el aislador iba detras del codificador de polarizacion, que
+    es donde borra la codificacion entera, y el test pasaba.
+    """
     tramos = catalogo.conexiones["opticas_fibra"]
-    esperado = [
-        "laser_dfb_1550", "mod_intensidad_mxer_ln_10", "mod_fase_mpz_ln_10",
-        "voa", "aislador", "filtro_espectral", "acoplador_monitor", "colimador",
-    ]
-    cadena = [tramos[0]["desde"]] + [t["hasta"] for t in tramos]
-    assert cadena == esperado
+    for anterior, siguiente in zip(tramos, tramos[1:]):
+        assert anterior["hasta"] == siguiente["desde"], (anterior, siguiente)
+    assert tramos[0]["desde"] == "laser_dfb_1550"
+    assert tramos[-1]["hasta"] == "colimador"
+
+
+def test_la_cadena_de_fibra_cumple_las_restricciones_declaradas(catalogo):
+    """El orden, derivado de los datos y no de una lista escrita aqui."""
+    from clau3d.analysis import fit
+
+    chequeo = fit.chequeo_orden_cadena_fibra(catalogo)
+    assert chequeo.estado == fit.OK, chequeo.mensaje
 
 
 def test_el_camino_en_espacio_libre_llega_al_exterior(catalogo):
@@ -26,8 +40,15 @@ def test_el_camino_en_espacio_libre_llega_al_exterior(catalogo):
     assert any(t["hasta"] == "EXTERIOR" for t in tramos)
     # El brazo de los beacons y sus dos dicroicos estan en
     # tests/test_brazo_beacon.py, que es donde se comprueba entero.
+    # El canal cuantico sale del colimador segun -Z y un espejo plano lo dobla
+    # hacia la linea de D1: el colimador ya no apunta a D1 directamente.
     assert any(
-        t["desde"] == "colimador" and t["hasta"] == "dicroico_d1" for t in tramos
+        t["desde"] == "colimador" and t["hasta"] == "espejo_plegado_cuantico"
+        for t in tramos
+    )
+    assert any(
+        t["desde"] == "espejo_plegado_cuantico" and t["hasta"] == "dicroico_d1"
+        for t in tramos
     )
 
 
