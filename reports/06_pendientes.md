@@ -5,9 +5,9 @@ No editar a mano: los numeros salen de `data/components.yaml`.
 
 - Mision: CLAU - CubeSat Laser per a Aplicacions Ultrasegures
 - Norma: CubeSat Design Specification Rev. 14.1, The CubeSat Program, Cal Poly SLO
-- Estado del layout: **confirmada** (26 piezas colocadas)
+- Estado del layout: **confirmada** (28 piezas colocadas)
 
-Total de huecos abiertos: **106**, de los cuales **45** son TBD sin ninguna aproximacion y **61** son SUPUESTOS: numeros que se ha inventado este repositorio para poder dibujar y colocar la pieza.
+Total de huecos abiertos: **119**, de los cuales **51** son TBD sin ninguna aproximacion y **68** son SUPUESTOS: numeros que se ha inventado este repositorio para poder dibujar y colocar la pieza.
 
 > **Un supuesto no es un dato.** No suma en los presupuestos de masa ni de potencia, se dibuja en gris y aparece aqui hasta que alguien lo sustituya por una cifra con fuente. La lista de abajo es, literalmente, lo que hay que preguntar.
 
@@ -35,6 +35,12 @@ Total de huecos abiertos: **106**, de los cuales **45** son TBD sin ninguna apro
 | propulsion | propulsion.dimensiones | TBD | - | Modelo de propulsor y sus dimensiones |
 | propulsion | propulsion.masa | TBD | - | Masa del propulsor elegido |
 
+## ACSAR (mecanica y optica) (1)
+
+| componente | magnitud | estado | valor modelado | que falta |
+|---|---|---|---|---|
+| integracion | integracion.optica.geometria_del_brazo_de_beacons | TBD | - | DECIDIR COMO CABE EL BRAZO. Con los dos beacons compartiendo brazo, la fila D1/2 + D2 + camara pide 54.5 mm desde el centro de D1 y solo hay 47.7 mm hasta la pared del banco: FALTAN 6.8 mm con las envolventes desnudas y 16.8 mm con holguras de montaje, y por eso 'camara_beacon' no esta colocada en data/layout.yaml. Ya esta aplicada la unica salida que no le cuesta volumen a nadie (bajar la reserva de la camara de 30 a 20 mm). Quedan dos, y las dos se pagan: (1) PLEGAR EL BRAZO HACIA -Z con un espejo de doblado. Da unos 27.5 mm mas -- la mitad de los 55 mm de banco en Z -- a costa de una superficie reflectante adicional en el camino del beacon y de una pieza mas que alinear. (2) ALARGAR EL BANCO, que hoy mide 55 mm en Z. Se paga con la bandeja de fibra o con 'telescopio_cassegrain.longitud_reservada', exactamente igual que la salida de la linea en X (CLAUDE.md 3.7). Lo que NO es una salida es seguir bajando reservas hasta que el chequeo pase: las del brazo ya son todas cotas superiores. |
+
 ## Aperture Optical Sciences (2)
 
 | componente | magnitud | estado | valor modelado | que falta |
@@ -42,20 +48,24 @@ Total de huecos abiertos: **106**, de los cuales **45** son TBD sin ninguna apro
 | telescopio_cassegrain | telescopio_cassegrain.masa | TBD | - | Masa |
 | telescopio_cassegrain | telescopio_cassegrain.longitud_optica | TBD | - | Longitud del tubo. Interesa distancia focal larga; se admite acortar. |
 
-## Equipo de PAT / de mision de ACSAR (1)
+## Equipo de PAT / de mision de ACSAR (2)
 
 | componente | magnitud | estado | valor modelado | que falta |
 |---|---|---|---|---|
 | integracion | integracion.optica.punto_de_adelanto | supuesto | `50.7` | Punto de adelanto maximo del enlace, del analisis de mision (orbita y geometria de los pases) |
+| integracion | integracion.optica.potencia_beacon_bajada | supuesto | `100.0` | Potencia optica de bajada del presupuesto de enlace (divergencia, distancia, sensibilidad del receptor de la estacion) |
 
-## Equipo de PAT de ACSAR (4)
+## Equipo de PAT de ACSAR (7)
 
 | componente | magnitud | estado | valor modelado | que falta |
 |---|---|---|---|---|
-| camara_beacon | camara_beacon.dimensiones | supuesto | `[30.0, 30.0, 30.0]` | Modelo de sensor, distancia focal del objetivo y campo de vision exigido por el lazo de apuntado |
+| integracion | integracion.optica.aislamiento_camara_a_1064 | TBD | - | Aislamiento total medido del beacon de bajada (1064 nm, 100 mW) en el sensor de la camara de seguimiento: la suma de la reflexion de D2, el filtro de banda estrecha de 976 nm y la ceguera del silicio a 1064. |
+| camara_beacon | camara_beacon.dimensiones | supuesto | `[20.0, 20.0, 20.0]` | Modelo de sensor, distancia focal del objetivo, campo de vision exigido por el lazo de apuntado y espesor del filtro de banda estrecha de 976 nm |
 | camara_beacon | camara_beacon.masa | TBD | - | Masa del sensor elegido |
-| laser_beacon_bajada | laser_beacon_bajada.dimensiones | supuesto | `[25.0, 30.0, 25.0]` | Longitud de onda, potencia optica y envolvente del modulo elegido |
+| laser_beacon_bajada | laser_beacon_bajada.dimensiones | supuesto | `[30.0, 25.0, 25.0]` | Modelo del laser elegido, potencia optica real y su disipador |
 | laser_beacon_bajada | laser_beacon_bajada.masa | TBD | - | Masa del laser de beacon elegido |
+| fotodiodo_monitor_beacon | fotodiodo_monitor_beacon.dimensiones | supuesto | `[12.0, 12.0, 12.0]` | Modelo de fotodiodo, encapsulado y electronica de acondicionamiento |
+| fotodiodo_monitor_beacon | fotodiodo_monitor_beacon.masa | TBD | - | Masa del fotodiodo con su soporte y su acondicionamiento |
 
 ## Equipo de electronica de ACSAR (12)
 
@@ -91,11 +101,13 @@ Total de huecos abiertos: **106**, de los cuales **45** son TBD sin ninguna apro
 | telescopio_cassegrain | telescopio_cassegrain.optica.espesor_mamparo | supuesto | `3.0` | Espesor real de los mamparos |
 | telescopio_cassegrain | telescopio_cassegrain.optica.espesor_vane | supuesto | `0.8` | Espesor real de los vanes |
 
-## Equipo de optica de ACSAR (16)
+## Equipo de optica de ACSAR (24)
 
 | componente | magnitud | estado | valor modelado | que falta |
 |---|---|---|---|---|
 | integracion | integracion.optica.diametro_haz_modelado | supuesto | `10.0` | Diametro de haz de cada tramo (e01 a e05 en data/connections.yaml) y el semiangulo del cono de la apertura |
+| integracion | integracion.optica.borde_dicroico_d1 | supuesto | `1300.0` | Longitud de onda de corte, anchura de la transicion y curvas de transmision y reflexion del divisor elegido |
+| integracion | integracion.optica.borde_dicroico_d2 | supuesto | `1020.0` | Longitud de onda de corte, anchura de la transicion y curvas de transmision y reflexion del divisor elegido |
 | telescopio_cassegrain | telescopio_cassegrain.optica.diametro_haz_comprimido | TBD | - | Diametro del haz colimado a la salida del telescopio, que es el mismo que entra por la brida trasera desde el FSM. ES EL PARAMETRO QUE LO ACOPLA TODO: fija la magnificacion (M = apertura_libre / este diametro), y con ella la focal del secundario, la separacion entre vertices y el diametro del secundario; y decide si el FSM elegido vale, porque un haz de d mm sobre un espejo a 45 grados deja una huella de d x d*raiz(2). Es el mismo hueco que 'diametro_haz_mm' en e01..e05 de data/connections.yaml. |
 | telescopio_cassegrain | telescopio_cassegrain.optica.margen_secundario | supuesto | `1.4` | Sobredimensionado real del secundario (campo de vista y alineacion) |
 | telescopio_cassegrain | telescopio_cassegrain.optica.estabilidad_despace_primario_secundario | TBD | - | Estabilidad exigida a la separacion entre el vertice del primario y el del secundario a lo largo de la orbita, en micras. La sensibilidad a desenfoque de un Cassegrain escala con m^2 (1+m), o sea con el cuadrado de la magnificacion del secundario, asi que unas pocas micras de deriva termica entre los dos espejos se comen el presupuesto de frente de onda entero. ES EL REQUISITO QUE DIMENSIONA el tubo metrico (material, seccion, si hace falta invar o CFRP) y la arana, y hoy no existe: el barrilete y los vanes de este modelo estan dibujados con espesores supuestos, no con una rigidez calculada. |
@@ -107,8 +119,14 @@ Total de huecos abiertos: **106**, de los cuales **45** son TBD sin ninguna apro
 | telescopio_cassegrain | telescopio_cassegrain.optica.angulo_exclusion_solar_modelado | supuesto | `30.0` | El angulo de verdad, que es 'angulo_exclusion_solar' |
 | fsm | fsm.eleccion_de_tecnologia | TBD | - | Elegir entre MEMS (Mirrorcle, herencia CLICK-A, espejo de 5 mm) y piezo (PI S-331). Se modela el MEMS porque es el que tiene cota publicada clara; eso NO es la eleccion. La alternativa piezo esta en el catalogo como 'fsm_piezo_pi_s331'. |
 | fsm | fsm.soporte | TBD | - | Soporte de vuelo del MEMS: el encapsulado DIP24 no se atornilla solo a un banco optico. Es lo que decide el volumen real de esta pieza. |
-| dicroico | dicroico.dimensiones | supuesto | `[23.0, 23.0, 23.0]` | Diametro del haz colimado (del que sale el tamano del sustrato), longitudes de onda de corte y envolvente del soporte |
-| dicroico | dicroico.masa | TBD | - | Masa del dicroico y su soporte |
+| dicroico_d1 | dicroico_d1.dimensiones | supuesto | `[23.0, 23.0, 23.0]` | Diametro del haz colimado (del que sale el tamano del sustrato), longitudes de onda de corte y envolvente del soporte |
+| dicroico_d1 | dicroico_d1.masa | TBD | - | Masa del divisor y su soporte |
+| dicroico_d2 | dicroico_d2.dimensiones | supuesto | `[23.0, 23.0, 23.0]` | Diametro de los dos haces de beacon, longitud de onda de corte y envolvente del soporte |
+| dicroico_d2 | dicroico_d2.masa | TBD | - | Masa del divisor y su soporte |
+| trampa_luz_d1 | trampa_luz_d1.dimensiones | supuesto | `[15.0, 15.0, 15.0]` | Tipo de absorbedor, su envolvente y el rechazo exigido |
+| trampa_luz_d1 | trampa_luz_d1.masa | TBD | - | Masa de la trampa elegida |
+| trampa_luz_d2 | trampa_luz_d2.dimensiones | supuesto | `[15.0, 15.0, 15.0]` | Tipo de absorbedor, su envolvente y el rechazo exigido |
+| trampa_luz_d2 | trampa_luz_d2.masa | TBD | - | Masa de la trampa elegida |
 | colimador | colimador.dimensiones | supuesto | `[28.0, 12.0, 12.0]` | Diametro del haz colimado y modelo de colimador. Es el mismo dato que bloquea los keep-outs del camino optico. |
 | colimador | colimador.masa | TBD | - | Masa del colimador elegido |
 
@@ -227,7 +245,7 @@ Total de huecos abiertos: **106**, de los cuales **45** son TBD sin ninguna apro
 |---|---|---|---|---|
 | fsm_piezo_pi_s331 | fsm_piezo_pi_s331.dimensiones | supuesto | `[50.0, 50.0, 22.0]` | Cotas exteriores del S-331 (plano acotado o STEP) |
 
-## Solo los supuestos, para sustituirlos (61)
+## Solo los supuestos, para sustituirlos (68)
 
 Cada fila es un numero que hoy sostiene el modelo sin sostenerse en nada.
 
@@ -238,6 +256,9 @@ Cada fila es un numero que hoy sostiene el modelo sin sostenerse en nada.
 | integracion | integracion.coaxial.radio_curvatura_modelado | `25.0` | Radio minimo de curvatura del coaxial elegido. Es el mismo hueco que 'cables_rf_moduladores.radio_minimo_curvatura'. | Equipo de electronica de ACSAR |
 | integracion | integracion.optica.diametro_haz_modelado | `10.0` | Diametro de haz de cada tramo (e01 a e05 en data/connections.yaml) y el semiangulo del cono de la apertura | Equipo de optica de ACSAR |
 | integracion | integracion.optica.punto_de_adelanto | `50.7` | Punto de adelanto maximo del enlace, del analisis de mision (orbita y geometria de los pases) | Equipo de PAT / de mision de ACSAR |
+| integracion | integracion.optica.potencia_beacon_bajada | `100.0` | Potencia optica de bajada del presupuesto de enlace (divergencia, distancia, sensibilidad del receptor de la estacion) | Equipo de PAT / de mision de ACSAR |
+| integracion | integracion.optica.borde_dicroico_d1 | `1300.0` | Longitud de onda de corte, anchura de la transicion y curvas de transmision y reflexion del divisor elegido | Equipo de optica de ACSAR |
+| integracion | integracion.optica.borde_dicroico_d2 | `1020.0` | Longitud de onda de corte, anchura de la transicion y curvas de transmision y reflexion del divisor elegido | Equipo de optica de ACSAR |
 | antena_quasar_wsant | antena_quasar_wsant.dimensiones | `[82.0, 82.0, 10.0]` | Dimensiones reales, ganancia, diagrama de radiacion y cara de montaje | AAC Clyde Space |
 | paneles_photon_side | paneles_photon_side.dimensiones | `[209.3, 3.5, 349.0]` | Contorno real de cada tamano de PHOTON-SIDE (1U/2U/3U/6U) y cual de ellos se monta en cada cara | AAC Clyde Space / Equipo de potencia de ACSAR |
 | telescopio_cassegrain | telescopio_cassegrain.dimensiones | `[95.4, 95.4, 200.0]` | Diametro exterior del barrilete y longitud optica real. YA EXISTE un concepto en formato nativo SolidWorks (Telescopio_concepto.SLDPRT, entrega "Preliminar viability model" del 2026-09-20), ilegible. Hace falta reexportarlo a STEP AP214 o AP242 y dejarlo en la ruta de 'step_esperado'. Ver cad/vendor/MANIFEST.yaml, seccion 'sin_convertir'. | Oscar (ACSAR) / Aperture Optical Sciences |
@@ -274,9 +295,13 @@ Cada fila es un numero que hoy sostiene el modelo sin sostenerse en nada.
 | telescopio_cassegrain | telescopio_cassegrain.optica.espesor_diafragma | `1.0` | Espesor real de los diafragmas | Equipo de optica de ACSAR |
 | telescopio_cassegrain | telescopio_cassegrain.optica.angulo_exclusion_solar_modelado | `30.0` | El angulo de verdad, que es 'angulo_exclusion_solar' | Equipo de optica de ACSAR |
 | fsm_piezo_pi_s331 | fsm_piezo_pi_s331.dimensiones | `[50.0, 50.0, 22.0]` | Cotas exteriores del S-331 (plano acotado o STEP) | Physik Instrumente |
-| dicroico | dicroico.dimensiones | `[23.0, 23.0, 23.0]` | Diametro del haz colimado (del que sale el tamano del sustrato), longitudes de onda de corte y envolvente del soporte | Equipo de optica de ACSAR |
-| camara_beacon | camara_beacon.dimensiones | `[30.0, 30.0, 30.0]` | Modelo de sensor, distancia focal del objetivo y campo de vision exigido por el lazo de apuntado | Equipo de PAT de ACSAR |
-| laser_beacon_bajada | laser_beacon_bajada.dimensiones | `[25.0, 30.0, 25.0]` | Longitud de onda, potencia optica y envolvente del modulo elegido | Equipo de PAT de ACSAR |
+| dicroico_d1 | dicroico_d1.dimensiones | `[23.0, 23.0, 23.0]` | Diametro del haz colimado (del que sale el tamano del sustrato), longitudes de onda de corte y envolvente del soporte | Equipo de optica de ACSAR |
+| dicroico_d2 | dicroico_d2.dimensiones | `[23.0, 23.0, 23.0]` | Diametro de los dos haces de beacon, longitud de onda de corte y envolvente del soporte | Equipo de optica de ACSAR |
+| camara_beacon | camara_beacon.dimensiones | `[20.0, 20.0, 20.0]` | Modelo de sensor, distancia focal del objetivo, campo de vision exigido por el lazo de apuntado y espesor del filtro de banda estrecha de 976 nm | Equipo de PAT de ACSAR |
+| laser_beacon_bajada | laser_beacon_bajada.dimensiones | `[30.0, 25.0, 25.0]` | Modelo del laser elegido, potencia optica real y su disipador | Equipo de PAT de ACSAR |
+| fotodiodo_monitor_beacon | fotodiodo_monitor_beacon.dimensiones | `[12.0, 12.0, 12.0]` | Modelo de fotodiodo, encapsulado y electronica de acondicionamiento | Equipo de PAT de ACSAR |
+| trampa_luz_d1 | trampa_luz_d1.dimensiones | `[15.0, 15.0, 15.0]` | Tipo de absorbedor, su envolvente y el rechazo exigido | Equipo de optica de ACSAR |
+| trampa_luz_d2 | trampa_luz_d2.dimensiones | `[15.0, 15.0, 15.0]` | Tipo de absorbedor, su envolvente y el rechazo exigido | Equipo de optica de ACSAR |
 | colimador | colimador.dimensiones | `[28.0, 12.0, 12.0]` | Diametro del haz colimado y modelo de colimador. Es el mismo dato que bloquea los keep-outs del camino optico. | Equipo de optica de ACSAR |
 | bandeja_optica | bandeja_optica.dimensiones | `[117.7, 3.0, 102.4]` | Material, espesor y patron de taladros de la placa, del analisis estructural y termico | Equipo de estructura de ACSAR |
 | laser_dfb_1550 | laser_dfb_1550.pines_btf14.dimensiones | `[30.0, 15.3, 4.0]` | Cotas de la fila de pines del modulo elegido | Gooch & Housego |

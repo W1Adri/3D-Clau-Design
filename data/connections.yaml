@@ -12,7 +12,7 @@
 # =====================================================================
 
 meta:
-  revision: 2026-09-19
+  revision: 2026-09-20
   nota: >-
     El orden de cada cadena sigue el camino fisico de la senal. Los campos
     'longitud_mm' se rellenan automaticamente desde el ensamblaje una vez
@@ -89,13 +89,30 @@ opticas_fibra:
 # ---------------------------------------------------------------------
 # 2. CAMINO OPTICO EN ESPACIO LIBRE
 # ---------------------------------------------------------------------
-# colimador -> dicroico -> FSM -> telescopio   (canal cuantico, bajada)
-# dicroico  -> camara                          (beacon de subida, reflexion)
+# Arquitectura de DOS DICROICOS (decision de ACSAR, 2026-09-20). Los dos
+# beacons comparten UN SOLO brazo lateral, el que refleja D1, y dentro de ese
+# brazo los separa D2:
+#
+#   canal cuantico  colimador --e01--> D1 --e02--> FSM --e03--> telescopio --e05--> EXTERIOR
+#   beacon subida               D1 --e04--> D2 --e06--> camara          (976 nm)
+#   beacon bajada     laser --e07--> D2 --e08--> D1 -> FSM              (1064 nm)
+#   fugas                       D1 --e09--> trampa_luz_d1               (1550 en reflexion)
+#                               D2 --e10--> fotodiodo_monitor_beacon    (beacon en transmision)
+#
+# Los cuatro puertos de cada divisor tienen destino declarado, y hay un test
+# que lo comprueba: un puerto sin destino no desaparece porque no se dibuje.
+#
+# e04 y e08 son EL MISMO TRAMO FISICO recorrido en sentidos contrarios y con
+# colores distintos. El keep-out se declara UNA VEZ, en e04, y e08 lo comparte
+# con 'keep_out_compartido_con': duplicar el volumen contaria dos veces el
+# mismo tubo y ensuciaria el informe de interferencias con una invasion que no
+# existe.
 opticas_espacio_libre:
   - id: e01
     desde: colimador
-    hasta: dicroico
+    hasta: dicroico_d1
     tipo: haz_libre
+    longitud_onda_nm: 1550
     diametro_haz_mm:
       valor: null
       estado: TBD
@@ -104,27 +121,43 @@ opticas_espacio_libre:
     keep_out: true
 
   - id: e02
-    desde: dicroico
+    desde: dicroico_d1
     hasta: fsm
     tipo: haz_libre
+    longitud_onda_nm: 1550
     diametro_haz_mm: {valor: null, estado: TBD, falta: Diametro del haz, pedir_a: Equipo de optica de ACSAR}
     keep_out: true
-    nota: El canal cuantico ATRAVIESA el dicroico; el beacon de subida se refleja.
+    nota: >-
+      El canal cuantico ATRAVIESA D1 (paso largo, borde ~1300 nm); los dos
+      beacons se reflejan hacia el brazo lateral.
 
   - id: e03
     desde: fsm
     hasta: telescopio_cassegrain
     tipo: haz_libre
+    longitud_onda_nm: 1550
     diametro_haz_mm: {valor: null, estado: TBD, falta: Diametro del haz, pedir_a: Equipo de optica de ACSAR}
     keep_out: true
+    nota: >-
+      Tramo COMPARTIDO: por aqui pasa tambien el beacon de bajada de 1064 nm,
+      en sentido contrario, porque comparte el FSM con el canal cuantico. De
+      ahi que reciba el mismo punto de adelanto; ver
+      'integracion.optica.punto_de_adelanto' en data/components.yaml.
 
   - id: e04
-    desde: dicroico
-    hasta: camara_beacon
+    desde: dicroico_d1
+    hasta: dicroico_d2
     tipo: haz_libre
+    longitud_onda_nm: 976
     diametro_haz_mm: {valor: null, estado: TBD, falta: Diametro del haz de beacon, pedir_a: Equipo de PAT de ACSAR}
     keep_out: true
-    nota: Brazo de reflexion del dicroico. Mide el error de apuntado.
+    bidireccional: true
+    bicolor: true
+    nota: >-
+      Brazo compartido de los dos beacons, en reflexion de D1. BIDIRECCIONAL Y
+      BICOLOR: por este mismo tubo suben los 976 nm del beacon de subida hacia
+      D2 y bajan los 1064 nm del de bajada hacia D1 (e08). El keep-out se
+      declara aqui una sola vez.
 
   - id: e05
     desde: telescopio_cassegrain
@@ -133,7 +166,74 @@ opticas_espacio_libre:
     keep_out: true
     nota: >-
       La apertura debe tener vision despejada hacia fuera del 6U. Ningun panel,
-      antena ni deployable puede invadir este cono.
+      antena ni deployable puede invadir este cono. Por ella salen el canal
+      cuantico y el beacon de bajada, y entra el de subida.
+
+  - id: e06
+    desde: dicroico_d2
+    hasta: camara_beacon
+    tipo: haz_libre
+    longitud_onda_nm: 976
+    diametro_haz_mm: {valor: null, estado: TBD, falta: Diametro del haz de beacon, pedir_a: Equipo de PAT de ACSAR}
+    keep_out: true
+    nota: >-
+      El beacon de subida ATRAVIESA D2 (paso corto, borde ~1020 nm) y sigue en
+      linea recta hasta la camara. El filtro de banda estrecha de 976 nm va
+      DENTRO de la reserva de 'camara_beacon', no como pieza suelta: modelarlo
+      aparte anade una pieza mas a la fila del brazo, que ya no cabe.
+
+  - id: e07
+    desde: laser_beacon_bajada
+    hasta: dicroico_d2
+    tipo: haz_libre
+    longitud_onda_nm: 1064
+    diametro_haz_mm: {valor: null, estado: TBD, falta: Diametro del haz de beacon, pedir_a: Equipo de PAT de ACSAR}
+    keep_out: true
+    nota: >-
+      Inyeccion LATERAL en D2 segun X. Es el unico tramo del beacon de bajada
+      que no comparte camino con nada.
+
+  - id: e08
+    desde: dicroico_d2
+    hasta: dicroico_d1
+    tipo: haz_libre
+    longitud_onda_nm: 1064
+    diametro_haz_mm: {valor: null, estado: TBD, falta: Diametro del haz de beacon, pedir_a: Equipo de PAT de ACSAR}
+    keep_out: false
+    keep_out_compartido_con: e04
+    nota: >-
+      D2 refleja el beacon de bajada hacia -Y, de vuelta a D1, que lo refleja
+      otra vez hacia el FSM y el telescopio. RECORRE EL MISMO TRAMO FISICO QUE
+      e04 EN SENTIDO CONTRARIO, asi que no lleva keep-out propio: comparte el
+      de e04. Un segundo volumen sobre el mismo tubo no reserva nada nuevo y si
+      genera una invasion de keep-out que no significa nada.
+
+  - id: e09
+    desde: dicroico_d1
+    hasta: trampa_luz_d1
+    tipo: haz_libre
+    longitud_onda_nm: 1550
+    diametro_haz_mm: {valor: null, estado: TBD, falta: Diametro del haz colimado, pedir_a: Equipo de optica de ACSAR}
+    keep_out: true
+    nota: >-
+      Cuarto puerto de D1, el opuesto al brazo: la fuga en REFLEXION del 1550.
+      Ningun divisor transmite el 100 %, y lo que no transmite sale por aqui.
+      La trampa es OBLIGATORIA: sin ella esa luz se queda rebotando en el banco
+      hasta llegar a la camara de seguimiento o de vuelta al canal cuantico.
+
+  - id: e10
+    desde: dicroico_d2
+    hasta: fotodiodo_monitor_beacon
+    tipo: haz_libre
+    longitud_onda_nm: 1064
+    diametro_haz_mm: {valor: null, estado: TBD, falta: Diametro del haz de beacon, pedir_a: Equipo de PAT de ACSAR}
+    keep_out: true
+    nota: >-
+      Cuarto puerto de D2, el opuesto al laser: la fuga en TRANSMISION del
+      beacon de bajada. Instrumentarla con un fotodiodo da telemetria de salud
+      del beacon sin tocar el haz util. Si no se instrumenta, ese puerto
+      necesita igualmente una trampa: 'trampa_luz_d2', declarada en el catalogo
+      como alternativa EXCLUYENTE del fotodiodo.
 
 # ---------------------------------------------------------------------
 # 3. RF COAXIAL

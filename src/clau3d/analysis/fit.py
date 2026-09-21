@@ -5,7 +5,7 @@ Un chequeo que no se puede hacer por falta de datos sale como 'no comprobable',
 nunca como correcto.
 
 La excepcion es 'banco_optico', que si necesita el layout: la pregunta que hace
--- si el colimador y el dicroico caben entre el eje del telescopio y la pared --
+-- si el colimador y D1 caben entre el eje del telescopio y la pared --
 solo tiene sentido una vez decidido donde cae ese eje. Se le pasa el layout
 cuando lo hay, y sin el sale como no comprobable, igual que cualquier otro
 chequeo al que le falte un dato.
@@ -303,13 +303,17 @@ def chequeo_configuracion_telescopio(catalogo: Catalogo) -> Chequeo:
         "focal_secundario_mm": o.focal_secundario,
         "separacion_mm": o.separacion,
         "obstruccion_lineal": o.obstruccion_lineal,
-        "perdida_obstruccion_dB_amplitud": o.perdida_obstruccion_db,
+        "perdida_potencia_recogida_dB": o.perdida_potencia_recogida_db,
+        "perdida_intensidad_en_eje_dB": o.perdida_intensidad_en_eje_db,
     }
     obstruccion = (
         f" Obstruccion lineal {o.obstruccion_lineal:.3f} (secundario de "
-        f"{o.diametro_secundario:.1f} mm sobre {o.apertura_libre:.0f} mm), "
-        f"o sea {o.perdida_obstruccion_db:.2f} dB en amplitud de campo "
-        f"({o.perdida_obstruccion_db / 2:.2f} dB en potencia)."
+        f"{o.diametro_secundario:.1f} mm sobre {o.apertura_libre:.0f} mm). "
+        f"Cuesta {o.perdida_potencia_recogida_db:.2f} dB de potencia recogida "
+        f"y {o.perdida_intensidad_en_eje_db:.2f} dB de intensidad en el eje en "
+        f"campo lejano. Son DOS magnitudes distintas, las dos en potencia, y "
+        f"para un enlace optico manda la segunda: lo que llega al receptor es "
+        f"la intensidad en el eje."
     )
     if o.es_afocal:
         return Chequeo(
@@ -892,7 +896,7 @@ def chequeo_banco_optico(catalogo: Catalogo, layout=None) -> Chequeo:
     """Cabe la cadena de espacio libre entre el eje del telescopio y la pared.
 
     El FSM dobla el haz de X a Z, asi que tiene que estar SOBRE el eje optico
-    del telescopio: no se puede mover. Eso deja al colimador y al dicroico en
+    del telescopio: no se puede mover. Eso deja al colimador y a D1 en
     linea con el, hacia +X, y el sitio que tienen es el que va del eje a la
     pared de la columna de payload. Es el punto mas apretado del payload y el
     que no se ve mirando volumenes: sobra hueco en el banco, pero no EN ESA
@@ -923,7 +927,7 @@ def chequeo_banco_optico(catalogo: Catalogo, layout=None) -> Chequeo:
     eje_x = telescopio.caja.centro[0]
     disponible = banco.caja.xmax - eje_x
 
-    piezas = ("fsm", "dicroico", "colimador")
+    piezas = ("fsm", "dicroico_d1", "colimador")
     necesario = 0.0
     sin_envolvente: list[str] = []
     detalle: dict[str, float] = {}
@@ -963,9 +967,35 @@ def chequeo_banco_optico(catalogo: Catalogo, layout=None) -> Chequeo:
         f"El FSM va sobre el eje optico del telescopio (X = {eje_x:+.2f} mm) "
         f"porque es el que dobla el haz de X a Z. Del eje a la pared +X de la "
         f"columna hay {disponible:.1f} mm, y la media anchura del FSM mas el "
-        f"dicroico mas el colimador suman {necesario:.1f} mm, sin contar "
+        f"D1 mas el colimador suman {necesario:.1f} mm, sin contar "
         f"holguras de montaje."
     )
+
+    # La segunda linea en X: los dos puertos laterales de D2, que estan dentro
+    # del mismo banco y se pagan del mismo ancho. Son pequenos, pero contarlos
+    # aparte seria descubrirlos cuando ya no hay donde ponerlos. La rama en Y
+    # del brazo la lleva 'brazo_beacon', que es donde aprieta de verdad.
+    x_d1 = _x_del_dicroico_d1(catalogo, eje_x)
+    ancho_d2 = _ancho_en(catalogo, "dicroico_d2", 0)
+    if x_d1 is not None and ancho_d2 is not None:
+        for etiqueta, cid, hueco in (
+            ("-X", "laser_beacon_bajada", x_d1 - banco.caja.xmin),
+            ("+X", "fotodiodo_monitor_beacon", banco.caja.xmax - x_d1),
+        ):
+            ancho = _ancho_en(catalogo, cid, 0)
+            if ancho is None:
+                continue
+            pide = ancho_d2 / 2 + ancho
+            numeros[f"{cid}_mm"] = ancho
+            numeros[f"margen_{etiqueta}_D2_mm"] = hueco - pide
+            if hueco - pide < margen:
+                margen = hueco - pide
+                numeros["margen_mm"] = margen
+                comun += (
+                    f" La rama {etiqueta} de D2 aprieta mas todavia: "
+                    f"{cid} pide {pide:.1f} mm y tiene {hueco:.1f} mm."
+                )
+
     if margen < 0:
         return Chequeo(
             id="banco_optico", titulo=titulo, estado=FALLA,
@@ -989,6 +1019,233 @@ def chequeo_banco_optico(catalogo: Catalogo, layout=None) -> Chequeo:
         )
     return Chequeo(
         id="banco_optico", titulo=titulo, estado=OK,
+        mensaje=comun + f" Quedan {margen:.1f} mm de margen.",
+        numeros=numeros,
+    )
+
+
+def _ancho_en(catalogo: Catalogo, cid: str, eje: int) -> float | None:
+    """Cota de la envolvente de una pieza segun un eje, o None si no se dibuja."""
+    from .. import parts
+
+    if not catalogo.existe(cid):
+        return None
+    componente = catalogo[cid]
+    if not componente.modelable:
+        return None
+    caja = parts.caja_local(componente)
+    return None if caja is None else caja.dims[eje]
+
+
+def _linea(
+    catalogo: Catalogo, piezas: tuple[str, ...], eje: int
+) -> tuple[float, dict[str, float], list[str]]:
+    """Suma de envolventes de una fila de piezas segun un eje.
+
+    Devuelve (suma, {pieza: ancho}, piezas sin envolvente). SIN HOLGURAS: la
+    misma convencion que 'banco_optico' viene usando desde el principio. Una
+    linea que no cabe ni en su cota desnuda no cabe de ninguna manera, y
+    meterle holguras aqui mezclaria dos discusiones.
+    """
+    suma = 0.0
+    detalle: dict[str, float] = {}
+    sin_envolvente: list[str] = []
+    for cid in piezas:
+        ancho = _ancho_en(catalogo, cid, eje)
+        if ancho is None:
+            sin_envolvente.append(cid)
+            continue
+        detalle[cid] = ancho
+        suma += ancho
+    return suma, detalle, sin_envolvente
+
+
+def _x_del_dicroico_d1(catalogo: Catalogo, eje_x: float) -> float | None:
+    """Donde cae D1 en X, derivado y no escrito.
+
+    D1 esta en la linea del canal cuantico, pegado al FSM, y el FSM esta sobre
+    el eje optico del telescopio porque es el que dobla el haz. Asi que su X es
+    el eje mas la media anchura del FSM A 45 GRADOS mas su propia media
+    anchura, SIN HOLGURAS, que es la misma convencion que usa el resto de
+    'banco_optico'. Se deriva aqui una sola vez para que los dos chequeos que
+    lo necesitan no puedan dejar de coincidir.
+    """
+    from .. import parts
+
+    if not catalogo.existe("fsm") or not catalogo["fsm"].modelable:
+        return None
+    caja = parts.caja_local(catalogo["fsm"])
+    ancho_d1 = _ancho_en(catalogo, "dicroico_d1", 0)
+    if caja is None or ancho_d1 is None:
+        return None
+    return eje_x + math.hypot(caja.dims[0], caja.dims[2]) / 2 + ancho_d1 / 2
+
+
+def chequeo_brazo_beacon(catalogo: Catalogo, layout=None) -> Chequeo:
+    """Cabe el brazo compartido de los dos beacons entre D1 y la pared.
+
+    Desde el 2026-09-20 los dos beacons comparten UN SOLO brazo -- el que
+    refleja D1 -- y dentro de ese brazo los separa D2. Eso es lo que hace que
+    la arquitectura funcione: antes la camara y el laser estaban en lados
+    OPUESTOS de D1 y el laser no tenia camino hacia el FSM. Pero tiene un
+    precio geometrico que hay que mirar de frente: lo que antes eran dos filas
+    de una pieza hacia cada lado ahora es UNA FILA DE TRES hacia un solo lado.
+
+    Ramas que se comprueban, todas ancladas en el centro de D1 o en el de D2:
+
+        +Y    D1/2 + D2 + camara            (subida, en transmision de D2)
+        -Y    D1/2 + trampa_luz_d1          (fuga del 1550 en reflexion de D1)
+        -X    D2/2 + laser de beacon        (bajada, en reflexion de D2)
+        +X    D2/2 + fotodiodo monitor      (fuga del beacon en transmision)
+
+    Las trampas y el fotodiodo son pequenos, pero estan DENTRO del presupuesto
+    del banco: dejarlos fuera de la cuenta seria descubrirlos cuando ya no hay
+    donde ponerlos. Las dos ramas en X las mira ademas 'banco_optico', que es
+    el que lleva la cuenta de la anchura del banco en ese eje; aqui salen por
+    completitud, porque son parte del brazo.
+
+    Si el margen sale negativo, ESO ES EL RESULTADO. Las salidas son plegar el
+    brazo hacia -Z con un espejo de doblado o alargar el banco, y las dos son
+    decisiones de ACSAR. Bajar una reserva hasta que el chequeo pase no es
+    ninguna de las dos.
+    """
+    titulo = "Brazo compartido de los dos beacons, de D1 a la pared del banco"
+    if layout is None:
+        return Chequeo(
+            id="brazo_beacon", titulo=titulo, estado=NO_COMPROBABLE,
+            mensaje="Sin layout no se sabe donde caen las paredes del banco.",
+            falta="Distribucion (data/layout.yaml)",
+        )
+    zonas = {z.id: z for z in layout.zonas}
+    banco = zonas.get("z_payload_banco")
+    telescopio = zonas.get("z_payload_telescopio")
+    if banco is None or telescopio is None:
+        return Chequeo(
+            id="brazo_beacon", titulo=titulo, estado=NO_COMPROBABLE,
+            mensaje="El layout no declara las zonas del banco y del telescopio.",
+            falta="Zonas z_payload_banco y z_payload_telescopio",
+        )
+
+    semi_d1 = _ancho_en(catalogo, "dicroico_d1", 1)
+    semi_d2 = _ancho_en(catalogo, "dicroico_d2", 0)
+    if semi_d1 is None or semi_d2 is None:
+        return Chequeo(
+            id="brazo_beacon", titulo=titulo, estado=NO_COMPROBABLE,
+            mensaje=(
+                "Sin envolvente de D1 o de D2 no hay brazo del que medir nada."
+            ),
+            falta="Envolvente de dicroico_d1 y dicroico_d2",
+        )
+    semi_d1 /= 2.0
+    semi_d2 /= 2.0
+
+    # D1 esta sobre la linea del canal cuantico, a la altura del eje del
+    # telescopio en Y; D2 esta sobre el mismo X que D1. Ninguno de los dos
+    # numeros se escribe aqui: el primero es Y = 0 por construccion de la zona
+    # y el segundo se deriva de la linea del banco, como en 'banco_optico'.
+    eje_x = telescopio.caja.centro[0]
+    x_d1 = _x_del_dicroico_d1(catalogo, eje_x)
+
+    ramas: list[tuple[str, tuple[str, ...], float, float]] = []
+    # (etiqueta, piezas de la fila, lo que ocupa la mitad de la estacion,
+    #  sitio disponible desde el centro de la estacion)
+    ramas.append(("+Y", ("dicroico_d2", "camara_beacon"), semi_d1, banco.caja.ymax))
+    ramas.append(("-Y", ("trampa_luz_d1",), semi_d1, -banco.caja.ymin))
+    if x_d1 is not None:
+        ramas.append(
+            ("-X", ("laser_beacon_bajada",), semi_d2, x_d1 - banco.caja.xmin)
+        )
+        ramas.append(
+            ("+X", ("fotodiodo_monitor_beacon",), semi_d2, banco.caja.xmax - x_d1)
+        )
+
+    numeros: dict[str, float] = {}
+    sin_envolvente: list[str] = []
+    peor: tuple[float, str, float, float] | None = None
+    for etiqueta, piezas, media_estacion, disponible in ramas:
+        eje = 1 if etiqueta[1] == "Y" else 0
+        suma, detalle, faltan = _linea(catalogo, piezas, eje)
+        sin_envolvente += faltan
+        necesario = media_estacion + suma
+        margen = disponible - necesario
+        for cid, ancho in detalle.items():
+            numeros[f"{cid}_mm"] = ancho
+        numeros[f"necesario_{etiqueta}_mm"] = necesario
+        numeros[f"disponible_{etiqueta}_mm"] = disponible
+        numeros[f"margen_{etiqueta}_mm"] = margen
+        if peor is None or margen < peor[0]:
+            peor = (margen, etiqueta, necesario, disponible)
+
+    if sin_envolvente:
+        return Chequeo(
+            id="brazo_beacon", titulo=titulo, estado=NO_COMPROBABLE,
+            mensaje=(
+                f"Sin envolvente: {', '.join(sorted(set(sin_envolvente)))}. No "
+                f"se puede sumar el brazo."
+            ),
+            numeros=numeros,
+            falta=f"Envolvente de {', '.join(sorted(set(sin_envolvente)))}",
+        )
+    assert peor is not None
+    margen, etiqueta, necesario, disponible = peor
+    # El deficit de arriba es el de las envolventes DESNUDAS, sin holguras de
+    # montaje, que es la convencion de 'banco_optico' desde siempre. El
+    # generador coloca con holgura, asi que lo que le falta de verdad a la
+    # pieza para caber es mas, y por eso hay piezas del brazo sin colocar.
+    colocadas = {c.componente_id for c in layout.colocaciones}
+    del_brazo = (
+        "dicroico_d2", "camara_beacon", "trampa_luz_d1",
+        "laser_beacon_bajada", "fotodiodo_monitor_beacon",
+    )
+    faltan_por_colocar = [
+        cid for cid in del_brazo
+        if catalogo.existe(cid)
+        and catalogo[cid].cuenta_en_presupuesto
+        and cid not in colocadas
+    ]
+    sin_colocar = (
+        f" Con las holguras de montaje el deficit es mayor todavia, asi que "
+        f"data/layout.yaml NO coloca {', '.join(faltan_por_colocar)}: una pieza "
+        f"sin sitio no se dibuja en uno inventado ni saliendose del satelite."
+        if faltan_por_colocar
+        else ""
+    )
+    comun = (
+        f"Los dos beacons comparten el brazo que refleja D1, y dentro de el D2 "
+        f"los separa. La rama mas apretada es {etiqueta}: pide {necesario:.1f} mm "
+        f"desde el centro de su divisor y tiene {disponible:.1f} mm, sin contar "
+        f"holguras de montaje."
+    )
+    if margen < 0:
+        return Chequeo(
+            id="brazo_beacon", titulo=titulo, estado=FALLA,
+            mensaje=(
+                comun + f" NO CABE por {abs(margen):.1f} mm. Y ya esta contada "
+                f"la reserva de la camara bajada de 30 a 20 mm. Las salidas son "
+                f"plegar el brazo hacia -Z con un espejo de doblado (da unos "
+                f"27.5 mm mas, a costa de una superficie reflectante mas en el "
+                f"camino del beacon) o alargar el banco, que se paga con la "
+                f"bandeja o con la longitud reservada al telescopio. Las dos son "
+                f"decisiones de ACSAR; bajar otra reserva hasta que esto pase, "
+                f"no."
+                + sin_colocar
+            ),
+            numeros=numeros,
+            falta=(
+                "Decision de ACSAR: plegar el brazo hacia -Z o alargar el banco"
+            ),
+        )
+    if margen < HOLGURA_NULA_MM * 10:
+        return Chequeo(
+            id="brazo_beacon", titulo=titulo, estado=ATENCION,
+            mensaje=(
+                comun + f" Quedan {margen:.1f} mm, que no dan para holguras de "
+                f"montaje. Todas las envolventes del brazo son SUPUESTAS."
+            ),
+            numeros=numeros,
+        )
+    return Chequeo(
+        id="brazo_beacon", titulo=titulo, estado=OK,
         mensaje=comun + f" Quedan {margen:.1f} mm de margen.",
         numeros=numeros,
     )
@@ -1165,6 +1422,7 @@ def todos(catalogo: Catalogo, layout=None) -> list[Chequeo]:
     salida += [
         chequeo_pila_pc104(catalogo),
         chequeo_banco_optico(catalogo, layout),
+        chequeo_brazo_beacon(catalogo, layout),
         chequeo_configuracion_telescopio(catalogo),
         chequeo_longitud_telescopio(catalogo),
         chequeo_haz_vs_fsm(catalogo),

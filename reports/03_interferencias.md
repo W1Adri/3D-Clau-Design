@@ -5,9 +5,9 @@ No editar a mano: los numeros salen de `data/components.yaml`.
 
 - Mision: CLAU - CubeSat Laser per a Aplicacions Ultrasegures
 - Norma: CubeSat Design Specification Rev. 14.1, The CubeSat Program, Cal Poly SLO
-- Estado del layout: **confirmada** (26 piezas colocadas)
+- Estado del layout: **confirmada** (28 piezas colocadas)
 
-Piezas colocadas: **26**. Choques de geometria: **0**. Invasiones de keep-outs dibujados con numeros SUPUESTOS: **14**.
+Piezas colocadas: **28**. Choques de geometria: **0**. Invasiones de keep-outs dibujados con numeros SUPUESTOS: **15**.
 
 ## Choques de geometria
 
@@ -15,7 +15,7 @@ Dos solidos que ocupan el mismo sitio, o una pieza que se sale de donde tiene qu
 
 _(sin filas)_
 
-## Invasiones de keep-outs SUPUESTOS (14)
+## Invasiones de keep-outs SUPUESTOS (15)
 
 > **Esto no es una lista de errores.** Son piezas que se meten en un volumen reservado que esta dibujado a partir de un numero que se ha inventado este repositorio: el radio minimo de curvatura de la fibra, el del coaxial y el diametro de haz siguen siendo **TBD**. Lo que dicen estas filas es *con la hipotesis de hoy, aqui no cabe*, y la manera de resolverlas NO es bajar el radio supuesto hasta que desaparezcan: es conseguir el dato. Por eso no tumban el codigo de salida.
 
@@ -35,10 +35,11 @@ Lo que estas filas estan diciendo, en una frase: **la bandeja de fibra, tal y co
 | keep_out | aislador | keepout_fibra_filtro_espectral_salida | 0.23 | aislador invade el keep-out 'fibra_filtro_espectral_salida' (fibra) en 0.23 cm3, con el keep-out dibujado a partir de un valor SUPUESTO |
 | keep_out | acoplador_monitor | keepout_fibra_filtro_espectral_salida | 7.46 | acoplador_monitor invade el keep-out 'fibra_filtro_espectral_salida' (fibra) en 7.46 cm3, con el keep-out dibujado a partir de un valor SUPUESTO |
 | keep_out | fsm | keepout_fibra_colimador_entrada | 2.96 | fsm invade el keep-out 'fibra_colimador_entrada' (fibra) en 2.96 cm3, con el keep-out dibujado a partir de un valor SUPUESTO |
-| keep_out | dicroico | keepout_fibra_colimador_entrada | 6.08 | dicroico invade el keep-out 'fibra_colimador_entrada' (fibra) en 6.08 cm3, con el keep-out dibujado a partir de un valor SUPUESTO |
-| keep_out | camara_beacon | keepout_fibra_colimador_entrada | 27.00 | camara_beacon invade el keep-out 'fibra_colimador_entrada' (fibra) en 27.00 cm3, con el keep-out dibujado a partir de un valor SUPUESTO |
+| keep_out | dicroico_d1 | keepout_fibra_colimador_entrada | 6.08 | dicroico_d1 invade el keep-out 'fibra_colimador_entrada' (fibra) en 6.08 cm3, con el keep-out dibujado a partir de un valor SUPUESTO |
+| keep_out | dicroico_d2 | keepout_fibra_colimador_entrada | 12.17 | dicroico_d2 invade el keep-out 'fibra_colimador_entrada' (fibra) en 12.17 cm3, con el keep-out dibujado a partir de un valor SUPUESTO |
+| keep_out | laser_beacon_bajada | keepout_fibra_colimador_entrada | 10.62 | laser_beacon_bajada invade el keep-out 'fibra_colimador_entrada' (fibra) en 10.62 cm3, con el keep-out dibujado a partir de un valor SUPUESTO |
 
-## Los keep-outs que hay (20)
+## Los keep-outs que hay (23)
 
 | id | tipo | estado | dims mm | en que se basa |
 |---|---|---|---|---|
@@ -60,6 +61,9 @@ Lo que estas filas estan diciendo, en una frase: **la bandeja de fibra, tal y co
 | haz_e02 | haz_libre | supuesto | 5 x 10 x 10 | Tubo de 10 mm de lado (integracion.optica.diametro_haz_modelado, SUPUESTO) en el hueco que queda entre las dos piezas. El diametro de haz de cada tram |
 | haz_e03 | haz_libre | supuesto | 10 x 10 x 16 | Tubo de 10 mm de lado (integracion.optica.diametro_haz_modelado, SUPUESTO) en el hueco que queda entre las dos piezas. El diametro de haz de cada tram |
 | haz_e04 | haz_libre | supuesto | 10 x 5 x 10 | Tubo de 10 mm de lado (integracion.optica.diametro_haz_modelado, SUPUESTO) en el hueco que queda entre las dos piezas. El diametro de haz de cada tram |
+| haz_e07 | haz_libre | supuesto | 5 x 10 x 10 | Tubo de 10 mm de lado (integracion.optica.diametro_haz_modelado, SUPUESTO) en el hueco que queda entre las dos piezas. El diametro de haz de cada tram |
+| haz_e09 | haz_libre | supuesto | 10 x 5 x 10 | Tubo de 10 mm de lado (integracion.optica.diametro_haz_modelado, SUPUESTO) en el hueco que queda entre las dos piezas. El diametro de haz de cada tram |
+| haz_e10 | haz_libre | supuesto | 5 x 10 x 10 | Tubo de 10 mm de lado (integracion.optica.diametro_haz_modelado, SUPUESTO) en el hueco que queda entre las dos piezas. El diametro de haz de cada tram |
 | haz_telescopio_colimado | haz_libre | supuesto | 90 x 90 x 186 | Envolvente del haz dentro del barrilete, derivada de 'optica' en data/components.yaml. SUPUESTO por partida doble: la apertura libre es una decision d |
 | haz_telescopio_comprimido | haz_libre | supuesto | 10 x 10 x 192 | Envolvente del haz dentro del barrilete, derivada de 'optica' en data/components.yaml. SUPUESTO por partida doble: la apertura libre es una decision d |
 

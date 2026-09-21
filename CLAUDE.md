@@ -3,7 +3,8 @@
 Documento de continuidad entre sesiones. El README explica **qué** es el
 repositorio; esto explica **por qué** está como está y **qué falta por decidir**.
 
-Última actualización: **2026-09-20** (noche: telescopio paramétrico, §4.7).
+Última actualización: **2026-09-20** (noche: telescopio paramétrico §4.7, y
+brazo de los beacons con dos dicroicos §3.9).
 
 ---
 
@@ -11,19 +12,19 @@ repositorio; esto explica **por qué** está como está y **qué falta por decid
 
 | | |
 |---|---|
-| Catálogo | 31 componentes, 0 problemas de integridad |
-| Con envolvente | **28 de 31**. Los 3 que faltan, por buenos motivos (§1.1) |
-| Huecos sin ninguna aproximación (TBD) | **45** |
-| Números inventados aquí (SUPUESTO) | **61** — se dibujan, no son datos (§2). Suben de 28 a 61 con el telescopio paramétrico (§4.7): 32 parámetros ópticos y mecánicos del barrilete más el punto de adelanto, cada uno con su razonamiento y a quién pedirlo |
+| Catálogo | 35 componentes, 0 problemas de integridad |
+| Con envolvente | **32 de 35**. Los 3 que faltan, por buenos motivos (§1.1) |
+| Huecos sin ninguna aproximación (TBD) | **51**. Los 6 nuevos son del brazo de los beacons (§3.9): el aislamiento de la cámara a 1064 nm, que sostiene la elección de longitudes de onda entera, y la decisión de cómo hacer que el brazo quepa |
+| Números inventados aquí (SUPUESTO) | **68** — se dibujan, no son datos (§2). Subieron de 28 a 61 con el telescopio paramétrico (§4.7) y de 61 a 68 con el brazo de los beacons (§3.9), cada uno con su razonamiento y a quién pedirlo |
 | Discrepancias entre fuentes | **10** |
-| Tests | **148**, todos en verde |
+| Tests | **162**, todos en verde |
 | Distribución | **CONFIRMADA** el 2026-09-20: dos columnas de 3U, moduladores en la franja lateral |
-| Piezas colocadas | **26**. Todos los componentes de la opción B están dibujados y situados |
+| Piezas colocadas | **28**, y **una que no cabe**: `camara_beacon` no está colocada porque el brazo de los beacons no da de sí (§3.9). Una pieza sin sitio no se dibuja en un sitio inventado |
 | Geometría real de fabricante | **3** piezas salen de un STEP de AAC (§9); el telescopio tiene sitio reservado para el suyo |
-| Keep-outs | **20**, todos dibujados con números supuestos (§3.7, §4.7) |
-| Choques de geometría | **0** |
-| Riesgos abiertos | **4**: térmico modulador–barrilete (§3.6), fibra del colimador (§3.7), antena en −Z (§3.8) y la longitud del telescopio, que cabe en los 200 mm por 1.2 mm (§4.7) |
-| Zona útil | 221.7 × 95.4 × 361.4 mm = **7.64 L**, de la que quedan **2.88 L** libres |
+| Keep-outs | **23**, todos dibujados con números supuestos (§3.7, §4.7, §3.9). El del brazo de los beacons lo comparten dos tramos en sentidos contrarios y se declara una sola vez |
+| Choques de geometría | **0**. `clau3d informe` devuelve 1 de todas formas: `brazo_beacon` es un chequeo crítico y falla (§3.9) |
+| Riesgos abiertos | **5**: térmico modulador–barrilete (§3.6), fibra del colimador (§3.7), antena en −Z (§3.8), la longitud del telescopio, que cabe en los 200 mm por 1.2 mm (§4.7), y **el brazo de los beacons, que no cabe por 6.8 mm** (§3.9) |
+| Zona útil | 221.7 × 95.4 × 361.4 mm = **7.64 L**, de la que quedan **2.89 L** libres |
 
 Funciona de punta a punta: catálogo validado, layout generado, ensamblaje
 exportado a STEP —completo y por subsistema—, interferencias, conexiones,
@@ -90,6 +91,24 @@ abajo:
   son obligatorios. Hoy los 18 que hay son todos `supuesto`, porque las tres
   cotas que los dimensionan —radio mínimo de curvatura de la fibra, el del
   coaxial y el diámetro de haz— siguen siendo TBD.
+- **Un puerto que existe se declara, se dibuje o no.** Un divisor dicroico a
+  45° tiene cuatro puertos, y los cuatro reciben luz aunque sólo dos estén en
+  el diagrama de nadie. El catálogo los escribe uno a uno en un campo `puertos`
+  con el tramo que va por cada uno, y hay un test que comprueba que ese tramo
+  existe en `connections.yaml` y toca a esa pieza. Así el cuarto puerto acaba
+  en una trampa de luz o en un fotodiodo en vez de acabar en el sitio donde
+  acaba de verdad, que es rebotando por dentro del banco.
+- **Un tramo que se recorre en los dos sentidos es un tramo, no dos.** El
+  keep-out se declara una vez y el otro lo referencia con
+  `keep_out_compartido_con`. Duplicar el volumen no reserva nada nuevo:
+  reserva lo mismo otra vez, y el detector de interferencias ve dos cajas
+  idénticas solapando al 100 % e informa de una invasión que no existe.
+- **Una pieza sin sitio no se coloca.** Si una fila del banco no cabe en su
+  zona, el generador **no la dibuja** —ni apretada, ni saliéndose del
+  satélite—, avisa por stderr y deja que el chequeo lo cuente en milímetros.
+  Apretarla esconde el resultado; dibujarla fuera rompe las dos invariantes que
+  este repositorio sí defiende con tests, cero solapes y nada fuera de la
+  envolvente, y las convierte en ruido. Pasó con la cámara de beacon (§3.9).
 - **Una invasión de keep-out supuesto no tumba el código de salida.** Si lo
   hiciera, la manera de poner CI en verde sería bajar el radio de curvatura
   supuesto hasta que las invasiones desaparecieran, que es exactamente lo que
@@ -176,8 +195,8 @@ declarado: **221.7 × 95.4 × 361.4 mm** ≈ 7.64 L.
   121.7  │ 1.24 L               │  _banco     │ z_payload_telescopio    │
    mm    │ láser DFB (4.1 W),   │ 0.64 L      │ 1.82 L · 95.4 mm de X   │
          │ bucles en los 121.7  │ colimador   │ telescopio →→ +Z        │
-         │ mm de ancho enteros  │ dicroico    │ 200 mm RESERVADOS       │
-         │                      │ FSM, cámara │ (provisional)           │
+         │ mm de ancho enteros  │ D1, D2      │ 200 mm RESERVADOS       │
+         │                      │ FSM, brazo  │ (provisional)           │
   −10.85 ├──────────────────────┴─────────────┴─────────────────────────┤
          │ z_plataforma  3.45 L                                         │
   PLATAF.│ pila PC104 a lo largo de todo Z — 305 mm usados de 361 mm     │
@@ -191,7 +210,7 @@ declarado: **221.7 × 95.4 × 361.4 mm** ≈ 7.64 L.
 | `z_plataforma` | 3.45 L | 1.22 L | Pila PC104 (305 mm) + antena en el extremo −Z |
 | `z_payload_telescopio` | 1.82 L | 0.00 L | Telescopio, dibujado **llenando la zona** a propósito (§4.2) |
 | `z_payload_franja` | 0.50 L | 0.44 L | Los 2 moduladores, tumbados, con sus conectores |
-| `z_payload_banco` | 0.64 L | 0.57 L | Colimador, dicroico, FSM, cámara y láser de beacon |
+| `z_payload_banco` | 0.64 L | 0.58 L | Colimador, D1, FSM y el brazo de los beacons: D2, láser, trampa y fotodiodo. **La cámara no cabe** (§3.9) |
 | `z_payload_bandeja` | 1.24 L | 1.17 L | Placa, láser DFB, VOA, aislador, filtro y tap |
 
 Los paneles solares no están en ninguna zona: van **por fuera**, sobre las dos
@@ -311,21 +330,25 @@ regenerar el layout es todo lo que hace falta para reasignar el reparto.
 
 ### 3.7 El banco óptico es el punto apretado del payload
 
-Y no se ve mirando volúmenes: en el banco sobra hueco —0.57 L de 0.64— pero no
-**en la línea** que importa.
+Y no se ve mirando volúmenes: en el banco sobra hueco —0.58 L de 0.64— pero no
+**en la línea** que importa. Desde el 2026-09-20 por la noche son **dos**
+líneas: esta, en X, y la del brazo de los beacons, en Y, que es peor todavía
+porque no cabe (§3.9).
 
 **Por qué esa línea no se puede mover.** El FSM dobla el haz que llega según X
 hacia el telescopio, que apunta según +Z. Para doblarlo tiene que estar *sobre
-el eje óptico del telescopio*, en X = +36.85 mm. Eso deja al colimador y al
-dicroico en fila con él, hacia +X, y lo que tienen es lo que va del eje a la
+el eje óptico del telescopio*, en X = +36.85 mm. Eso deja al colimador y a D1
+en fila con él, hacia +X, y lo que tienen es lo que va del eje a la
 pared de la columna: **74.0 mm**.
 
-Las reservas iniciales (colimador de 40 mm, dicroico de 30) **no cabían**. Están
+Las reservas iniciales (colimador de 40 mm, D1 de 30) **no cabían**. Están
 ahora en 28 y 23, y su `fuente` en el catálogo lo dice: la cota está *acotada
 por arriba por el banco*, no solo elegida a ojo. Sumando la media anchura del
 FSM a 45°, la línea ocupa 66.3 mm y quedan **7.7 mm**, que no dan para holguras
 de montaje. El chequeo `banco_optico` lo recalcula desde el catálogo, avisa por
-debajo de 5 mm y falla si se pasa.
+debajo de 5 mm y falla si se pasa. Mira además los dos puertos laterales de D2
+—el láser de beacon hacia −X y el fotodiodo hacia +X—, que están dentro del
+mismo ancho de banco y hoy tienen 33.0 y 23.7 mm de margen.
 
 **Si las piezas reales son mayores, no es que el modelo esté mal: es que el
 banco no da.** La salida sería alargarlo a costa de la bandeja o de la longitud
@@ -335,20 +358,20 @@ reservada al telescopio, no apretar las piezas.
 
 Está pegado a la pared +X con 7.7 mm, y su fibra tiene que volver a la bandeja,
 que está en −Z. Con la reserva supuesta de fibra (20 mm de tramo recto + 30 mm
-de radio de curvatura = 50 mm por puerto), su keep-out se come al dicroico, al
-FSM y a la cámara de beacon.
+de radio de curvatura = 50 mm por puerto), su keep-out se come al FSM, a D1,
+a D2 y al láser de beacon: cuatro de las quince invasiones del modelo.
 
 **Esto no es un fallo del reparto: es lo que cuesta no tener el radio de
 curvatura.** Si el radio real resulta ser la mitad, buena parte del problema
 desaparece sola. Si no, hay tres salidas y las tres son decisiones de alguien:
-mover el dicroico al tramo +Z (entre el FSM y el telescopio, lo que cambia el
+mover D1 al tramo +Z (entre el FSM y el telescopio, lo que cambia el
 orden de la cadena óptica declarada en `connections.yaml`), alargar el banco, o
 sacar el colimador del banco y ponerlo en el borde de la bandeja.
 
 ### 3.7.2 La bandeja tampoco respeta un radio de 30 mm
 
 Mismo origen, mismo dato. Las filas de la bandeja están a 8 mm y cada puerto de
-fibra querría 50. De las 14 invasiones de keep-out que reporta el modelo, 11 son
+fibra querría 50. De las 15 invasiones de keep-out que reporta el modelo, 11 son
 de la bandeja.
 
 `reports/03_interferencias.md` las lista en una sección aparte que empieza
@@ -373,6 +396,154 @@ Puede no ser un problema —el canal clásico de post-procesado no tiene por qu�
 ser simultáneo al pase óptico— pero es una **decisión de operaciones**, no de
 mecánica, y está sin tomar. Si el espesor real de la antena fuera menor de
 6.5 mm, podría ir por fuera en cualquier cara y el problema se evapora.
+
+### 3.9 El brazo de los beacons: dos dicroicos, un solo brazo, y no cabe
+
+Añadido el 2026-09-20 por la noche. Es el cambio que hace que el beacon de
+bajada **exista** en el modelo, y el que enseña que el banco tiene un segundo
+punto apretado además del de §3.7 —y este en el otro eje.
+
+**Lo que estaba mal.** `camara_beacon` en Y = +31.5 y `laser_beacon_bajada` en
+Y = −31.5: en lados **opuestos** del dicroico. Un láser que emite hacia +Y
+contra la cara trasera de un dicroico a 45° sobre el eje X no tiene camino
+hacia el FSM: la luz entra por el puerto equivocado y no sale a ninguna parte.
+Y en `connections.yaml` el beacon de bajada **no tenía ni una conexión
+declarada**: `e04` era el único tramo del brazo, y sólo cubría la cámara. La
+pieza se dibujaba, ocupaba volumen y no funcionaba. Nada lo cazaba porque los
+tests de conexiones comprobaban que los extremos declarados existieran, no que
+las piezas declaradas tuvieran extremos. Ahora hay un test que va al revés
+(`tests/test_brazo_beacon.py`), y es el que habría pillado esto.
+
+**La arquitectura correcta** (decisión de ACSAR, 2026-09-20): los dos beacons
+comparten **un único brazo lateral**, el que refleja D1, y dentro de ese brazo
+un segundo dicroico D2 los separa.
+
+| | | |
+|---|---|---|
+| **D1** (`dicroico_d1`, OPT-09) | paso largo, borde ~1300 nm | transmite 1550 → FSM; refleja **los dos** beacons al brazo |
+| **D2** (`dicroico_d2`, OPT-15) | paso corto, borde ~1020 nm | transmite 976 → cámara; refleja 1064, inyectado lateralmente |
+
+> **Ojo con los `id_drive`.** La tarea pedía OPT-14 para `dicroico_d2`, pero
+> OPT-14 ya lo usa `bandeja_optica` y `validar` rechaza dos piezas con el mismo
+> identificador de Drive —pisarían la misma fila al actualizar la hoja desde
+> `components_status.csv`—. Las cuatro piezas nuevas van en **OPT-15 a OPT-18**,
+> que sí estaban libres. Hay que **dar de alta esas cuatro filas** en la hoja
+> índice del equipo.
+
+Los cuatro puertos de cada uno tienen destino declarado, y el catálogo los
+escribe uno a uno en un campo `puertos`:
+
+```
+       camara_beacon (976 nm, transmision)
+             |
+  laser --- D2 --- fotodiodo_monitor_beacon   (fuga del beacon en transmision)
+             |
+            D1 --- FSM --- telescopio         (1550, transmision)
+             |
+       trampa_luz_d1                          (fuga del 1550 en reflexion)
+```
+
+**Los cuartos puertos no son opcionales.** Ningún divisor transmite el 100 %.
+Lo que D1 no transmite del 1550 sale por el puerto opuesto al brazo, y sin
+trampa se queda rebotando dentro del banco hasta llegar a la cámara de
+seguimiento o de vuelta al canal. De ahí `trampa_luz_d1` (OPT-17). El cuarto
+puerto de D2 recibe la fuga en transmisión del beacon de bajada, y eso sí se
+puede aprovechar: un `fotodiodo_monitor_beacon` (OPT-16) da telemetría de salud
+del beacon **sin tocar el haz útil**. Si el equipo de PAT decide no
+instrumentarlo, hace falta igualmente taparlo: `trampa_luz_d2` (OPT-18) está en
+el catálogo como `alternativa_de` del fotodiodo —**excluyente**, no adicional—,
+así que no suma en ningún presupuesto ni se coloca, igual que el FSM piezo.
+
+**El orden dentro de D2 no es intercambiable.** Con la cámara en transmisión y
+el beacon en reflexión, los 100 mW del beacon tocan **una sola superficie con
+recubrimiento** antes de salir, y lo que se fugue en D2 se va al puerto opuesto
+al láser en vez de hacia el sensor. Invertirlo mete el beacon en transmisión
+—dos superficies más— y apunta su fuga justo a lo que hay que proteger.
+
+#### Las longitudes de onda: 976 arriba, 1064 abajo
+
+Y el motivo es el **silicio**, no la óptica. Un CMOS de silicio tiene QE decente
+a 976 nm y está prácticamente ciego a 1064 nm (<1 %). Esa ceguera regala **dos o
+tres órdenes de magnitud de rechazo por encima** del filtro de banda estrecha, y
+es lo único que permite que un sensor que mide microvatios de beacon de subida
+conviva en el mismo brazo con 100 mW de beacon de bajada. Invertir la asignación
+pierde ese aislamiento y obliga a una cámara InGaAs. Abajo no cuesta nada: 1064
+es la línea del Nd:YAG, y en tierra se detecta con APD de silicio —que a 1064
+todavía responde lo justo, y hay detectores comerciales de sobra— o con InGaAs,
+donde el tamaño y el consumo no importan.
+
+**El número que sostiene todo esto no existe.** `aislamiento_camara_a_1064` es
+TBD y es del equipo de PAT. Hoy la elección de colores se defiende con un
+argumento físico correcto y **ninguna medida**. Si sale corto, las salidas son
+separar más los dos colores, apagar el beacon mientras la cámara lee, o volver a
+dos brazos separados —y eso último ya se sabe que no cabe.
+
+#### El filtro de banda estrecha no es una pieza
+
+Va declarado **dentro** de la reserva de `camara_beacon` y dicho en su `fuente`.
+No es pereza: modelarlo suelto añade una pieza más a la fila del brazo, y el
+brazo ya no cabe sin ella.
+
+#### Y no cabe
+
+Aquí está el precio de la arquitectura, y es geométrico. Antes la cámara y el
+láser usaban lados **opuestos** de D1, así que cada uno tenía 47.7 mm para él
+solo. Compartiendo brazo, D1/2 + D2 + cámara van **en fila hacia un solo lado**:
+
+| | mm |
+|---|---|
+| semi-D1 | 11.5 |
+| D2 | 23.0 |
+| cámara (bajada de 30 a 20) | 20.0 |
+| **necesario** | **54.5** |
+| disponible, del centro de D1 a la pared | 47.7 |
+| **falta** | **6.8** |
+
+Y eso ya con la única salida que **no le cuesta volumen a nadie**: bajar la
+reserva de `camara_beacon` de 30 a 20 mm, como `supuesto`, con el razonamiento
+escrito en el catálogo (sensor pequeño con objetivo corto a 976 nm, filtro
+incluido, sin sensor elegido). Las otras dos salidas se pagan y **son decisiones
+de ACSAR**, así que están escritas y no aplicadas:
+
+1. **Plegar el brazo hacia −Z** con un espejo de doblado: da unos 27.5 mm más, a
+   costa de una superficie reflectante adicional en el camino del beacon.
+2. **Alargar el banco**, que se paga con la bandeja o con la longitud reservada
+   al telescopio (§3.6), exactamente igual que la salida de §3.7.
+
+`chequeo_brazo_beacon` recalcula el margen desde el catálogo —las cuatro ramas,
+incluidas las trampas y el fotodiodo, que son pequeños pero se pagan del mismo
+presupuesto— y **falla**, y se queda fallando. Eso es un resultado.
+
+**Y la cámara no está colocada.** Con las holguras de montaje el déficit sube a
+16.8 mm, así que el generador **no la coloca** y avisa por stderr. Las otras dos
+opciones eran apretarla, que esconde el resultado, o dibujarla saliéndose del
+satélite, que además choca con el panel solar y rompe las dos invariantes que
+este repositorio sí defiende con tests (cero solapes, nada fuera de la
+envolvente). Una pieza sin sitio no se dibuja en un sitio inventado. Consecuencia
+visible: `e06` (D2 → cámara) sale como **no comprobable, sin colocar** en
+`reports/04_conexiones.md`, que es exactamente lo que está pasando.
+
+#### El beacon de bajada comparte el FSM, y eso tiene cola
+
+Sale por D2, vuelve a D1 y se refleja al mismo espejo que el canal cuántico, así
+que recibe el **mismo punto de adelanto**. Es lo que se quiere —el beacon tiene
+que llegar adonde *estará* la estación—, pero implica que la cámara ve el beacon
+de subida en la dirección de retorno, sin adelantar, mientras el FSM trabaja
+adelantado. Ese desfase entre recibido y transmitido está **escrito**, en
+`integracion.optica.punto_de_adelanto`, no implementado: el lazo de control del
+FSM no está en este repositorio.
+
+#### Un tramo que se recorre en los dos sentidos es un tramo, no dos
+
+`e04` (976 subiendo, D1 → D2) y `e08` (1064 bajando, D2 → D1) son **el mismo
+tubo físico**. El keep-out se declara una sola vez, en `e04`, marcado
+`bidireccional` y `bicolor`; `e08` lleva `keep_out: false` y
+`keep_out_compartido_con: e04`. El generador lo entiende, anota en la nota del
+keep-out quién más pasa por ahí y con qué color, y **aborta** si el tramo
+compartido no existe, no tiene keep-out propio o une otros extremos. Declararlo
+dos veces no reservaría nada nuevo: reservaría lo mismo otra vez, y el detector
+de interferencias vería dos cajas idénticas solapando al 100 % e informaría de
+una invasión que no existe.
 
 ### Cómo se regenera
 
@@ -576,7 +747,7 @@ con 33 filas en vez de una. Sigue siendo el **fallback**: el día que aparezca
 `cad/vendor/aperture_optical_sciences/telescopio_cassegrain.step`, lo sustituye
 sin tocar el catálogo, exactamente igual que sustituía al cilindro. Y sigue
 reservando lo mismo: **el volumen libre y las interferencias no se han movido**
-(2.88 L libres, 0 choques, 14 invasiones de keep-out supuesto). Ver más abajo
+(2.89 L libres, 0 choques, 15 invasiones de keep-out supuesto). Ver más abajo
 por qué eso no es casualidad.
 
 #### (a) La sección pasa a ser cuadrada
@@ -633,14 +804,30 @@ la geometría entera:
 ```
 M  = apertura_libre / diametro_haz_comprimido        f2 = f1 / M
 d  = f1 − |f2|   (confocalidad)                      D2 = haz × margen
-ε  = D2 / apertura_libre        pérdida = −20·log₁₀(1 − ε²)
+ε  = D2 / apertura_libre
+potencia recogida   = 1 − ε²      →  −10·log₁₀(1 − ε²)
+intensidad en eje   = (1 − ε²)²   →  −20·log₁₀(1 − ε²)
 ```
 
-Ninguno de esos seis números está escrito en el catálogo: se derivan en
+Ninguno de esos números está escrito en el catálogo: se derivan en
 `optica/parametros.py`, y hay un test que comprueba que cambiar el haz los mueve
 todos. Con lo que hay hoy (apertura 90, haz supuesto 10): **M = 9.00**,
-f2 = 22.22 mm, d = 177.78 mm, secundario Ø14, ε = 0.156, 0.21 dB en amplitud
-(0.11 dB en potencia).
+f2 = 22.22 mm, d = 177.78 mm, secundario Ø14, ε = 0.156, **0.11 dB de potencia
+recogida y 0.21 dB de intensidad en el eje**.
+
+**Corregido el 2026-09-20 por la noche.** Hasta entonces el código comentaba
+el −20·log₁₀ como «convenio de amplitud» y decía que en potencia la misma
+obstrucción costaba la mitad de dB. Es falso. No son dos convenios de la misma
+magnitud: son **dos magnitudes distintas y las dos son de potencia**. La
+fracción de potencia recogida es (1 − ε²), porque la obstrucción tapa ε² del
+área; la intensidad en eje en campo lejano es (1 − ε²)², porque la obstrucción
+además **redistribuye energía del lóbulo principal a los anillos**. Para un
+enlace óptico manda la segunda: lo que llega al receptor es la intensidad en el
+eje, no la potencia total que sale del telescopio. Las dos se derivan y se
+publican por separado (`perdida_potencia_recogida_dB` y
+`perdida_intensidad_en_eje_dB`), y cuál manda está declarado en el catálogo como
+`integracion.optica.perdida_obstruccion_convenio` —sólo cuál, no los números,
+que se derivan de ε—.
 
 Y aquí está el acoplamiento: **un haz de d mm sobre un espejo a 45° deja una
 huella de d × d·√2**, así que un espejo circular de D mm solo admite
@@ -679,7 +866,7 @@ reserva quedan **22.2 mm** para los dos mamparos, la celda y los dos espejos:
 | **margen** | **1.2** |
 
 Todos esos espesores están en su **cota superior**, no elegidos, y su `fuente` en
-el catálogo lo dice —el mismo patrón que el colimador y el dicroico de §3.7—.
+el catálogo lo dice —el mismo patrón que el colimador y D1 de §3.7—.
 Una celda de 3 mm no es una celda, y un primario de Ø92 × 8 mm tiene una relación
 de aspecto de 11.5. `chequeo_longitud_telescopio` sale como **atención** y dice
 la salida: con los **~2U de verdad del brief (227 mm, no 200)** la misma óptica
@@ -771,9 +958,9 @@ su propio haz.
    obligar a devolverlos a la bandeja, y entonces el telescopio vuelve a tener
    techo de 176.4 mm.
 4. **EL RADIO MÍNIMO DE CURVATURA DE LA FIBRA** (equipo de payload). Ha pasado
-   a ser el dato que más desbloquea, por delante del resto. De las 14
-   invasiones de keep-out que reporta el modelo, **las 14** salen de él: 11 en
-   la bandeja y 3 en el colimador. Mientras no exista, la bandeja no se puede
+   a ser el dato que más desbloquea, por delante del resto. De las 15
+   invasiones de keep-out que reporta el modelo, **las 15** salen de él: 11 en
+   la bandeja y 4 en el colimador. Mientras no exista, la bandeja no se puede
    validar y el colimador no se puede encaminar (§3.7.1, §3.7.2). Con él, el
    chequeo `bucles_fibra` pasa de `no comprobable` a decir algo, y los
    keep-outs pasan de `supuesto` a `confirmado` sin tocar una línea de código.
@@ -819,6 +1006,21 @@ su propio haz.
     cotas. La tercera **no es del FSM**: es el diámetro del haz (punto 8). Con el
     espejo de 5 mm del MEMS el haz máximo son 3.54 mm; si el equipo de óptica
     pide más, el MEMS queda descartado sin discusión (§4.7c).
+13. **DECIDIR CÓMO CABE EL BRAZO DE LOS BEACONS** (§3.9). Es la única cosa de
+    esta lista que hoy hace **fallar** `clau3d informe`, y la única pieza del
+    modelo que no está colocada porque no tiene dónde. Faltan 6.8 mm con las
+    envolventes desnudas y 16.8 mm con holguras, y las dos salidas cuestan:
+    plegar el brazo hacia −Z con un espejo de doblado (una superficie
+    reflectante más en el camino del beacon) o alargar el banco a costa de la
+    bandeja o del telescopio. **Es una decisión de ACSAR**, no del modelo.
+14. **EL AISLAMIENTO DE LA CÁMARA A 1064 nm** (equipo de PAT). Es el número que
+    sostiene toda la elección de longitudes de onda de §3.9 —976 arriba, 1064
+    abajo— y hoy no está medido. Lo que decide es si un sensor que mide
+    microvatios puede convivir en el mismo brazo con 100 mW del beacon propio.
+15. **Confirmar la potencia del beacon de bajada** (100 mW son un supuesto) y
+    **si el cuarto puerto de D2 se instrumenta** con el fotodiodo o se tapa con
+    `trampa_luz_d2`. Lo segundo no cambia la geometría del brazo; lo primero sí
+    cambia el disipador del láser, que es lo que fija su envolvente.
 
 > **La lista de supuestos a sustituir, entera y con el valor concreto de cada
 > uno, está en `reports/06_pendientes.md` y en `reports/components_status.csv`.**
@@ -885,13 +1087,13 @@ y sirve `src/clau3d/visor/` en `http://localhost:8000`.
 
 **Por qué un visor propio y no uno de CadQuery.** Los visores genéricos enseñan
 sólidos. Aquí lo que hay que ver no es solo la forma: es **de dónde sale cada
-cota y qué falta**. El visor colorea por estado del dato, lista los 19
+cota y qué falta**. El visor colorea por estado del dato, lista los
 componentes sin envolvente con a quién pedírselos, marca el volumen libre como
 *techo* mientras `resumen.fiable` sea falso y muestra los chequeos con el mismo
 criterio que `reports/`. Un visor genérico no puede decir nada de eso.
 
 Desde el 2026-09-20 por la tarde tiene además un panel de **«números
-inventados aquí»**: los 61 supuestos, uno a uno, con qué falta y a quién
+inventados aquí»**: los 68 supuestos, uno a uno, con qué falta y a quién
 pedírselo. Es lo único que distingue en pantalla un cuerpo gris que está ahí
 porque alguien lo midió de uno que está ahí porque alguien se lo inventó; la
 geometría los enseña igual de sólidos a los dos.

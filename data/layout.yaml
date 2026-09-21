@@ -85,13 +85,17 @@ zonas:
       min: [-10.85, -47.70, -74.30]
       max: [110.85, 47.70, -19.30]
     nota: >-
-      Camino: colimador -> dicroico -> FSM -> telescopio, y del dicroico
-      sale el brazo del beacon hacia +-Y (camara arriba, laser de beacon
-      de bajada abajo). El FSM esta sobre el eje optico del telescopio (X
-      = +36.85) porque es el que dobla el haz de X a Z, y eso deja el
-      colimador y el dicroico en linea hacia +X. Margen contra la pared
-      +X: -0.5 mm. Los haces NO estan dibujados: sin diametro de haz, un
-      keep-out optico seria una medida inventada.
+      Canal cuantico: colimador -> D1 -> FSM -> telescopio. De D1 sale
+      hacia +Y UN SOLO brazo para los dos beacons, y dentro de el D2 los
+      separa: la camara en transmision (976 nm) y el laser de bajada
+      inyectando lateralmente en reflexion (1064 nm). Los dos cuartos
+      puertos llevan su trampa y su fotodiodo. El FSM esta sobre el eje
+      optico del telescopio (X = +36.85) porque es el que dobla el haz de
+      X a Z, y eso deja el colimador y D1 en linea hacia +X. Margen contra
+      la pared +X: -0.5 mm. EL BRAZO NO CABE: camara_beacon se sale por la
+      rama +Y en 16.8 mm y NO esta colocado. Apretarlo hasta que entrara,
+      o dibujarlo saliendose del satelite, seria esconder el resultado.
+      Ver el chequeo 'brazo_beacon' y CLAUDE.md 3.9.
 
   - id: z_payload_bandeja
     nombre: "Bandeja optica de fibra"
@@ -354,7 +358,7 @@ keep_out:
       min: [76.397, -5.0, -51.8]
       max: [81.397, 5.0, -41.8]
     nota: >-
-      Camino optico colimador -> dicroico (e01).
+      Camino optico colimador -> dicroico_d1 (e01).
   - id: haz_e02
     tipo: haz_libre
     estado: supuesto
@@ -366,7 +370,7 @@ keep_out:
       min: [48.397, -5.0, -51.8]
       max: [53.397, 5.0, -41.8]
     nota: >-
-      Camino optico dicroico -> fsm (e02).
+      Camino optico dicroico_d1 -> fsm (e02).
   - id: haz_e03
     tipo: haz_libre
     estado: supuesto
@@ -390,7 +394,47 @@ keep_out:
       min: [59.897, 11.5, -51.8]
       max: [69.897, 16.5, -41.8]
     nota: >-
-      Camino optico dicroico -> camara_beacon (e04).
+      Camino optico dicroico_d1 -> dicroico_d2 (e04). TRAMO COMPARTIDO:
+      lo recorren tambien e08 (dicroico_d2 -> dicroico_d1, 1064 nm). Es
+      el mismo tubo, asi que el volumen se declara una sola vez:
+      duplicarlo no reservaria nada nuevo y si generaria una invasion de
+      keep-out que no significa nada.
+  - id: haz_e07
+    tipo: haz_libre
+    estado: supuesto
+    fuente: >-
+      Tubo de 10 mm de lado (integracion.optica.diametro_haz_modelado,
+      SUPUESTO) en el hueco que queda entre las dos piezas. El diametro
+      de haz de cada tramo es TBD en data/connections.yaml.
+    caja:
+      min: [48.397, 23.0, -51.8]
+      max: [53.397, 33.0, -41.8]
+    nota: >-
+      Camino optico laser_beacon_bajada -> dicroico_d2 (e07).
+  - id: haz_e09
+    tipo: haz_libre
+    estado: supuesto
+    fuente: >-
+      Tubo de 10 mm de lado (integracion.optica.diametro_haz_modelado,
+      SUPUESTO) en el hueco que queda entre las dos piezas. El diametro
+      de haz de cada tramo es TBD en data/connections.yaml.
+    caja:
+      min: [59.897, -16.5, -51.8]
+      max: [69.897, -11.5, -41.8]
+    nota: >-
+      Camino optico dicroico_d1 -> trampa_luz_d1 (e09).
+  - id: haz_e10
+    tipo: haz_libre
+    estado: supuesto
+    fuente: >-
+      Tubo de 10 mm de lado (integracion.optica.diametro_haz_modelado,
+      SUPUESTO) en el hueco que queda entre las dos piezas. El diametro
+      de haz de cada tramo es TBD en data/connections.yaml.
+    caja:
+      min: [76.397, 23.0, -51.8]
+      max: [81.397, 33.0, -41.8]
+    nota: >-
+      Camino optico dicroico_d2 -> fotodiodo_monitor_beacon (e10).
   - id: haz_telescopio_colimado
     tipo: haz_libre
     estado: supuesto
@@ -519,7 +563,7 @@ colocaciones:
     centro: [36.85, 0.0, -46.8]
     rotacion: [0, 45, 0]
     zona: z_payload_banco
-  - componente: dicroico
+  - componente: dicroico_d1
     instancia: 1
     centro: [64.897, 0.0, -46.8]
     rotacion: [0, 0, 0]
@@ -529,14 +573,24 @@ colocaciones:
     centro: [95.397, 0.0, -46.8]
     rotacion: [0, 0, 0]
     zona: z_payload_banco
-  - componente: camara_beacon
+  - componente: dicroico_d2
     instancia: 1
-    centro: [64.897, 31.5, -46.8]
+    centro: [64.897, 28.0, -46.8]
+    rotacion: [0, 0, 0]
+    zona: z_payload_banco
+  - componente: trampa_luz_d1
+    instancia: 1
+    centro: [64.897, -24.0, -46.8]
     rotacion: [0, 0, 0]
     zona: z_payload_banco
   - componente: laser_beacon_bajada
     instancia: 1
-    centro: [64.897, -31.5, -46.8]
+    centro: [33.397, 28.0, -46.8]
+    rotacion: [0, 0, 0]
+    zona: z_payload_banco
+  - componente: fotodiodo_monitor_beacon
+    instancia: 1
+    centro: [87.397, 28.0, -46.8]
     rotacion: [0, 0, 0]
     zona: z_payload_banco
   - componente: telescopio_cassegrain

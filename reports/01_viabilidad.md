@@ -5,7 +5,7 @@ No editar a mano: los numeros salen de `data/components.yaml`.
 
 - Mision: CLAU - CubeSat Laser per a Aplicacions Ultrasegures
 - Norma: CubeSat Design Specification Rev. 14.1, The CubeSat Program, Cal Poly SLO
-- Estado del layout: **confirmada** (26 piezas colocadas)
+- Estado del layout: **confirmada** (28 piezas colocadas)
 
 Comprobaciones que no dependen de donde se coloque cada pieza.
 
@@ -13,13 +13,13 @@ Comprobaciones que no dependen de donde se coloque cada pieza.
 
 **Estado: ATENCION**
 
-Los 24 componentes con envolvente conocida ocupan 4302 cm3 de los 7644 cm3 interiores (56%). Quedan 3 componentes sin envolvente: el dato real sera mayor.
+Los 27 componentes con envolvente conocida ocupan 4301 cm3 de los 7644 cm3 interiores (56%). Quedan 3 componentes sin envolvente: el dato real sera mayor.
 
 | magnitud | valor |
 |---|---|
 | interior_cm3 | 7643.68 |
-| ocupado_conocido_cm3 | 4302.48 |
-| libre_si_nada_mas_creciera_cm3 | 3341.20 |
+| ocupado_conocido_cm3 | 4300.75 |
+| libre_si_nada_mas_creciera_cm3 | 3342.93 |
 | fraccion_ocupada | 0.56 |
 | componentes_sin_volumen | 3 |
 
@@ -126,22 +126,54 @@ Falta: Paso de apilamiento PC104 del chasis elegido
 
 **Estado: OK**
 
-El FSM va sobre el eje optico del telescopio (X = +36.85 mm) porque es el que dobla el haz de X a Z. Del eje a la pared +X de la columna hay 74.0 mm, y la media anchura del FSM mas el dicroico mas el colimador suman 66.3 mm, sin contar holguras de montaje. Quedan 7.7 mm de margen.
+El FSM va sobre el eje optico del telescopio (X = +36.85 mm) porque es el que dobla el haz de X a Z. Del eje a la pared +X de la columna hay 74.0 mm, y la media anchura del FSM mas el D1 mas el colimador suman 66.3 mm, sin contar holguras de montaje. Quedan 7.7 mm de margen.
 
 | magnitud | valor |
 |---|---|
 | fsm | 15.29 |
-| dicroico | 23.00 |
+| dicroico_d1 | 23.00 |
 | colimador | 28.00 |
 | necesario_mm | 66.29 |
 | disponible_mm | 74.00 |
 | margen_mm | 7.71 |
+| laser_beacon_bajada_mm | 30.00 |
+| margen_-X_D2_mm | 32.99 |
+| fotodiodo_monitor_beacon_mm | 12.00 |
+| margen_+X_D2_mm | 23.71 |
+
+## Brazo compartido de los dos beacons, de D1 a la pared del banco
+
+**Estado: FALLA**
+
+Los dos beacons comparten el brazo que refleja D1, y dentro de el D2 los separa. La rama mas apretada es +Y: pide 54.5 mm desde el centro de su divisor y tiene 47.7 mm, sin contar holguras de montaje. NO CABE por 6.8 mm. Y ya esta contada la reserva de la camara bajada de 30 a 20 mm. Las salidas son plegar el brazo hacia -Z con un espejo de doblado (da unos 27.5 mm mas, a costa de una superficie reflectante mas en el camino del beacon) o alargar el banco, que se paga con la bandeja o con la longitud reservada al telescopio. Las dos son decisiones de ACSAR; bajar otra reserva hasta que esto pase, no. Con las holguras de montaje el deficit es mayor todavia, asi que data/layout.yaml NO coloca camara_beacon: una pieza sin sitio no se dibuja en uno inventado ni saliendose del satelite.
+
+| magnitud | valor |
+|---|---|
+| dicroico_d2_mm | 23.00 |
+| camara_beacon_mm | 20.00 |
+| necesario_+Y_mm | 54.50 |
+| disponible_+Y_mm | 47.70 |
+| margen_+Y_mm | -6.80 |
+| trampa_luz_d1_mm | 15.00 |
+| necesario_-Y_mm | 26.50 |
+| disponible_-Y_mm | 47.70 |
+| margen_-Y_mm | 21.20 |
+| laser_beacon_bajada_mm | 30.00 |
+| necesario_-X_mm | 41.50 |
+| disponible_-X_mm | 74.49 |
+| margen_-X_mm | 32.99 |
+| fotodiodo_monitor_beacon_mm | 12.00 |
+| necesario_+X_mm | 23.50 |
+| disponible_+X_mm | 47.21 |
+| margen_+X_mm | 23.71 |
+
+Falta: Decision de ACSAR: plegar el brazo hacia -Z o alargar el banco
 
 ## Configuracion optica del telescopio
 
 **Estado: OK**
 
-Afocal tipo Mersenne: dos parabolas confocales, M = 9.00. Entra colimado y sale colimado, asi que NO hay foco real dentro del satelite y no hace falta ninguna lente de enfoque en el banco. El foco comun de las dos conicas es VIRTUAL y por eso el modelo no dibuja ningun marcador ahi: no hay nada. Obstruccion lineal 0.156 (secundario de 14.0 mm sobre 90 mm), o sea 0.21 dB en amplitud de campo (0.11 dB en potencia).
+Afocal tipo Mersenne: dos parabolas confocales, M = 9.00. Entra colimado y sale colimado, asi que NO hay foco real dentro del satelite y no hace falta ninguna lente de enfoque en el banco. El foco comun de las dos conicas es VIRTUAL y por eso el modelo no dibuja ningun marcador ahi: no hay nada. Obstruccion lineal 0.156 (secundario de 14.0 mm sobre 90 mm). Cuesta 0.11 dB de potencia recogida y 0.21 dB de intensidad en el eje en campo lejano. Son DOS magnitudes distintas, las dos en potencia, y para un enlace optico manda la segunda: lo que llega al receptor es la intensidad en el eje.
 
 | magnitud | valor |
 |---|---|
@@ -150,7 +182,8 @@ Afocal tipo Mersenne: dos parabolas confocales, M = 9.00. Entra colimado y sale 
 | focal_secundario_mm | 22.22 |
 | separacion_mm | 177.78 |
 | obstruccion_lineal | 0.16 |
-| perdida_obstruccion_dB_amplitud | 0.21 |
+| perdida_potencia_recogida_dB | 0.11 |
+| perdida_intensidad_en_eje_dB | 0.21 |
 
 ## Longitud del telescopio frente a la reservada
 
@@ -208,16 +241,16 @@ Falta: Radio minimo de curvatura de la fibra elegida
 
 **Estado: ATENCION**
 
-Masa conocida 846 g de un limite de 12000 g (CDS 14.1). Faltan 25 componentes por pesar, incluido el chasis y el telescopio, que son de los mas pesados.
+Masa conocida 846 g de un limite de 12000 g (CDS 14.1). Faltan 28 componentes por pesar, incluido el chasis y el telescopio, que son de los mas pesados.
 
 | magnitud | valor |
 |---|---|
 | masa_conocida_g | 845.90 |
 | limite_g | 12000.00 |
 | margen_g | 11154.10 |
-| componentes_sin_masa | 25.00 |
+| componentes_sin_masa | 28.00 |
 
-Falta: Masa de: estructura_6u, adcs_iadcs400, antena_quasar_wsant, radio_uhf_pulsar_vutrx, paneles_photon_side, propulsion, telescopio_cassegrain, fsm, dicroico, camara_beacon, laser_beacon_bajada, colimador, bandeja_optica, laser_dfb_1550, mod_intensidad_mxer_ln_10, mod_fase_mpz_ln_10, voa, aislador, filtro_espectral, acoplador_monitor, pcb1_control_qkd, pcb2_drivers_opticos, pcb3_pat, cables_rf_moduladores, qrng_idq20mc1_s3
+Falta: Masa de: estructura_6u, adcs_iadcs400, antena_quasar_wsant, radio_uhf_pulsar_vutrx, paneles_photon_side, propulsion, telescopio_cassegrain, fsm, dicroico_d1, dicroico_d2, camara_beacon, laser_beacon_bajada, fotodiodo_monitor_beacon, trampa_luz_d1, colimador, bandeja_optica, laser_dfb_1550, mod_intensidad_mxer_ln_10, mod_fase_mpz_ln_10, voa, aislador, filtro_espectral, acoplador_monitor, pcb1_control_qkd, pcb2_drivers_opticos, pcb3_pat, cables_rf_moduladores, qrng_idq20mc1_s3
 
 ## STEP de fabricante frente al manifiesto
 
