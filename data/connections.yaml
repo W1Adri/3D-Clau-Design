@@ -85,6 +85,56 @@ meta:
         autoestados de la fibra. El tramo que los une es el mas corto que
         permita la fabricacion, y va recto.
 
+  # -------------------------------------------------------------------
+  # TOPOLOGIA DEL BRAZO DE LOS BEACONS
+  # -------------------------------------------------------------------
+  # UN SOLO SITIO. Hasta el 2026-09-21 esto estaba escrito DOS VECES: como
+  # RAMAS_BRAZO en tools/generar_layout.py y, a mano, dentro de
+  # chequeo_brazo_beacon en src/clau3d/analysis/fit.py, que daba por hecho que
+  # la rama +Y era la de la camara. Al invertir D2 y mover la camara a -X las
+  # dos copias dejaron de decir lo mismo, y el chequeo habria seguido midiendo
+  # una geometria que ya no existia. Ahora las dos lo leen de aqui.
+  #
+  # Cada rama sale de una pieza ESTACION por una CARA y crece hacia fuera. Una
+  # pieza colocada en una rama puede ser estacion de otra: D2 lo es de dos. El
+  # orden importa, porque una rama no se puede colocar hasta que su estacion
+  # esta colocada.
+  topologia_brazo_beacons:
+    - estacion: dicroico_d1
+      cara: "+Y"
+      piezas: [dicroico_d2, colimador_beacon_bajada]
+      motivo: >-
+        El brazo compartido de los dos beacons, que es lo que D1 refleja.
+        Dentro de el, D2 los separa. Detras de D2 va el colimador del beacon de
+        BAJADA, que le inyecta por +Y para que D2 lo transmita hacia D1: es el
+        sitio que deja libre la camara al pasar a reflexion. Es la rama que
+        aprieta, porque desde el centro de D1 solo hay 47.7 mm hasta la pared.
+    - estacion: dicroico_d1
+      cara: "-Y"
+      piezas: [trampa_luz_d1]
+      motivo: >-
+        Cuarto puerto de D1, el opuesto al brazo: la fuga en reflexion del 1550.
+    - estacion: dicroico_d2
+      cara: "-X"
+      piezas: [camara_beacon]
+      motivo: >-
+        El beacon de SUBIDA, que D2 refleja. La camara esta aqui y no en +Y
+        desde el 2026-09-21: es la pieza gorda del brazo (30 mm segun su eje) y
+        en fila detras de D2 no cabia, mientras que en -X hay unos 71 mm hasta
+        la pared del banco. Va CENTRADA en el eje de D2, o sea a 21 mm del
+        plano optico, y por eso su seccion no puede pasar de 26 mm: con mas
+        baja hasta meterse dentro del FSM.
+    - estacion: dicroico_d2
+      cara: "+X"
+      piezas: [fotodiodo_monitor_beacon]
+      motivo: >-
+        Cuarto puerto de D2, el que recibe la fuga del beacon de bajada. Sigue
+        siendo el fotodiodo despues de invertir D2, y no por casualidad: en un
+        divisor a 45 grados los pares de reflexion son FIJOS (-Y con -X, +Y con
+        +X), asi que el beacon que entra por +Y tiene su fuga en reflexion en
+        +X en las dos configuraciones. Lo que nunca puede pasar es que esa fuga
+        apunte a la camara.
+
 # ---------------------------------------------------------------------
 # 1. CADENA OPTICA EN FIBRA
 # ---------------------------------------------------------------------
@@ -182,6 +232,30 @@ opticas_fibra:
       Cuanta fibra es tolerable aqui NO SE PUEDE DECIR todavia: falta
       'integracion.fibra.sensibilidad_termica_fase_pm', que es TBD.
 
+  # EL UNICO TRAMO DE FIBRA QUE NO ES DEL CANAL CUANTICO. Lleva
+  # 'cadena: beacon_bajada' para que los chequeos de orden no lo metan en la
+  # cadena del transmisor: no comparte ni una restriccion con ella.
+  - id: f08
+    desde: laser_beacon_bajada
+    hasta: colimador_beacon_bajada
+    tipo: fibra_sm
+    cadena: beacon_bajada
+    union: fusion
+    longitud_onda_nm: 1064
+    nota: >-
+      TRAVESIA DE ZONA del beacon de bajada: el modulo esta en la BANDEJA, en
+      la fila del DFB, y su colimador en el BANCO, detras de D2. Se parte asi
+      desde el 2026-09-21 para sacar el disipador del beacon fuera del banco
+      optico y para que en el brazo solo quede un cilindro de 12 mm; ver
+      CLAUDE.md 3.11.
+      FIBRA MONOMODO A 1064 Y NO CRITICA EN POLARIZACION: un beacon es una
+      baliza de potencia, no lleva informacion en el estado, asi que da igual
+      lo que la birrefringencia le haga a la polarizacion por el camino. Es el
+      UNICO tramo de fibra del payload cuyo encaminamiento es libre: no hay que
+      alinear ejes, no hay que mantenerlo corto y no hay que mantenerlo recto.
+      Lo unico que le aplica es el radio minimo de curvatura, que es el mismo
+      TBD de siempre ('integracion.fibra.radio_minimo_curvatura').
+
 # ---------------------------------------------------------------------
 # 2. CAMINO OPTICO EN ESPACIO LIBRE
 # ---------------------------------------------------------------------
@@ -197,9 +271,23 @@ opticas_fibra:
 #   canal cuantico  colimador --e01--> espejo --e02--> D1 --e03--> FSM
 #                                      --e04--> telescopio --e05--> EXTERIOR
 #   beacon subida               D1 --e06--> D2 --e07--> camara      (976 nm)
-#   beacon bajada     laser --e08--> D2 --e09--> D1 -> FSM          (1064 nm)
+#   beacon bajada  colimador_bb --e08--> D2 --e09--> D1 -> FSM      (1064 nm)
 #   fugas                       D1 --e10--> trampa_luz_d1           (1550 en reflexion)
-#                               D2 --e11--> fotodiodo_monitor_beacon (beacon en transmision)
+#                               D2 --e11--> fotodiodo_monitor_beacon (beacon en reflexion)
+#
+# D2 INVERTIDO EL 2026-09-21 [DECISION ACSAR]: pasa de paso corto a PASO
+# LARGO, asi que el 976 de subida ya no lo atraviesa hacia la camara sino que
+# se REFLEJA hacia -X, y el 1064 de bajada ya no se refleja sino que lo
+# ATRAVIESA desde +Y hacia -Y. Los ids de los tramos NO cambian -- e07 sigue
+# siendo "D2 a la camara" y e08 "el beacon de bajada hacia D2" --; lo que
+# cambia es por que puerto va cada uno y de donde sale e08, que ahora no es el
+# laser entero sino su colimador. Renumerarlos no habria anadido nada y habria
+# invalidado todas las referencias del catalogo. Ver CLAUDE.md 3.11.
+#
+# LOS PARES DE REFLEXION SON FIJOS, y de ahi sale toda la geometria del brazo:
+# en un divisor a 45 grados lo que entra por -Y se refleja a -X y lo que entra
+# por +Y se refleja a +X. Por eso la fuga del beacon acaba en el fotodiodo
+# (+X) en las dos configuraciones, y nunca en la camara.
 #
 # Los cuatro puertos de cada divisor tienen destino declarado, y hay un test
 # que lo comprueba: un puerto sin destino no desaparece porque no se dibuje.
@@ -294,21 +382,29 @@ opticas_espacio_libre:
     diametro_haz_mm: {valor: null, estado: TBD, falta: Diametro del haz de beacon, pedir_a: Equipo de PAT de ACSAR}
     keep_out: true
     nota: >-
-      El beacon de subida ATRAVIESA D2 (paso corto, borde ~1020 nm) y sigue en
-      linea recta hasta la camara. El filtro de banda estrecha de 976 nm va
-      DENTRO de la reserva de 'camara_beacon', no como pieza suelta: modelarlo
-      aparte anade una pieza mas a la fila del brazo, que ya no cabe.
+      El beacon de subida SE REFLEJA en D2 (paso largo, borde ~1020 nm) y sale
+      por -X hasta la camara. ANTES iba en transmision, recto por +Y, y ahi la
+      camara no cabia: es el cambio del 2026-09-21. El filtro de banda estrecha
+      de 976 nm va DENTRO de la reserva de 'camara_beacon', no como pieza
+      suelta: modelarlo aparte anade una pieza mas al brazo.
+      Reflexion tiene ademas una ventaja que no se busco: el beacon de subida
+      toca una superficie menos de sustrato antes de llegar al sensor que mide
+      microvatios.
 
   - id: e08
-    desde: laser_beacon_bajada
+    desde: colimador_beacon_bajada
     hasta: dicroico_d2
     tipo: haz_libre
     longitud_onda_nm: 1064
     diametro_haz_mm: {valor: null, estado: TBD, falta: Diametro del haz de beacon, pedir_a: Equipo de PAT de ACSAR}
     keep_out: true
     nota: >-
-      Inyeccion LATERAL en D2 segun X. Es el unico tramo del beacon de bajada
-      que no comparte camino con nada.
+      Inyeccion EN LINEA con el brazo: el colimador esta detras de D2 en +Y y
+      emite hacia -Y, y D2 lo TRANSMITE hacia D1. Antes era una inyeccion
+      lateral segun X desde el laser entero; desde el 2026-09-21 el laser es un
+      modulo fiberizado que vive en la bandeja (f08) y aqui solo esta su
+      colimador. Es el unico tramo del beacon de bajada que no comparte camino
+      con nada.
 
   - id: e09
     desde: dicroico_d2
@@ -319,8 +415,13 @@ opticas_espacio_libre:
     keep_out: false
     keep_out_compartido_con: e06
     nota: >-
-      D2 refleja el beacon de bajada hacia -Y, de vuelta a D1, que lo refleja
-      otra vez hacia el FSM y el telescopio. RECORRE EL MISMO TRAMO FISICO QUE
+      D2 TRANSMITE el beacon de bajada hacia -Y, de vuelta a D1, que lo refleja
+      hacia el FSM y el telescopio. Lo transmite y no lo refleja desde que D2
+      es paso largo (2026-09-21), y EL PRECIO ES ESTE TRAMO: el beacon
+      atraviesa el sustrato, o sea una cara mas con recubrimiento y un fantasma
+      mas de la cara trasera. Los dos se los come el beacon, que es una baliza
+      de 100 mW; el canal cuantico no pasa por D2 y no se entera.
+      RECORRE EL MISMO TRAMO FISICO QUE
       e06 EN SENTIDO CONTRARIO, asi que no lleva keep-out propio: comparte el
       de e06. Un segundo volumen sobre el mismo tubo no reserva nada nuevo y si
       genera una invasion de keep-out que no significa nada.
@@ -346,9 +447,15 @@ opticas_espacio_libre:
     diametro_haz_mm: {valor: null, estado: TBD, falta: Diametro del haz de beacon, pedir_a: Equipo de PAT de ACSAR}
     keep_out: true
     nota: >-
-      Cuarto puerto de D2, el opuesto al laser: la fuga en TRANSMISION del
-      beacon de bajada. Instrumentarla con un fotodiodo da telemetria de salud
-      del beacon sin tocar el haz util. Si no se instrumenta, ese puerto
+      Cuarto puerto de D2, el opuesto al colimador del beacon: la fuga en
+      REFLEXION del beacon de bajada, que entra por +Y y por tanto tiene su par
+      de reflexion en +X. SIGUE SIENDO EL FOTODIODO despues de invertir D2, y
+      eso no es suerte: los pares de reflexion de un divisor a 45 grados son
+      fijos, asi que la fuga directa del beacon sale por el cuarto puerto en
+      las dos configuraciones y en ninguna apunta a la camara. Lo que cambia es
+      solo si la fuga es en transmision o en reflexion.
+      Instrumentarla con un fotodiodo da telemetria de salud del beacon sin
+      tocar el haz util. Si no se instrumenta, ese puerto
       necesita igualmente una trampa: 'trampa_luz_d2', declarada en el catalogo
       como alternativa EXCLUYENTE del fotodiodo.
 
@@ -502,9 +609,17 @@ potencia:
 # 6. CONTROL TERMICO
 # ---------------------------------------------------------------------
 termico:
+  # PARTIDA EN DOS el 2026-09-21. Hasta entonces t01 declaraba una sola zona
+  # "bandeja_optica" con el laser y los dos moduladores dentro, y eso llevaba
+  # desfasado desde el 2026-09-20: los moduladores estan en la FRANJA, no en la
+  # bandeja, y las dos zonas no tienen ni el mismo problema termico ni la misma
+  # vecindad. La bandeja es donde esta TODO EL CALOR (4.1 W del DFB mas el
+  # beacon) y esta lejos del barrilete; la franja no disipa casi nada y esta
+  # PEGADA al barrilete, que es lo que quiere estabilidad. Declararlas juntas
+  # escondia justamente el riesgo abierto de CLAUDE.md 3.6.
   - id: t01
     zona: bandeja_optica
-    componentes: [mod_intensidad_mxer_ln_10, mod_fase_mpz_ln_10, laser_dfb_1550]
+    componentes: [laser_dfb_1550, laser_beacon_bajada]
     rango_requerido:
       valor: [0.0, 70.0]
       unidad: C
@@ -512,8 +627,37 @@ termico:
       fuente: Ficha Exail grado espacial MXER-LN-10 (extincion garantizada)
     controlado_por: pcb2_drivers_opticos
     nota: >-
-      La bandeja necesita lazo termico propio. Reservar espacio para sensores y
-      calefactores. Ubicacion exacta pendiente de fijar la distribucion.
+      LA ZONA DE LAS FUENTES, y por tanto la que disipa: el DFB con sus 4.1 W
+      es el mayor consumo del payload y el modulo del beacon de bajada anade lo
+      suyo. Los dos se atornillan a la placa, que les hace de disipador, y los
+      dos estan en el extremo -Z, lo mas lejos posible del barrilete del
+      telescopio. Aqui el problema es EVACUAR, no estabilizar.
+      El rango es todavia el de la extincion del MXER, que ya no esta en esta
+      zona: hace falta el rango propio del DFB y el del modulo de beacon.
+      Reservar espacio para sensores y calefactores.
+    estado_ubicacion: TBD
+
+  - id: t03
+    zona: franja_lateral
+    componentes: [mod_intensidad_mxer_ln_10, acoplador_monitor, voa, mod_fase_mpz_ln_10]
+    rango_requerido:
+      valor: [0.0, 70.0]
+      unidad: C
+      estado: confirmado
+      fuente: Ficha Exail grado espacial MXER-LN-10 (extincion garantizada)
+    controlado_por: pcb2_drivers_opticos
+    nota: >-
+      LA ZONA DE LA CADENA, y aqui el problema es el contrario: casi no disipa
+      -- los moduladores de niobato apenas consumen y los drivers estan en
+      PCB-2, en la otra columna -- pero esta PEGADA AL BARRILETE del
+      telescopio, que quiere estabilidad termica. Es el riesgo abierto de
+      CLAUDE.md 3.6, ahora declarado donde se puede ver.
+      EL MPZ ES LA PIEZA MAS SENSIBLE DE LAS CUATRO, y no por su extincion: es
+      el codificador de polarizacion, y en niobato el punto de trabajo en fase
+      deriva con la temperatura igual que el bias del MXER deriva en voltaje.
+      Una deriva de fase en el codificador es una rotacion de los cuatro
+      estados BB84, o sea QBER. El rango de 0 a 70 C que hereda del MXER es la
+      extincion, no la estabilidad de fase, y eso ultimo es lo que falta.
     estado_ubicacion: TBD
 
   - id: t02

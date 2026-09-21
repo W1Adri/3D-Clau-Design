@@ -34,7 +34,7 @@ meta:
     porque todo componente de fibra tiene que ir antes del codificador de
     polarizacion y despues de el la fibra no se puede curvar. Asi la
     cadena cruza de zona una sola vez, y esa vez es pre-codificacion.
-    El telescopio reserva 200 mm. PCB-2 sigue
+    El telescopio reserva 227 mm. PCB-2 sigue
     en la otra columna, con lo que el coaxial RF cruza el satelite a lo
     ancho.
 
@@ -58,10 +58,10 @@ zonas:
   - id: z_payload_telescopio
     nombre: "Telescopio"
     caja:
-      min: [-10.85, -47.70, -19.30]
+      min: [-10.85, -47.70, -46.30]
       max: [84.55, 47.70, 180.70]
     nota: >-
-      Telescopio Cassegrain apuntando por +Z. 200 mm RESERVADOS en Z (dato
+      Telescopio Cassegrain apuntando por +Z. 227 mm RESERVADOS en Z (dato
       'longitud_reservada', estado decision, provisional hasta el STEP).
       OJO: los "~2U" del brief son ~227 mm con la U de longitud de la CDS
       (113.5 mm), no 200. Esta zona mide 95.4 mm en X, que es el mayor
@@ -74,7 +74,7 @@ zonas:
   - id: z_payload_franja
     nombre: "Franja lateral - modulacion, monitorizacion, atenuacion y codificacion"
     caja:
-      min: [84.55, -47.70, -19.30]
+      min: [84.55, -47.70, -46.30]
       max: [110.85, 47.70, 180.70]
     nota: >-
       Los 26.3 mm de X que quedan al lado del telescopio, a lo largo de
@@ -89,16 +89,15 @@ zonas:
       franja tiene 26.3 mm de X contra 95.4 mm de Y, y la X del
       codificador esta PINCHADA por la coaxialidad con el colimador. Los
       bucles de fibra van en el plano Y-Z por el mismo motivo: con el
-      radio modelado hacen falta 60 mm de diametro y en X no caben. EL
-      TRAMO RECTO NO CABE: mod_fase_mpz_ln_10 se sale por 18.0 mm y NO
-      esta colocado. Ver el chequeo 'fibra_post_codificacion' y CLAUDE.md
-      3.10.
+      radio modelado hacen falta 60 mm de diametro y en X no caben. El
+      tramo recto del codificador al colimador cabe: pide 218.0 mm de los
+      227.0 que hay.
 
   - id: z_payload_banco
     nombre: "Banco optico de espacio libre"
     caja:
-      min: [-10.85, -47.70, -74.30]
-      max: [110.85, 47.70, -19.30]
+      min: [-10.85, -47.70, -101.30]
+      max: [110.85, 47.70, -46.30]
     nota: >-
       Canal cuantico: el colimador baja el haz segun -Z desde la franja,
       el espejo de plegado lo dobla hacia -X y de ahi D1 -> FSM ->
@@ -108,19 +107,16 @@ zonas:
       dos cuartos puertos llevan su trampa y su fotodiodo. El FSM esta
       sobre el eje optico del telescopio (X = +36.85) porque es el que
       dobla el haz de X a Z, y eso deja D1 y el espejo de plegado en linea
-      hacia +X. Margen contra la pared +X: 7.5 mm. EL BRAZO NO CABE:
-      camara_beacon se sale por la rama +Y en 16.8 mm y NO esta colocado.
-      Apretarlo hasta que entrara, o dibujarlo saliendose del satelite,
-      seria esconder el resultado. Ver el chequeo 'brazo_beacon' y
-      CLAUDE.md 3.9.
+      hacia +X. Margen contra la pared +X: 5.3 mm. El brazo de los beacons
+      cabe entero.
 
   - id: z_payload_bandeja
     nombre: "Bandeja optica de fibra"
     caja:
       min: [-10.85, -47.70, -180.70]
-      max: [110.85, 47.70, -74.30]
+      max: [110.85, 47.70, -101.30]
     nota: >-
-      106.4 mm de Z con los 121.7 mm de ancho enteros. Desde el 2026-09-21
+      79.4 mm de Z con los 121.7 mm de ancho enteros. Desde el 2026-09-21
       aqui esta SOLO LA FUENTE: el laser DFB, el aislador y el filtro.
       Todo lo que modula, monitoriza, atenua y codifica esta en la franja,
       asi que la cadena cruza de zona UNA SOLA VEZ, y esa vez cae en el
@@ -128,7 +124,7 @@ zonas:
       avanzan segun Z en el orden y el sentido de la cadena: el laser al
       extremo -Z, lo mas lejos posible del barrilete porque con sus 4.1 W
       es la principal fuente de calor del payload, y la salida hacia la
-      franja en +Z. Quedan 43.6 mm de Z libres al final para los bucles,
+      franja en +Z. Quedan 16.6 mm de Z libres al final para los bucles,
       mas los huecos entre filas. Cuanta fibra cabe ahi NO se puede decir:
       falta el radio minimo de curvatura. Zona con control termico propio.
 
@@ -150,8 +146,8 @@ keep_out:
       DIRECCION tampoco es un dato: se toma el eje de fibra que declara
       'montaje', porque el encaminamiento real esta sin decidir.
     caja:
-      min: [68.7, -40.8, -180.7]
-      max: [110.85, 19.2, -123.05]
+      min: [32.55, -40.8, -180.7]
+      max: [82.55, 19.2, -123.05]
     nota: >-
       Puerto de salida de fibra de laser_dfb_1550, recortado a la zona
       z_payload_bandeja.
@@ -168,7 +164,7 @@ keep_out:
       'montaje', porque el encaminamiento real esta sin decidir.
     caja:
       min: [-10.85, -41.95, -150.65]
-      max: [-4.85, 18.05, -90.65]
+      max: [-4.85, 18.05, -101.3]
     nota: >-
       Puerto de entrada de fibra de aislador, recortado a la zona
       z_payload_bandeja.
@@ -185,7 +181,7 @@ keep_out:
       'montaje', porque el encaminamiento real esta sin decidir.
     caja:
       min: [30.15, -41.95, -150.65]
-      max: [80.15, 18.05, -90.65]
+      max: [80.15, 18.05, -101.3]
     nota: >-
       Puerto de salida de fibra de aislador, recortado a la zona
       z_payload_bandeja.
@@ -202,7 +198,7 @@ keep_out:
       'montaje', porque el encaminamiento real esta sin decidir.
     caja:
       min: [14.85, -41.95, -150.65]
-      max: [64.85, 18.05, -90.65]
+      max: [64.85, 18.05, -101.3]
     nota: >-
       Puerto de entrada de fibra de filtro_espectral, recortado a la
       zona z_payload_bandeja.
@@ -219,7 +215,7 @@ keep_out:
       'montaje', porque el encaminamiento real esta sin decidir.
     caja:
       min: [104.85, -41.95, -150.65]
-      max: [110.85, 18.05, -90.65]
+      max: [110.85, 18.05, -101.3]
     nota: >-
       Puerto de salida de fibra de filtro_espectral, recortado a la zona
       z_payload_bandeja.
@@ -235,8 +231,8 @@ keep_out:
       DIRECCION tampoco es un dato: se toma el eje de fibra que declara
       'montaje', porque el encaminamiento real esta sin decidir.
     caja:
-      min: [84.55, -47.7, 110.7]
-      max: [97.7, 7.0, 160.7]
+      min: [84.55, -47.7, 83.7]
+      max: [97.7, 7.0, 133.7]
     nota: >-
       Puerto de entrada de fibra de mod_intensidad_mxer_ln_10, recortado
       a la zona z_payload_franja.
@@ -252,8 +248,8 @@ keep_out:
       DIRECCION tampoco es un dato: se toma el eje de fibra que declara
       'montaje', porque el encaminamiento real esta sin decidir.
     caja:
-      min: [97.7, 5.5, 40.7]
-      max: [110.85, 47.7, 90.7]
+      min: [97.7, 5.5, 13.7]
+      max: [110.85, 47.7, 63.7]
     nota: >-
       Puerto de entrada de fibra de acoplador_monitor, recortado a la
       zona z_payload_franja.
@@ -269,8 +265,8 @@ keep_out:
       DIRECCION tampoco es un dato: se toma el eje de fibra que declara
       'montaje', porque el encaminamiento real esta sin decidir.
     caja:
-      min: [97.7, -1.75, 83.7]
-      max: [110.85, 47.7, 133.7]
+      min: [97.7, -1.75, 56.7]
+      max: [110.85, 47.7, 106.7]
     nota: >-
       Puerto de entrada de fibra de voa, recortado a la zona
       z_payload_franja.
@@ -286,11 +282,62 @@ keep_out:
       DIRECCION tampoco es un dato: se toma el eje de fibra que declara
       'montaje', porque el encaminamiento real esta sin decidir.
     caja:
-      min: [97.7, -1.75, -1.3]
-      max: [110.85, 47.7, 48.7]
+      min: [97.7, -1.75, -28.3]
+      max: [110.85, 47.7, 21.7]
     nota: >-
       Puerto de salida de fibra de voa, recortado a la zona
       z_payload_franja.
+  - id: fibra_mod_fase_mpz_ln_10_entrada
+    tipo: fibra
+    estado: supuesto
+    fuente: >-
+      Tramo recto de 20 mm (integracion.fibra.longitud_boot_modelada)
+      mas el envolvente de un codo de 30 mm
+      (integracion.fibra.radio_curvatura_modelado). Los dos son
+      SUPUESTOS: el radio de verdad es
+      integracion.fibra.radio_minimo_curvatura, que sigue siendo TBD. La
+      DIRECCION tampoco es un dato: se toma el eje de fibra que declara
+      'montaje', porque el encaminamiento real esta sin decidir.
+    caja:
+      min: [95.6, -30.0, 171.7]
+      max: [110.85, 30.0, 180.7]
+    nota: >-
+      Puerto de entrada de fibra de mod_fase_mpz_ln_10, recortado a la
+      zona z_payload_franja.
+  - id: fibra_laser_beacon_bajada_salida
+    tipo: fibra
+    estado: supuesto
+    fuente: >-
+      Tramo recto de 20 mm (integracion.fibra.longitud_boot_modelada)
+      mas el envolvente de un codo de 30 mm
+      (integracion.fibra.radio_curvatura_modelado). Los dos son
+      SUPUESTOS: el radio de verdad es
+      integracion.fibra.radio_minimo_curvatura, que sigue siendo TBD. La
+      DIRECCION tampoco es un dato: se toma el eje de fibra que declara
+      'montaje', porque el encaminamiento real esta sin decidir.
+    caja:
+      min: [104.85, -37.2, -180.7]
+      max: [110.85, 22.8, -123.05]
+    nota: >-
+      Puerto de salida de fibra de laser_beacon_bajada, recortado a la
+      zona z_payload_bandeja.
+  - id: fibra_colimador_beacon_bajada_entrada
+    tipo: fibra
+    estado: supuesto
+    fuente: >-
+      Tramo recto de 20 mm (integracion.fibra.longitud_boot_modelada)
+      mas el envolvente de un codo de 30 mm
+      (integracion.fibra.radio_curvatura_modelado). Los dos son
+      SUPUESTOS: el radio de verdad es
+      integracion.fibra.radio_minimo_curvatura, que sigue siendo TBD. La
+      DIRECCION tampoco es un dato: se toma el eje de fibra que declara
+      'montaje', porque el encaminamiento real esta sin decidir.
+    caja:
+      min: [31.397, 46.0, -101.3]
+      max: [91.397, 47.7, -46.3]
+    nota: >-
+      Puerto de entrada de fibra de colimador_beacon_bajada, recortado a
+      la zona z_payload_banco.
   - id: coaxial_mod_intensidad_mxer_ln_10
     tipo: coaxial
     estado: supuesto
@@ -299,96 +346,120 @@ keep_out:
       (integracion.coaxial.radio_curvatura_modelado, SUPUESTO). El
       conector SI es dato: 6.1 x 10 mm del plano de Exail.
     caja:
-      min: [84.55, -47.7, 20.7]
-      max: [110.85, -40.5, 70.7]
+      min: [84.55, -47.7, -6.3]
+      max: [110.85, -40.5, 43.7]
     nota: >-
       Salida del conector RF de mod_intensidad_mxer_ln_10 hacia PCB-2.
+  - id: coaxial_mod_fase_mpz_ln_10
+    tipo: coaxial
+    estado: supuesto
+    fuente: >-
+      Envolvente de un codo de 25 mm a la salida del conector RF
+      (integracion.coaxial.radio_curvatura_modelado, SUPUESTO). El
+      conector SI es dato: 6.1 x 10 mm del plano de Exail.
+    caja:
+      min: [84.55, 17.5, 81.7]
+      max: [110.85, 42.5, 131.7]
+    nota: >-
+      Salida del conector RF de mod_fase_mpz_ln_10 hacia PCB-2.
   - id: haz_e02
     tipo: haz_libre
     estado: supuesto
     fuente: >-
-      Tubo de 10 mm de lado (integracion.optica.diametro_haz_modelado,
+      Tubo de 7 mm de lado (integracion.optica.diametro_haz_modelado,
       SUPUESTO) en el hueco que queda entre las dos piezas. El diametro
       de haz de cada tramo es TBD en data/connections.yaml.
     caja:
-      min: [76.397, -5.0, -51.8]
-      max: [81.397, 5.0, -41.8]
+      min: [69.397, -3.5, -77.3]
+      max: [87.55, 3.5, -70.3]
     nota: >-
       Camino optico espejo_plegado_cuantico -> dicroico_d1 (e02).
   - id: haz_e03
     tipo: haz_libre
     estado: supuesto
     fuente: >-
-      Tubo de 10 mm de lado (integracion.optica.diametro_haz_modelado,
+      Tubo de 7 mm de lado (integracion.optica.diametro_haz_modelado,
       SUPUESTO) en el hueco que queda entre las dos piezas. El diametro
       de haz de cada tramo es TBD en data/connections.yaml.
     caja:
-      min: [48.397, -5.0, -51.8]
-      max: [53.397, 5.0, -41.8]
+      min: [48.397, -3.5, -77.3]
+      max: [53.397, 3.5, -70.3]
     nota: >-
       Camino optico dicroico_d1 -> fsm (e03).
   - id: haz_e04
     tipo: haz_libre
     estado: supuesto
     fuente: >-
-      Tubo de 10 mm de lado (integracion.optica.diametro_haz_modelado,
+      Tubo de 7 mm de lado (integracion.optica.diametro_haz_modelado,
       SUPUESTO) en el hueco que queda entre las dos piezas. El diametro
       de haz de cada tramo es TBD en data/connections.yaml.
     caja:
-      min: [31.85, -5.0, -35.253]
-      max: [41.85, 5.0, -19.3]
+      min: [33.35, -3.5, -62.253]
+      max: [40.35, 3.5, -46.3]
     nota: >-
       Camino optico fsm -> telescopio_cassegrain (e04).
   - id: haz_e06
     tipo: haz_libre
     estado: supuesto
     fuente: >-
-      Tubo de 10 mm de lado (integracion.optica.diametro_haz_modelado,
+      Tubo de 7 mm de lado (integracion.optica.diametro_haz_modelado,
       SUPUESTO) en el hueco que queda entre las dos piezas. El diametro
       de haz de cada tramo es TBD en data/connections.yaml.
     caja:
-      min: [59.897, 11.5, -51.8]
-      max: [69.897, 16.5, -41.8]
+      min: [57.897, 8.0, -77.3]
+      max: [64.897, 13.0, -70.3]
     nota: >-
       Camino optico dicroico_d1 -> dicroico_d2 (e06). TRAMO COMPARTIDO:
       lo recorren tambien e09 (dicroico_d2 -> dicroico_d1, 1064 nm). Es
       el mismo tubo, asi que el volumen se declara una sola vez:
       duplicarlo no reservaria nada nuevo y si generaria una invasion de
       keep-out que no significa nada.
+  - id: haz_e07
+    tipo: haz_libre
+    estado: supuesto
+    fuente: >-
+      Tubo de 7 mm de lado (integracion.optica.diametro_haz_modelado,
+      SUPUESTO) en el hueco que queda entre las dos piezas. El diametro
+      de haz de cada tramo es TBD en data/connections.yaml.
+    caja:
+      min: [48.397, 17.5, -77.3]
+      max: [53.397, 24.5, -70.3]
+    nota: >-
+      Camino optico dicroico_d2 -> camara_beacon (e07).
   - id: haz_e08
     tipo: haz_libre
     estado: supuesto
     fuente: >-
-      Tubo de 10 mm de lado (integracion.optica.diametro_haz_modelado,
+      Tubo de 7 mm de lado (integracion.optica.diametro_haz_modelado,
       SUPUESTO) en el hueco que queda entre las dos piezas. El diametro
       de haz de cada tramo es TBD en data/connections.yaml.
     caja:
-      min: [48.397, 23.0, -51.8]
-      max: [53.397, 33.0, -41.8]
+      min: [57.897, 29.0, -77.3]
+      max: [64.897, 34.0, -70.3]
     nota: >-
-      Camino optico laser_beacon_bajada -> dicroico_d2 (e08).
+      Camino optico colimador_beacon_bajada -> dicroico_d2 (e08).
   - id: haz_e10
     tipo: haz_libre
     estado: supuesto
     fuente: >-
-      Tubo de 10 mm de lado (integracion.optica.diametro_haz_modelado,
+      Tubo de 7 mm de lado (integracion.optica.diametro_haz_modelado,
       SUPUESTO) en el hueco que queda entre las dos piezas. El diametro
       de haz de cada tramo es TBD en data/connections.yaml.
     caja:
-      min: [59.897, -16.5, -51.8]
-      max: [69.897, -11.5, -41.8]
+      min: [57.897, -13.0, -77.3]
+      max: [64.897, -8.0, -70.3]
     nota: >-
       Camino optico dicroico_d1 -> trampa_luz_d1 (e10).
   - id: haz_e11
     tipo: haz_libre
     estado: supuesto
     fuente: >-
-      Tubo de 10 mm de lado (integracion.optica.diametro_haz_modelado,
+      Tubo de 7 mm de lado (integracion.optica.diametro_haz_modelado,
       SUPUESTO) en el hueco que queda entre las dos piezas. El diametro
       de haz de cada tramo es TBD en data/connections.yaml.
     caja:
-      min: [76.397, 23.0, -51.8]
-      max: [81.397, 33.0, -41.8]
+      min: [69.397, 17.5, -77.3]
+      max: [74.397, 24.5, -70.3]
     nota: >-
       Camino optico dicroico_d2 -> fotodiodo_monitor_beacon (e11).
   - id: haz_telescopio_colimado
@@ -400,10 +471,10 @@ keep_out:
       data/components.yaml. SUPUESTO por partida doble: la apertura
       libre es una decision de ACSAR sin diametro de barrilete que la
       respalde, y el haz comprimido se dibuja con
-      integracion.optica.diametro_haz_modelado (10 mm) porque
+      integracion.optica.diametro_haz_modelado (7 mm) porque
       'optica.diametro_haz_comprimido' sigue siendo TBD.
     caja:
-      min: [-8.15, -45.0, -5.3]
+      min: [-8.15, -45.0, -32.3]
       max: [81.85, 45.0, 180.7]
     nota: >-
       Haz de entrada, 90 mm, de la apertura al primario. Es lo que
@@ -418,15 +489,15 @@ keep_out:
       data/components.yaml. SUPUESTO por partida doble: la apertura
       libre es una decision de ACSAR sin diametro de barrilete que la
       respalde, y el haz comprimido se dibuja con
-      integracion.optica.diametro_haz_modelado (10 mm) porque
+      integracion.optica.diametro_haz_modelado (7 mm) porque
       'optica.diametro_haz_comprimido' sigue siendo TBD.
     caja:
-      min: [31.85, -5.0, -19.3]
-      max: [41.85, 5.0, 172.478]
+      min: [33.35, -3.5, -46.3]
+      max: [40.35, 3.5, 152.144]
     nota: >-
-      Haz comprimido, 10 mm, del secundario a la brida del FSM
+      Haz comprimido, 7 mm, del secundario a la brida del FSM
       atravesando el agujero central del primario. Magnificacion
-      derivada M = 9.00.
+      derivada M = 12.86.
 
 colocaciones:
   - componente: adcs_iadcs400
@@ -476,12 +547,17 @@ colocaciones:
     zona: z_plataforma
   - componente: bandeja_optica
     instancia: 1
-    centro: [50.0, -46.2, -127.5]
+    centro: [50.0, -46.2, -141.0]
     rotacion: [0, 0, 0]
     zona: z_payload_bandeja
   - componente: laser_dfb_1550
     instancia: 1
-    centro: [50.0, -40.8, -153.05]
+    centro: [13.85, -40.8, -153.05]
+    rotacion: [-90, 0, 0]
+    zona: z_payload_bandeja
+  - componente: laser_beacon_bajada
+    instancia: 1
+    centro: [84.85, -37.2, -153.05]
     rotacion: [-90, 0, 0]
     zona: z_payload_bandeja
   - componente: aislador
@@ -496,62 +572,72 @@ colocaciones:
     zona: z_payload_bandeja
   - componente: fsm
     instancia: 1
-    centro: [36.85, 0.0, -46.8]
+    centro: [36.85, 0.0, -73.8]
     rotacion: [0, 45, 0]
     zona: z_payload_banco
   - componente: dicroico_d1
     instancia: 1
-    centro: [64.897, 0.0, -46.8]
+    centro: [61.397, 0.0, -73.8]
     rotacion: [0, 0, 0]
     zona: z_payload_banco
   - componente: espejo_plegado_cuantico
     instancia: 1
-    centro: [91.397, 0.0, -46.8]
+    centro: [95.55, 0.0, -73.8]
     rotacion: [0, 0, 0]
     zona: z_payload_banco
   - componente: dicroico_d2
     instancia: 1
-    centro: [64.897, 28.0, -46.8]
+    centro: [61.397, 21.0, -73.8]
+    rotacion: [0, 0, 0]
+    zona: z_payload_banco
+  - componente: colimador_beacon_bajada
+    instancia: 1
+    centro: [61.397, 40.0, -73.8]
     rotacion: [0, 0, 0]
     zona: z_payload_banco
   - componente: trampa_luz_d1
     instancia: 1
-    centro: [64.897, -24.0, -46.8]
+    centro: [61.397, -20.5, -73.8]
     rotacion: [0, 0, 0]
     zona: z_payload_banco
-  - componente: laser_beacon_bajada
+  - componente: camara_beacon
     instancia: 1
-    centro: [33.397, 28.0, -46.8]
+    centro: [33.397, 21.0, -73.8]
     rotacion: [0, 0, 0]
     zona: z_payload_banco
   - componente: fotodiodo_monitor_beacon
     instancia: 1
-    centro: [87.397, 28.0, -46.8]
+    centro: [80.397, 21.0, -73.8]
     rotacion: [0, 0, 0]
     zona: z_payload_banco
   - componente: colimador
     instancia: 1
-    centro: [91.397, 0.0, -5.3]
+    centro: [95.55, 0.0, -32.3]
+    rotacion: [0, 90, 0]
+    zona: z_payload_franja
+  - componente: mod_fase_mpz_ln_10
+    instancia: 1
+    centro: [95.6, -0.0, 106.7]
     rotacion: [0, 90, 0]
     zona: z_payload_franja
   - componente: acoplador_monitor
     instancia: 1
-    centro: [97.7, 35.5, 10.7]
+    centro: [97.7, 35.5, -16.3]
     rotacion: [0, 90, 0]
     zona: z_payload_franja
   - componente: voa
     instancia: 1
-    centro: [97.7, 28.25, 66.2]
+    centro: [97.7, 28.25, 39.2]
     rotacion: [0, 90, 0]
     zona: z_payload_franja
   - componente: mod_intensidad_mxer_ln_10
     instancia: 1
-    centro: [97.7, -23.0, 45.7]
+    centro: [97.7, -23.0, 18.7]
     rotacion: [0, 90, 180]
     zona: z_payload_franja
   - componente: telescopio_cassegrain
     instancia: 1
-    centro: [36.85, 0.0, 80.7]
+    centro: [36.85, 0.0, 67.2]
     rotacion: [0, 0, 0]
     zona: z_payload_telescopio
   - componente: antena_quasar_wsant

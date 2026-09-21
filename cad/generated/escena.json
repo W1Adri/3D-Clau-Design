@@ -1,12 +1,12 @@
 {
- "generado": "2026-09-21T14:49:34+02:00",
+ "generado": "2026-09-21T21:19:58+02:00",
  "glb": "clau_6u.glb",
  "proyecto": "CLAU",
  "layout": {
   "estado": "confirmada",
   "confirmado": true,
-  "nota": "Dos columnas de 3U a lo largo de todo Z. La pila PC104 queda holgada: 305 mm usados de 361 mm. La columna de payload mide 121.7 mm de ancho y se parte en dos a lo largo del telescopio: 95.4 mm para el barrilete y 26.3 mm de franja lateral, donde van los dos moduladores tumbados segun Z. Asi la bandeja se queda sin cuerpos dentro y el telescopio puede reservar 200 mm. PCB-2 sigue en la otra columna, con lo que el coaxial RF cruza el satelite a lo ancho.",
-  "decidido": "2026-09-20"
+  "nota": "Dos columnas de 3U a lo largo de todo Z. La pila PC104 queda holgada: 305 mm usados de 361 mm. La columna de payload mide 121.7 mm de ancho y se parte en dos a lo largo del telescopio: 95.4 mm para el barrilete y 26.3 mm de franja lateral. REPARTO REVISADO EL 2026-09-21 (CLAUDE.md 3.10): la bandeja se queda con la FUENTE -- laser, aislador y filtro -- y la franja lleva todo lo que modula, monitoriza, atenua y codifica, apilado en BANDAS DE Y, porque todo componente de fibra tiene que ir antes del codificador de polarizacion y despues de el la fibra no se puede curvar. Asi la cadena cruza de zona una sola vez, y esa vez es pre-codificacion. El telescopio reserva 200 mm. PCB-2 sigue en la otra columna, con lo que el coaxial RF cruza el satelite a lo ancho.",
+  "decidido": "2026-09-21"
  },
  "envolvente": {
   "min": [
@@ -55,11 +55,11 @@
  "resumen": {
   "volumen_exterior_l": 8.28258,
   "volumen_interior_l": 7.643675052000001,
-  "volumen_ocupado_l": 4.750635252365712,
-  "volumen_libre_l": 2.893039799634289,
+  "volumen_ocupado_l": 4.727110252365712,
+  "volumen_libre_l": 2.916564799634289,
   "fiable": false,
   "piezas_colocadas": 28,
-  "componentes": 35,
+  "componentes": 37,
   "sin_envolvente": [
    "radio_uhf_pulsar_vutrx",
    "propulsion",
@@ -69,10 +69,11 @@
    "radio_uhf_pulsar_vutrx",
    "propulsion",
    "camara_beacon",
+   "mod_fase_mpz_ln_10",
    "cables_rf_moduladores"
   ],
-  "pendientes_tbd": 51,
-  "pendientes_supuestos": 68,
+  "pendientes_tbd": 61,
+  "pendientes_supuestos": 75,
   "discrepancias": 10
  },
  "zonas": [
@@ -138,8 +139,8 @@
   },
   {
    "id": "z_payload_franja",
-   "nombre": "Franja lateral - moduladores",
-   "nota": "Los 26.3 mm de X que quedan al lado del telescopio, a lo largo de toda su longitud. Aqui van los dos moduladores tumbados (9.7 mm por X, 15 mm por Y, 110 mm por Z), pegados al extremo -Z para acortar la fibra hasta la bandeja. El ancho no se ha elegido: el barrilete no puede pasar de los 95.4 mm de altura interior, asi que esta franja existe para cualquier diametro que permita montar el telescopio.",
+   "nombre": "Franja lateral - modulacion, monitorizacion, atenuacion y codificacion",
+   "nota": "Los 26.3 mm de X que quedan al lado del telescopio, a lo largo de toda su longitud. El ancho no se ha elegido: el barrilete no puede pasar de los 95.4 mm de altura interior, asi que esta franja existe para cualquier diametro que permita montar el telescopio. Desde el 2026-09-21 aqui va TODO lo que hay entre la fuente y el colimador -- MXER, acoplador 2x2, VOA y el codificador de polarizacion -- mas el propio colimador, porque todo componente de fibra tiene que ir ANTES del codificador y el codificador tiene que alimentar al colimador en linea recta. EL REPARTO ES EN BANDAS DE Y, y no se ha elegido: la franja tiene 26.3 mm de X contra 95.4 mm de Y, y la X del codificador esta PINCHADA por la coaxialidad con el colimador. Los bucles de fibra van en el plano Y-Z por el mismo motivo: con el radio modelado hacen falta 60 mm de diametro y en X no caben. EL TRAMO RECTO NO CABE: mod_fase_mpz_ln_10 se sale por 18.0 mm y NO esta colocado. Ver el chequeo 'fibra_post_codificacion' y CLAUDE.md 3.10.",
    "caja": {
     "min": [
      84.55,
@@ -163,13 +164,13 @@
     ]
    },
    "volumen_l": 0.501804,
-   "libre_l": 0.43875399999999964,
-   "fraccion_ocupada": 0.1256466668260922
+   "libre_l": 0.45078824999999967,
+   "fraccion_ocupada": 0.10166469378482501
   },
   {
    "id": "z_payload_banco",
    "nombre": "Banco optico de espacio libre",
-   "nota": "Canal cuantico: colimador -> D1 -> FSM -> telescopio. De D1 sale hacia +Y UN SOLO brazo para los dos beacons, y dentro de el D2 los separa: la camara en transmision (976 nm) y el laser de bajada inyectando lateralmente en reflexion (1064 nm). Los dos cuartos puertos llevan su trampa y su fotodiodo. El FSM esta sobre el eje optico del telescopio (X = +36.85) porque es el que dobla el haz de X a Z, y eso deja el colimador y D1 en linea hacia +X. Margen contra la pared +X: -0.5 mm. EL BRAZO NO CABE: camara_beacon se sale por la rama +Y en 16.8 mm y NO esta colocado. Apretarlo hasta que entrara, o dibujarlo saliendose del satelite, seria esconder el resultado. Ver el chequeo 'brazo_beacon' y CLAUDE.md 3.9.",
+   "nota": "Canal cuantico: el colimador baja el haz segun -Z desde la franja, el espejo de plegado lo dobla hacia -X y de ahi D1 -> FSM -> telescopio. De D1 sale hacia +Y UN SOLO brazo para los dos beacons, y dentro de el D2 los separa: la camara en transmision (976 nm) y el laser de bajada inyectando lateralmente en reflexion (1064 nm). Los dos cuartos puertos llevan su trampa y su fotodiodo. El FSM esta sobre el eje optico del telescopio (X = +36.85) porque es el que dobla el haz de X a Z, y eso deja D1 y el espejo de plegado en linea hacia +X. Margen contra la pared +X: 7.5 mm. EL BRAZO NO CABE: camara_beacon se sale por la rama +Y en 16.8 mm y NO esta colocado. Apretarlo hasta que entrara, o dibujarlo saliendose del satelite, seria esconder el resultado. Ver el chequeo 'brazo_beacon' y CLAUDE.md 3.9.",
    "caja": {
     "min": [
      -10.85,
@@ -193,13 +194,13 @@
     ]
    },
    "volumen_l": 0.6385599000000001,
-   "libre_l": 0.57828749922,
-   "fraccion_ocupada": 0.09438801399837352
+   "libre_l": 0.57431949922,
+   "fraccion_ocupada": 0.10060199642977893
   },
   {
    "id": "z_payload_bandeja",
    "nombre": "Bandeja optica de fibra",
-   "nota": "106.4 mm de Z con los 121.7 mm de ancho enteros, ya sin cuerpos de modulador dentro. La cadena va en filas que avanzan segun Z, en el orden y el sentido de la cadena optica: el laser DFB al extremo -Z, lo mas lejos posible del barrilete porque con sus 4.1 W es la principal fuente de calor del payload, y la salida hacia el colimador en +Z. Quedan 15.6 mm de Z libres al final para los bucles, mas los huecos entre filas. Cuanta fibra cabe ahi NO se puede decir: falta el radio minimo de curvatura. Zona con control termico propio.",
+   "nota": "106.4 mm de Z con los 121.7 mm de ancho enteros. Desde el 2026-09-21 aqui esta SOLO LA FUENTE: el laser DFB, el aislador y el filtro. Todo lo que modula, monitoriza, atenua y codifica esta en la franja, asi que la cadena cruza de zona UNA SOLA VEZ, y esa vez cae en el tramo pre-codificacion, que es el que se puede curvar. Las filas avanzan segun Z en el orden y el sentido de la cadena: el laser al extremo -Z, lo mas lejos posible del barrilete porque con sus 4.1 W es la principal fuente de calor del payload, y la salida hacia la franja en +Z. Quedan 43.6 mm de Z libres al final para los bucles, mas los huecos entre filas. Cuanta fibra cabe ahi NO se puede decir: falta el radio minimo de curvatura. Zona con control termico propio.",
    "caja": {
     "min": [
      -10.85,
@@ -223,8 +224,8 @@
     ]
    },
    "volumen_l": 1.235323152,
-   "libre_l": 1.168806736,
-   "fraccion_ocupada": 0.053845356894922015
+   "libre_l": 1.184265486,
+   "fraccion_ocupada": 0.041331424831905036
   }
  ],
  "keep_outs": [
@@ -256,63 +257,9 @@
    }
   },
   {
-   "id": "fibra_mod_intensidad_mxer_ln_10_entrada",
+   "id": "fibra_aislador_entrada",
    "tipo": "fibra",
-   "nota": "Puerto de entrada de fibra de mod_intensidad_mxer_ln_10, recortado a la zona z_payload_franja.",
-   "caja": {
-    "min": [
-     91.125,
-     -30.0,
-     110.7
-    ],
-    "max": [
-     110.85,
-     30.0,
-     160.7
-    ],
-    "centro": [
-     100.9875,
-     0.0,
-     135.7
-    ],
-    "dims": [
-     19.724999999999994,
-     60.0,
-     49.999999999999986
-    ]
-   }
-  },
-  {
-   "id": "fibra_mod_fase_mpz_ln_10_entrada",
-   "tipo": "fibra",
-   "nota": "Puerto de entrada de fibra de mod_fase_mpz_ln_10, recortado a la zona z_payload_franja.",
-   "caja": {
-    "min": [
-     104.275,
-     -30.0,
-     110.7
-    ],
-    "max": [
-     110.85,
-     30.0,
-     160.7
-    ],
-    "centro": [
-     107.5625,
-     0.0,
-     135.7
-    ],
-    "dims": [
-     6.574999999999989,
-     60.0,
-     49.999999999999986
-    ]
-   }
-  },
-  {
-   "id": "fibra_voa_entrada",
-   "tipo": "fibra",
-   "nota": "Puerto de entrada de fibra de voa, recortado a la zona z_payload_bandeja.",
+   "nota": "Puerto de entrada de fibra de aislador, recortado a la zona z_payload_bandeja.",
    "caja": {
     "min": [
      -10.85,
@@ -337,9 +284,9 @@
    }
   },
   {
-   "id": "fibra_voa_salida",
+   "id": "fibra_aislador_salida",
    "tipo": "fibra",
-   "nota": "Puerto de salida de fibra de voa, recortado a la zona z_payload_bandeja.",
+   "nota": "Puerto de salida de fibra de aislador, recortado a la zona z_payload_bandeja.",
    "caja": {
     "min": [
      30.15,
@@ -364,22 +311,22 @@
    }
   },
   {
-   "id": "fibra_aislador_entrada",
+   "id": "fibra_filtro_espectral_entrada",
    "tipo": "fibra",
-   "nota": "Puerto de entrada de fibra de aislador, recortado a la zona z_payload_bandeja.",
+   "nota": "Puerto de entrada de fibra de filtro_espectral, recortado a la zona z_payload_bandeja.",
    "caja": {
     "min": [
-     19.85,
+     14.85,
      -41.95,
      -150.65
     ],
     "max": [
-     69.85,
+     64.85,
      18.05,
      -90.65
     ],
     "centro": [
-     44.849999999999994,
+     39.849999999999994,
      -11.950000000000001,
      -120.65
     ],
@@ -391,9 +338,9 @@
    }
   },
   {
-   "id": "fibra_aislador_salida",
+   "id": "fibra_filtro_espectral_salida",
    "tipo": "fibra",
-   "nota": "Puerto de salida de fibra de aislador, recortado a la zona z_payload_bandeja.",
+   "nota": "Puerto de salida de fibra de filtro_espectral, recortado a la zona z_payload_bandeja.",
    "caja": {
     "min": [
      104.85,
@@ -418,137 +365,110 @@
    }
   },
   {
-   "id": "fibra_filtro_espectral_entrada",
+   "id": "fibra_mod_intensidad_mxer_ln_10_entrada",
    "tipo": "fibra",
-   "nota": "Puerto de entrada de fibra de filtro_espectral, recortado a la zona z_payload_bandeja.",
+   "nota": "Puerto de entrada de fibra de mod_intensidad_mxer_ln_10, recortado a la zona z_payload_franja.",
    "caja": {
     "min": [
-     -10.85,
-     -41.95,
-     -129.9
+     84.55,
+     -47.7,
+     110.7
     ],
     "max": [
-     -4.85,
-     18.05,
-     -74.3
+     97.7,
+     7.0,
+     160.7
     ],
     "centro": [
-     -7.85,
-     -11.950000000000001,
-     -102.1
+     91.125,
+     -20.35,
+     135.7
     ],
     "dims": [
-     6.0,
-     60.0,
-     55.60000000000001
-    ]
-   }
-  },
-  {
-   "id": "fibra_filtro_espectral_salida",
-   "tipo": "fibra",
-   "nota": "Puerto de salida de fibra de filtro_espectral, recortado a la zona z_payload_bandeja.",
-   "caja": {
-    "min": [
-     35.15,
-     -41.95,
-     -129.9
-    ],
-    "max": [
-     85.15,
-     18.05,
-     -74.3
-    ],
-    "centro": [
-     60.150000000000006,
-     -11.950000000000001,
-     -102.1
-    ],
-    "dims": [
-     50.00000000000001,
-     60.0,
-     55.60000000000001
+     13.150000000000006,
+     54.7,
+     49.999999999999986
     ]
    }
   },
   {
    "id": "fibra_acoplador_monitor_entrada",
    "tipo": "fibra",
-   "nota": "Puerto de entrada de fibra de acoplador_monitor, recortado a la zona z_payload_bandeja.",
+   "nota": "Puerto de entrada de fibra de acoplador_monitor, recortado a la zona z_payload_franja.",
    "caja": {
     "min": [
-     -5.15,
-     -38.7,
-     -129.9
-    ],
-    "max": [
-     44.85,
-     21.3,
-     -74.3
-    ],
-    "centro": [
-     19.85,
-     -8.700000000000001,
-     -102.1
-    ],
-    "dims": [
-     50.0,
-     60.0,
-     55.60000000000001
-    ]
-   }
-  },
-  {
-   "id": "fibra_acoplador_monitor_salida",
-   "tipo": "fibra",
-   "nota": "Puerto de salida de fibra de acoplador_monitor, recortado a la zona z_payload_bandeja.",
-   "caja": {
-    "min": [
-     104.85,
-     -38.7,
-     -129.9
+     97.7,
+     5.5,
+     40.7
     ],
     "max": [
      110.85,
-     21.3,
-     -74.3
+     47.7,
+     90.7
     ],
     "centro": [
-     107.85,
-     -8.700000000000001,
-     -102.1
+     104.275,
+     26.6,
+     65.7
     ],
     "dims": [
-     6.0,
-     60.0,
-     55.60000000000001
+     13.149999999999991,
+     42.2,
+     50.0
     ]
    }
   },
   {
-   "id": "fibra_colimador_entrada",
+   "id": "fibra_voa_entrada",
    "tipo": "fibra",
-   "nota": "Puerto de entrada de fibra de colimador, recortado a la zona z_payload_banco.",
+   "nota": "Puerto de entrada de fibra de voa, recortado a la zona z_payload_franja.",
    "caja": {
     "min": [
-     31.397,
-     0.0,
-     -74.3
+     97.7,
+     -1.75,
+     83.7
     ],
     "max": [
-     81.397,
+     110.85,
      47.7,
-     -19.3
+     133.7
     ],
     "centro": [
-     56.397000000000006,
-     23.85,
-     -46.8
+     104.275,
+     22.975,
+     108.69999999999999
     ],
     "dims": [
-     50.00000000000001,
+     13.149999999999991,
+     49.45,
+     49.999999999999986
+    ]
+   }
+  },
+  {
+   "id": "fibra_voa_salida",
+   "tipo": "fibra",
+   "nota": "Puerto de salida de fibra de voa, recortado a la zona z_payload_franja.",
+   "caja": {
+    "min": [
+     97.7,
+     -1.75,
+     -1.3
+    ],
+    "max": [
+     110.85,
      47.7,
-     55.0
+     48.7
+    ],
+    "centro": [
+     104.275,
+     22.975,
+     23.700000000000003
+    ],
+    "dims": [
+     13.149999999999991,
+     49.45,
+     50.0
     ]
    }
   },
@@ -559,57 +479,30 @@
    "caja": {
     "min": [
      84.55,
-     17.5,
+     -47.7,
      20.7
     ],
     "max": [
      110.85,
-     42.5,
+     -40.5,
      70.7
     ],
     "centro": [
      97.69999999999999,
-     30.0,
+     -44.1,
      45.7
     ],
     "dims": [
      26.299999999999997,
-     25.0,
+     7.200000000000003,
      50.0
     ]
    }
   },
   {
-   "id": "coaxial_mod_fase_mpz_ln_10",
-   "tipo": "coaxial",
-   "nota": "Salida del conector RF de mod_fase_mpz_ln_10 hacia PCB-2.",
-   "caja": {
-    "min": [
-     84.55,
-     17.5,
-     20.7
-    ],
-    "max": [
-     110.85,
-     42.5,
-     70.7
-    ],
-    "centro": [
-     97.69999999999999,
-     30.0,
-     45.7
-    ],
-    "dims": [
-     26.299999999999997,
-     25.0,
-     50.0
-    ]
-   }
-  },
-  {
-   "id": "haz_e01",
+   "id": "haz_e02",
    "tipo": "haz_libre",
-   "nota": "Camino optico colimador -> dicroico_d1 (e01).",
+   "nota": "Camino optico espejo_plegado_cuantico -> dicroico_d1 (e02).",
    "caja": {
     "min": [
      76.397,
@@ -634,9 +527,9 @@
    }
   },
   {
-   "id": "haz_e02",
+   "id": "haz_e03",
    "tipo": "haz_libre",
-   "nota": "Camino optico dicroico_d1 -> fsm (e02).",
+   "nota": "Camino optico dicroico_d1 -> fsm (e03).",
    "caja": {
     "min": [
      48.397,
@@ -661,9 +554,9 @@
    }
   },
   {
-   "id": "haz_e03",
+   "id": "haz_e04",
    "tipo": "haz_libre",
-   "nota": "Camino optico fsm -> telescopio_cassegrain (e03).",
+   "nota": "Camino optico fsm -> telescopio_cassegrain (e04).",
    "caja": {
     "min": [
      31.85,
@@ -688,9 +581,9 @@
    }
   },
   {
-   "id": "haz_e04",
+   "id": "haz_e06",
    "tipo": "haz_libre",
-   "nota": "Camino optico dicroico_d1 -> dicroico_d2 (e04). TRAMO COMPARTIDO: lo recorren tambien e08 (dicroico_d2 -> dicroico_d1, 1064 nm). Es el mismo tubo, asi que el volumen se declara una sola vez: duplicarlo no reservaria nada nuevo y si generaria una invasion de keep-out que no significa nada.",
+   "nota": "Camino optico dicroico_d1 -> dicroico_d2 (e06). TRAMO COMPARTIDO: lo recorren tambien e09 (dicroico_d2 -> dicroico_d1, 1064 nm). Es el mismo tubo, asi que el volumen se declara una sola vez: duplicarlo no reservaria nada nuevo y si generaria una invasion de keep-out que no significa nada.",
    "caja": {
     "min": [
      59.897,
@@ -715,9 +608,9 @@
    }
   },
   {
-   "id": "haz_e07",
+   "id": "haz_e08",
    "tipo": "haz_libre",
-   "nota": "Camino optico laser_beacon_bajada -> dicroico_d2 (e07).",
+   "nota": "Camino optico laser_beacon_bajada -> dicroico_d2 (e08).",
    "caja": {
     "min": [
      48.397,
@@ -742,9 +635,9 @@
    }
   },
   {
-   "id": "haz_e09",
+   "id": "haz_e10",
    "tipo": "haz_libre",
-   "nota": "Camino optico dicroico_d1 -> trampa_luz_d1 (e09).",
+   "nota": "Camino optico dicroico_d1 -> trampa_luz_d1 (e10).",
    "caja": {
     "min": [
      59.897,
@@ -769,9 +662,9 @@
    }
   },
   {
-   "id": "haz_e10",
+   "id": "haz_e11",
    "tipo": "haz_libre",
-   "nota": "Camino optico dicroico_d2 -> fotodiodo_monitor_beacon (e10).",
+   "nota": "Camino optico dicroico_d2 -> fotodiodo_monitor_beacon (e11).",
    "caja": {
     "min": [
      76.397,
@@ -1977,368 +1870,6 @@
    }
   },
   {
-   "nodo": "mod_intensidad_mxer_ln_10",
-   "componente": "mod_intensidad_mxer_ln_10",
-   "nombre": "Exail MXER-LN-10 (modulador de intensidad, grado espacial EM/NS-FM/FM)",
-   "categoria": "payload_bandeja",
-   "subsistema": "bandeja_optica",
-   "zona": "z_payload_franja",
-   "id_drive": "OPT-02",
-   "referencia_comercial": "Exail MXER-LN-10, encapsulado de grado espacial EM/NS-FM/FM",
-   "estado_dato": "confirmado",
-   "desde_step": false,
-   "step": null,
-   "step_estado": null,
-   "step_nota": null,
-   "step_esperado": null,
-   "forma": "caja",
-   "montaje": {
-    "cara": "-Z",
-    "eje": "X",
-    "tipo_eje": "fibra",
-    "nota": "Se atornilla por su base (-Z local) por las dos bridas de los extremos. El eje de fibra recorre X, a 4.8 mm de la base (dato 'altura_eje_fibra'). En el layout va TUMBADO: la rotacion [0, 90, 0] lleva el eje de fibra a Z del satelite y la altura del cuerpo a X, que es el eje escaso de la franja. Asi el conector RF sale hacia +-Y, donde sobra sitio."
-   },
-   "conectores": [
-    {
-     "id": "rf",
-     "tipo": "coaxial",
-     "cara": "+Y",
-     "dimensiones": {
-      "valor": [
-       6.1,
-       10.0,
-       6.1
-      ],
-      "unidad": "mm",
-      "estado": "supuesto",
-      "fuente": "Dos de las tres cotas SI son del plano (Exail 03_2026_ED2 / 00025851-B p.9): 6.1 mm de ancho y 10 mm de saliente sobre el cuerpo. La tercera, 6.1 mm, esta inventada: se toma igual al ancho porque el plano no la acota. Es el saliente de 10 mm el que manda, y ese es dato.",
-      "nota": null,
-      "falta": "Profundidad del conector RF, y holgura de insercion del coaxial",
-      "pedir_a": "Exail / Equipo de electronica de ACSAR",
-      "discrepancia": []
-     },
-     "nota": "Este conector es la razon de que el modulador vaya tumbado. Con el cuerpo de pie, sus 10 mm saldrian hacia la franja, que tiene 26.3 mm para los dos moduladores."
-    },
-    {
-     "id": "fibra_entrada",
-     "tipo": "fibra",
-     "cara": "-X",
-     "dimensiones": {
-      "valor": [
-       10.0,
-       3.0,
-       3.0
-      ],
-      "unidad": "mm",
-      "estado": "supuesto",
-      "fuente": "Los 10 mm de saliente salen de restar las dos cotas del plano: (130 con protectores - 110 con bridas) / 2. La seccion de 3 mm esta inventada; es un boot de fibra tipico.",
-      "nota": null,
-      "falta": "Diametro del protector de fibra del encapsulado de grado espacial",
-      "pedir_a": "Exail",
-      "discrepancia": []
-     },
-     "nota": null
-    },
-    {
-     "id": "fibra_salida",
-     "tipo": "fibra",
-     "cara": "+X",
-     "dimensiones": {
-      "valor": [
-       10.0,
-       3.0,
-       3.0
-      ],
-      "unidad": "mm",
-      "estado": "supuesto",
-      "fuente": "Simetrico de 'fibra_entrada'. Mismas cotas y mismo origen.",
-      "nota": null,
-      "falta": "Diametro del protector de fibra del encapsulado de grado espacial",
-      "pedir_a": "Exail",
-      "discrepancia": []
-     },
-     "nota": null
-    }
-   ],
-   "centro": [
-    91.125,
-    0.0,
-    45.7
-   ],
-   "rotacion": [
-    0.0,
-    90.0,
-    0.0
-   ],
-   "caja": {
-    "min": [
-     86.27499999999999,
-     -7.5,
-     -19.299999999999997
-    ],
-    "max": [
-     95.97500000000001,
-     17.5,
-     110.7
-    ],
-    "centro": [
-     91.125,
-     5.0,
-     45.7
-    ],
-    "dims": [
-     9.700000000000017,
-     25.0,
-     130.0
-    ]
-   },
-   "volumen_cm3": 31.525000000000055,
-   "requiere_vista_exterior": false,
-   "nota": null,
-   "color": [
-    0.19999999868206275,
-    0.7500000009342138,
-    0.8199999872960941
-   ],
-   "magnitudes": {
-    "dimensiones": {
-     "valor": [
-      110.0,
-      15.0,
-      9.7
-     ],
-     "unidad": "mm",
-     "estado": "confirmado",
-     "fuente": "https://www.exail.com/media-file/7854/exail-datasheet-em-ns-fm-fm-mxer-ln-10-space-grade-components.pdf",
-     "nota": "Plano mecanico 03_2026_ED2 / 00025851-B p.9. Cuerpo 100 mm, bridas incluidas 110 +/-0.2 mm, ancho 15 +/-0.2, alto 9.7 +/-0.2. DISCREPANCIA IMPORTANTE con el brief, ver alternativas.",
-     "falta": null,
-     "pedir_a": null,
-     "discrepancia": [
-      {
-       "valor": [
-        85.0,
-        15.0,
-        9.65
-       ],
-       "fuente": "https://www.exail.com/media-file/7739/datasheet-mpxmpz-ln-series.pdf",
-       "nota": "\"Housing #A\" de la serie comercial MPX/MPZ, que es la cifra que recoge el brief. El encapsulado de GRADO ESPACIAL es mas largo. Para el analisis se usa el de grado espacial, que es el que vuela."
-      }
-     ]
-    },
-    "masa": {
-     "valor": null,
-     "unidad": "g",
-     "estado": "TBD",
-     "fuente": null,
-     "nota": "La version comercial \"Housing",
-     "falta": "Masa del encapsulado de grado espacial",
-     "pedir_a": "Exail",
-     "discrepancia": []
-    },
-    "potencia_nominal": {
-     "valor": null,
-     "unidad": null,
-     "estado": "ausente",
-     "fuente": null,
-     "nota": null,
-     "falta": null,
-     "pedir_a": null,
-     "discrepancia": []
-    },
-    "potencia_pico": {
-     "valor": null,
-     "unidad": null,
-     "estado": "ausente",
-     "fuente": null,
-     "nota": null,
-     "falta": null,
-     "pedir_a": null,
-     "discrepancia": []
-    }
-   }
-  },
-  {
-   "nodo": "mod_fase_mpz_ln_10",
-   "componente": "mod_fase_mpz_ln_10",
-   "nombre": "Exail MPZ-LN-10 (modulador de fase, codificador de polarizacion)",
-   "categoria": "payload_bandeja",
-   "subsistema": "bandeja_optica",
-   "zona": "z_payload_franja",
-   "id_drive": "OPT-03",
-   "referencia_comercial": "Exail MPZ-LN-10 (grado espacial sin ficha publica)",
-   "estado_dato": "referencia",
-   "desde_step": false,
-   "step": null,
-   "step_estado": null,
-   "step_nota": null,
-   "step_esperado": null,
-   "forma": "caja",
-   "montaje": {
-    "cara": "-Z",
-    "eje": "X",
-    "tipo_eje": "fibra",
-    "nota": "Identico al MXER-LN-10; va tumbado en la franja por el mismo motivo."
-   },
-   "conectores": [
-    {
-     "id": "rf",
-     "tipo": "coaxial",
-     "cara": "+Y",
-     "dimensiones": {
-      "valor": [
-       6.1,
-       10.0,
-       6.1
-      ],
-      "unidad": "mm",
-      "estado": "supuesto",
-      "fuente": "Dos de las tres cotas SI son del plano (Exail 03_2026_ED3 / 00025631-B p.9, NIR-MPX-LN): 6.1 mm de ancho y 10 mm de saliente sobre el cuerpo. La tercera, 6.1 mm, esta inventada: se toma igual al ancho porque el plano no la acota. Es el saliente de 10 mm el que manda, y ese es dato.",
-      "nota": null,
-      "falta": "Profundidad del conector RF, y holgura de insercion del coaxial",
-      "pedir_a": "Exail / Equipo de electronica de ACSAR",
-      "discrepancia": []
-     },
-     "nota": "Este conector es la razon de que el modulador vaya tumbado. Con el cuerpo de pie, sus 10 mm saldrian hacia la franja, que tiene 26.3 mm para los dos moduladores."
-    },
-    {
-     "id": "fibra_entrada",
-     "tipo": "fibra",
-     "cara": "-X",
-     "dimensiones": {
-      "valor": [
-       10.0,
-       3.0,
-       3.0
-      ],
-      "unidad": "mm",
-      "estado": "supuesto",
-      "fuente": "Los 10 mm de saliente salen de restar las dos cotas del plano: (130 con protectores - 110 con bridas) / 2. La seccion de 3 mm esta inventada; es un boot de fibra tipico.",
-      "nota": null,
-      "falta": "Diametro del protector de fibra del encapsulado de grado espacial",
-      "pedir_a": "Exail",
-      "discrepancia": []
-     },
-     "nota": null
-    },
-    {
-     "id": "fibra_salida",
-     "tipo": "fibra",
-     "cara": "+X",
-     "dimensiones": {
-      "valor": [
-       10.0,
-       3.0,
-       3.0
-      ],
-      "unidad": "mm",
-      "estado": "supuesto",
-      "fuente": "Simetrico de 'fibra_entrada'. Mismas cotas y mismo origen.",
-      "nota": null,
-      "falta": "Diametro del protector de fibra del encapsulado de grado espacial",
-      "pedir_a": "Exail",
-      "discrepancia": []
-     },
-     "nota": null
-    }
-   ],
-   "centro": [
-    104.275,
-    0.0,
-    45.7
-   ],
-   "rotacion": [
-    0.0,
-    90.0,
-    0.0
-   ],
-   "caja": {
-    "min": [
-     99.425,
-     -7.5,
-     -19.299999999999997
-    ],
-    "max": [
-     109.12500000000001,
-     17.5,
-     110.7
-    ],
-    "centro": [
-     104.275,
-     5.0,
-     45.7
-    ],
-    "dims": [
-     9.700000000000017,
-     25.0,
-     130.0
-    ]
-   },
-   "volumen_cm3": 31.525000000000055,
-   "requiere_vista_exterior": false,
-   "nota": "Esquema ICFO de codificacion de polarizacion con un solo modulador de fase.",
-   "color": [
-    0.9999999999999999,
-    0.5500000090900438,
-    0.0
-   ],
-   "magnitudes": {
-    "dimensiones": {
-     "valor": [
-      110.0,
-      15.0,
-      9.7
-     ],
-     "unidad": "mm",
-     "estado": "referencia",
-     "fuente": "https://www.exail.com/media-file/7855/exail-datasheet-em-ns-fm-fm-nir-mpx-ln-01-space-grade-components.pdf",
-     "nota": "Exail NO publica ficha de grado espacial del MPZ-LN-10. Se toma como referencia el encapsulado de grado espacial del NIR-MPX-LN-0.1 (plano 03_2026_ED3 / 00025631-B p.9), identico al del MXER-LN-10. Confirmar con Exail antes de cerrar la bandeja.",
-     "falta": null,
-     "pedir_a": null,
-     "discrepancia": [
-      {
-       "valor": [
-        85.0,
-        15.0,
-        9.65
-       ],
-       "fuente": "https://www.exail.com/media-file/7739/datasheet-mpxmpz-ln-series.pdf",
-       "nota": "Housing #A comercial. El MPZ-LN-10-LVP usa el Housing #C, de 105 mm."
-      }
-     ]
-    },
-    "masa": {
-     "valor": null,
-     "unidad": "g",
-     "estado": "TBD",
-     "fuente": null,
-     "nota": null,
-     "falta": "Masa del encapsulado de grado espacial",
-     "pedir_a": "Exail",
-     "discrepancia": []
-    },
-    "potencia_nominal": {
-     "valor": null,
-     "unidad": null,
-     "estado": "ausente",
-     "fuente": null,
-     "nota": null,
-     "falta": null,
-     "pedir_a": null,
-     "discrepancia": []
-    },
-    "potencia_pico": {
-     "valor": null,
-     "unidad": null,
-     "estado": "ausente",
-     "fuente": null,
-     "nota": null,
-     "falta": null,
-     "pedir_a": null,
-     "discrepancia": []
-    }
-   }
-  },
-  {
    "nodo": "bandeja_optica",
    "componente": "bandeja_optica",
    "nombre": "Bandeja optica (placa mecanica, no PCB)",
@@ -2610,13 +2141,13 @@
    }
   },
   {
-   "nodo": "voa",
-   "componente": "voa",
-   "nombre": "Atenuador optico variable (VOA)",
+   "nodo": "aislador",
+   "componente": "aislador",
+   "nombre": "Aislador optico",
    "categoria": "payload_bandeja",
    "subsistema": "bandeja_optica",
    "zona": "z_payload_bandeja",
-   "id_drive": "OPT-04",
+   "id_drive": "OPT-05",
    "referencia_comercial": null,
    "estado_dato": "supuesto",
    "desde_step": false,
@@ -2629,7 +2160,7 @@
     "cara": "-Z",
     "eje": "X",
     "tipo_eje": "fibra",
-    "nota": "Componente en linea. Se fija con abrazadera a la bandeja."
+    "nota": "Componente en linea. Tiene sentido de paso; orientar segun la cadena."
    },
    "conectores": [],
    "centro": [
@@ -2666,117 +2197,7 @@
    },
    "volumen_cm3": 1.05875,
    "requiere_vista_exterior": false,
-   "nota": "Lleva el flujo al nivel de fotones por pulso exigido por BB84 con decoy. SIN CANDIDATO: la envolvente que se dibuja es una reserva, no una pieza.",
-   "color": [
-    0.6200000002918433,
-    0.6200000002918433,
-    0.6599999923026542
-   ],
-   "magnitudes": {
-    "dimensiones": {
-     "valor": [
-      35.0,
-      5.5,
-      5.5
-     ],
-     "unidad": "mm",
-     "estado": "supuesto",
-     "fuente": "SUPUESTO. Encapsulado cilindrico en linea tipico de los componentes pasivos de fibra de telecomunicaciones (del orden de 5.5 mm de diametro por 35-40 mm de cuerpo). NO es ningun producto: no hay candidato elegido, asi que no hay ficha que copiar. Sirve para reservar un volumen del orden correcto en la bandeja y para que el recorrido de fibra tenga extremos donde apoyarse. La cifra real cambiara, y puede cambiar mucho si se elige un encapsulado en caja.",
-     "nota": null,
-     "falta": "Modelo de VOA elegido y su envolvente",
-     "pedir_a": "Equipo de payload de ACSAR",
-     "discrepancia": []
-    },
-    "masa": {
-     "valor": null,
-     "unidad": "g",
-     "estado": "TBD",
-     "fuente": null,
-     "nota": null,
-     "falta": "Masa del VOA elegido",
-     "pedir_a": "Equipo de payload de ACSAR",
-     "discrepancia": []
-    },
-    "potencia_nominal": {
-     "valor": null,
-     "unidad": null,
-     "estado": "ausente",
-     "fuente": null,
-     "nota": null,
-     "falta": null,
-     "pedir_a": null,
-     "discrepancia": []
-    },
-    "potencia_pico": {
-     "valor": null,
-     "unidad": null,
-     "estado": "ausente",
-     "fuente": null,
-     "nota": null,
-     "falta": null,
-     "pedir_a": null,
-     "discrepancia": []
-    }
-   }
-  },
-  {
-   "nodo": "aislador",
-   "componente": "aislador",
-   "nombre": "Aislador optico",
-   "categoria": "payload_bandeja",
-   "subsistema": "bandeja_optica",
-   "zona": "z_payload_bandeja",
-   "id_drive": "OPT-05",
-   "referencia_comercial": null,
-   "estado_dato": "supuesto",
-   "desde_step": false,
-   "step": null,
-   "step_estado": null,
-   "step_nota": null,
-   "step_esperado": null,
-   "forma": "cilindro",
-   "montaje": {
-    "cara": "-Z",
-    "eje": "X",
-    "tipo_eje": "fibra",
-    "nota": "Componente en linea. Tiene sentido de paso; orientar segun la cadena."
-   },
-   "conectores": [],
-   "centro": [
-    87.35,
-    -41.95,
-    -120.65
-   ],
-   "rotacion": [
-    -90.0,
-    0.0,
-    0.0
-   ],
-   "caja": {
-    "min": [
-     69.85,
-     -44.7,
-     -123.4
-    ],
-    "max": [
-     104.85,
-     -39.2,
-     -117.9
-    ],
-    "centro": [
-     87.35,
-     -41.95,
-     -120.65
-    ],
-    "dims": [
-     35.0,
-     5.5,
-     5.5
-    ]
-   },
-   "volumen_cm3": 1.05875,
-   "requiere_vista_exterior": false,
-   "nota": "SIN CANDIDATO: la envolvente que se dibuja es una reserva, no una pieza.",
+   "nota": "SIN CANDIDATO: la envolvente que se dibuja es una reserva, no una pieza. VA JUSTO DETRAS DEL LASER, que es donde protege de verdad: cualquier retrorreflexion de los moduladores desestabiliza un DFB, y eso se traduce en salto de modo y en deriva de longitud de onda. COMPROBAR SI EL BUTTERFLY DEL G&H YA INTEGRA AISLADOR INTERNO: es frecuente en los modulos DFB de telecomunicaciones, y si lo lleva, esta pieza puede sobrar o quedarse en una sola etapa. Eso libera volumen en la bandeja y quita un iman permanente del satelite.",
    "color": [
     0.6200000002918433,
     0.6200000002918433,
@@ -2853,9 +2274,9 @@
    },
    "conectores": [],
    "centro": [
-    15.15,
+    84.85,
     -41.95,
-    -99.9
+    -120.65
    ],
    "rotacion": [
     -90.0,
@@ -2864,19 +2285,19 @@
    ],
    "caja": {
     "min": [
-     -4.85,
+     64.85,
      -44.7,
-     -102.65
+     -123.4
     ],
     "max": [
-     35.15,
+     104.85,
      -39.2,
-     -97.15
+     -117.9
     ],
     "centro": [
-     15.149999999999999,
+     84.85,
      -41.95,
-     -99.9
+     -120.65
     ],
     "dims": [
      40.0,
@@ -2886,7 +2307,7 @@
    },
    "volumen_cm3": 1.21,
    "requiere_vista_exterior": false,
-   "nota": "SIN CANDIDATO: la envolvente que se dibuja es una reserva, no una pieza.",
+   "nota": "SIN CANDIDATO: la envolvente que se dibuja es una reserva, no una pieza. QUE HACE AQUI, que no es lo que se suele suponer: en esta arquitectura -- UN SOLO LASER y moduladores externos -- todos los pulsos salen IDENTICOS del DFB, asi que el canal lateral espectral entre estados es pequeno por construccion (el problema clasico es el de varios laseres, uno por estado, que nunca son identicos). Lo que este filtro hace de verdad es QUITAR LA ASE del laser y ESTRECHAR LA VENTANA DE TROYA: cuanto mas estrecha la banda por la que puede entrar luz del canal, menos margen tiene un atacante para sondear los moduladores. VA ANTES DE LOS MODULADORES para que todo lo que se module ya este espectralmente limpio.",
    "color": [
     0.6200000002918433,
     0.6200000002918433,
@@ -2914,116 +2335,6 @@
      "fuente": null,
      "nota": null,
      "falta": "Masa del filtro elegido",
-     "pedir_a": "Equipo de payload de ACSAR",
-     "discrepancia": []
-    },
-    "potencia_nominal": {
-     "valor": null,
-     "unidad": null,
-     "estado": "ausente",
-     "fuente": null,
-     "nota": null,
-     "falta": null,
-     "pedir_a": null,
-     "discrepancia": []
-    },
-    "potencia_pico": {
-     "valor": null,
-     "unidad": null,
-     "estado": "ausente",
-     "fuente": null,
-     "nota": null,
-     "falta": null,
-     "pedir_a": null,
-     "discrepancia": []
-    }
-   }
-  },
-  {
-   "nodo": "acoplador_monitor",
-   "componente": "acoplador_monitor",
-   "nombre": "Acoplador de monitorizacion + fotodiodo tap",
-   "categoria": "payload_bandeja",
-   "subsistema": "bandeja_optica",
-   "zona": "z_payload_bandeja",
-   "id_drive": "OPT-07",
-   "referencia_comercial": null,
-   "estado_dato": "supuesto",
-   "desde_step": false,
-   "step": null,
-   "step_estado": null,
-   "step_nota": null,
-   "step_esperado": null,
-   "forma": "caja",
-   "montaje": {
-    "cara": "-Z",
-    "eje": "X",
-    "tipo_eje": "fibra",
-    "nota": "Son DOS cosas en una envolvente: el acoplador (un tubo de empalme en linea) y el fotodiodo con su encapsulado. Se modelan juntas porque van juntas; al elegir modelo habra que separarlas."
-   },
-   "conectores": [],
-   "centro": [
-    74.85,
-    -38.7,
-    -99.9
-   ],
-   "rotacion": [
-    -90.0,
-    0.0,
-    0.0
-   ],
-   "caja": {
-    "min": [
-     44.849999999999994,
-     -44.7,
-     -109.9
-    ],
-    "max": [
-     104.85,
-     -32.7,
-     -89.9
-    ],
-    "centro": [
-     74.85,
-     -38.7,
-     -99.9
-    ],
-    "dims": [
-     60.0,
-     12.0,
-     20.0
-    ]
-   },
-   "volumen_cm3": 14.4,
-   "requiere_vista_exterior": false,
-   "nota": "SIN CANDIDATO: la envolvente que se dibuja es una reserva, no una pieza.",
-   "color": [
-    0.6200000002918433,
-    0.6200000002918433,
-    0.6599999923026542
-   ],
-   "magnitudes": {
-    "dimensiones": {
-     "valor": [
-      60.0,
-      20.0,
-      12.0
-     ],
-     "unidad": "mm",
-     "estado": "supuesto",
-     "fuente": "SUPUESTO. Reserva para un acoplador de derivacion en linea (tubo de unos 60 mm) mas el encapsulado de un fotodiodo InGaAs con su transimpedancia. NO es ningun producto: no hay candidato elegido. Es la pieza de la bandeja con el supuesto mas flojo de todos, porque la geometria depende por completo de si el fotodiodo va en la bandeja o en PCB-2.",
-     "nota": null,
-     "falta": "Modelo de acoplador y de fotodiodo, y si el fotodiodo va en la bandeja o montado en PCB-2",
-     "pedir_a": "Equipo de payload de ACSAR",
-     "discrepancia": []
-    },
-    "masa": {
-     "valor": null,
-     "unidad": "g",
-     "estado": "TBD",
-     "fuente": null,
-     "nota": null,
-     "falta": "Masa del acoplador y el fotodiodo",
      "pedir_a": "Equipo de payload de ACSAR",
      "discrepancia": []
     },
@@ -3280,13 +2591,13 @@
    }
   },
   {
-   "nodo": "colimador",
-   "componente": "colimador",
-   "nombre": "Colimador fibra a espacio libre",
+   "nodo": "espejo_plegado_cuantico",
+   "componente": "espejo_plegado_cuantico",
+   "nombre": "Espejo de plegado del canal cuantico (plano metalico a 45 grados)",
    "categoria": "payload_optico",
    "subsistema": "terminal_optico",
    "zona": "z_payload_banco",
-   "id_drive": "OPT-08",
+   "id_drive": "OPT-19",
    "referencia_comercial": null,
    "estado_dato": "supuesto",
    "desde_step": false,
@@ -3294,16 +2605,16 @@
    "step_estado": null,
    "step_nota": null,
    "step_esperado": null,
-   "forma": "cilindro",
+   "forma": "caja",
    "montaje": {
     "cara": "-Y",
-    "eje": "X",
+    "eje": "Z",
     "tipo_eje": "optico",
-    "nota": "Es la frontera: le entra fibra por -X y le sale haz libre por +X. Se fija con abrazadera en V al banco."
+    "nota": "El sustrato va a 45 grados dentro del soporte; lo que se declara aqui es el soporte, que es lo que ocupa, y por eso la envolvente va alineada con los ejes (mismo criterio que los dos divisores). El eje declarado es Z porque es por donde le ENTRA el haz, bajando del colimador; sale hacia -X, hacia D1."
    },
    "conectores": [],
    "centro": [
-    95.397,
+    91.397,
     0.0,
     -46.8
    ],
@@ -3315,28 +2626,28 @@
    "caja": {
     "min": [
      81.397,
-     -6.0,
-     -52.8
+     -10.0,
+     -56.8
     ],
     "max": [
-     109.397,
-     6.0,
-     -40.8
+     101.397,
+     10.0,
+     -36.8
     ],
     "centro": [
-     95.397,
+     91.397,
      0.0,
      -46.8
     ],
     "dims": [
-     28.0,
-     12.0,
-     12.0
+     20.0,
+     20.0,
+     20.0
     ]
    },
-   "volumen_cm3": 4.032,
+   "volumen_cm3": 8.0,
    "requiere_vista_exterior": false,
-   "nota": "Frontera entre la cadena de fibra y el camino en espacio libre. SIN CANDIDATO: lo que se dibuja es una reserva.",
+   "nota": "SIN CANDIDATO: lo que se dibuja es una reserva, no una pieza. QUE HACE: dobla el canal cuantico de -Z a -X. Existe porque el codificador de polarizacion tiene que alimentar al colimador EN LINEA RECTA -- nada de fibra curvada despues de la codificacion --, y eso obliga al colimador a apuntar segun Z, mientras que la linea D1 -> FSM -> telescopio va segun X y no se mueve. Ver CLAUDE.md 3.10. LO QUE CUESTA, y hay que escribirlo: es una SEGUNDA SUPERFICIE A 45 GRADOS en el camino cuantico, y esta EN EL MISMO PLANO DE INCIDENCIA que el FSM -- los dos pliegan en X-Z --, asi que sus retardancias SE SUMAN en vez de compensarse. Si estuvieran en planos perpendiculares se cancelarian en primer orden; no es el caso y no se puede fingir que lo sea. POR QUE AUN ASI NO ES UN PROBLEMA: el efecto es UNITARIO Y ESTATICO. Una retardancia fija no destruye informacion, solo gira el marco de referencia de polarizacion, y la estacion de tierra ya tiene que calibrar ese marco de todas formas (el satelite pasa girando sobre su cabeza). La diatenuacion -- que si atenuaria unos estados mas que otros -- es despreciable en un metal protegido a 45 grados. Por eso el requisito es de ESTABILIDAD: que la retardancia no DERIVE con la temperatura ni con el envejecimiento entre calibraciones. Eso es lo que pide 'retardancia_45_1550'.",
    "color": [
     0.6200000002918433,
     0.6200000002918433,
@@ -3345,15 +2656,15 @@
    "magnitudes": {
     "dimensiones": {
      "valor": [
-      28.0,
-      12.0,
-      12.0
+      20.0,
+      20.0,
+      20.0
      ],
      "unidad": "mm",
      "estado": "supuesto",
-     "fuente": "SUPUESTO. Reserva para un colimador de fibra de banco: barrilete cilindrico de unos 12 mm de diametro. NO es ningun producto. El diametro del barrilete lo fija el del haz colimado, que es TBD, asi que esta cifra se movera con el. ACOTADA POR ARRIBA POR EL BANCO, ademas: el FSM tiene que estar sobre el eje optico del telescopio, y entre ese eje y la pared +X de la columna de payload quedan unos 56 mm para el colimador y D1 juntos, gaps incluidos. Si las piezas reales son mayores no es que el modelo este mal: es que el banco no da, y habra que alargarlo a costa de la bandeja o de la longitud reservada al telescopio. El chequeo 'banco_optico' recalcula ese margen desde el catalogo.",
+     "fuente": "SUPUESTO, y ACOTADO POR ABAJO POR EL HAZ. Un haz de d mm que incide a 45 grados deja una huella de d x d*raiz(2) sobre el espejo -- el mismo razonamiento que decide si el MEMS del FSM vale, ver CLAUDE.md 4.7(c) --, asi que con el diametro de haz modelado ('integracion.optica.diametro_haz_modelado', 10 mm, SUPUESTO) la huella es de 10 x 14.1 mm y el sustrato no puede bajar de ahi. Se reserva un CUBO DE 20 mm para el soporte, que admite un sustrato de unos 14 mm a 45 grados con margen de apertura libre y celda. NO es ningun producto: no hay candidato elegido. Y ESTA ACOTADO POR ARRIBA POR EL BANCO, igual que el colimador y D1: esta pieza ocupa en la linea en X el sitio que antes ocupaba el colimador, y el chequeo 'banco_optico' recalcula ese margen desde el catalogo.",
      "nota": null,
-     "falta": "Diametro del haz colimado y modelo de colimador. Es el mismo dato que bloquea los keep-outs del camino optico.",
+     "falta": "Diametro del haz colimado (del que sale el tamano del sustrato) y envolvente del soporte del espejo elegido",
      "pedir_a": "Equipo de optica de ACSAR",
      "discrepancia": []
     },
@@ -3363,7 +2674,7 @@
      "estado": "TBD",
      "fuente": null,
      "nota": null,
-     "falta": "Masa del colimador elegido",
+     "falta": "Masa del espejo y su soporte",
      "pedir_a": "Equipo de optica de ACSAR",
      "discrepancia": []
     },
@@ -3805,6 +3116,517 @@
      "nota": null,
      "falta": "Masa del fotodiodo con su soporte y su acondicionamiento",
      "pedir_a": "Equipo de PAT de ACSAR",
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  },
+  {
+   "nodo": "colimador",
+   "componente": "colimador",
+   "nombre": "Colimador fibra a espacio libre",
+   "categoria": "payload_optico",
+   "subsistema": "terminal_optico",
+   "zona": "z_payload_franja",
+   "id_drive": "OPT-08",
+   "referencia_comercial": null,
+   "estado_dato": "supuesto",
+   "desde_step": false,
+   "step": null,
+   "step_estado": null,
+   "step_nota": null,
+   "step_esperado": null,
+   "forma": "cilindro",
+   "montaje": {
+    "cara": "-Y",
+    "eje": "X",
+    "tipo_eje": "optico",
+    "nota": "Es la frontera: le entra fibra por -X y le sale haz libre por +X. Se fija con abrazadera en V al banco. EN EL LAYOUT VA GIRADO PARA QUE SU EJE VAYA SEGUN Z, con la fibra entrando por +Z y el haz saliendo hacia -Z, contra el espejo de plegado. No es un capricho de reparto: lo alimenta el codificador de polarizacion EN LINEA RECTA, y el codificador esta en la franja, que esta en +Z. Ver CLAUDE.md 3.10."
+   },
+   "conectores": [],
+   "centro": [
+    91.397,
+    0.0,
+    -5.3
+   ],
+   "rotacion": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     85.397,
+     -6.0,
+     -19.3
+    ],
+    "max": [
+     97.397,
+     6.0,
+     8.700000000000001
+    ],
+    "centro": [
+     91.397,
+     0.0,
+     -5.3
+    ],
+    "dims": [
+     12.0,
+     12.0,
+     28.0
+    ]
+   },
+   "volumen_cm3": 4.032,
+   "requiere_vista_exterior": false,
+   "nota": "Frontera entre la cadena de fibra y el camino en espacio libre. SIN CANDIDATO: lo que se dibuja es una reserva. ES LA UNICA PIEZA QUE PUEDE IR DETRAS DEL CODIFICADOR. Todo lo demas de la cadena -- aislador, filtro, VOA, acopladores -- va delante, porque cualquiera de ellos proyecta o deforma los cuatro estados BB84. Y el tramo de fibra que lo alimenta tiene que ser RECTO: los estados diagonales viajan a 45 grados de los ejes de la fibra PM, no son autoestados, y cualquier curva les mete una fase que deriva con la temperatura.",
+   "color": [
+    0.6200000002918433,
+    0.6200000002918433,
+    0.6599999923026542
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      28.0,
+      12.0,
+      12.0
+     ],
+     "unidad": "mm",
+     "estado": "supuesto",
+     "fuente": "SUPUESTO. Reserva para un colimador de fibra de banco: barrilete cilindrico de unos 12 mm de diametro. NO es ningun producto. El diametro del barrilete lo fija el del haz colimado, que es TBD, asi que esta cifra se movera con el. ACOTADA POR ARRIBA POR EL BANCO, ademas: el FSM tiene que estar sobre el eje optico del telescopio, y entre ese eje y la pared +X de la columna de payload quedan unos 56 mm para el colimador y D1 juntos, gaps incluidos. Si las piezas reales son mayores no es que el modelo este mal: es que el banco no da, y habra que alargarlo a costa de la bandeja o de la longitud reservada al telescopio. El chequeo 'banco_optico' recalcula ese margen desde el catalogo.",
+     "nota": null,
+     "falta": "Diametro del haz colimado y modelo de colimador. Es el mismo dato que bloquea los keep-outs del camino optico.",
+     "pedir_a": "Equipo de optica de ACSAR",
+     "discrepancia": []
+    },
+    "masa": {
+     "valor": null,
+     "unidad": "g",
+     "estado": "TBD",
+     "fuente": null,
+     "nota": null,
+     "falta": "Masa del colimador elegido",
+     "pedir_a": "Equipo de optica de ACSAR",
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  },
+  {
+   "nodo": "acoplador_monitor",
+   "componente": "acoplador_monitor",
+   "nombre": "Acoplador 2x2 de monitorizacion + dos fotodiodos",
+   "categoria": "payload_bandeja",
+   "subsistema": "bandeja_optica",
+   "zona": "z_payload_franja",
+   "id_drive": "OPT-07",
+   "referencia_comercial": null,
+   "estado_dato": "supuesto",
+   "desde_step": false,
+   "step": null,
+   "step_estado": null,
+   "step_nota": null,
+   "step_esperado": null,
+   "forma": "caja",
+   "montaje": {
+    "cara": "-Z",
+    "eje": "X",
+    "tipo_eje": "fibra",
+    "nota": "Son TRES cosas en una envolvente: el acoplador 2x2 (un tubo de empalme en linea) y los DOS fotodiodos con sus encapsulados. Se modelan juntas porque van juntas; al elegir modelo habra que separarlas."
+   },
+   "conectores": [],
+   "centro": [
+    97.7,
+    35.5,
+    10.7
+   ],
+   "rotacion": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     91.7,
+     25.5,
+     -19.3
+    ],
+    "max": [
+     103.7,
+     45.5,
+     40.7
+    ],
+    "centro": [
+     97.7,
+     35.5,
+     10.700000000000001
+    ],
+    "dims": [
+     12.0,
+     20.0,
+     60.0
+    ]
+   },
+   "volumen_cm3": 14.4,
+   "requiere_vista_exterior": false,
+   "nota": "SIN CANDIDATO: la envolvente que se dibuja es una reserva, no una pieza. VA DETRAS DEL MXER, que es lo que monitoriza, Y ANTES DEL VOA, donde todavia hay luz suficiente para medir: detras del VOA la senal esta ya a fracciones de foton por pulso y no hay nada que medir con un fotodiodo. \"BIAS\" AQUI ES EL PUNTO DE TRABAJO, NO LA LONGITUD DE ONDA. Un modulador Mach-Zehnder de niobato tiene una transmision en cos^2 del voltaje, y esa curva SE DESPLAZA EN VOLTAJE con la temperatura y con la deriva de carga del sustrato. El lazo de bias mide con este fotodiodo y corrige el voltaje de continua para mantener el punto de trabajo; no toca el laser. PARA VERIFICAR CADA NIVEL POR SEPARADO -- senal, decoy, vacio -- no basta un fotodiodo lento promediando: hace falta un fotodiodo RAPIDO capaz de resolver pulso a pulso, o secuencias de calibracion de patron conocido intercaladas en la transmision. Es una decision de PCB-2 y del lazo de control, no de mecanica, pero decide el fotodiodo y con el esta reserva.",
+   "color": [
+    0.6200000002918433,
+    0.6200000002918433,
+    0.6599999923026542
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      60.0,
+      20.0,
+      12.0
+     ],
+     "unidad": "mm",
+     "estado": "supuesto",
+     "fuente": "SUPUESTO. Reserva para un acoplador de derivacion 2x2 en linea (tubo de unos 60 mm) mas el encapsulado de DOS fotodiodos InGaAs con su transimpedancia: el de monitorizacion hacia delante y el VIGIA DE TROYA hacia atras. NO es ningun producto: no hay candidato elegido. LOS DOS FOTODIODOS VAN DENTRO DE ESTA RESERVA y no como piezas sueltas: separarlos anadiria dos cuerpos mas a la franja, que es donde aprieta, y la geometria de cada uno depende por completo de si el detector va aqui o montado en PCB-2, que es la decision que falta. El volumen no crece respecto a la version de un solo fotodiodo porque la reserva ya era generosa para uno; si los dos detectores acaban siendo dos encapsulados separados, crece.",
+     "nota": null,
+     "falta": "Modelo de acoplador 2x2 y de los dos fotodiodos, y si van en la bandeja o montados en PCB-2",
+     "pedir_a": "Equipo de payload de ACSAR",
+     "discrepancia": []
+    },
+    "masa": {
+     "valor": null,
+     "unidad": "g",
+     "estado": "TBD",
+     "fuente": null,
+     "nota": null,
+     "falta": "Masa del acoplador 2x2 y los dos fotodiodos",
+     "pedir_a": "Equipo de payload de ACSAR",
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  },
+  {
+   "nodo": "voa",
+   "componente": "voa",
+   "nombre": "Atenuador optico variable (VOA)",
+   "categoria": "payload_bandeja",
+   "subsistema": "bandeja_optica",
+   "zona": "z_payload_franja",
+   "id_drive": "OPT-04",
+   "referencia_comercial": null,
+   "estado_dato": "supuesto",
+   "desde_step": false,
+   "step": null,
+   "step_estado": null,
+   "step_nota": null,
+   "step_esperado": null,
+   "forma": "cilindro",
+   "montaje": {
+    "cara": "-Z",
+    "eje": "X",
+    "tipo_eje": "fibra",
+    "nota": "Componente en linea. Se fija con abrazadera a la bandeja."
+   },
+   "conectores": [],
+   "centro": [
+    97.7,
+    28.25,
+    66.2
+   ],
+   "rotacion": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     94.95,
+     25.5,
+     48.7
+    ],
+    "max": [
+     100.45,
+     31.0,
+     83.7
+    ],
+    "centro": [
+     97.7,
+     28.25,
+     66.2
+    ],
+    "dims": [
+     5.5,
+     5.5,
+     35.0
+    ]
+   },
+   "volumen_cm3": 1.05875,
+   "requiere_vista_exterior": false,
+   "nota": "Lleva el flujo al nivel de fotones por pulso exigido por BB84 con decoy. SIN CANDIDATO: la envolvente que se dibuja es una reserva, no una pieza. VA ANTES DEL CODIFICADOR POR LA PDL. Todo componente de fibra tiene PERDIDA DEPENDIENTE DE LA POLARIZACION, y un atenuador variable la tiene por construccion: atenua unos estados mas que otros. Puesto detras del codificador, eso DEFORMA el conjunto BB84 -- los cuatro estados dejan de tener la misma intensidad -- y se lo regala a un atacante. Puesto delante, la luz va en una sola polarizacion fija y la PDL es una perdida constante mas, sin ninguna consecuencia. Y no cuesta nada ponerlo delante: la atenuacion es LINEAL, asi que da igual en que punto de la cadena se haga.",
+   "color": [
+    0.6200000002918433,
+    0.6200000002918433,
+    0.6599999923026542
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      35.0,
+      5.5,
+      5.5
+     ],
+     "unidad": "mm",
+     "estado": "supuesto",
+     "fuente": "SUPUESTO. Encapsulado cilindrico en linea tipico de los componentes pasivos de fibra de telecomunicaciones (del orden de 5.5 mm de diametro por 35-40 mm de cuerpo). NO es ningun producto: no hay candidato elegido, asi que no hay ficha que copiar. Sirve para reservar un volumen del orden correcto en la bandeja y para que el recorrido de fibra tenga extremos donde apoyarse. La cifra real cambiara, y puede cambiar mucho si se elige un encapsulado en caja.",
+     "nota": null,
+     "falta": "Modelo de VOA elegido y su envolvente",
+     "pedir_a": "Equipo de payload de ACSAR",
+     "discrepancia": []
+    },
+    "masa": {
+     "valor": null,
+     "unidad": "g",
+     "estado": "TBD",
+     "fuente": null,
+     "nota": null,
+     "falta": "Masa del VOA elegido",
+     "pedir_a": "Equipo de payload de ACSAR",
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  },
+  {
+   "nodo": "mod_intensidad_mxer_ln_10",
+   "componente": "mod_intensidad_mxer_ln_10",
+   "nombre": "Exail MXER-LN-10 (modulador de intensidad, grado espacial EM/NS-FM/FM)",
+   "categoria": "payload_bandeja",
+   "subsistema": "bandeja_optica",
+   "zona": "z_payload_franja",
+   "id_drive": "OPT-02",
+   "referencia_comercial": "Exail MXER-LN-10, encapsulado de grado espacial EM/NS-FM/FM",
+   "estado_dato": "confirmado",
+   "desde_step": false,
+   "step": null,
+   "step_estado": null,
+   "step_nota": null,
+   "step_esperado": null,
+   "forma": "caja",
+   "montaje": {
+    "cara": "-Z",
+    "eje": "X",
+    "tipo_eje": "fibra",
+    "nota": "Se atornilla por su base (-Z local) por las dos bridas de los extremos. El eje de fibra recorre X, a 4.8 mm de la base (dato 'altura_eje_fibra'). En el layout va TUMBADO: la rotacion [0, 90, 0] lleva el eje de fibra a Z del satelite y la altura del cuerpo a X, que es el eje escaso de la franja. Asi el conector RF sale hacia +-Y, donde sobra sitio."
+   },
+   "conectores": [
+    {
+     "id": "rf",
+     "tipo": "coaxial",
+     "cara": "+Y",
+     "dimensiones": {
+      "valor": [
+       6.1,
+       10.0,
+       6.1
+      ],
+      "unidad": "mm",
+      "estado": "supuesto",
+      "fuente": "Dos de las tres cotas SI son del plano (Exail 03_2026_ED2 / 00025851-B p.9): 6.1 mm de ancho y 10 mm de saliente sobre el cuerpo. La tercera, 6.1 mm, esta inventada: se toma igual al ancho porque el plano no la acota. Es el saliente de 10 mm el que manda, y ese es dato.",
+      "nota": null,
+      "falta": "Profundidad del conector RF, y holgura de insercion del coaxial",
+      "pedir_a": "Exail / Equipo de electronica de ACSAR",
+      "discrepancia": []
+     },
+     "nota": "Este conector es la razon de que el modulador vaya tumbado. Con el cuerpo de pie, sus 10 mm saldrian hacia la franja, que tiene 26.3 mm para los dos moduladores."
+    },
+    {
+     "id": "fibra_entrada",
+     "tipo": "fibra",
+     "cara": "-X",
+     "dimensiones": {
+      "valor": [
+       10.0,
+       3.0,
+       3.0
+      ],
+      "unidad": "mm",
+      "estado": "supuesto",
+      "fuente": "Los 10 mm de saliente salen de restar las dos cotas del plano: (130 con protectores - 110 con bridas) / 2. La seccion de 3 mm esta inventada; es un boot de fibra tipico.",
+      "nota": null,
+      "falta": "Diametro del protector de fibra del encapsulado de grado espacial",
+      "pedir_a": "Exail",
+      "discrepancia": []
+     },
+     "nota": null
+    },
+    {
+     "id": "fibra_salida",
+     "tipo": "fibra",
+     "cara": "+X",
+     "dimensiones": {
+      "valor": [
+       10.0,
+       3.0,
+       3.0
+      ],
+      "unidad": "mm",
+      "estado": "supuesto",
+      "fuente": "Simetrico de 'fibra_entrada'. Mismas cotas y mismo origen.",
+      "nota": null,
+      "falta": "Diametro del protector de fibra del encapsulado de grado espacial",
+      "pedir_a": "Exail",
+      "discrepancia": []
+     },
+     "nota": null
+    }
+   ],
+   "centro": [
+    97.7,
+    -23.0,
+    45.7
+   ],
+   "rotacion": [
+    0.0,
+    90.0,
+    180.0
+   ],
+   "caja": {
+    "min": [
+     92.85,
+     -40.5,
+     -19.299999999999997
+    ],
+    "max": [
+     102.55000000000001,
+     -15.499999999999998,
+     110.7
+    ],
+    "centro": [
+     97.7,
+     -28.0,
+     45.7
+    ],
+    "dims": [
+     9.700000000000017,
+     25.0,
+     130.0
+    ]
+   },
+   "volumen_cm3": 31.525000000000055,
+   "requiere_vista_exterior": false,
+   "nota": null,
+   "color": [
+    0.19999999868206275,
+    0.7500000009342138,
+    0.8199999872960941
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      110.0,
+      15.0,
+      9.7
+     ],
+     "unidad": "mm",
+     "estado": "confirmado",
+     "fuente": "https://www.exail.com/media-file/7854/exail-datasheet-em-ns-fm-fm-mxer-ln-10-space-grade-components.pdf",
+     "nota": "Plano mecanico 03_2026_ED2 / 00025851-B p.9. Cuerpo 100 mm, bridas incluidas 110 +/-0.2 mm, ancho 15 +/-0.2, alto 9.7 +/-0.2. DISCREPANCIA IMPORTANTE con el brief, ver alternativas.",
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": [
+      {
+       "valor": [
+        85.0,
+        15.0,
+        9.65
+       ],
+       "fuente": "https://www.exail.com/media-file/7739/datasheet-mpxmpz-ln-series.pdf",
+       "nota": "\"Housing #A\" de la serie comercial MPX/MPZ, que es la cifra que recoge el brief. El encapsulado de GRADO ESPACIAL es mas largo. Para el analisis se usa el de grado espacial, que es el que vuela."
+      }
+     ]
+    },
+    "masa": {
+     "valor": null,
+     "unidad": "g",
+     "estado": "TBD",
+     "fuente": null,
+     "nota": "La version comercial \"Housing",
+     "falta": "Masa del encapsulado de grado espacial",
+     "pedir_a": "Exail",
      "discrepancia": []
     },
     "potencia_nominal": {
@@ -5477,6 +5299,22 @@
   },
   {
    "componente": "integracion",
+   "magnitud": "integracion.fibra.longitud_protector_empalme",
+   "estado": "supuesto",
+   "valor_modelado": 60.0,
+   "falta": "Protector de empalme elegido y su tramo recto real",
+   "pedir_a": "Equipo de payload de ACSAR"
+  },
+  {
+   "componente": "integracion",
+   "magnitud": "integracion.fibra.tolerancia_coaxialidad",
+   "estado": "supuesto",
+   "valor_modelado": 0.5,
+   "falta": "Tolerancia de alineacion del colimador elegido, y presupuesto de alineacion del montaje",
+   "pedir_a": "Equipo de optica / de payload de ACSAR"
+  },
+  {
+   "componente": "integracion",
    "magnitud": "integracion.fibra.longitud_boot_modelada",
    "estado": "supuesto",
    "valor_modelado": 20.0,
@@ -5929,6 +5767,18 @@
    "pedir_a": "Equipo de optica de ACSAR"
   },
   {
+   "componente": "espejo_plegado_cuantico",
+   "magnitud": "espejo_plegado_cuantico.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    20.0,
+    20.0,
+    20.0
+   ],
+   "falta": "Diametro del haz colimado (del que sale el tamano del sustrato) y envolvente del soporte del espejo elegido",
+   "pedir_a": "Equipo de optica de ACSAR"
+  },
+  {
    "componente": "colimador",
    "magnitud": "colimador.dimensiones",
    "estado": "supuesto",
@@ -6061,6 +5911,18 @@
    "pedir_a": "Equipo de payload de ACSAR"
   },
   {
+   "componente": "atenuador_fijo",
+   "magnitud": "atenuador_fijo.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    25.0,
+    5.5,
+    5.5
+   ],
+   "falta": "Modelo de atenuador fijo elegido y su envolvente",
+   "pedir_a": "Equipo de payload de ACSAR"
+  },
+  {
    "componente": "aislador",
    "magnitud": "aislador.dimensiones",
    "estado": "supuesto",
@@ -6070,6 +5932,14 @@
     5.5
    ],
    "falta": "Modelo de aislador elegido y su envolvente",
+   "pedir_a": "Equipo de payload de ACSAR"
+  },
+  {
+   "componente": "aislador",
+   "magnitud": "aislador.aislamiento",
+   "estado": "supuesto",
+   "valor_modelado": 50.0,
+   "falta": "Aislamiento del aislador elegido, medido a 1550 nm",
    "pedir_a": "Equipo de payload de ACSAR"
   },
   {
@@ -6085,6 +5955,14 @@
    "pedir_a": "Equipo de payload de ACSAR"
   },
   {
+   "componente": "filtro_espectral",
+   "magnitud": "filtro_espectral.ancho_banda",
+   "estado": "supuesto",
+   "valor_modelado": 0.8,
+   "falta": "Ancho espectral real del pulso del DFB conmutado en ganancia, y ancho de banda del filtro elegido",
+   "pedir_a": "Equipo de payload de ACSAR"
+  },
+  {
    "componente": "acoplador_monitor",
    "magnitud": "acoplador_monitor.dimensiones",
    "estado": "supuesto",
@@ -6093,7 +5971,18 @@
     20.0,
     12.0
    ],
-   "falta": "Modelo de acoplador y de fotodiodo, y si el fotodiodo va en la bandeja o montado en PCB-2",
+   "falta": "Modelo de acoplador 2x2 y de los dos fotodiodos, y si van en la bandeja o montados en PCB-2",
+   "pedir_a": "Equipo de payload de ACSAR"
+  },
+  {
+   "componente": "acoplador_monitor",
+   "magnitud": "acoplador_monitor.razon_acoplamiento",
+   "estado": "supuesto",
+   "valor_modelado": [
+    99.0,
+    1.0
+   ],
+   "falta": "Razon de acoplamiento del acoplador elegido, y sensibilidad del fotodiodo, que es lo que la fija",
    "pedir_a": "Equipo de payload de ACSAR"
   },
   {
@@ -6138,7 +6027,7 @@
    "id": "volumen_total",
    "titulo": "Volumen total frente a la zona util",
    "estado": "atencion",
-   "mensaje": "Los 27 componentes con envolvente conocida ocupan 4301 cm3 de los 7644 cm3 interiores (56%). Quedan 3 componentes sin envolvente: el dato real sera mayor.",
+   "mensaje": "Los 28 componentes con envolvente conocida ocupan 4309 cm3 de los 7644 cm3 interiores (56%). Quedan 3 componentes sin envolvente: el dato real sera mayor.",
    "falta": "Envolvente de: radio_uhf_pulsar_vutrx, propulsion, cables_rf_moduladores"
   },
   {
@@ -6187,7 +6076,7 @@
    "id": "banco_optico",
    "titulo": "Cadena de espacio libre entre el eje del telescopio y la pared",
    "estado": "ok",
-   "mensaje": "El FSM va sobre el eje optico del telescopio (X = +36.85 mm) porque es el que dobla el haz de X a Z. Del eje a la pared +X de la columna hay 74.0 mm, y la media anchura del FSM mas el D1 mas el colimador suman 66.3 mm, sin contar holguras de montaje. Quedan 7.7 mm de margen.",
+   "mensaje": "El FSM va sobre el eje optico del telescopio (X = +36.85 mm) porque es el que dobla el haz de X a Z. Del eje a la pared +X de la columna hay 74.0 mm, y la media anchura del FSM mas el D1 mas el espejo de plegado suman 58.3 mm, sin contar holguras de montaje. Quedan 15.7 mm de margen.",
    "falta": null
   },
   {
@@ -6196,6 +6085,27 @@
    "estado": "falla",
    "mensaje": "Los dos beacons comparten el brazo que refleja D1, y dentro de el D2 los separa. La rama mas apretada es +Y: pide 54.5 mm desde el centro de su divisor y tiene 47.7 mm, sin contar holguras de montaje. NO CABE por 6.8 mm. Y ya esta contada la reserva de la camara bajada de 30 a 20 mm. Las salidas son plegar el brazo hacia -Z con un espejo de doblado (da unos 27.5 mm mas, a costa de una superficie reflectante mas en el camino del beacon) o alargar el banco, que se paga con la bandeja o con la longitud reservada al telescopio. Las dos son decisiones de ACSAR; bajar otra reserva hasta que esto pase, no. Con las holguras de montaje el deficit es mayor todavia, asi que data/layout.yaml NO coloca camara_beacon: una pieza sin sitio no se dibuja en uno inventado ni saliendose del satelite.",
    "falta": "Decision de ACSAR: plegar el brazo hacia -Z o alargar el banco"
+  },
+  {
+   "id": "orden_cadena_fibra",
+   "titulo": "Orden de la cadena de fibra frente a las restricciones declaradas",
+   "estado": "ok",
+   "mensaje": "La cadena laser_dfb_1550 -> aislador -> filtro_espectral -> mod_intensidad_mxer_ln_10 -> acoplador_monitor -> voa -> mod_fase_mpz_ln_10 -> colimador cumple las 7 restricciones declaradas. Todo componente de fibra va antes del codificador de polarizacion, y detras de el solo esta el colimador.",
+   "falta": null
+  },
+  {
+   "id": "fibra_post_codificacion",
+   "titulo": "Tramo de fibra posterior al codificador de polarizacion",
+   "estado": "falla",
+   "mensaje": "El tramo va en fila segun Z y suma 218.0 mm: 130 mm del codificador (protectores de fibra incluidos), 60 mm de protector de empalme y 28 mm de colimador. La franja mide 200.0 mm en Z, asi que NO CABE por 18.0 mm. Por eso data/layout.yaml NO coloca mod_fase_mpz_ln_10: una pieza sin sitio no se dibuja en uno inventado. La longitud de la franja es la reservada al telescopio, asi que alargar el banco NO ayuda: el banco no entra en esta cuenta. Las salidas son subir 'telescopio_cassegrain.longitud_reservada' (los \"~2U\" de verdad del brief son 227 mm, no 200) o que Exail sirva el codificador con salida colimada, que quitaria el empalme entero -- ver el TBD 'pigtail_salida_minimo'. Las dos son decisiones que no toma este modelo. Lo que NO es una salida es bajar el protector de empalme hasta que esto pase.",
+   "falta": "Decision de ACSAR: alargar la franja (longitud reservada al telescopio) o codificador con salida colimada"
+  },
+  {
+   "id": "altura_eje_codificador",
+   "titulo": "Eje de fibra del codificador frente al plano optico del banco",
+   "estado": "no comprobable",
+   "mensaje": "mod_fase_mpz_ln_10 NO ESTA COLOCADO en data/layout.yaml, asi que no hay eje que medir. No esta colocado porque el tramo recto que tiene que alimentar no cabe: ver el chequeo 'fibra_post_codificacion'. Decir que la altura esta bien cuando la pieza no esta seria inventarse el resultado.",
+   "falta": "Colocacion del codificador, que hoy no cabe en la franja"
   },
   {
    "id": "configuracion_telescopio",
@@ -6229,8 +6139,8 @@
    "id": "masa",
    "titulo": "Presupuesto de masa",
    "estado": "atencion",
-   "mensaje": "Masa conocida 846 g de un limite de 12000 g (CDS 14.1). Faltan 28 componentes por pesar, incluido el chasis y el telescopio, que son de los mas pesados.",
-   "falta": "Masa de: estructura_6u, adcs_iadcs400, antena_quasar_wsant, radio_uhf_pulsar_vutrx, paneles_photon_side, propulsion, telescopio_cassegrain, fsm, dicroico_d1, dicroico_d2, camara_beacon, laser_beacon_bajada, fotodiodo_monitor_beacon, trampa_luz_d1, colimador, bandeja_optica, laser_dfb_1550, mod_intensidad_mxer_ln_10, mod_fase_mpz_ln_10, voa, aislador, filtro_espectral, acoplador_monitor, pcb1_control_qkd, pcb2_drivers_opticos, pcb3_pat, cables_rf_moduladores, qrng_idq20mc1_s3"
+   "mensaje": "Masa conocida 846 g de un limite de 12000 g (CDS 14.1). Faltan 29 componentes por pesar, incluido el chasis y el telescopio, que son de los mas pesados.",
+   "falta": "Masa de: estructura_6u, adcs_iadcs400, antena_quasar_wsant, radio_uhf_pulsar_vutrx, paneles_photon_side, propulsion, telescopio_cassegrain, fsm, dicroico_d1, dicroico_d2, camara_beacon, laser_beacon_bajada, fotodiodo_monitor_beacon, trampa_luz_d1, espejo_plegado_cuantico, colimador, bandeja_optica, laser_dfb_1550, mod_intensidad_mxer_ln_10, mod_fase_mpz_ln_10, voa, aislador, filtro_espectral, acoplador_monitor, pcb1_control_qkd, pcb2_drivers_opticos, pcb3_pat, cables_rf_moduladores, qrng_idq20mc1_s3"
   },
   {
    "id": "step_de_fabricante",
@@ -6243,108 +6153,52 @@
  "interferencias": [
   {
    "tipo": "keep_out",
-   "a": "aislador",
+   "a": "filtro_espectral",
    "b": "keepout_fibra_laser_dfb_1550_salida",
-   "volumen_cm3": 0.019600000000000405,
-   "detalle": "aislador invade el keep-out 'fibra_laser_dfb_1550_salida' (fibra) en 0.02 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
+   "volumen_cm3": 0.020244000000000418,
+   "detalle": "filtro_espectral invade el keep-out 'fibra_laser_dfb_1550_salida' (fibra) en 0.02 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
   },
   {
    "tipo": "keep_out",
    "a": "laser_dfb_1550",
-   "b": "keepout_fibra_voa_salida",
+   "b": "keepout_fibra_aislador_salida",
    "volumen_cm3": 3.6357475000000035,
-   "detalle": "laser_dfb_1550 invade el keep-out 'fibra_voa_salida' (fibra) en 3.64 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
-  },
-  {
-   "tipo": "keep_out",
-   "a": "aislador",
-   "b": "keepout_fibra_voa_salida",
-   "volumen_cm3": 0.15578750000000016,
-   "detalle": "aislador invade el keep-out 'fibra_voa_salida' (fibra) en 0.16 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
+   "detalle": "laser_dfb_1550 invade el keep-out 'fibra_aislador_salida' (fibra) en 3.64 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
   },
   {
    "tipo": "keep_out",
    "a": "filtro_espectral",
-   "b": "keepout_fibra_voa_salida",
-   "volumen_cm3": 0.075625,
-   "detalle": "filtro_espectral invade el keep-out 'fibra_voa_salida' (fibra) en 0.08 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
-  },
-  {
-   "tipo": "keep_out",
-   "a": "acoplador_monitor",
-   "b": "keepout_fibra_voa_salida",
-   "volumen_cm3": 6.285606250000002,
-   "detalle": "acoplador_monitor invade el keep-out 'fibra_voa_salida' (fibra) en 6.29 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
+   "b": "keepout_fibra_aislador_salida",
+   "volumen_cm3": 0.23141250000000016,
+   "detalle": "filtro_espectral invade el keep-out 'fibra_aislador_salida' (fibra) en 0.23 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
   },
   {
    "tipo": "keep_out",
    "a": "laser_dfb_1550",
-   "b": "keepout_fibra_aislador_entrada",
-   "volumen_cm3": 3.6357475000000035,
-   "detalle": "laser_dfb_1550 invade el keep-out 'fibra_aislador_entrada' (fibra) en 3.64 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
+   "b": "keepout_fibra_filtro_espectral_entrada",
+   "volumen_cm3": 3.261479375000002,
+   "detalle": "laser_dfb_1550 invade el keep-out 'fibra_filtro_espectral_entrada' (fibra) en 3.26 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
+  },
+  {
+   "tipo": "keep_out",
+   "a": "aislador",
+   "b": "keepout_fibra_filtro_espectral_entrada",
+   "volumen_cm3": 0.23141249999999997,
+   "detalle": "aislador invade el keep-out 'fibra_filtro_espectral_entrada' (fibra) en 0.23 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
   },
   {
    "tipo": "keep_out",
    "a": "voa",
-   "b": "keepout_fibra_aislador_entrada",
-   "volumen_cm3": 0.15578749999999997,
-   "detalle": "voa invade el keep-out 'fibra_aislador_entrada' (fibra) en 0.16 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
-  },
-  {
-   "tipo": "keep_out",
-   "a": "filtro_espectral",
-   "b": "keepout_fibra_aislador_entrada",
-   "volumen_cm3": 0.23141249999999994,
-   "detalle": "filtro_espectral invade el keep-out 'fibra_aislador_entrada' (fibra) en 0.23 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
+   "b": "keepout_fibra_acoplador_monitor_entrada",
+   "volumen_cm3": 0.529375,
+   "detalle": "voa invade el keep-out 'fibra_acoplador_monitor_entrada' (fibra) en 0.53 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
   },
   {
    "tipo": "keep_out",
    "a": "acoplador_monitor",
-   "b": "keepout_fibra_aislador_entrada",
-   "volumen_cm3": 4.4515625,
-   "detalle": "acoplador_monitor invade el keep-out 'fibra_aislador_entrada' (fibra) en 4.45 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
-  },
-  {
-   "tipo": "keep_out",
-   "a": "aislador",
-   "b": "keepout_fibra_filtro_espectral_salida",
-   "volumen_cm3": 0.23141250000000016,
-   "detalle": "aislador invade el keep-out 'fibra_filtro_espectral_salida' (fibra) en 0.23 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
-  },
-  {
-   "tipo": "keep_out",
-   "a": "acoplador_monitor",
-   "b": "keepout_fibra_filtro_espectral_salida",
-   "volumen_cm3": 7.455500000000002,
-   "detalle": "acoplador_monitor invade el keep-out 'fibra_filtro_espectral_salida' (fibra) en 7.46 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
-  },
-  {
-   "tipo": "keep_out",
-   "a": "fsm",
-   "b": "keepout_fibra_colimador_entrada",
-   "volumen_cm3": 2.964138063802284,
-   "detalle": "fsm invade el keep-out 'fibra_colimador_entrada' (fibra) en 2.96 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
-  },
-  {
-   "tipo": "keep_out",
-   "a": "dicroico_d1",
-   "b": "keepout_fibra_colimador_entrada",
-   "volumen_cm3": 6.0835,
-   "detalle": "dicroico_d1 invade el keep-out 'fibra_colimador_entrada' (fibra) en 6.08 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
-  },
-  {
-   "tipo": "keep_out",
-   "a": "dicroico_d2",
-   "b": "keepout_fibra_colimador_entrada",
-   "volumen_cm3": 12.167,
-   "detalle": "dicroico_d2 invade el keep-out 'fibra_colimador_entrada' (fibra) en 12.17 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
-  },
-  {
-   "tipo": "keep_out",
-   "a": "laser_beacon_bajada",
-   "b": "keepout_fibra_colimador_entrada",
-   "volumen_cm3": 10.625,
-   "detalle": "laser_beacon_bajada invade el keep-out 'fibra_colimador_entrada' (fibra) en 10.62 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
+   "b": "keepout_fibra_voa_salida",
+   "volumen_cm3": 5.04,
+   "detalle": "acoplador_monitor invade el keep-out 'fibra_voa_salida' (fibra) en 5.04 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
   }
  ],
  "colores": {
@@ -6400,8 +6254,10 @@
  },
  "no_colocados_con_geometria": [
   "adcs_iadcs420",
+  "atenuador_fijo",
   "camara_beacon",
   "fsm_piezo_pi_s331",
+  "mod_fase_mpz_ln_10",
   "qrng_idq20mc1_s3",
   "trampa_luz_d2"
  ]

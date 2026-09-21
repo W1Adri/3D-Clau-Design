@@ -5,7 +5,7 @@ No editar a mano: los numeros salen de `data/components.yaml`.
 
 - Mision: CLAU - CubeSat Laser per a Aplicacions Ultrasegures
 - Norma: CubeSat Design Specification Rev. 14.1, The CubeSat Program, Cal Poly SLO
-- Estado del layout: **confirmada** (28 piezas colocadas)
+- Estado del layout: **confirmada** (31 piezas colocadas)
 
 Comprobaciones que no dependen de donde se coloque cada pieza.
 
@@ -13,14 +13,14 @@ Comprobaciones que no dependen de donde se coloque cada pieza.
 
 **Estado: ATENCION**
 
-Los 28 componentes con envolvente conocida ocupan 4309 cm3 de los 7644 cm3 interiores (56%). Quedan 3 componentes sin envolvente: el dato real sera mayor.
+Los 29 componentes con envolvente conocida ocupan 4531 cm3 de los 7644 cm3 interiores (59%). Quedan 3 componentes sin envolvente: el dato real sera mayor.
 
 | magnitud | valor |
 |---|---|
 | interior_cm3 | 7643.68 |
-| ocupado_conocido_cm3 | 4308.75 |
-| libre_si_nada_mas_creciera_cm3 | 3334.93 |
-| fraccion_ocupada | 0.56 |
+| ocupado_conocido_cm3 | 4531.20 |
+| libre_si_nada_mas_creciera_cm3 | 3112.48 |
+| fraccion_ocupada | 0.59 |
 | componentes_sin_volumen | 3 |
 
 Falta: Envolvente de: radio_uhf_pulsar_vutrx, propulsion, cables_rf_moduladores
@@ -126,48 +126,62 @@ Falta: Paso de apilamiento PC104 del chasis elegido
 
 **Estado: OK**
 
-El FSM va sobre el eje optico del telescopio (X = +36.85 mm) porque es el que dobla el haz de X a Z. Del eje a la pared +X de la columna hay 74.0 mm, y la media anchura del FSM mas el D1 mas el espejo de plegado suman 58.3 mm, sin contar holguras de montaje. Quedan 15.7 mm de margen.
+El FSM va sobre el eje optico del telescopio (X = +36.85 mm) porque es el que dobla el haz de X a Z. Del eje a la pared +X de la columna hay 74.0 mm, y la media anchura del FSM mas el D1 mas el espejo de plegado suman 47.3 mm, sin contar holguras de montaje. Quedan 26.7 mm de margen.
 
 | magnitud | valor |
 |---|---|
 | fsm | 15.29 |
-| dicroico_d1 | 23.00 |
-| espejo_plegado_cuantico | 20.00 |
-| necesario_mm | 58.29 |
+| dicroico_d1 | 16.00 |
+| espejo_plegado_cuantico | 16.00 |
+| necesario_mm | 47.29 |
 | disponible_mm | 74.00 |
-| margen_mm | 15.71 |
-| laser_beacon_bajada_mm | 30.00 |
+| margen_mm | 26.71 |
+| camara_beacon_mm | 30.00 |
 | margen_-X_D2_mm | 32.99 |
 | fotodiodo_monitor_beacon_mm | 12.00 |
-| margen_+X_D2_mm | 23.71 |
+| margen_+X_D2_mm | 30.71 |
 
-## Brazo compartido de los dos beacons, de D1 a la pared del banco
+## El espejo de plegado frente al borde de la franja
 
-**Estado: FALLA**
+**Estado: OK**
 
-Los dos beacons comparten el brazo que refleja D1, y dentro de el D2 los separa. La rama mas apretada es +Y: pide 54.5 mm desde el centro de su divisor y tiene 47.7 mm, sin contar holguras de montaje. NO CABE por 6.8 mm. Y ya esta contada la reserva de la camara bajada de 30 a 20 mm. Las salidas son plegar el brazo hacia -Z con un espejo de doblado (da unos 27.5 mm mas, a costa de una superficie reflectante mas en el camino del beacon) o alargar el banco, que se paga con la bandeja o con la longitud reservada al telescopio. Las dos son decisiones de ACSAR; bajar otra reserva hasta que esto pase, no. Con las holguras de montaje el deficit es mayor todavia, asi que data/layout.yaml NO coloca camara_beacon: una pieza sin sitio no se dibuja en uno inventado ni saliendose del satelite.
+El colimador va coaxial con el espejo, en X = +95.55 mm, y con 6.0 mm de radio su cara -X cae en +89.55. La franja empieza en +84.55. Quedan 5.0 mm de margen.
 
 | magnitud | valor |
 |---|---|
-| dicroico_d2_mm | 23.00 |
-| camara_beacon_mm | 20.00 |
-| necesario_+Y_mm | 54.50 |
+| x_espejo_mm | 95.55 |
+| x_colimador_mm | 95.55 |
+| coaxialidad_mm | 0.00 |
+| radio_colimador_mm | 6.00 |
+| borde_franja_mm | 84.55 |
+| x_minimo_del_colimador_mm | 89.55 |
+| margen_mm | 5.00 |
+
+## Brazo compartido de los dos beacons, de D1 a la pared del banco
+
+**Estado: OK**
+
+Los dos beacons comparten el brazo que refleja D1, y dentro de el D2 los separa. El reparto por ramas sale de 'meta.topologia_brazo_beacons' de data/connections.yaml, que es el mismo dato que usa el generador para colocar -- +Y: dicroico_d2 + colimador_beacon_bajada; -Y: trampa_luz_d1; -X: camara_beacon; +X: fotodiodo_monitor_beacon. La rama mas apretada es +Y: pide 36.0 mm desde el centro de su divisor y tiene 47.7 mm, sin contar holguras de montaje. Quedan 11.7 mm de margen. Ojo: es el margen DESNUDO. El generador coloca dejando holgura entre pieza y pieza, asi que lo que de verdad sobra en la rama +Y es menos, y todas las envolventes del brazo siguen siendo SUPUESTAS.
+
+| magnitud | valor |
+|---|---|
+| dicroico_d2_mm | 16.00 |
+| colimador_beacon_bajada_mm | 12.00 |
+| necesario_+Y_mm | 36.00 |
 | disponible_+Y_mm | 47.70 |
-| margen_+Y_mm | -6.80 |
+| margen_+Y_mm | 11.70 |
 | trampa_luz_d1_mm | 15.00 |
-| necesario_-Y_mm | 26.50 |
+| necesario_-Y_mm | 23.00 |
 | disponible_-Y_mm | 47.70 |
-| margen_-Y_mm | 21.20 |
-| laser_beacon_bajada_mm | 30.00 |
-| necesario_-X_mm | 41.50 |
-| disponible_-X_mm | 74.49 |
+| margen_-Y_mm | 24.70 |
+| camara_beacon_mm | 30.00 |
+| necesario_-X_mm | 38.00 |
+| disponible_-X_mm | 70.99 |
 | margen_-X_mm | 32.99 |
 | fotodiodo_monitor_beacon_mm | 12.00 |
-| necesario_+X_mm | 23.50 |
-| disponible_+X_mm | 47.21 |
-| margen_+X_mm | 23.71 |
-
-Falta: Decision de ACSAR: plegar el brazo hacia -Z o alargar el banco
+| necesario_+X_mm | 20.00 |
+| disponible_+X_mm | 50.71 |
+| margen_+X_mm | 30.71 |
 
 ## Orden de la cadena de fibra frente a las restricciones declaradas
 
@@ -183,9 +197,9 @@ La cadena laser_dfb_1550 -> aislador -> filtro_espectral -> mod_intensidad_mxer_
 
 ## Tramo de fibra posterior al codificador de polarizacion
 
-**Estado: FALLA**
+**Estado: NO COMPROBABLE**
 
-El tramo va en fila segun Z y suma 218.0 mm: 130 mm del codificador (protectores de fibra incluidos), 60 mm de protector de empalme y 28 mm de colimador. La franja mide 200.0 mm en Z, asi que NO CABE por 18.0 mm. Por eso data/layout.yaml NO coloca mod_fase_mpz_ln_10: una pieza sin sitio no se dibuja en uno inventado. La longitud de la franja es la reservada al telescopio, asi que alargar el banco NO ayuda: el banco no entra en esta cuenta. Las salidas son subir 'telescopio_cassegrain.longitud_reservada' (los "~2U" de verdad del brief son 227 mm, no 200) o que Exail sirva el codificador con salida colimada, que quitaria el empalme entero -- ver el TBD 'pigtail_salida_minimo'. Las dos son decisiones que no toma este modelo. Lo que NO es una salida es bajar el protector de empalme hasta que esto pase.
+El tramo va en fila segun Z y suma 218.0 mm: 130 mm del codificador (protectores de fibra incluidos), 60 mm de protector de empalme y 28 mm de colimador. Cabe en los 227.0 mm de la franja, con 9.0 mm de margen. PERO SI ESA LONGITUD DE FIBRA ES ACEPTABLE NO SE PUEDE DECIR: los estados diagonales no son autoestados de la fibra PM y acumulan una fase que deriva con la temperatura, y cuanta es esa fase depende de 'integracion.fibra.sensibilidad_termica_fase_pm', que es TBD.
 
 | magnitud | valor |
 |---|---|
@@ -193,76 +207,115 @@ El tramo va en fila segun Z y suma 218.0 mm: 130 mm del codificador (protectores
 | protector_empalme_mm | 60.00 |
 | colimador_mm | 28.00 |
 | necesario_mm | 218.00 |
-| disponible_mm | 200.00 |
-| margen_mm | -18.00 |
+| disponible_mm | 227.00 |
+| margen_mm | 9.00 |
 
-Falta: Decision de ACSAR: alargar la franja (longitud reservada al telescopio) o codificador con salida colimada
+Falta: integracion.fibra.sensibilidad_termica_fase_pm (medida)
 
 ## Eje de fibra del codificador frente al plano optico del banco
 
-**Estado: NO COMPROBABLE**
+**Estado: OK**
 
-mod_fase_mpz_ln_10 NO ESTA COLOCADO en data/layout.yaml, asi que no hay eje que medir. No esta colocado porque el tramo recto que tiene que alimentar no cabe: ver el chequeo 'fibra_post_codificacion'. Decir que la altura esta bien cuando la pieza no esta seria inventarse el resultado.
+El eje de fibra del codificador cae en Y = +0.00 mm y el plano optico del banco -- el del colimador, D1, el FSM y el telescopio -- esta en Y = +0.00 mm. Desvio: 0.00 mm, contra una tolerancia SUPUESTA de 0.50 mm. El tramo puede ser recto sin cambiar de altura.
 
 | magnitud | valor |
 |---|---|
+| eje_codificador_Y_mm | 0.00 |
 | plano_optico_Y_mm | 0.00 |
-
-Falta: Colocacion del codificador, que hoy no cabe en la franja
+| desvio_mm | 0.00 |
+| tolerancia_mm | 0.50 |
 
 ## Configuracion optica del telescopio
 
 **Estado: OK**
 
-Afocal tipo Mersenne: dos parabolas confocales, M = 9.00. Entra colimado y sale colimado, asi que NO hay foco real dentro del satelite y no hace falta ninguna lente de enfoque en el banco. El foco comun de las dos conicas es VIRTUAL y por eso el modelo no dibuja ningun marcador ahi: no hay nada. Obstruccion lineal 0.156 (secundario de 14.0 mm sobre 90 mm). Cuesta 0.11 dB de potencia recogida y 0.21 dB de intensidad en el eje en campo lejano. Son DOS magnitudes distintas, las dos en potencia, y para un enlace optico manda la segunda: lo que llega al receptor es la intensidad en el eje.
+Afocal tipo Mersenne: dos parabolas confocales, M = 12.86. Entra colimado y sale colimado, asi que NO hay foco real dentro del satelite y no hace falta ninguna lente de enfoque en el banco. El foco comun de las dos conicas es VIRTUAL y por eso el modelo no dibuja ningun marcador ahi: no hay nada. Obstruccion lineal 0.109 (secundario de 9.8 mm sobre 90 mm). Cuesta 0.05 dB de potencia recogida y 0.10 dB de intensidad en el eje en campo lejano. Son DOS magnitudes distintas, las dos en potencia, y para un enlace optico manda la segunda: lo que llega al receptor es la intensidad en el eje.
 
 | magnitud | valor |
 |---|---|
-| magnificacion | 9.00 |
+| magnificacion | 12.86 |
 | focal_primario_mm | 200.00 |
-| focal_secundario_mm | 22.22 |
-| separacion_mm | 177.78 |
-| obstruccion_lineal | 0.16 |
-| perdida_potencia_recogida_dB | 0.11 |
-| perdida_intensidad_en_eje_dB | 0.21 |
+| focal_secundario_mm | 15.56 |
+| separacion_mm | 184.44 |
+| obstruccion_lineal | 0.11 |
+| perdida_potencia_recogida_dB | 0.05 |
+| perdida_intensidad_en_eje_dB | 0.10 |
 
 ## Longitud del telescopio frente a la reservada
 
-**Estado: ATENCION**
+**Estado: OK**
 
-Con f1 = 200 mm y M = 9.00 la separacion entre vertices es 177.8 mm, que no se puede tocar sin cambiar la optica. Para los 200 mm reservados eso deja 22.2 mm para los dos mamparos, la celda y los dos espejos. Cabe por 1.2 mm, que no es margen: los espesores con los que se dibuja (mamparos de 3 mm, celda de 3 mm, primario de 8 mm) estan todos en su COTA SUPERIOR, no elegidos. Cualquiera de ellos que crezca deja de caber. Con los ~2U de verdad del brief (227 mm, no 200: la U de longitud de la CDS son 113.5 mm) la misma optica tendria 28 mm de margen. Alargar se paga con la bandeja y es decision de ACSAR.
+Con f1 = 200 mm y M = 12.86 la separacion entre vertices es 184.4 mm, que no se puede tocar sin cambiar la optica. Para los 227 mm reservados eso deja 42.6 mm para los dos mamparos, la celda y los dos espejos. Quedan 21.6 mm de margen. PEOR CASO EN LONGITUD: si el haz bajara a 3.54 mm -- el maximo que admite el espejo del FSM MEMS, o sea el unico haz con el que ese FSM seguiria en juego -- la separacion subiria a 192.1 mm y el margen quedaria en 13.9 mm. Un haz mas fino no ahorra tubo: lo alarga, porque sube la magnificacion.
 
 | magnitud | valor |
 |---|---|
-| longitud_reservada_mm | 200.00 |
-| separacion_vertices_mm | 177.78 |
-| estructura_mm | 22.22 |
-| longitud_necesaria_mm | 198.78 |
-| margen_mm | 1.22 |
+| longitud_reservada_mm | 227.00 |
+| separacion_vertices_mm | 184.44 |
+| estructura_mm | 42.56 |
+| longitud_necesaria_mm | 205.44 |
+| margen_mm | 21.56 |
 | focal_primario_mm | 200.00 |
-| magnificacion | 9.00 |
-
-Falta: Longitud real del telescopio (STEP de Aperture Optical Sciences)
+| magnificacion | 12.86 |
+| peor_caso_haz_mm | 3.54 |
+| peor_caso_separacion_mm | 192.14 |
+| peor_caso_margen_mm | 13.86 |
 
 ## El haz comprimido frente al espejo del FSM
 
 **Estado: NO COMPROBABLE**
 
-El espejo del FSM mide 5.0 mm, y un haz a 45 grados deja una huella de d x d*raiz(2), asi que solo admite un haz de 3.54 mm. Con 90 mm de apertura eso exige una magnificacion de al menos 25.5. Con el haz SUPUESTO con el que se dibuja (10 mm, de integracion.optica.diametro_haz_modelado) la huella seria 10 x 14.1 mm y NO CABRIA en el espejo de 5 mm. Si el equipo de optica confirma un haz de ese orden, el MEMS DIP24 queda descartado y hay que ir al 'fsm_piezo_pi_s331' (que pesa 130 g frente a los gramos del MEMS) o subir la magnificacion de 9.0 a 25.5, lo que reduce el secundario y alarga el tubo. Punto de adelanto: 50.7 urad en el cielo son 456 urad opticos en el haz comprimido (228 urad de giro mecanico del espejo) con M = 9.00, porque un afocal comprime los angulos por M. Es poco para cualquiera de las dos tecnologias -- el piezo S-331 da 3 mrad --, asi que el recorrido NO es lo que decide: lo que decide es el tamano del espejo.
+El espejo del FSM mide 5.0 mm, y un haz a 45 grados deja una huella de d x d*raiz(2), asi que solo admite un haz de 3.54 mm. Con 90 mm de apertura eso exige una magnificacion de al menos 25.5. Con el haz SUPUESTO con el que se dibuja (7 mm, de integracion.optica.diametro_haz_modelado) la huella seria 7 x 9.9 mm y NO CABRIA en el espejo de 5 mm. Si el equipo de optica confirma un haz de ese orden, el MEMS DIP24 queda descartado y hay que ir al 'fsm_piezo_pi_s331' (que pesa 130 g frente a los gramos del MEMS) o subir la magnificacion de 12.9 a 25.5, lo que reduce el secundario y alarga el tubo. Punto de adelanto: 50.7 urad en el cielo son 652 urad opticos en el haz comprimido (326 urad de giro mecanico del espejo) con M = 12.86, porque un afocal comprime los angulos por M. Es poco para cualquiera de las dos tecnologias -- el piezo S-331 da 3 mrad --, asi que el recorrido NO es lo que decide: lo que decide es el tamano del espejo.
 
 | magnitud | valor |
 |---|---|
 | diametro_espejo_fsm_mm | 5.00 |
 | haz_maximo_admisible_mm | 3.54 |
 | magnificacion_minima | 25.46 |
-| magnificacion_modelada | 9.00 |
-| haz_modelado_mm | 10.00 |
-| huella_a_45_mm | 14.14 |
+| magnificacion_modelada | 12.86 |
+| haz_modelado_mm | 7.00 |
+| huella_a_45_mm | 9.90 |
 | punto_de_adelanto_urad | 50.70 |
-| recorrido_optico_en_el_fsm_urad | 456.30 |
-| giro_mecanico_en_el_fsm_urad | 228.15 |
+| recorrido_optico_en_el_fsm_urad | 651.86 |
+| giro_mecanico_en_el_fsm_urad | 325.93 |
 
 Falta: Diametro del haz comprimido (telescopio_cassegrain.optica.diametro_haz_comprimido y diametro_haz_mm de e01..e05). Es el dato que DECIDE el TBD 'fsm.eleccion_de_tecnologia': sin el no se puede elegir entre el MEMS y el piezo.
+
+## El haz frente a la apertura libre de las opticas del banco
+
+**Estado: NO COMPROBABLE**
+
+D1, D2 y el espejo de plegado estan a 45 grados, y un haz de 7.0 mm deja sobre ellos una huella de 7.0 x 9.9 mm. La apertura libre de la familia con la que se dimensionan sus celdas es 11.4 mm, o sea que admite un haz de hasta 8.06 mm. Con el haz SUPUESTO con el que se dibuja cabe, con 1.5 mm de margen sobre la apertura, PERO ESO NO VALIDA NADA: los dos numeros son supuestos y el de arriba es el que se eligio para que esto saliera bien. Lo que este chequeo dice de verdad es cual es el TECHO: si el diseno optico pide mas de 8.06 mm de haz, las celdas de 16 mm de D1, D2 y el espejo dejan de valer y hay que rehacer el brazo.
+
+| magnitud | valor |
+|---|---|
+| haz_modelado_mm | 7.00 |
+| huella_a_45_mm | 9.90 |
+| apertura_libre_optica_mm | 11.40 |
+| haz_maximo_admisible_mm | 8.06 |
+| margen_mm | 1.50 |
+| celda_dicroico_d1_mm | 16.00 |
+| celda_dicroico_d2_mm | 16.00 |
+| celda_espejo_plegado_cuantico_mm | 16.00 |
+
+Falta: Apertura libre real de las monturas elegidas para D1, D2 y el espejo de plegado, y el diametro de haz de verdad (telescopio_cassegrain.optica.diametro_haz_comprimido)
+
+## Placa de la bandeja frente a su zona
+
+**Estado: OK**
+
+La zona de la bandeja mide 121.7 x 79.4 mm en X y Z, asi que con 2 mm de holgura por lado la placa tiene que medir 117.7 x 75.4. Mide 117.7 x 75.4. Coincide: el contorno de la placa sigue derivado de su zona. El espesor (3 mm) sigue siendo SUPUESTO, y eso no lo arregla este chequeo.
+
+| magnitud | valor |
+|---|---|
+| placa_X_mm | 117.70 |
+| placa_Z_mm | 75.40 |
+| zona_X_mm | 121.70 |
+| zona_Z_mm | 79.40 |
+| holgura_por_lado_mm | 2.00 |
+| derivado_X_mm | 117.70 |
+| derivado_Z_mm | 75.40 |
+| margen_X_mm | -0.00 |
+| margen_Z_mm | -0.00 |
 
 ## Radio minimo de curvatura de la fibra
 
@@ -282,16 +335,16 @@ Falta: Radio minimo de curvatura de la fibra elegida
 
 **Estado: ATENCION**
 
-Masa conocida 846 g de un limite de 12000 g (CDS 14.1). Faltan 29 componentes por pesar, incluido el chasis y el telescopio, que son de los mas pesados.
+Masa conocida 846 g de un limite de 12000 g (CDS 14.1). Faltan 30 componentes por pesar, incluido el chasis y el telescopio, que son de los mas pesados.
 
 | magnitud | valor |
 |---|---|
 | masa_conocida_g | 845.90 |
 | limite_g | 12000.00 |
 | margen_g | 11154.10 |
-| componentes_sin_masa | 29.00 |
+| componentes_sin_masa | 30.00 |
 
-Falta: Masa de: estructura_6u, adcs_iadcs400, antena_quasar_wsant, radio_uhf_pulsar_vutrx, paneles_photon_side, propulsion, telescopio_cassegrain, fsm, dicroico_d1, dicroico_d2, camara_beacon, laser_beacon_bajada, fotodiodo_monitor_beacon, trampa_luz_d1, espejo_plegado_cuantico, colimador, bandeja_optica, laser_dfb_1550, mod_intensidad_mxer_ln_10, mod_fase_mpz_ln_10, voa, aislador, filtro_espectral, acoplador_monitor, pcb1_control_qkd, pcb2_drivers_opticos, pcb3_pat, cables_rf_moduladores, qrng_idq20mc1_s3
+Falta: Masa de: estructura_6u, adcs_iadcs400, antena_quasar_wsant, radio_uhf_pulsar_vutrx, paneles_photon_side, propulsion, telescopio_cassegrain, fsm, dicroico_d1, dicroico_d2, camara_beacon, laser_beacon_bajada, colimador_beacon_bajada, fotodiodo_monitor_beacon, trampa_luz_d1, espejo_plegado_cuantico, colimador, bandeja_optica, laser_dfb_1550, mod_intensidad_mxer_ln_10, mod_fase_mpz_ln_10, voa, aislador, filtro_espectral, acoplador_monitor, pcb1_control_qkd, pcb2_drivers_opticos, pcb3_pat, cables_rf_moduladores, qrng_idq20mc1_s3
 
 ## STEP de fabricante frente al manifiesto
 

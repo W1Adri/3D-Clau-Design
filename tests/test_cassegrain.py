@@ -259,6 +259,96 @@ def test_la_seccion_tiene_que_coincidir_con_la_envolvente_declarada():
         parametros.mecanica(catalogo["telescopio_de_prueba"], catalogo)
 
 
+def test_la_longitud_reservada_tiene_que_coincidir_con_la_envolvente():
+    """El mismo motivo que la seccion, y la misma trampa, en el otro eje.
+
+    'longitud_reservada' es con lo que el layout reparte Z entre telescopio,
+    banco y bandeja; la tercera cota de 'forma.dimensiones' es lo que se dibuja
+    y lo que miden el volumen y las interferencias. Son el mismo numero escrito
+    dos veces. Se vio al subir el telescopio de 200 a 227 mm el 2026-09-21: sin
+    esta comprobacion, cambiar uno y olvidar el otro deja el layout repartiendo
+    227 y el analisis midiendo 200, y nada se queja.
+    """
+    bruto = _telescopio(longitud_reservada=_sup(300.0, "mm"))
+    catalogo = _catalogo(bruto)
+    with pytest.raises(ErrorDeDatos, match="longitud_reservada"):
+        parametros.mecanica(catalogo["telescopio_de_prueba"], catalogo)
+
+
+def test_sin_longitud_reservada_la_envolvente_manda():
+    """Un telescopio que no reserva nada no es un error: es el caso de antes.
+
+    Lo que no puede pasar es que las dos existan y digan cosas distintas.
+    """
+    catalogo = _catalogo(_telescopio())
+    m = parametros.mecanica(catalogo["telescopio_de_prueba"], catalogo)
+    assert m.longitud == 220.0
+
+
+def test_la_longitud_reservada_que_coincide_se_acepta():
+    bruto = _telescopio(longitud_reservada=_sup(220.0, "mm"))
+    catalogo = _catalogo(bruto)
+    m = parametros.mecanica(catalogo["telescopio_de_prueba"], catalogo)
+    assert m.longitud == 220.0
+
+
+def test_el_catalogo_de_verdad_no_tiene_las_dos_longitudes_divergidas(catalogo):
+    """Y esto sobre el catalogo real, que es donde importa."""
+    telescopio = catalogo["telescopio_cassegrain"]
+    reservada = telescopio.extras["longitud_reservada"].escalar()
+    dibujada = telescopio.dimensiones.como_vector()[2]
+    assert reservada == dibujada, (reservada, dibujada)
+
+
+def test_un_haz_mas_fino_alarga_el_telescopio():
+    """Lo contrario de lo que uno esperaria, y es lo que decide el reparto.
+
+    Bajar el haz sube la magnificacion (M = apertura / haz) y con ella la
+    separacion entre vertices, f1 (1 - 1/M). Por eso apretar el haz a 7 mm para
+    que las opticas de Ø12.7 del banco valgan obligo a subir la reserva del
+    telescopio: con 200 mm ya no cabia.
+    """
+    gordo = _catalogo(_telescopio(), haz_modelado=10.0)
+    fino = _catalogo(_telescopio(), haz_modelado=5.0)
+    sep_gordo = parametros.mecanica(
+        gordo["telescopio_de_prueba"], gordo
+    ).optica.separacion
+    sep_fino = parametros.mecanica(
+        fino["telescopio_de_prueba"], fino
+    ).optica.separacion
+    assert sep_fino > sep_gordo
+
+
+def test_el_peor_caso_de_haz_se_deriva_del_espejo_del_fsm():
+    """No se escribe: es D / raiz(2), el mismo numero que usa 'haz_vs_fsm'."""
+    catalogo = _catalogo(_telescopio(), _fsm(5.0), haz_modelado=10.0)
+    assert fit._haz_maximo_del_fsm(catalogo) == pytest.approx(5.0 / math.sqrt(2.0))
+
+    m = parametros.mecanica(catalogo["telescopio_de_prueba"], catalogo)
+    peor = fit._margen_con_otro_haz(m, fit._haz_maximo_del_fsm(catalogo))
+    assert peor is not None
+    haz, separacion, margen = peor
+    # Un haz mas fino pide mas tubo, asi que su margen es MENOR.
+    assert separacion > m.optica.separacion
+    assert margen < m.margen_longitud
+
+
+def test_sin_fsm_no_hay_peor_caso_que_informar():
+    """Un numero que no se puede derivar no se inventa."""
+    catalogo = _catalogo(_telescopio(), haz_modelado=10.0)
+    assert fit._haz_maximo_del_fsm(catalogo) is None
+    m = parametros.mecanica(catalogo["telescopio_de_prueba"], catalogo)
+    assert fit._margen_con_otro_haz(m, None) is None
+
+
+def test_el_chequeo_de_longitud_del_catalogo_real_trae_el_peor_caso(catalogo):
+    chequeo = fit.chequeo_longitud_telescopio(catalogo)
+    assert "peor_caso_haz_mm" in chequeo.numeros
+    assert (
+        chequeo.numeros["peor_caso_margen_mm"] < chequeo.numeros["margen_mm"]
+    )
+
+
 # -------------------------------------------------------------- geometria
 def test_el_solido_no_se_sale_de_la_envolvente_declarada():
     catalogo = _catalogo(_telescopio())

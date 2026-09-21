@@ -98,9 +98,16 @@ def test_los_puertos_declarados_de_cada_divisor_tienen_destino(catalogo):
 
 
 def test_el_beacon_de_bajada_llega_al_exterior(catalogo):
-    """Del laser al EXTERIOR siguiendo los tramos, sin pasar por la camara."""
+    """Del MODULO al EXTERIOR siguiendo los tramos, fibra incluida.
+
+    Arranca en 'laser_beacon_bajada', que desde el 2026-09-21 es solo el modulo
+    y vive en la bandeja, asi que el primer salto ya no es en espacio libre
+    sino por fibra (f08). Se recorren las dos familias a proposito: partir la
+    pieza en dos no puede romper el camino, y si alguien se dejara f08 sin
+    declarar la pieza quedaria suelta en la bandeja y nadie se enteraria.
+    """
     salto: dict[str, set[str]] = {}
-    for tramo in _tramos(catalogo):
+    for tramo in _tramos(catalogo) + list(catalogo.conexiones["opticas_fibra"]):
         salto.setdefault(tramo["desde"], set()).add(tramo["hasta"])
 
     vistos = {"laser_beacon_bajada"}
@@ -114,7 +121,10 @@ def test_el_beacon_de_bajada_llega_al_exterior(catalogo):
     assert "EXTERIOR" in vistos, (
         f"el beacon de bajada no llega a salir del satelite; alcanza {vistos}"
     )
-    for eslabon in ("dicroico_d2", "dicroico_d1", "fsm", "telescopio_cassegrain"):
+    for eslabon in (
+        "colimador_beacon_bajada", "dicroico_d2", "dicroico_d1", "fsm",
+        "telescopio_cassegrain",
+    ):
         assert eslabon in vistos, f"el beacon de bajada no pasa por {eslabon}"
 
 
@@ -191,7 +201,25 @@ def _pieza(cid: str, dims: list[float]) -> dict:
     }
 
 
-def _catalogo_de_brazo(camara: float, d2: float = 20.0) -> Catalogo:
+# La topologia de prueba, con la camara en +Y: NO es la del modelo real, que
+# la tiene en -X. Es a proposito -- lo que se comprueba aqui es el mecanismo,
+# no el reparto de hoy -- y ademas es lo que hace util
+# 'test_el_chequeo_lee_la_topologia_declarada': si el chequeo volviera a tener
+# las ramas escritas dentro, mediria la del modelo y no esta.
+TOPOLOGIA_DE_PRUEBA = [
+    {"estacion": "dicroico_d1", "cara": "+Y",
+     "piezas": ["dicroico_d2", "camara_beacon"]},
+    {"estacion": "dicroico_d1", "cara": "-Y", "piezas": ["trampa_luz_d1"]},
+    {"estacion": "dicroico_d2", "cara": "-X",
+     "piezas": ["laser_beacon_bajada"]},
+    {"estacion": "dicroico_d2", "cara": "+X",
+     "piezas": ["fotodiodo_monitor_beacon"]},
+]
+
+
+def _catalogo_de_brazo(
+    camara: float, d2: float = 20.0, topologia=None
+) -> Catalogo:
     return Catalogo(
         meta={}, norma={}, envolvente={}, zona_util={}, integracion={},
         componentes=[
@@ -203,7 +231,13 @@ def _catalogo_de_brazo(camara: float, d2: float = 20.0) -> Catalogo:
             _componente(_pieza("fotodiodo_monitor_beacon", [10.0, 10.0, 10.0])),
             _componente(_pieza("fsm", [20.0, 20.0, 20.0])),
         ],
-        conexiones={},
+        conexiones={
+            "meta": {
+                "topologia_brazo_beacons": (
+                    TOPOLOGIA_DE_PRUEBA if topologia is None else topologia
+                )
+            }
+        },
     )
 
 
@@ -255,6 +289,91 @@ def test_el_chequeo_del_brazo_se_mueve_con_la_reserva_de_la_camara():
         estrecha.numeros["margen_+Y_mm"] - ancha.numeros["margen_+Y_mm"]
         == 20.0
     )
+
+
+def _generador():
+    """tools/generar_layout.py cargado como modulo.
+
+    No es un paquete instalado -- es un script de la raiz del repositorio --,
+    asi que se carga por ruta. Merece la pena: es el unico sitio donde se puede
+    comprobar que el generador y el chequeo leen LA MISMA topologia, que es
+    justamente lo que fallo el 2026-09-21.
+    """
+    import importlib.util
+
+    ruta = RAIZ / "tools" / "generar_layout.py"
+    spec = importlib.util.spec_from_file_location("_generar_layout", ruta)
+    assert spec is not None and spec.loader is not None
+    modulo = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(modulo)
+    return modulo
+
+
+def test_el_chequeo_lee_la_topologia_declarada():
+    """Cambiar la topologia en los DATOS tiene que mover el chequeo.
+
+    Es el test que faltaba. Hasta el 2026-09-21 las ramas estaban escritas dos
+    veces -- RAMAS_BRAZO en el generador y a mano dentro del chequeo -- y al
+    invertir D2 las dos dejaron de decir lo mismo: el generador colocaba la
+    camara en -X y el chequeo seguia midiendola en +Y, o sea comprobando una
+    geometria que ya no existia. Si alguien vuelve a escribirlas dentro del
+    codigo, esto falla.
+    """
+    layout = _LayoutDePrueba(semi_y=60.0)
+    # Con la camara en +Y esa rama pide 10 (semi D1) + 20 (D2) + 40 = 70.
+    en_mas_y = fit.chequeo_brazo_beacon(_catalogo_de_brazo(camara=40.0), layout)
+    assert en_mas_y.numeros["necesario_+Y_mm"] == 70.0
+    assert "camara_beacon_mm" in en_mas_y.numeros
+
+    # Movida a -X desde D2, la rama +Y se queda solo con D2: 10 + 20 = 30.
+    movida = [
+        {"estacion": "dicroico_d1", "cara": "+Y", "piezas": ["dicroico_d2"]},
+        {"estacion": "dicroico_d1", "cara": "-Y", "piezas": ["trampa_luz_d1"]},
+        {"estacion": "dicroico_d2", "cara": "-X", "piezas": ["camara_beacon"]},
+        {"estacion": "dicroico_d2", "cara": "+X",
+         "piezas": ["fotodiodo_monitor_beacon"]},
+    ]
+    en_menos_x = fit.chequeo_brazo_beacon(
+        _catalogo_de_brazo(camara=40.0, topologia=movida), layout
+    )
+    assert en_menos_x.numeros["necesario_+Y_mm"] == 30.0
+    assert en_menos_x.numeros["necesario_-X_mm"] == 50.0
+    assert en_menos_x.numeros["margen_+Y_mm"] > en_mas_y.numeros["margen_+Y_mm"]
+
+
+def test_el_generador_usa_la_misma_topologia_que_el_chequeo():
+    """Y no una copia suya: las dos salen de data/connections.yaml.
+
+    Se le da al generador una topologia inventada y se comprueba que coloca por
+    ella. Junto con el test de arriba, esto ata los dos lados al mismo dato:
+    reescribir las ramas en cualquiera de los dos sitios rompe uno de los dos.
+    """
+    generar = _generador()
+
+    catalogo = _catalogo_de_brazo(camara=10.0)
+    # D1 ya colocado en el origen; el resto cuelga de el.
+    colocaciones = [{
+        "componente": "dicroico_d1", "instancia": 1,
+        "centro": [0.0, 0.0, 0.0], "rotacion": [0, 0, 0],
+        "zona": "z_payload_banco",
+    }]
+    puestas, sin_sitio = generar._ramas_del_brazo(
+        catalogo, colocaciones, ([-100.0, -100.0, -50.0], [100.0, 100.0, 0.0])
+    )
+    assert sin_sitio == []
+    por_id = {c["componente"]: c["centro"] for c in puestas}
+    # La topologia de prueba pone la camara en +Y detras de D2, no en -X.
+    assert por_id["camara_beacon"][1] > 0
+    assert por_id["camara_beacon"][0] == 0.0
+    # Y el laser en -X desde D2.
+    assert por_id["laser_beacon_bajada"][0] < 0
+
+
+def test_sin_topologia_declarada_el_chequeo_no_es_concluyente():
+    """Un chequeo sin datos sale como no comprobable, nunca como ok."""
+    catalogo = _catalogo_de_brazo(camara=20.0, topologia=[])
+    chequeo = fit.chequeo_brazo_beacon(catalogo, _LayoutDePrueba(semi_y=100.0))
+    assert chequeo.estado == fit.NO_COMPROBABLE
 
 
 def test_sin_dicroicos_el_chequeo_no_es_concluyente():

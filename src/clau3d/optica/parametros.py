@@ -468,6 +468,24 @@ def mecanica(componente: Componente, catalogo: Catalogo) -> Mecanica:
             f"'forma.dimensiones' dice {dims[:2]}. Lo que se reserva se mide "
             f"sobre lo que se dibuja: las dos tienen que ser la misma cota."
         )
+    # Y lo mismo con la LONGITUD, por el mismo motivo. 'longitud_reservada' es
+    # lo que el generador usa para repartir Z entre telescopio, banco y
+    # bandeja; la tercera cota de 'forma.dimensiones' es lo que se DIBUJA y lo
+    # que miden el volumen y las interferencias. Son el mismo numero escrito
+    # dos veces, asi que o coinciden o el modelo esta diciendo dos cosas
+    # distintas a la vez. Paso de 200 a 227 el 2026-09-21 (CLAUDE.md 3.11) y
+    # fue justo aqui donde se vio que habia dos copias.
+    reservada = componente.extras.get("longitud_reservada")
+    valor_reservado = None if reservada is None else reservada.escalar()
+    if valor_reservado is not None and abs(valor_reservado - dims[2]) > 1e-6:
+        raise ErrorDeDatos(
+            f"{componente.id}: 'longitud_reservada' dice {valor_reservado} mm y "
+            f"la tercera cota de 'forma.dimensiones' dice {dims[2]} mm. El "
+            f"layout reparte Z con la primera y el analisis mide con la "
+            f"segunda: si divergen, lo reservado y lo dibujado dejan de hablar "
+            f"de lo mismo (CLAUDE.md 2, y es lo que costo 46 mm en la pila "
+            f"PC104)."
+        )
 
     return Mecanica(
         optica=optica,

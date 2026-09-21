@@ -3,9 +3,11 @@
 Documento de continuidad entre sesiones. El README explica **qué** es el
 repositorio; esto explica **por qué** está como está y **qué falta por decidir**.
 
-Última actualización: **2026-09-21** (cadena óptica reordenada y frontera de la
-codificación §3.10; antes: telescopio paramétrico §4.7 y brazo de los beacons
-con dos dicroicos §3.9).
+Última actualización: **2026-09-21** (redistribución del banco y la franja
+§3.11: telescopio a 227 mm, haz a 7 mm, ópticas de Ø12.7, D2 invertido y el
+láser de beacon partido en dos. **Todo cabe y `clau3d informe` devuelve 0**;
+antes: cadena óptica reordenada §3.10, telescopio paramétrico §4.7 y brazo de
+los beacons con dos dicroicos §3.9).
 
 ---
 
@@ -13,19 +15,19 @@ con dos dicroicos §3.9).
 
 | | |
 |---|---|
-| Catálogo | 37 componentes, 0 problemas de integridad |
-| Con envolvente | **34 de 37**. Los 3 que faltan, por buenos motivos (§1.1) |
-| Huecos sin ninguna aproximación (TBD) | **61**. Los 10 nuevos son de la cadena de fibra (§3.10): si la guía del MPZ es bipolarización —sin eso el esquema de un solo modulador es imposible—, la sensibilidad térmica de la fase en PM, la retardancia del espejo de plegado y qué par de bases usa el enlace |
-| Números inventados aquí (SUPUESTO) | **75** — se dibujan, no son datos (§2). 28 → 61 con el telescopio paramétrico (§4.7), → 68 con el brazo de los beacons (§3.9) y → 75 con la cadena de fibra (§3.10), cada uno con su razonamiento y a quién pedirlo |
+| Catálogo | 38 componentes, 0 problemas de integridad |
+| Con envolvente | **35 de 38**. Los 3 que faltan, por buenos motivos (§1.1) |
+| Huecos sin ninguna aproximación (TBD) | **63**. Los 2 nuevos son de §3.11: la apertura libre real de las monturas del banco y el recubrimiento del empalme post-codificación como alternativa al protector. Se cerró uno: la geometría del brazo de los beacons, que era una decisión y ya está tomada |
+| Números inventados aquí (SUPUESTO) | **78** — se dibujan, no son datos (§2). 28 → 61 con el telescopio paramétrico (§4.7), → 68 con el brazo de los beacons (§3.9), → 75 con la cadena de fibra (§3.10) y → 78 con la redistribución (§3.11), cada uno con su razonamiento y a quién pedirlo |
 | Discrepancias entre fuentes | **10** |
-| Tests | **180**, todos en verde |
-| Distribución | **CONFIRMADA** el 2026-09-20 y **repartida otra vez el 2026-09-21** (§3.10): la bandeja es sólo la fuente y la franja lleva modulación, monitorización, atenuación y codificación, apiladas en Y |
-| Piezas colocadas | **28**, y **dos que no caben**: `camara_beacon` (§3.9) y `mod_fase_mpz_ln_10` (§3.10). Una pieza sin sitio no se dibuja en un sitio inventado |
+| Tests | **209**, todos en verde |
+| Distribución | **CONFIRMADA** el 2026-09-20 y repartida dos veces el 2026-09-21: por zonas (§3.10) y por longitudes (§3.11), con el telescopio en los **227 mm** que son los «~2U» de verdad del brief |
+| Piezas colocadas | **31, todas**. `camara_beacon` y `mod_fase_mpz_ln_10`, que no cabían, ya tienen sitio (§3.11), y hay una pieza nueva, `colimador_beacon_bajada` |
 | Geometría real de fabricante | **3** piezas salen de un STEP de AAC (§9); el telescopio tiene sitio reservado para el suyo |
-| Keep-outs | **19**, todos dibujados con números supuestos (§3.7, §4.7, §3.9). El del brazo de los beacons lo comparten dos tramos en sentidos contrarios y se declara una sola vez; el tramo post-codificación **no lleva ninguno**, porque no se puede curvar (§3.10) |
-| Choques de geometría | **0**. `clau3d informe` devuelve 1 de todas formas, y ahora por **dos** chequeos críticos: `brazo_beacon` (§3.9) y `fibra_post_codificacion` (§3.10) |
-| Riesgos abiertos | **5**: térmico modulador–barrilete (§3.6), antena en −Z (§3.8), la longitud del telescopio, que cabe en los 200 mm por 1.2 mm (§4.7), **el brazo de los beacons, que no cabe por 6.8 mm** (§3.9) y **el tramo recto post-codificación, que no cabe por 18.0 mm** (§3.10). El de la fibra del colimador (§3.7.1) **está resuelto** |
-| Zona útil | 221.7 × 95.4 × 361.4 mm = **7.64 L**, de la que quedan **2.92 L** libres |
+| Keep-outs | **24**, todos dibujados con números supuestos (§3.7, §4.7, §3.9, §3.10). El del brazo de los beacons lo comparten dos tramos en sentidos contrarios y se declara una sola vez; el tramo post-codificación **no lleva ninguno**, porque no se puede curvar (§3.10) |
+| Choques de geometría | **0**, y **`clau3d informe` devuelve 0 por primera vez desde que se dibuja el payload entero**: ni `brazo_beacon` ni `fibra_post_codificacion` fallan ya |
+| Riesgos abiertos | **5**: térmico modulador–barrilete (§3.6), antena en −Z (§3.8), **el FSM, que con el haz de 7 mm ya no puede ser el MEMS** (§3.11), **la cámara, que pasa a 0.45 mm del FSM** (§3.11) y **el secundario rápido que sale de subir la magnificación** (§4.7c). Los tres de antes —fibra del colimador (§3.7.1), brazo de los beacons (§3.9) y tramo post-codificación (§3.10)— **están resueltos** |
+| Zona útil | 221.7 × 95.4 × 361.4 mm = **7.64 L**, de la que quedan **2.65 L** libres |
 
 Funciona de punta a punta: catálogo validado, layout generado, ensamblaje
 exportado a STEP —completo y por subsistema—, interferencias, conexiones,
@@ -190,33 +192,36 @@ declarado: **221.7 × 95.4 × 361.4 mm** ≈ 7.64 L.
         −Z ←────────────────── Z (361.4 mm útiles) ──────────────────→ +Z
         (entra primero)                                    (apunta a tierra)
 
- +110.85 ┌──────────────────────┬─────────────┬─────────────────────────┐
-         │                      │             │ z_payload_franja 0.50 L │
-         │                      │             │ 26.3 mm de X, 3 bandas  │
-         │                      │             │ en Y: acoplador+VOA /   │
-         │                      │             │ colimador+codificador / │
-  PAYLOAD│ z_payload_bandeja    │ z_payload   │ MXER. §3.10             │
-  121.7  │ 1.24 L               │  _banco     ├─────────────────────────┤
-   mm    │ LA FUENTE: láser DFB │ 0.64 L      │ z_payload_telescopio    │
-         │ (4.1 W), aislador y  │ espejo de   │ 1.82 L · 95.4 mm de X   │
-         │ filtro. Bucles en    │ plegado,    │ telescopio →→ +Z        │
-         │ los 121.7 mm de      │ D1, D2      │ 200 mm RESERVADOS       │
-         │ ancho enteros        │ FSM, brazo  │ (provisional)           │
-  −10.85 ├──────────────────────┴─────────────┴─────────────────────────┤
+ +110.85 ┌────────────────┬─────────────┬───────────────────────────────┐
+         │                │             │ z_payload_franja 0.57 L       │
+         │                │             │ 26.3 mm de X, 3 bandas        │
+         │                │             │ en Y: acoplador+VOA /         │
+         │                │             │ colimador+codificador /       │
+  PAYLOAD│ z_payload      │ z_payload   │ MXER. §3.10                   │
+  121.7  │  _bandeja      │  _banco     ├───────────────────────────────┤
+   mm    │ 0.92 L         │ 0.64 L      │ z_payload_telescopio          │
+         │ LA FUENTE:     │ espejo de   │ 2.07 L · 95.4 mm de X         │
+         │ láser DFB      │ plegado,    │ telescopio →→ +Z              │
+         │ (4.1 W),       │ D1, D2      │ 227 mm RESERVADOS             │
+         │ aislador,      │ FSM, brazo  │ (los «~2U» del brief, §3.11)  │
+         │ filtro y el    │             │                               │
+         │ módulo del     │             │                               │
+         │ beacon §3.11   │             │                               │
+  −10.85 ├────────────────┴─────────────┴───────────────────────────────┤
          │ z_plataforma  3.45 L                                         │
   PLATAF.│ pila PC104 a lo largo de todo Z — 305 mm usados de 361 mm     │
   100 mm │ −Z ← baterías·baterías·PCB-2·PCB-1·PCB-3·radio·EPS·OBC·ADCS → │
  −110.85 └──────────────────────────────────────────────────────────────┘
-             106.4 mm             55 mm            200 mm
+             79.4 mm          55 mm              227 mm
 ```
 
 | zona | volumen | libre | contenido |
 |---|---|---|---|
 | `z_plataforma` | 3.45 L | 1.22 L | Pila PC104 (305 mm) + antena en el extremo −Z |
-| `z_payload_telescopio` | 1.82 L | 0.00 L | Telescopio, dibujado **llenando la zona** a propósito (§4.2) |
-| `z_payload_franja` | 0.50 L | 0.45 L | Colimador, MXER, acoplador 2×2 y VOA, **apilados en Y**. **El codificador no cabe** (§3.10) |
-| `z_payload_banco` | 0.64 L | 0.57 L | Espejo de plegado, D1, FSM y el brazo de los beacons: D2, láser, trampa y fotodiodo. **La cámara no cabe** (§3.9) |
-| `z_payload_bandeja` | 1.24 L | 1.18 L | Placa, láser DFB, aislador y filtro — **sólo la fuente** (§3.10) |
+| `z_payload_telescopio` | 2.07 L | 0.00 L | Telescopio, dibujado **llenando la zona** a propósito (§4.2) |
+| `z_payload_franja` | 0.57 L | 0.49 L | Colimador, codificador, MXER, acoplador 2×2 y VOA, **apilados en Y**. Desde §3.11 **el codificador cabe**, con 9.0 mm de sobra |
+| `z_payload_banco` | 0.64 L | 0.59 L | Espejo de plegado, D1, FSM y el brazo de los beacons: D2, colimador del beacon, cámara, trampa y fotodiodo. Desde §3.11 **la cámara cabe**, y el láser ya no está aquí |
+| `z_payload_bandeja` | 0.92 L | 0.87 L | Placa, láser DFB, aislador, filtro y **el módulo del beacon de bajada** (§3.11) |
 
 Los paneles solares no están en ninguna zona: van **por fuera**, sobre las dos
 caras grandes, con la protrusión que concede la CDS 14.1 req 2.2.3. El layout
@@ -288,14 +293,15 @@ calor del payload y no debe acercarse al barrilete.
 
 **La longitud del telescopio es un parámetro, no un dato.** Vive en
 `data/components.yaml` como `telescopio_cassegrain.longitud_reservada`, estado
-`decision`, valor provisional 200 mm. **Cuidado con «2U»:** la U de longitud de
+`decision`, **227 mm desde §3.11** (provisional hasta el STEP; eran 200 hasta el
+2026-09-21). **Cuidado con «2U»:** la U de longitud de
 la CDS son 113.5 mm, no 100, así que los «~2U» del brief son ~227 mm. El reparto
 admite ambos:
 
 | L reservada al telescopio | bandeja residual |
 |---|---|
-| 200 mm (valor actual) | 106.4 mm |
-| 227 mm (los «2U» de verdad) | 79.4 mm |
+| 200 mm (el de trabajo hasta el 21-sep) | 106.4 mm |
+| **227 mm (los «2U» de verdad, valor actual)** | **79.4 mm** |
 | 306.4 mm (techo, bandeja a cero) | 0 mm |
 
 La longitud real saldrá del STEP del telescopio (Óscar). Cambiar esa magnitud y
@@ -323,7 +329,8 @@ regenerar el layout es todo lo que hace falta para reasignar el reparto.
 
 - **El telescopio deja de estar limitado por la bandeja**: de un techo de
   176.4 mm a uno de 306.4 mm.
-- **La bandeja se queda sin cuerpos dentro**: 121.7 × 95.4 × 106.4 mm con el
+- **La bandeja se queda sin cuerpos dentro**: 121.7 × 95.4 × 79.4 mm —eran
+  106.4 de fondo hasta que §3.11 le pasó 27 mm al telescopio— con el
   ancho entero disponible para curvar. Antes los bucles tenían que sortear dos
   cuerpos de 110 mm, que era el punto flojo declarado de la distribución.
 - **La pila PC104 deja de ser el problema**: **305 mm usados de 361 mm**, con
@@ -350,14 +357,21 @@ pared de la columna: **74.0 mm**.
 colimador** (§3.10), y eso desahoga esta línea: el espejo reserva 20 mm donde el
 colimador reservaba 28.
 
-Las reservas iniciales (colimador de 40 mm, D1 de 30) **no cabían**. Están
-ahora en 20 y 23, y su `fuente` en el catálogo lo dice: la cota está *acotada
-por arriba por el banco*, no solo elegida a ojo. Sumando la media anchura del
-FSM a 45°, la línea ocupa 58.3 mm y quedan **15.7 mm** —eran 7.7 antes de que el
-colimador saliera de la fila—. El chequeo `banco_optico` lo recalcula desde el catálogo, avisa por
-debajo de 5 mm y falla si se pasa. Mira además los dos puertos laterales de D2
-—el láser de beacon hacia −X y el fotodiodo hacia +X—, que están dentro del
-mismo ancho de banco y hoy tienen 33.0 y 23.7 mm de margen.
+Las reservas iniciales (colimador de 40 mm, D1 de 30) **no cabían**. Pasaron a
+20 y 23, y desde §3.11 las celdas de D1 y del espejo son de **16 mm**, que es lo
+que pide una óptica de Ø12.7. Sumando la media anchura del FSM a 45°, la línea
+ocupa 47.3 mm y quedan **26.7 mm** —eran 7.7 con el colimador en la fila y 15.7
+con las celdas grandes—. El chequeo `banco_optico` lo recalcula desde el
+catálogo, avisa por debajo de 5 mm y falla si se pasa. Mira además los dos
+puertos laterales de D2 —desde §3.11 la **cámara** hacia −X y el fotodiodo hacia
++X, que es el cambio que hace que el brazo quepa—, que están dentro del mismo
+ancho de banco y hoy tienen 33.0 y 30.7 mm de margen. Cuáles son esas ramas ya
+no está escrito en el chequeo: sale de `meta.topologia_brazo_beacons`, el mismo
+dato que usa el generador.
+
+**Esta línea ya no es el punto apretado del payload.** Con 26.7 mm de margen lo
+es la rama +Y del brazo (§3.9), con 11.7, y sobre todo la distancia de la cámara
+al FSM, que es de 0.45 mm (§3.11).
 
 **Si las piezas reales son mayores, no es que el modelo esté mal: es que el
 banco no da.** La salida sería alargarlo a costa de la bandeja o de la longitud
@@ -388,11 +402,13 @@ camino cuántico, y un tramo recto de 218 mm que **no cabe por 18.0 mm**.
 ### 3.7.2 La bandeja tampoco respeta un radio de 30 mm
 
 Mismo origen, mismo dato. Las filas están a 8 mm y cada puerto de fibra querría
-50. Con el reparto del 2026-09-21 la bandeja tiene tres piezas en vez de cinco,
-así que de las **7** invasiones de keep-out que reporta el modelo —eran 15— 5
-son de la bandeja y 2 de la franja. Bajaron porque hay menos puertos de fibra en
-la bandeja y porque el colimador ya no tiene keep-out de curvatura (§3.7.1), no
-porque el problema esté resuelto: **el dato que falta sigue siendo el mismo**.
+50. Hoy el modelo reporta **13** invasiones —7 de la bandeja y 6 de la franja—
+donde antes de §3.10 eran 15 y después 7. **Que hayan subido de 7 a 13 no es un
+empeoramiento**: es que el codificador y la cámara, que no estaban colocados
+porque no cabían, ahora sí lo están y por tanto sus puertos de fibra ya cuentan;
+y que la bandeja tiene una pieza más, el módulo del beacon. Un modelo que dibuja
+más piezas encuentra más consecuencias del mismo supuesto, que es justamente
+para lo que existe. **El dato que falta sigue siendo el mismo.**
 
 `reports/03_interferencias.md` las lista en una sección aparte que empieza
 diciendo que **no es una lista de errores**. La manera de resolverlas no es
@@ -441,7 +457,7 @@ un segundo dicroico D2 los separa.
 | | | |
 |---|---|---|
 | **D1** (`dicroico_d1`, OPT-09) | paso largo, borde ~1300 nm | transmite 1550 → FSM; refleja **los dos** beacons al brazo |
-| **D2** (`dicroico_d2`, OPT-15) | paso corto, borde ~1020 nm | transmite 976 → cámara; refleja 1064, inyectado lateralmente |
+| **D2** (`dicroico_d2`, OPT-15) | ~~paso corto~~ **paso largo**, borde ~1020 nm | **invertido el 2026-09-21** (§3.11): refleja 976 → cámara; transmite 1064 |
 
 > **Ojo con los `id_drive`.** La tarea pedía OPT-14 para `dicroico_d2`, pero
 > OPT-14 ya lo usa `bandeja_optica` y `validar` rechaza dos piezas con el mismo
@@ -454,14 +470,20 @@ Los cuatro puertos de cada uno tienen destino declarado, y el catálogo los
 escribe uno a uno en un campo `puertos`:
 
 ```
-       camara_beacon (976 nm, transmision)
+    colimador_beacon_bajada (1064 nm, entra y D2 lo TRANSMITE)
              |
-  laser --- D2 --- fotodiodo_monitor_beacon   (fuga del beacon en transmision)
+ camara --- D2 --- fotodiodo_monitor_beacon   (fuga del beacon en reflexion)
              |
             D1 --- FSM --- telescopio         (1550, transmision)
              |
        trampa_luz_d1                          (fuga del 1550 en reflexion)
 ```
+
+**Este diagrama es el de después del 2026-09-21.** Hasta entonces la cámara
+estaba arriba, en transmisión de D2, y el láser entero entraba lateralmente
+por −X. No cabía, y lo que lo arregla está en §3.11. La topología ya no se
+escribe en ningún sitio del código: vive en `meta.topologia_brazo_beacons` de
+`connections.yaml`, y la leen el generador y el chequeo.
 
 **Los cuartos puertos no son opcionales.** Ningún divisor transmite el 100 %.
 Lo que D1 no transmite del 1550 sale por el puerto opuesto al brazo, y sin
@@ -474,11 +496,24 @@ instrumentarlo, hace falta igualmente taparlo: `trampa_luz_d2` (OPT-18) está en
 el catálogo como `alternativa_de` del fotodiodo —**excluyente**, no adicional—,
 así que no suma en ningún presupuesto ni se coloca, igual que el FSM piezo.
 
-**El orden dentro de D2 no es intercambiable.** Con la cámara en transmisión y
-el beacon en reflexión, los 100 mW del beacon tocan **una sola superficie con
-recubrimiento** antes de salir, y lo que se fugue en D2 se va al puerto opuesto
-al láser en vez de hacia el sensor. Invertirlo mete el beacon en transmisión
-—dos superficies más— y apunta su fuga justo a lo que hay que proteger.
+#### El orden dentro de D2 sí era intercambiable, y estaba mal razonado
+
+Esto decía, el 2026-09-20: «con la cámara en transmisión y el beacon en
+reflexión, lo que se fugue en D2 se va al puerto opuesto al láser **en vez de
+hacia el sensor**; invertirlo apunta su fuga justo a lo que hay que proteger».
+
+**La segunda mitad es falsa.** En un divisor a 45° los pares de reflexión son
+**fijos**: lo que entra por −Y se refleja a −X, y lo que entra por +Y se refleja
+a +X. La fuga directa del beacon sale por *el cuarto puerto* —el del
+fotodiodo— en **las dos** configuraciones, y en ninguna apunta a la cámara. Lo
+único que cambia es si esa fuga es en transmisión o en reflexión.
+
+La primera mitad sí era correcta, y **ése es el coste real de invertir**: con D2
+en paso largo el beacon de bajada **atraviesa el sustrato**, o sea una cara más
+con recubrimiento y un fantasma más de la cara trasera. Los dos se los come el
+beacon, que es una baliza de 100 mW cuya única exigencia es potencia y apuntado;
+el canal cuántico no pasa por D2 y no se entera. Es el precio barato, y a cambio
+el brazo cabe (§3.11).
 
 #### Las longitudes de onda: 976 arriba, 1064 abajo
 
@@ -504,44 +539,37 @@ Va declarado **dentro** de la reserva de `camara_beacon` y dicho en su `fuente`.
 No es pereza: modelarlo suelto añade una pieza más a la fila del brazo, y el
 brazo ya no cabe sin ella.
 
-#### Y no cabe
+#### Y no cabía — RESUELTO el 2026-09-21
 
-Aquí está el precio de la arquitectura, y es geométrico. Antes la cámara y el
+Aquí estaba el precio de la arquitectura, y era geométrico. Antes la cámara y el
 láser usaban lados **opuestos** de D1, así que cada uno tenía 47.7 mm para él
-solo. Compartiendo brazo, D1/2 + D2 + cámara van **en fila hacia un solo lado**:
+solo. Compartiendo brazo, D1/2 + D2 + cámara iban **en fila hacia un solo lado**:
 
-| | mm |
-|---|---|
-| semi-D1 | 11.5 |
-| D2 | 23.0 |
-| cámara (bajada de 30 a 20) | 20.0 |
-| **necesario** | **54.5** |
-| disponible, del centro de D1 a la pared | 47.7 |
-| **falta** | **6.8** |
+| | mm (20-sep) | mm (21-sep) |
+|---|---|---|
+| semi-D1 | 11.5 | **8.0** |
+| D2 | 23.0 | **16.0** |
+| tercera pieza de la fila | cámara, 20.0 | **colimador del beacon, 12.0** |
+| **necesario** | **54.5** | **36.0** |
+| disponible, del centro de D1 a la pared | 47.7 | 47.7 |
+| | **faltan 6.8** | **sobran 11.7** |
 
-Y eso ya con la única salida que **no le cuesta volumen a nadie**: bajar la
-reserva de `camara_beacon` de 30 a 20 mm, como `supuesto`, con el razonamiento
-escrito en el catálogo (sensor pequeño con objetivo corto a 976 nm, filtro
-incluido, sin sensor elegido). Las otras dos salidas se pagan y **son decisiones
-de ACSAR**, así que están escritas y no aplicadas:
-
-1. **Plegar el brazo hacia −Z** con un espejo de doblado: da unos 27.5 mm más, a
-   costa de una superficie reflectante adicional en el camino del beacon.
-2. **Alargar el banco**, que se paga con la bandeja o con la longitud reservada
-   al telescopio (§3.6), exactamente igual que la salida de §3.7.
+Con las holguras de montaje faltaban 16.8 mm, y por eso el generador **no
+colocaba la cámara**; hoy sobran 1.7 mm y la coloca. Lo que lo arregla **no es
+ninguna de las dos salidas que estaban escritas aquí** —plegar el brazo hacia
+−Z con un espejo más, o alargar el banco a costa de la bandeja—, sino tres
+cambios que no añaden ninguna superficie al camino del beacon ni una sola al del
+canal cuántico. Están en §3.11: ópticas de Ø12.7 con celdas de 16 mm, D2
+invertido con la cámara en reflexión hacia −X, y el láser de bajada partido en
+módulo (bandeja) y colimador (banco).
 
 `chequeo_brazo_beacon` recalcula el margen desde el catálogo —las cuatro ramas,
 incluidas las trampas y el fotodiodo, que son pequeños pero se pagan del mismo
-presupuesto— y **falla**, y se queda fallando. Eso es un resultado.
+presupuesto— y **pasa**. Sigue diciendo que el margen es el DESNUDO, sin
+holguras, y que todas las envolventes del brazo son supuestas.
 
-**Y la cámara no está colocada.** Con las holguras de montaje el déficit sube a
-16.8 mm, así que el generador **no la coloca** y avisa por stderr. Las otras dos
-opciones eran apretarla, que esconde el resultado, o dibujarla saliéndose del
-satélite, que además choca con el panel solar y rompe las dos invariantes que
-este repositorio sí defiende con tests (cero solapes, nada fuera de la
-envolvente). Una pieza sin sitio no se dibuja en un sitio inventado. Consecuencia
-visible: `e06` (D2 → cámara) sale como **no comprobable, sin colocar** en
-`reports/04_conexiones.md`, que es exactamente lo que está pasando.
+**Lo que no arregla la geometría** es `aislamiento_camara_a_1064`, que es el
+número que sostiene la elección de colores y sigue sin medirse.
 
 #### El beacon de bajada comparte el FSM, y eso tiene cola
 
@@ -707,7 +735,7 @@ temperatura entre calibraciones. Eso es `retardancia_45_1550`, TBD, y hay que
 pedir plata u oro protegido **con la curva de fase medida**, que es lo que casi
 ningún catálogo publica.
 
-#### Y el tramo recto no cabe, por 18.0 mm
+#### Y el tramo recto no cabía, por 18.0 mm — RESUELTO el 2026-09-21
 
 Aquí está el precio, y es geométrico. El codificador, el protector del empalme y
 el colimador van **en fila según Z** y ninguno de los tres se puede apretar:
@@ -718,8 +746,8 @@ el colimador van **en fila según Z** y ninguno de los tres se puede apretar:
 | protector de empalme (`longitud_protector_empalme`) | 60.0 |
 | codificador, protectores de fibra incluidos | 130.0 |
 | **necesario** | **218.0** |
-| disponible: la franja en Z | 200.0 |
-| **falta** | **18.0** |
+| disponible: la franja en Z | ~~200.0~~ **227.0** |
+| | ~~faltan 18.0~~ **sobran 9.0** |
 
 **La longitud de la franja es la longitud reservada al telescopio**, así que
 —y esto corrige lo que uno esperaría— **alargar el banco no ayuda**: el banco no
@@ -731,43 +759,55 @@ iniciar. Si el colimador real necesitara su propio tramo rígido de strain
 relief, el déficit sube en esa cantidad. Queda dicho para que nadie lo descubra
 después.
 
-**Las tres salidas, todas calculadas, y las tres decisiones de ACSAR:**
+**Las tres salidas, todas calculadas. Se aplicó la primera** [DECISIÓN ACSAR,
+2026-09-21]:
 
 1. **Subir `longitud_reservada` del telescopio a ≥ 218 mm.** Con los **«~2U» de
    verdad del brief (227 mm, no 200 — la U de longitud de la CDS son 113.5)**
    sobran **9.0 mm**. Se paga con la bandeja, que baja de 106.4 a 79.4 mm; con
-   sólo tres piezas dentro le sobran 16.6 mm. Es la salida más barata y la que
-   además arregla el margen de 1.2 mm de §4.7(d).
+   sus piezas dentro le sobran 16.6 mm de Z. Es la salida más barata, y la que
+   además arregla el margen de 1.2 mm de §4.7(d) —y la única que sirve con el
+   haz bajado a 7 mm, porque con 200 mm ese haz ni siquiera dejaba caber la
+   óptica—. **Ésta es la aplicada**; ver §3.11.
 2. **Codificador con salida colimada de fábrica**, que quitaría el empalme
    entero: `pigtail_salida_minimo`, TBD, es de Exail. Sin los 60 mm del
-   protector sobran **42.0 mm**.
+   protector sobrarían **42.0 mm**. Sigue abierta y sigue mereciendo la pena
+   preguntarla: quitaría el único empalme del modelo que cae en un tramo que
+   además tiene prohibido curvarse.
 3. **Alargar el banco a ≥ 86 mm**, que es lo que hace falta para que el
    colimador quepa *dentro del banco* (10 de semiespejo + 5 de holgura + 28).
-   Entonces la franja sólo necesita 190 y sobran 10.0 mm. Cuesta 31 mm de
-   bandeja, que se queda en 75.4 y sigue dando.
+   Entonces la franja sólo necesitaría 190 y sobrarían 10.0 mm.
 
 Lo que **no** es una salida es bajar el protector de empalme hasta que el
-chequeo pase: los 60 mm ya son el orden correcto del tramo rígido.
+chequeo pase: los 60 mm ya son el orden correcto del tramo rígido. Lo que sí
+podría bajarlo de verdad es **recubrir el empalme (recoating) en vez de
+protegerlo con férula**, que devolvería a la fibra su diámetro y su
+flexibilidad y daría unos +22 mm. Está anotado como TBD
+(`integracion.fibra.recubrimiento_empalme_post_codificacion`) y **no aplicado**:
+cambia la fiabilidad mecánica del empalme y eso lleva un ensayo de vibración
+detrás, no una suposición.
 
-**Y el codificador no está colocado.** Igual que `camara_beacon` en §3.9: una
-pieza sin sitio no se dibuja en un sitio inventado. `chequeo_fibra_post_codificacion`
-**falla**, y se queda fallando. Consecuencia visible: `altura_eje_codificador`
-sale como **no comprobable** porque no hay eje que medir, y lo dice.
+**Y el codificador ya está colocado.** `chequeo_fibra_post_codificacion` pasa a
+**no comprobable** —cabe, con 9.0 mm, pero si esa longitud de fibra es
+aceptable no se puede decir hasta tener `sensibilidad_termica_fase_pm`—, y
+`altura_eje_codificador` pasa de *no comprobable* a **ok**: el eje cae en
+Y = 0.000, que es el plano óptico del banco, con 0.00 mm de desvío contra una
+tolerancia supuesta de 0.5.
 
-#### Lo que se sabría si el codificador cupiera
+#### Lo que se sabe ahora que el codificador cabe
 
 El generador lo coloca **por su eje de fibra**, no por su caja: el eje pasa a
 4.8 mm de la cara de montaje sobre una altura de 9.7, o sea 0.05 mm por debajo
 del centro. Con la colocación que le tocaría:
 
 - **coaxialidad con el colimador**: exacta por construcción, y el margen de la
-  envolvente contra la pared −X de la franja es de **2.05 mm**;
+  envolvente contra la pared −X de la franja es de **6.20 mm** (eran 2.05 antes
+  de anclar el espejo de plegado bajo la franja, §3.11);
 - **altura del eje**: Y = 0.000, que es el plano óptico del banco. Desvío
   **0.00 mm** contra una tolerancia supuesta de 0.5.
 
 Un plegado en el plano X-Z conserva Y; cualquier desfase en Y obligaría a una
-curva en S **después** del codificador, que es donde está prohibida. Por eso el
-chequeo existe aunque hoy no pueda concluir.
+curva en S **después** del codificador, que es donde está prohibida.
 
 #### Los empalmes: cero conectores
 
@@ -795,6 +835,138 @@ entonces es una pieza suelta, que es lo que `test_brazo_beacon.py` existe para
 cazar— o las tiene, y el modelo afirma un camino óptico que nadie ha decidido.
 Si se decide instalarla, se da de alta con su `id_drive`, su envolvente y sus
 dos tramos.
+
+### 3.11 La redistribución: 227 mm, haz de 7 mm, y por fin cabe todo
+
+Añadido el 2026-09-21. Es el cambio que hace que **`clau3d informe` devuelva 0**
+por primera vez desde que se dibuja el payload entero, y el que enseña que los
+dos «no cabe» que quedaban abiertos —el brazo de los beacons (§3.9) y el tramo
+recto post-codificación (§3.10)— **eran el mismo problema visto por dos sitios**:
+el payload estaba repartido con las longitudes de la arquitectura anterior.
+
+#### El estudio, y sus tres resultados
+
+Con este mismo generador, moviendo una cosa cada vez:
+
+1. **La bandeja tiene sitio de sobra y la franja no.** Y la franja mide
+   exactamente lo que se le reserva al telescopio, así que **alargar esa reserva
+   transfiere longitud de una a la otra**. No hace falta quitarle nada a nadie
+   más.
+2. **El brazo de los beacons sólo cabe con ópticas de Ø12.7 mm.** Con Ø25.4 no
+   cabe de ninguna manera, se haga lo que se haga con el reparto. Y Ø12.7 tiene
+   una consecuencia que no es negociable: su apertura libre útil son ~11.4 mm, y
+   un haz a 45° deja una huella de d·√2, **así que el haz comprimido no puede
+   pasar de ~8 mm**.
+3. **Con un haz menor de 10 mm, el afocal no cabe en 200 mm.** Y esto es lo
+   contrario de lo que uno espera: un haz más fino sube la magnificación
+   (M = apertura / haz) y con ella la separación entre vértices, f1·(1 − 1/M).
+   Con 7 mm pide 5.4 mm más que con 10, y con 3.5 mm pide 13.2 mm más. **Con
+   227 mm cabe en los dos casos.**
+
+Los tres se cierran con el mismo número: **227 mm de reserva al telescopio**,
+que son los «~2U» de verdad del brief con la U de longitud de la CDS (113.5 mm,
+no 100). Lo que hasta ayer era «la salida más barata de §3.10» resulta ser la
+única que sirve a la vez para el tramo recto y para la óptica.
+
+#### Las decisiones [DECISIÓN ACSAR, 2026-09-21]
+
+| | qué | qué desbloquea |
+|---|---|---|
+| 1 | `longitud_reservada` del telescopio: 200 → **227 mm** | el tramo recto (+9.0 mm) y la longitud del afocal (+21.6 mm) |
+| 2 | `diametro_haz_modelado`: 10 → **7 mm**, como **cota superior** | que Ø12.7 valga, y con ello todo el brazo |
+| 3 | celdas de D1, D2 y espejo de plegado: 23/23/20 → **16 mm** | la línea en X del banco (+11 mm) y la rama +Y del brazo |
+| 4 | **D2 invertido**: paso corto → **paso largo** | la cámara pasa de la rama +Y, donde no cabía, a la −X, que tiene 71 mm |
+| 5 | `laser_beacon_bajada` **partido en dos**: módulo (bandeja) + `colimador_beacon_bajada` (banco) | el calor sale del banco y la rama +Y se queda con 12 mm en vez de 30 |
+
+**El haz de 7 mm no dice cuánto mide el haz: dice cuánto como máximo puede
+medir** para que la arquitectura dibujada exista. Sigue siendo `supuesto`, el
+real sigue siendo TBD, y el nuevo chequeo `haz_vs_optica_banco` publica el techo
+(8.06 mm con Ø12.7) en vez de decir «ok».
+
+#### Lo que cuesta, y hay que escribirlo
+
+- **El MEMS del FSM deja de valer.** Su espejo de 5 mm admite un haz de
+  3.54 mm; con 7 haría falta el `fsm_piezo_pi_s331`, que pesa **130 g** frente a
+  los gramos del MEMS. **Este modelo no elige FSM** —sigue siendo el TBD
+  `fsm.eleccion_de_tecnologia`— pero ya no es una elección libre: o el equipo de
+  óptica baja el haz a ≤ 3.54, o el MEMS está descartado. Y bajarlo a 3.54
+  alarga el tubo otros 7.7 mm, que es lo que dice el peor caso del chequeo
+  `longitud_telescopio`: quedarían 13.9 mm de margen en vez de 21.6. `haz_vs_fsm`
+  sale **no comprobable** y dice exactamente esto.
+- **La cámara pasa a 0.45 mm del FSM.** Va centrada en el eje de D2, que está a
+  21 mm del plano óptico, y su semisección son 13: la cara inferior cae en
+  Y = +8.0 y el FSM llega a +7.55. Por eso la sección es 26 mm y no 30: con 30
+  el estudio medía 0.1 cm³ de solape real con el FSM. **Es el sitio más apretado
+  del payload**, por delante de la línea en X del banco, que tiene 26.7 mm.
+- **El beacon atraviesa el sustrato de D2.** Una cara más con recubrimiento y un
+  fantasma más de la cara trasera. Se los come el beacon, que es una baliza de
+  100 mW; el canal cuántico no pasa por D2. Ver la corrección de §3.9.
+- **El secundario se vuelve más rápido.** Ver §4.7(c): f2 ≈ 16 mm con haz de
+  7 mm y ≈ 8 mm con 3.5, frente a los 22 de antes. Es un riesgo de alineación y
+  de fabricación que hay que revisar con Aperture Optical Sciences.
+- **La bandeja baja de 106.4 a 79.4 mm.** Le sobran 16.6 mm de Z, así que da,
+  pero ya no es la zona holgada que era.
+
+#### Dos cosas que el estudio encontró sin buscarlas
+
+**El espejo de plegado tenía que anclarse, no compactarse.** El generador
+colocaba las piezas del banco en fila apretada desde el FSM hacia +X. Con las
+celdas grandes eso dejaba el espejo bastante hacia +X y no se veía el problema;
+al bajarlas a 16 mm la línea se encogió 11 mm hacia el FSM y **el colimador, que
+va encima del espejo, se metió dentro del barrilete del telescopio**. Ahora el
+espejo tiene un mínimo —`x ≥ x_franja_min + radio del colimador + holgura`— y
+hay un chequeo, `espejo_bajo_la_franja`, que lo comprueba sobre el layout ya
+generado.
+
+**La placa de la bandeja tenía su contorno escrito a mano.** Era una cota
+derivada (la zona menos 2 mm por lado) escrita como si fuera un dato, y en
+cuanto la zona se encogió 27 mm la placa **se salía del 6U por 11.5 mm por cada
+extremo**, rompiendo una de las dos invariantes que este repositorio sí defiende
+con tests. Ahora el generador la deriva y aborta con el número que toca si no
+coincide, y el chequeo `bandeja_en_su_zona` lo vuelve a mirar sobre el layout.
+Es el mismo error que costó 46 mm en la pila PC104 (§4.6), en otro sitio.
+
+#### Y una tercera: la topología del brazo estaba escrita dos veces
+
+`RAMAS_BRAZO` en el generador y, a mano, dentro de `chequeo_brazo_beacon`, que
+daba por hecho que la rama +Y era la de la cámara. **Al invertir D2 las dos
+copias dejaron de decir lo mismo**: el generador habría colocado la cámara en
+−X y el chequeo habría seguido midiéndola en +Y, o sea comprobando una geometría
+que ya no existe. Ahora vive una sola vez, en `meta.topologia_brazo_beacons` de
+`connections.yaml`, con el motivo de cada rama al lado, y hay dos tests
+—`test_el_chequeo_lee_la_topologia_declarada` y
+`test_el_generador_usa_la_misma_topologia_que_el_chequeo`— que atan los dos
+lados al mismo dato. Es el mismo patrón que §3.10 con las restricciones de
+orden: **un dato que dos sitios necesitan no puede estar en ninguno de los dos**.
+
+#### Los números, antes y después
+
+| | antes | después |
+|---|---|---|
+| Tramo MPZ → colimador | −18.0 mm, MPZ sin colocar | **+9.0 mm, MPZ colocado** |
+| Telescopio, haz 7 mm | — | **+21.6 mm** |
+| Telescopio, haz 3.54 mm (peor caso, MEMS) | — | **+13.9 mm** |
+| `banco_optico` (línea en X) | +15.7 mm | **+26.7 mm** |
+| Rama +Y del brazo (desnudo / colocando) | −6.8 / −16.8 mm | **+11.7 / +1.7 mm** |
+| Cámara al FSM | no colocada | **+0.45 mm** |
+| Piezas sin colocar | `camara_beacon`, `mod_fase_mpz_ln_10` | **ninguna** |
+| Choques reales | 0 | **0** |
+| `clau3d informe` | código 1 | **código 0** |
+
+El único número que no coincide con el estudio de partida es `banco_optico`:
+**+26.7 mm en vez de los ~22.7 esperados**. La diferencia son 4 mm exactos y
+salen de la celda del espejo de plegado, que el estudio dejó en 20 mm y aquí
+baja también a 16. Es coherente: si las tres piezas planas del banco son de la
+misma familia Ø12.7, las tres tienen la misma celda, y el espejo no tiene
+ninguna razón para ser mayor. El margen sale mejor, no peor.
+
+#### Los `id_drive` nuevos
+
+Sólo uno, y hay que **dar de alta esa fila** en la hoja índice del equipo:
+**OPT-20** (`colimador_beacon_bajada`). `laser_beacon_bajada` conserva **OPT-12**
+aunque ahora sea sólo el módulo: `id_drive` se asigna por pieza del catálogo y
+la fila existente sigue describiendo la misma función, con la envolvente y la
+zona cambiadas.
 
 ### Cómo se regenera
 
@@ -1033,8 +1205,8 @@ Dos parábolas confocales, primario cóncavo y secundario convexo: entra colimad
 y sale colimado. El motivo no es óptico, es **el banco**. Un Cassegrain focal
 clásico (f/12, EFL 1080 mm) deja el foco real ~40 mm detrás del vértice del
 primario, o sea **dentro de `z_payload_banco`**, y obliga a meter una lente de
-enfoque en la línea apretada de §3.7 (15.7 mm de margen desde que el colimador
-salió de ella, y eran 7.7). El afocal no
+enfoque en la línea de §3.7 (26.7 mm de margen desde §3.11; eran 15.7 y antes
+7.7). El afocal no
 necesita ningún elemento adicional, y en particular **ninguna superficie
 transmisiva en el camino del canal cuántico**, donde un refractivo mete
 birrefringencia por tensión y se come justo lo que el enlace mide.
@@ -1064,9 +1236,26 @@ intensidad en eje   = (1 − ε²)²   →  −20·log₁₀(1 − ε²)
 
 Ninguno de esos números está escrito en el catálogo: se derivan en
 `optica/parametros.py`, y hay un test que comprueba que cambiar el haz los mueve
-todos. Con lo que hay hoy (apertura 90, haz supuesto 10): **M = 9.00**,
-f2 = 22.22 mm, d = 177.78 mm, secundario Ø14, ε = 0.156, **0.11 dB de potencia
-recogida y 0.21 dB de intensidad en el eje**.
+todos. Con lo que hay hoy (apertura 90, **haz supuesto 7 desde §3.11**):
+**M = 12.86**, f2 = 15.56 mm, d = 184.44 mm, secundario Ø9.8, ε = 0.109,
+**0.05 dB de potencia recogida y 0.10 dB de intensidad en el eje**. Con el haz
+de 10 mm de antes eran M = 9.00, f2 = 22.22, d = 177.78, Ø14, ε = 0.156, 0.11 y
+0.21 dB.
+
+**Un haz más fino sale mejor en obstrucción y peor en todo lo demás**, y lo
+segundo es lo que hay que mirar:
+
+- **alarga el tubo**, porque d = f1·(1 − 1/M) crece con M. Es lo que obligó a
+  subir la reserva a 227 mm (§3.11).
+- **hace el secundario más rápido**: f2 = f1/M pasa de 22 mm con haz de 10 a
+  **≈ 16 mm con 7** y **≈ 8 mm con 3.5**. Un secundario convexo de Ø9.8 con
+  8 mm de focal es f/0.8 largo, y sobre todo es una superficie cuyo radio de
+  curvatura (2·f2) baja de 44 a 31 y a 16 mm: **la tolerancia de despace y de
+  descentrado escala con eso**, así que el mismo presupuesto de alineación se
+  vuelve mucho más exigente. **Hay que revisarlo con Aperture Optical
+  Sciences** antes de cerrar el haz: no es un problema de si cabe, es de si se
+  puede fabricar y alinear. Va de la mano del TBD
+  `estabilidad_despace_primario_secundario`, que es el que lo cuantificaría.
 
 **Corregido el 2026-09-20 por la noche.** Hasta entonces el código comentaba
 el −20·log₁₀ como «convenio de amplitud» y decía que en potencia la misma
@@ -1091,10 +1280,12 @@ D·cos 45° = D/√2.
 | **5 mm** (MEMS Mirrorcle, herencia CLICK-A) | **3.54 mm** | **25.5** |
 | 12.7 mm (espejo del piezo PI S-331) | 8.98 mm | 10.0 |
 
-Con el haz supuesto de 10 mm con el que hoy se dibuja todo, **el MEMS DIP24 no
-vale**: haría falta el `fsm_piezo_pi_s331` —que pesa 130 g frente a los gramos
-del MEMS— o subir la magnificación de 9 a 25.5, lo que encoge el secundario y
-alarga el tubo. `chequeo_haz_vs_fsm` dice exactamente eso, y sale **`no
+Con el haz supuesto de **7 mm** con el que hoy se dibuja todo, **el MEMS DIP24
+no vale**: haría falta el `fsm_piezo_pi_s331` —que pesa 130 g frente a los
+gramos del MEMS— o bajar el haz a 3.54, lo que subiría la magnificación a 25.5,
+encogería el secundario a f2 ≈ 8 mm y alargaría el tubo otros 7.7 mm. Lo dice
+así el chequeo `longitud_telescopio`, que desde §3.11 informa de ese **peor
+caso** derivándolo del espejo del FSM en vez de escribirlo. `chequeo_haz_vs_fsm` dice exactamente eso, y sale **`no
 comprobable`**, no `ok` ni `falla`: el número con el que se dibuja no valida
 nada. **Este es el dato que decide el TBD `fsm.eleccion_de_tecnologia`**, y así
 está redactado en el informe.
@@ -1104,27 +1295,38 @@ así que los ~51 µrad del cielo son 456 µrad ópticos en el haz comprimido
 (228 µrad de giro mecánico del espejo) con M = 9. El piezo da 3 mrad y un MEMS
 mucho más. Lo que decide es el **tamaño** del espejo, no su recorrido.
 
-#### (d) La longitud: cabe por 1.2 mm, y eso no es margen
+#### (d) La longitud: cabía por 1.2 mm — RESUELTO el 2026-09-21
 
 La separación entre vértices de un afocal es `f1·(1 − 1/M)` y no se negocia.
-Con f1 = 200 mm y M = 9 son **177.8 mm**, así que de los 200 mm que el layout
-reserva quedan **22.2 mm** para los dos mamparos, la celda y los dos espejos:
+Con f1 = 200 mm y M = 9 eran 177.8 mm, así que de los **200 mm** que el layout
+reservaba quedaban 22.2 mm para los dos mamparos, la celda y los dos espejos, y
+esos suman 21: **cabía por 1.2 mm, que no es margen**.
+
+Con la reserva en **227 mm** (§3.11) y el haz en 7, la separación sube a
+184.4 mm y el margen queda en **21.6 mm**:
 
 | | mm |
 |---|---|
+| separación entre vértices (f1 = 200, M = 12.86) | 184.4 |
 | mamparos (2 × 3.0) | 6.0 |
 | celda del primario | 3.0 |
 | espejo primario | 8.0 |
 | espejo secundario | 4.0 |
-| **margen** | **1.2** |
+| **necesario** | **205.4** |
+| reservado | 227.0 |
+| **margen** | **21.6** |
 
-Todos esos espesores están en su **cota superior**, no elegidos, y su `fuente` en
-el catálogo lo dice —el mismo patrón que el espejo de plegado y D1 de §3.7—.
-Una celda de 3 mm no es una celda, y un primario de Ø92 × 8 mm tiene una relación
-de aspecto de 11.5. `chequeo_longitud_telescopio` sale como **atención** y dice
-la salida: con los **~2U de verdad del brief (227 mm, no 200)** la misma óptica
-tendría ~28 mm de margen. **Alargar se paga con la bandeja y es decisión de
-ACSAR**, así que aquí no se ha tocado `longitud_reservada`.
+Todos esos espesores siguen estando en su **cota superior**, no elegidos, y su
+`fuente` en el catálogo lo dice —el mismo patrón que el espejo de plegado y D1
+de §3.7—. Una celda de 3 mm no es una celda, y un primario de Ø92 × 8 mm tiene
+una relación de aspecto de 11.5: **los 21.6 mm son justamente el sitio para que
+esos espesores crezcan hasta ser reales**, que era lo que faltaba.
+
+`chequeo_longitud_telescopio` sale como **ok** e informa además del **peor
+caso**: si el haz bajara a 3.54 mm —el máximo que admite el espejo del FSM
+MEMS, o sea el único haz con el que ese FSM seguiría en juego— la separación
+subiría a 192.1 y el margen quedaría en **13.9 mm**. Ese número se deriva del
+espejo declarado, no se escribe.
 
 #### Por qué el volumen y las interferencias no se mueven
 
@@ -1210,21 +1412,23 @@ su propio haz.
    acoplados al barrilete del telescopio. No bloquea el layout, pero puede
    obligar a devolverlos a la bandeja, y entonces el telescopio vuelve a tener
    techo de 176.4 mm.
-4. **EL RADIO MÍNIMO DE CURVATURA DE LA FIBRA** (equipo de payload). Sigue
-   siendo el dato que más desbloquea. De las **7** invasiones de keep-out que
-   reporta el modelo —eran 15 antes de §3.10— **las 7** salen de él: 5 en la
-   bandeja y 2 en la franja. Mientras no exista, la bandeja no se puede validar
-   (§3.7.2). Con él, el chequeo `bucles_fibra` pasa de `no comprobable` a decir
-   algo, y los keep-outs pasan de `supuesto` a `confirmado` sin tocar una línea
-   de código. Lo que **ya no** depende de él es el encaminamiento del colimador:
-   §3.7.1 está resuelto.
+4. **EL RADIO MÍNIMO DE CURVATURA DE LA FIBRA** (equipo de payload). **Es el
+   dato que más desbloquea, y desde §3.11 es el único que queda haciendo
+   ruido**: de las **13** invasiones de keep-out que reporta el modelo, **las
+   13** salen de él (7 en la bandeja y 6 en la franja). Subieron de 7 a 13 no
+   porque algo empeorara sino porque el codificador y la cámara ya están
+   colocados y sus puertos de fibra cuentan. Mientras no exista, la bandeja no
+   se puede validar (§3.7.2). Con él, el chequeo `bucles_fibra` pasa de `no
+   comprobable` a decir algo, y los keep-outs pasan de `supuesto` a `confirmado`
+   sin tocar una línea de código. Lo que **ya no** depende de él es el
+   encaminamiento del colimador: §3.7.1 está resuelto.
 5. **Los otros dos datos que bloquean mucho**:
    - **STEP del telescopio** (Óscar / Aperture Optical Sciences): contorno
      exterior del barrilete **y longitud real**. Hay sitio reservado para él en
      `cad/vendor/aperture_optical_sciences/telescopio_cassegrain.step`: dejarlo
-     ahí basta para que sustituya al modelo paramétrico (§4.7). Ojo: los «~2U»
-     del brief son ~227 mm, no 200 (la U de longitud de la CDS son 113.5 mm), y
-     con 200 mm la óptica derivada cabe por **1.2 mm**.
+     ahí basta para que sustituya al modelo paramétrico (§4.7). Desde §3.11 la
+     reserva son los **227 mm** del brief y la óptica derivada cabe por 21.6 mm,
+     así que ya no es urgente por el margen; sigue siéndolo por el contorno.
    - **Paso de apilamiento real del chasis** (equipo de estructura). Ahora se usa
      el estándar PC/104; el real puede cambiar los **305 mm** de pila, y el
      margen ya solo es de 56 mm (§4.6).
@@ -1254,19 +1458,20 @@ su propio haz.
     desaparece la hipótesis de espesor de pared y la zona útil pasa a ser real.
 11. **Cerrar el encaminamiento de los 4.1 W del láser**: directo del bus del EPS
     o a través de PCB-2. Y el disipador del láser, que no está modelado.
-12. **Elegir FSM**: MEMS o piezo (§4.4). El modelo enseña las tres cifras que
-    deciden. Dos son de la pieza —la masa y el volumen del soporte— y ninguna
-    está cerrada: del MEMS falta el soporte de vuelo, del piezo faltan las
-    cotas. La tercera **no es del FSM**: es el diámetro del haz (punto 8). Con el
-    espejo de 5 mm del MEMS el haz máximo son 3.54 mm; si el equipo de óptica
-    pide más, el MEMS queda descartado sin discusión (§4.7c).
-13. **DECIDIR CÓMO CABE EL BRAZO DE LOS BEACONS** (§3.9). Es la única cosa de
-    esta lista que hoy hace **fallar** `clau3d informe`, y la única pieza del
-    modelo que no está colocada porque no tiene dónde. Faltan 6.8 mm con las
-    envolventes desnudas y 16.8 mm con holguras, y las dos salidas cuestan:
-    plegar el brazo hacia −Z con un espejo de doblado (una superficie
-    reflectante más en el camino del beacon) o alargar el banco a costa de la
-    bandeja o del telescopio. **Es una decisión de ACSAR**, no del modelo.
+12. **ELEGIR FSM**: MEMS o piezo (§4.4). **Ha subido de prioridad con §3.11 y
+    ya no es una elección libre.** Con el haz en 7 mm el espejo de 5 mm del MEMS
+    no admite la huella (3.54 mm máximo), así que o el equipo de óptica baja el
+    haz a ≤ 3.54 —y entonces el tubo se alarga otros 7.7 mm y el secundario baja
+    a f2 ≈ 8 mm, ver §4.7— o **el MEMS está descartado y toca el piezo, con sus
+    130 g frente a los gramos del MEMS**. Las otras dos cifras que deciden son
+    de la pieza —masa y volumen del soporte— y ninguna está cerrada: del MEMS
+    falta el soporte de vuelo, del piezo faltan las cotas.
+13. ~~**DECIDIR CÓMO CABE EL BRAZO DE LOS BEACONS**~~ **HECHO** el 2026-09-21
+    (§3.11): ópticas de Ø12.7, D2 invertido y el láser partido en módulo y
+    colimador. La rama +Y pasa de −6.8 a **+11.7 mm** y todo el brazo está
+    colocado. **Lo que queda de aquí es vigilar la cámara**: va a **0.45 mm del
+    FSM**, que es el sitio más apretado del payload. Si el sensor real pasa de
+    26 mm de sección, hay que mover el brazo, no apretar la reserva.
 14. **EL AISLAMIENTO DE LA CÁMARA A 1064 nm** (equipo de PAT). Es el número que
     sostiene toda la elección de longitudes de onda de §3.9 —976 arriba, 1064
     abajo— y hoy no está medido. Lo que decide es si un sensor que mide
@@ -1276,15 +1481,16 @@ su propio haz.
     `trampa_luz_d2`. Lo segundo no cambia la geometría del brazo; lo primero sí
     cambia el disipador del láser, que es lo que fija su envolvente.
 
-16. **DECIDIR CÓMO CABE EL TRAMO RECTO POST-CODIFICACIÓN** (§3.10). Es la
-    segunda cosa que hoy hace **fallar** `clau3d informe`, y por la que
-    `mod_fase_mpz_ln_10` no está colocado. Faltan **18.0 mm** de los 218 que
-    piden en fila el colimador, el protector del empalme y el codificador. Las
-    tres salidas están calculadas en §3.10 y las tres son de ACSAR: subir la
-    longitud reservada al telescopio a ≥ 218 mm (con los 227 del brief sobran
-    9.0), conseguir de Exail un codificador con salida colimada (sobran 42.0) o
-    alargar el banco a ≥ 86 mm (sobran 10.0). Ojo: **alargar el banco a secas no
-    sirve** si no llega a 86, porque la cuenta es de la franja, no del banco.
+16. ~~**DECIDIR CÓMO CABE EL TRAMO RECTO POST-CODIFICACIÓN**~~ **HECHO** el
+    2026-09-21 (§3.11): la reserva del telescopio sube a los 227 mm del brief y
+    el tramo pasa de −18.0 a **+9.0 mm**, con `mod_fase_mpz_ln_10` colocado.
+    **Lo que sigue mereciendo la pena preguntar** es la segunda salida, que no
+    se ha aplicado y daría 42 mm: un **codificador con salida colimada de
+    fábrica** (`pigtail_salida_minimo`, Exail), que quitaría el único empalme
+    del modelo que cae en un tramo que además no se puede curvar. Y anotada como
+    TBD sin aplicar, la tercera: **recubrir el empalme (recoating)** en vez de
+    protegerlo con férula, que daría unos +22 mm a cambio de un ensayo de
+    vibración.
 17. **SI LA GUÍA DEL MPZ-LN-10 ES BIPOLARIZACIÓN** (Exail). Es el TBD que más
     riesgo esconde de todos los nuevos: las guías de intercambio protónico
     guían una sola polarización y actúan como polarizador integrado, y con una
@@ -1313,6 +1519,32 @@ su propio haz.
     permanente —rotador de Faraday—, así que no es un componente pasivo para el
     magnetómetro del ADCS. Y de paso: **comprobar si el butterfly del G&H ya
     integra aislador interno**, que quitaría la pieza y el imán.
+23. **LA APERTURA LIBRE REAL DE LAS MONTURAS DEL BANCO** (equipo de óptica).
+    Las celdas de 16 mm de D1, D2 y el espejo de plegado se dimensionan con una
+    apertura libre supuesta de 11.4 mm para Ø12.7, y **ese número es el que
+    pone el techo al haz comprimido en 8.06 mm**, que a su vez es lo que
+    descarta el MEMS del FSM y lo que alarga el telescopio (§3.11). Si la
+    montura real da menos apertura, el techo baja y todo se aprieta otra vez;
+    si hace falta más haz del que cabe, la salida es Ø25.4 y entonces **hay que
+    volver a comprobar el brazo**, porque con celdas de ese tamaño no cabía.
+    Con él, `haz_vs_optica_banco` deja de ser una hipótesis devuelta.
+24. **REVISAR EL SECUNDARIO RÁPIDO CON APERTURE OPTICAL SCIENCES** (§4.7c). Al
+    bajar el haz, f2 pasa de 22 mm a ≈ 16 (haz 7) o ≈ 8 (haz 3.5), y con ella
+    el radio de curvatura del secundario, de 44 a 31 o 16 mm. **La tolerancia
+    de despace y de descentrado escala con eso**, así que no es si cabe: es si
+    se puede fabricar y alinear. Va de la mano del punto 8.b.
+25. **LA DEFENSA CONTRA TROYA EN ESPACIO LIBRE** (payload / seguridad). Sale de
+    corregir lo que se dijo del vigía del acoplador 2×2 (§3.10): está **detrás
+    del VOA visto desde el canal**, así que la luz de sondeo le llega atenuada
+    por el VOA a la ida y a la vuelta, decenas de dB dos veces. Sirve de último
+    recurso, no de defensa. La defensa tiene que ir donde el sondeo todavía no
+    se ha atenuado, o sea entre el colimador y el telescopio: aislador o
+    circulador de espacio libre, filtro de banda estrecha, tap con fotodiodo
+    mirando lo que ENTRA, o una combinación. Cada una cuesta una superficie más
+    en el camino cuántico. Está como TBD en
+    `integracion.optica.defensa_troya_espacio_libre` y **no como componente**,
+    por lo mismo que la lámina de cuarto de onda: lo que está en duda es si la
+    pieza existe.
 
 > **La lista de supuestos a sustituir, entera y con el valor concreto de cada
 > uno, está en `reports/06_pendientes.md` y en `reports/components_status.csv`.**
@@ -1385,7 +1617,7 @@ componentes sin envolvente con a quién pedírselos, marca el volumen libre como
 criterio que `reports/`. Un visor genérico no puede decir nada de eso.
 
 Desde el 2026-09-20 por la tarde tiene además un panel de **«números
-inventados aquí»**: los 68 supuestos, uno a uno, con qué falta y a quién
+inventados aquí»**: los 78 supuestos, uno a uno, con qué falta y a quién
 pedírselo. Es lo único que distingue en pantalla un cuerpo gris que está ahí
 porque alguien lo midió de uno que está ahí porque alguien se lo inventó; la
 geometría los enseña igual de sólidos a los dos.

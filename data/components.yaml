@@ -716,7 +716,7 @@ componentes:
           'referencia' hasta verificar que es el barrilete definitivo y no el
           concepto.
       dimensiones:
-        valor: [95.4, 95.4, 200.0]
+        valor: [95.4, 95.4, 227.0]
         unidad: mm
         estado: supuesto
         fuente: >-
@@ -728,8 +728,11 @@ componentes:
           puede pasar de ahi, luego este es el telescopio MAS GRANDE que cabe,
           no el que hay. Es una seccion CUADRADA, no un diametro: ver
           'optica.seccion_barrilete', que es donde esta el razonamiento. La
-          longitud es la ya reservada en el layout ('longitud_reservada',
-          200 mm, provisional). Con 90 mm de apertura libre quedan 2.7 mm hasta
+          TERCERA COTA NO ES LIBRE: tiene que ser identica a
+          'longitud_reservada' (227 mm desde el 2026-09-21), y el modelo FALLA
+          AL CARGAR si dejan de coincidir -- mismo criterio que
+          'seccion_barrilete' contra las dos primeras. Lo que se reserva se
+          mide sobre lo que se dibuja. Con 90 mm de apertura libre quedan 2.7 mm hasta
           la cara plana y 22.5 mm hasta la esquina; ver el chequeo
           'apertura_telescopio'. Si no cabe, el telescopio tendra que ser el
           propio elemento estructural de esa cara.
@@ -748,20 +751,31 @@ componentes:
           de la CDS son 113.5 mm, no 100, asi que "2U" son ~227 mm. La longitud
           real saldra del STEP del telescopio (Oscar), no de esta cifra.
     longitud_reservada:
-      valor: 200.0
+      valor: 227.0
       unidad: mm
       estado: decision
       fuente: >-
-        Decision de reparto ACSAR del 2026-09-20, al pasar los moduladores a la
-        franja lateral. Es el hueco que se le RESERVA al telescopio en Z dentro
-        de la columna de payload, no una longitud medida.
+        Decision de ACSAR (Adri), 2026-09-21, estudio de redistribucion del
+        banco y la franja. SON LOS "~2U" DE VERDAD DEL BRIEF: la U de longitud
+        de la CDS Rev 14.1 son 113.5 mm, no 100, asi que 2U son 227 mm y los
+        200 mm de trabajo del 2026-09-20 se quedaban 27 mm cortos. Es el hueco
+        que se le RESERVA al telescopio en Z dentro de la columna de payload,
+        no una longitud medida.
+        POR QUE SE SUBE AHORA, y son tres cosas a la vez: (1) LA FRANJA MIDE LO
+        MISMO QUE ESTA RESERVA, asi que estos 27 mm son los que hacen que el
+        tramo recto post-codificacion quepa -- pedia 218 mm y tenia 200 --;
+        (2) la bandeja tenia sitio de sobra y la franja no, asi que la longitud
+        se transfiere de una a la otra y la bandeja baja de 106.4 a 79.4 mm,
+        donde sus tres piezas siguen cabiendo con 16.6 mm de sobra; (3) con el
+        haz comprimido bajado a 7 mm el afocal necesita mas separacion entre
+        vertices y con 200 mm YA NO CABRIA. Ver CLAUDE.md 3.11.
       nota: >-
-        PROVISIONAL. Valor de trabajo mientras no llegue el STEP. No confundir
-        con los "~2U" del brief: con la U de longitud de la CDS (113.5 mm) esos
-        2U son 227 mm, no 200. La distribucion admite hasta 306.4 mm vaciando la
-        bandeja; con 200 mm quedan 106.4 mm de bandeja y con 227 mm quedan
-        79.4 mm. Cambiar este valor y regenerar el layout es todo lo que hace
-        falta para reasignar el reparto.
+        SIGUE SIENDO PROVISIONAL: es una reserva, no el STEP. La distribucion
+        admite hasta 306.4 mm vaciando la bandeja. Cambiar este valor y
+        regenerar el layout es todo lo que hace falta para reasignar el
+        reparto, pero hay que cambiar TAMBIEN la tercera cota de
+        'forma.dimensiones': son el mismo numero y el modelo falla al cargar si
+        divergen.
     apertura_libre:
       valor: 90.0
       unidad: mm
@@ -1392,26 +1406,34 @@ componentes:
     forma:
       tipo: caja
       dimensiones:
-        valor: [23.0, 23.0, 23.0]
+        valor: [16.0, 16.0, 16.0]
         unidad: mm
         estado: supuesto
         fuente: >-
-          SUPUESTO. Reserva cubica para el SOPORTE de D1, con el
-          sustrato a 45 grados por dentro. La envolvente va alineada con los
-          ejes porque lo que ocupa es la celda, no el sustrato. Un lado de
-          23 mm admite un sustrato de unos 12-15 mm a 45 grados, que para un
-          haz colimado de pocos milimetros sobra; si el haz sale mas gordo, el
-          soporte crece. NO es ningun producto: no hay candidato elegido.
+          SUPUESTO. Reserva cubica para el SOPORTE de D1, con el sustrato a 45
+          grados por dentro. La envolvente va alineada con los ejes porque lo
+          que ocupa es la celda, no el sustrato.
+          BAJADA DE 23 A 16 mm el 2026-09-21 [DECISION ACSAR], al fijar la
+          familia de opticas del banco en Ø12.7 mm (media pulgada). El
+          razonamiento: un sustrato de Ø12.7 a 45 grados proyecta unos 11 mm
+          sobre los ejes del banco, y una celda de banco para media pulgada
+          anade del orden de 2 mm por lado entre anillo de sujecion y pared, o
+          sea unos 16 mm de cubo. Ø12.7 no se elige por ser pequeno: es LA
+          UNICA familia con la que el brazo compartido de los beacons cabe
+          (con Ø25.4 no cabe de ninguna manera), y a cambio impone un techo al
+          haz -- ver 'integracion.optica.apertura_libre_optica_banco' y el
+          chequeo 'haz_vs_optica_banco'. NO es todavia un producto, pero ya hay
+          candidato de esa familia en la hoja de Drive 'CAD_payload_B -
+          componentes payload optico v2': Thorlabs DMLP1180T (paso largo, borde
+          1180 nm, Ø12.7), que es una REFERENCIA de que la pieza existe, no una
+          eleccion.
           ACOTADA POR ARRIBA POR EL BANCO, ademas: el FSM tiene que estar sobre
           el eje optico del telescopio, y entre ese eje y la pared +X de la
-          columna de payload quedan unos 56 mm para el colimador y D1
-          juntos, gaps incluidos. Si las piezas reales son mayores no es que el
-          modelo este mal: es que el banco no da, y habra que alargarlo a costa
-          de la bandeja o de la longitud reservada al telescopio. El chequeo
-          'banco_optico' recalcula ese margen desde el catalogo.
+          columna de payload hay 74 mm para el FSM, D1 y el espejo de plegado.
+          El chequeo 'banco_optico' recalcula ese margen desde el catalogo.
         falta: >-
-          Diametro del haz colimado (del que sale el tamano del sustrato),
-          longitudes de onda de corte y envolvente del soporte
+          Divisor y montura elegidos, con su apertura libre, sus longitudes de
+          onda de corte y la envolvente real del soporte
         pedir_a: Equipo de optica de ACSAR
     tipo_filtro:
       valor: paso_largo
@@ -1462,56 +1484,82 @@ componentes:
       tipo_eje: optico
       nota: >-
         Va dentro del brazo que refleja D1, asi que su eje en linea es Y: por
-        el le llega el beacon de subida desde D1 y por el sigue hasta la
-        camara. El de bajada entra LATERALMENTE segun X y sale reflejado hacia
-        -Y, de vuelta a D1. El sustrato va a 45 grados dentro del soporte,
-        igual que en D1.
+        -Y le llega el beacon de SUBIDA desde D1 y por +Y le entra el de
+        BAJADA desde su colimador. INVERTIDO EL 2026-09-21: el de subida ya no
+        sigue recto hasta la camara, sino que D2 lo REFLEJA hacia -X, que es
+        donde la camara si tiene sitio; el de bajada atraviesa el sustrato y
+        sale por -Y, de vuelta a D1. El sustrato va a 45 grados dentro del
+        soporte, igual que en D1.
     forma:
       tipo: caja
       dimensiones:
-        valor: [23.0, 23.0, 23.0]
+        valor: [16.0, 16.0, 16.0]
         unidad: mm
         estado: supuesto
         fuente: >-
           SUPUESTO. Misma reserva cubica que 'dicroico_d1' y por el mismo
           motivo: lo que ocupa es la celda con el sustrato a 45 grados por
-          dentro, no el sustrato. NO es ningun producto. ACOTADA POR ARRIBA POR
-          EL BRAZO: entre D1 y la pared del banco hay 47.7 mm para D1/2, D2 y
-          la camara en fila, y hoy NO CABEN. El chequeo 'brazo_beacon'
-          recalcula ese margen desde el catalogo y falla mientras no quepa.
+          dentro, no el sustrato. Bajada de 23 a 16 mm el 2026-09-21 [DECISION
+          ACSAR] al fijar la familia Ø12.7 para las tres piezas planas del
+          banco; el razonamiento entero esta en 'dicroico_d1'. NO es ningun
+          producto.
+          ACOTADA POR ARRIBA POR EL BRAZO, que es donde esta el apreton: desde
+          el centro de D1 hasta la pared +Y del banco hay 47.7 mm para D1/2, D2
+          y el colimador del beacon de bajada en fila. El chequeo
+          'brazo_beacon' recalcula ese margen desde el catalogo. Con la celda
+          de 23 mm y la camara en esta rama NO CABIA (faltaban 6.8 mm); con 16
+          y la camara movida a la rama -X sobran 11.7. Ver CLAUDE.md 3.11.
         falta: >-
-          Diametro de los dos haces de beacon, longitud de onda de corte y
-          envolvente del soporte
+          Divisor y montura elegidos, con su apertura libre, su longitud de
+          onda de corte y la envolvente real del soporte
         pedir_a: Equipo de optica de ACSAR
     tipo_filtro:
-      valor: paso_corto
+      valor: paso_largo
       estado: decision
       fuente: >-
-        Decision de arquitectura de ACSAR del 2026-09-20. Paso corto con el
-        borde en 'integracion.optica.borde_dicroico_d2': TRANSMITE los 976 nm
-        del beacon de subida en linea recta hacia la camara y REFLEJA los
-        1064 nm del beacon de bajada, que entra lateralmente. EL ORDEN NO ES
-        INTERCAMBIABLE: con la camara en transmision y el beacon en reflexion,
-        los 100 mW del beacon tocan UNA SOLA superficie con recubrimiento antes
-        de salir, y lo que se fugue en D2 se va al puerto opuesto al laser en
-        vez de hacia el sensor. Invertirlo mete el beacon en transmision (dos
-        superficies mas) y apunta su fuga al sensor, que es justo lo que hay
-        que proteger.
+        Decision de ACSAR (Adri), 2026-09-21, estudio de redistribucion del
+        banco y la franja. INVERTIDO respecto al 2026-09-20, que lo declaraba
+        paso corto. Ahora es PASO LARGO con el borde en
+        'integracion.optica.borde_dicroico_d2': REFLEJA los 976 nm del beacon
+        de subida hacia la camara y TRANSMITE los 1064 nm del de bajada, que
+        entra por el puerto opuesto al brazo.
+        POR QUE SE INVIERTE, y es geometrico: la camara es la pieza gorda del
+        brazo (30 mm segun su eje) y en la rama +Y, en fila detras de D1 y D2,
+        NO CABIA -- faltaban 6.8 mm con las envolventes desnudas. Poniendola en
+        reflexion pasa a la rama -X, que tiene 71 mm desde el centro de D2
+        hasta la pared, y el sitio que deja en +Y lo ocupa el colimador del
+        beacon, que mide 12.
+        POR QUE EL RAZONAMIENTO DEL 2026-09-20 ERA EQUIVOCADO: decia que
+        invertir "apunta la fuga del beacon al sensor". No es cierto. En un
+        divisor a 45 grados los pares de reflexion son FIJOS -- lo que entra
+        por -Y se refleja a -X y lo que entra por +Y se refleja a +X --, asi
+        que en LAS DOS configuraciones la fuga directa del beacon sale por el
+        cuarto puerto, que es el del fotodiodo, y nunca hacia la camara. El
+        argumento de las superficies si era correcto y ese es EL COSTE REAL de
+        invertir: ahora el beacon de bajada ATRAVIESA el sustrato de D2, o sea
+        una cara mas con recubrimiento y un fantasma mas de la cara trasera.
+        Los dos afectan al beacon, que es una baliza de 100 mW cuya unica
+        exigencia es potencia y apuntado, y NINGUNO al canal cuantico, que no
+        pasa por D2. Es el precio barato.
     puertos:
       valor:
-        - "-Y (transmision, entrada): beacon de subida 976 nm desde D1 (e06)"
-        - "+Y (transmision, salida): camara de seguimiento (e07)"
-        - "-X (reflexion, entrada): beacon de bajada 1064 nm desde el laser (e08)"
-        - "-Y (reflexion, salida): de vuelta a D1 -> FSM -> telescopio (e09)"
-        - "+X (transmision): fuga del beacon -> fotodiodo_monitor_beacon (e11)"
+        - "-Y (reflexion, entrada): beacon de subida 976 nm desde D1 (e06)"
+        - "-X (reflexion, salida): camara de seguimiento (e07)"
+        - "+Y (transmision, entrada): beacon de bajada 1064 nm desde su colimador (e08)"
+        - "-Y (transmision, salida): de vuelta a D1 -> FSM -> telescopio (e09)"
+        - "+X (reflexion): fuga del beacon -> fotodiodo_monitor_beacon (e11)"
       estado: decision
       fuente: >-
-        Decision de arquitectura de ACSAR del 2026-09-20. Son cuatro puertos
-        fisicos: el brazo (-Y), la camara (+Y), el laser (-X) y el opuesto al
-        laser (+X). El tramo -Y lo comparten el beacon de subida que ENTRA y el
-        de bajada que SALE: es el mismo tramo fisico recorrido en los dos
-        sentidos y con dos colores, y por eso en data/connections.yaml e08
-        declara 'keep_out_compartido_con: e04' en vez de duplicar el volumen.
+        Decision de ACSAR (Adri), 2026-09-21, estudio de redistribucion del
+        banco y la franja. Son cuatro puertos fisicos: el brazo (-Y), el
+        colimador del beacon (+Y), la camara (-X) y el opuesto al colimador
+        (+X). Los pares de reflexion son -Y/-X y +Y/+X, y de ahi sale todo lo
+        demas: el 976 que entra por -Y se refleja a la camara, el 1064 que
+        entra por +Y se transmite al brazo y su fuga en reflexion se va a +X.
+        El tramo -Y lo comparten el beacon de subida que ENTRA y el de bajada
+        que SALE: es el mismo tramo fisico recorrido en los dos sentidos y con
+        dos colores, y por eso en data/connections.yaml e09 declara
+        'keep_out_compartido_con: e06' en vez de duplicar el volumen.
     nota: >-
       Dentro del brazo que refleja D1. SIN CANDIDATO: lo que se dibuja es una
       reserva, no una pieza.
@@ -1531,30 +1579,39 @@ componentes:
     cantidad: 1
     montaje:
       cara: "-Y"
-      eje: Y
+      eje: X
       tipo_eje: optico
       nota: >-
-        Mira hacia D2 por -Y, que es de donde le llega el beacon de subida en
-        TRANSMISION. Se atornilla por su cara trasera al soporte del banco.
+        Mira hacia D2 por +X, que es de donde le llega el beacon de subida en
+        REFLEXION desde el 2026-09-21. Se atornilla por su cara inferior al
+        suelo del banco. Antes estaba en +Y, en transmision, en fila detras de
+        D2, y ahi no cabia.
     forma:
       tipo: caja
       dimensiones:
-        valor: [20.0, 20.0, 20.0]
+        valor: [30.0, 26.0, 26.0]
         unidad: mm
         estado: supuesto
         fuente: >-
           SUPUESTO. Reserva para un sensor pequeno con objetivo corto a 976 nm,
           INCLUIDO EL FILTRO DE BANDA ESTRECHA que va delante: el filtro no es
           un cuerpo aparte del catalogo, va dentro de esta reserva, porque
-          modelarlo suelto anade una pieza mas a la fila del brazo y el brazo
-          ya no cabe. BAJADA DE 30 A 20 MM el 2026-09-20 al pasar a la
-          arquitectura de dos dicroicos: con la camara y el laser de beacon en
-          lados OPUESTOS de D1 cabian 30 mm a cada lado, pero esa arquitectura
-          no funcionaba (el laser no tenia camino hacia el FSM). Compartiendo
-          brazo, D1/2 + D2 + camara van en fila hacia un solo lado y no caben.
-          20 mm es la cota superior compatible con un sensor pequeno y un
-          objetivo corto; NO sale de ningun producto, no hay sensor elegido, y
-          AUN ASI SIGUEN FALTANDO 6.8 mm. Ver el chequeo 'brazo_beacon'.
+          modelarlo suelto anade una pieza mas a la fila del brazo.
+          RECUPERADA A UNA RESERVA REALISTA el 2026-09-21, despues de pasar por
+          30 (2026-09-19) y por 20 (2026-09-20). Los 20 mm de ayer no eran una
+          cota, eran lo que se podia apretar intentando que la camara cupiera
+          en la rama +Y, y aun asi faltaban 6.8 mm. Al invertir D2 la camara se
+          va a la rama -X, donde desde el centro de D2 hay unos 71 mm hasta la
+          pared, y entonces ya no hace falta apretar nada: 30 mm SEGUN SU EJE
+          OPTICO (X) para sensor, objetivo y filtro en fila, y una SECCION
+          CUADRADA DE 26 mm.
+          LOS 26 NO SON LIBRES, son el techo: la camara queda centrada en Y
+          sobre el eje de D2, que esta a 21 mm del plano optico, y el FSM llega
+          hasta Y = +7.55 mm. Una seccion de 30 mm bajaria la camara hasta
+          Y = +6 y se metaria dentro del FSM -- con 30 el estudio media 0.1 cm3
+          de solape --. Con 26 la cara inferior cae en Y = +8 y quedan 0.45 mm.
+          Es POCO: cualquier sensor real mayor obliga a mover el brazo, no a
+          apretar la reserva.
         falta: >-
           Modelo de sensor, distancia focal del objetivo, campo de vision
           exigido por el lazo de apuntado y espesor del filtro de banda
@@ -1576,41 +1633,114 @@ componentes:
   - id: laser_beacon_bajada
     id_drive: OPT-12
     referencia_comercial: null
-    nombre: Laser de beacon de bajada (1064 nm)
+    nombre: Modulo laser de beacon de bajada (1064 nm), fiberizado
+    categoria: payload_bandeja
+    subsistema: bandeja_optica
+    cantidad: 1
+    montaje:
+      cara: "-Z"
+      eje: X
+      tipo_eje: fibra
+      nota: >-
+        DESDE EL 2026-09-21 ES SOLO EL MODULO, y vive en la BANDEJA, no en el
+        banco: se atornilla por su base a la placa, que le hace de disipador,
+        igual que el DFB, y saca la luz por FIBRA hacia el banco (f08). Lo que
+        emite al espacio libre es 'colimador_beacon_bajada', que si esta en el
+        banco, pegado a D2.
+    forma:
+      tipo: caja
+      dimensiones:
+        valor: [40.0, 20.0, 15.0]
+        unidad: mm
+        estado: supuesto
+        fuente: >-
+          SUPUESTO. Reserva para un modulo de diodo laser de 1064 nm con salida
+          FIBERIZADA, del orden del butterfly de 14 pines del DFB (37.4 x 12.7
+          x 7.8) mas su interfaz termica: 40 x 20 x 15 mm. Ya NO incluye ni la
+          optica de colimacion ni el camino en espacio libre -- eso es
+          'colimador_beacon_bajada' --, y por eso es mas pequeno que la reserva
+          de 30 x 25 x 25 que tenia cuando era un laser de banco.
+          POR QUE SE PARTE EN DOS Y SE MUEVE [DECISION ACSAR, 2026-09-21]:
+          lo que fija la envolvente de un beacon de 100 mW es el DISIPADOR, y
+          un disipador dentro del banco optico calienta justo lo que tiene que
+          estar estable. Partiendolo, la disipacion sale del banco y se va a la
+          bandeja, a la fila del DFB, que usa 37 de los 110 mm utiles en X y
+          tiene sitio de sobra; y en el banco solo queda un cilindro de 12 mm.
+          NO es ningun producto: con la longitud de onda ya decidida (1064 nm)
+          sigue sin haber modelo elegido.
+        falta: >-
+          Modelo del modulo elegido, potencia optica real, consumo electrico y
+          su interfaz termica contra la bandeja
+        pedir_a: Equipo de PAT de ACSAR
+    nota: >-
+      1064 nm: ver 'integracion.optica.longitud_onda_beacon_bajada' para el
+      argumento del silicio. SIN CANDIDATO: lo que se dibuja es una reserva.
+      La fibra que lo une a su colimador (f08) es monomodo a 1064 y NO es
+      critica en polarizacion -- un beacon es una baliza de potencia, no lleva
+      informacion en el estado --, asi que es el UNICO tramo de fibra del
+      payload cuyo encaminamiento es libre: solo le aplica el radio minimo de
+      curvatura.
+    masa:
+      valor: null
+      unidad: g
+      estado: TBD
+      falta: Masa del modulo de beacon elegido
+      pedir_a: Equipo de PAT de ACSAR
+
+  - id: colimador_beacon_bajada
+    id_drive: OPT-20
+    referencia_comercial: null
+    nombre: Colimador de fibra del beacon de bajada (1064 nm)
     categoria: payload_optico
     subsistema: terminal_optico
     cantidad: 1
     montaje:
       cara: "-Y"
-      eje: X
+      eje: Y
+      sentido: -1
       tipo_eje: optico
       nota: >-
-        Inyecta LATERALMENTE en D2 segun X. D2 lo refleja hacia -Y, de vuelta a
-        D1, que lo refleja otra vez hacia el FSM y el telescopio. Antes emitia
-        segun Y contra la cara trasera de D1, que no llevaba a ninguna parte.
+        SENTIDO -1: es la primera pieza del modelo que emite hacia el lado
+        NEGATIVO de su eje. Esta encima de D2 y le apunta hacia abajo, asi que
+        la fibra le entra por +Y y el haz sale por -Y. Sin declararlo, el
+        keep-out de su fibra se dibujaba saliendo por la cara del haz y
+        atravesaba D2, D1, el FSM y la camara.
+        Le entra fibra desde el modulo de la bandeja (f08) y saca el haz por -Y
+        contra la cara de D2, que lo transmite hacia D1 y de ahi al FSM y al
+        telescopio. Va en la rama +Y del brazo, detras de D2, que es el sitio
+        que deja libre la camara al irse a -X.
     forma:
-      tipo: caja
+      tipo: cilindro
+      eje: Y
       dimensiones:
-        valor: [30.0, 25.0, 25.0]
+        valor: [8.0, 12.0, 8.0]
         unidad: mm
         estado: supuesto
         fuente: >-
-          SUPUESTO. Reserva para un diodo laser con su optica de colimacion y
-          su disipador. La cota larga va ahora por X, que es el eje por el que
-          inyecta en D2; antes iba por Y, cuando emitia contra D1. NO es ningun producto: con la longitud de onda ya
-          decidida (1064 nm) sigue sin haber modelo elegido, y la potencia
-          -- 100 mW supuestos -- manda sobre el disipador, que es lo que fija
-          la envolvente.
-        falta: Modelo del laser elegido, potencia optica real y su disipador
-        pedir_a: Equipo de PAT de ACSAR
+          SUPUESTO. Reserva para un colimador de fibra compacto: barrilete
+          cilindrico de 8 mm de diametro y 12 mm de largo, con la fibra
+          entrando por la cara opuesta al haz. Referencia de que esa envolvente
+          existe: OZ Optics LPC-04, cuya carcasa es de Ø8. NO es una eleccion,
+          es la comprobacion de que un colimador de banco de este tamano es un
+          producto de catalogo y no una invencion.
+          ES LA PIEZA QUE HACE QUE EL BRAZO QUEPA: con el laser entero (30 mm
+          segun su eje) en el banco, la rama del beacon costaba el triple. Aqui
+          solo hay optica, porque el calor se quedo en la bandeja.
+        falta: >-
+          Colimador elegido, su envolvente real y el diametro de haz que
+          entrega, que es lo que tiene que cuadrar con la apertura de D2
+        pedir_a: Equipo de PAT / de optica de ACSAR
     nota: >-
-      1064 nm: ver 'integracion.optica.longitud_onda_beacon_bajada' para el
-      argumento del silicio. SIN CANDIDATO: lo que se dibuja es una reserva.
+      SIN CANDIDATO: lo que se dibuja es una reserva. Es la frontera entre la
+      fibra del beacon y el espacio libre, igual que 'colimador' lo es para el
+      canal cuantico, pero sin ninguna de sus restricciones de polarizacion:
+      el beacon no lleva informacion en el estado, asi que su fibra puede ser
+      larga y curvarse.
     masa:
       valor: null
       unidad: g
       estado: TBD
-      falta: Masa del laser de beacon elegido
+      falta: Masa del colimador elegido con su soporte
       pedir_a: Equipo de PAT de ACSAR
 
   - id: fotodiodo_monitor_beacon
@@ -1752,26 +1882,30 @@ componentes:
     forma:
       tipo: caja
       dimensiones:
-        valor: [20.0, 20.0, 20.0]
+        valor: [16.0, 16.0, 16.0]
         unidad: mm
         estado: supuesto
         fuente: >-
-          SUPUESTO, y ACOTADO POR ABAJO POR EL HAZ. Un haz de d mm que incide a
-          45 grados deja una huella de d x d*raiz(2) sobre el espejo -- el
-          mismo razonamiento que decide si el MEMS del FSM vale, ver CLAUDE.md
-          4.7(c) --, asi que con el diametro de haz modelado
-          ('integracion.optica.diametro_haz_modelado', 10 mm, SUPUESTO) la
-          huella es de 10 x 14.1 mm y el sustrato no puede bajar de ahi. Se
-          reserva un CUBO DE 20 mm para el soporte, que admite un sustrato de
-          unos 14 mm a 45 grados con margen de apertura libre y celda. NO es
-          ningun producto: no hay candidato elegido.
-          Y ESTA ACOTADO POR ARRIBA POR EL BANCO, igual que el colimador y D1:
-          esta pieza ocupa en la linea en X el sitio que antes ocupaba el
-          colimador, y el chequeo 'banco_optico' recalcula ese margen desde el
-          catalogo.
+          SUPUESTO, y ACOTADO POR LOS DOS LADOS. Por abajo lo acota EL HAZ: un
+          haz de d mm que incide a 45 grados deja una huella de d x d*raiz(2)
+          sobre el espejo -- el mismo razonamiento que decide si el MEMS del
+          FSM vale, ver CLAUDE.md 4.7(c) --, asi que con el diametro de haz
+          modelado ('integracion.optica.diametro_haz_modelado', 7 mm,
+          SUPUESTO) la huella es de 7 x 9.9 mm y el sustrato no puede bajar de
+          ahi. Por arriba lo acota EL BANCO, igual que D1.
+          BAJADO DE 20 A 16 mm el 2026-09-21 [DECISION ACSAR], a la vez que el
+          haz bajaba de 10 a 7: con 10 mm la huella era de 14.1 mm y hacia
+          falta un sustrato mayor de media pulgada, con 7 mm cabe en Ø12.7
+          (apertura libre 11.4, ver 'haz_vs_optica_banco') y la celda es la
+          misma de 16 mm que la de los dos divisores. Candidato de esa familia
+          en la hoja de Drive 'CAD_payload_B - componentes payload optico v2':
+          Thorlabs PFE05-P01 (plata protegida, Ø12.7), que es una REFERENCIA de
+          que la pieza existe, no una eleccion -- y ojo, lo que hay que exigir
+          a ese recubrimiento no es la reflectancia sino la curva de fase: ver
+          'retardancia_45_1550'.
         falta: >-
-          Diametro del haz colimado (del que sale el tamano del sustrato) y
-          envolvente del soporte del espejo elegido
+          Espejo y montura elegidos, con su apertura libre y la envolvente real
+          del soporte
         pedir_a: Equipo de optica de ACSAR
     retardancia_45_1550:
       valor: null
@@ -1894,24 +2028,29 @@ componentes:
     forma:
       tipo: caja
       dimensiones:
-        valor: [117.7, 3.0, 102.4]
+        valor: [117.7, 3.0, 75.4]
         unidad: mm
         estado: supuesto
         fuente: >-
-          El CONTORNO si esta derivado: es la zona z_payload_bandeja del layout
-          confirmado (121.7 x 106.4 mm en X y Z) menos 2 mm por lado de holgura
-          de montaje. El ESPESOR de 3 mm esta inventado, y la holgura de 2 mm
-          tambien: no hay ni material elegido ni analisis estructural. Como la
-          magnitud es una sola, el bloque entero va como supuesto, que es lo
-          honesto: dos de las tres cotas dependen de un numero sin respaldo.
+          EL CONTORNO NO SE ELIGE: es la zona z_payload_bandeja menos
+          'integracion.bandeja.holgura_montaje' (2 mm) por lado, en X y en Z.
+          Con la longitud del telescopio en 227 mm esa zona mide 121.7 x 79.4,
+          asi que la placa mide 117.7 x 75.4. EL ESPESOR de 3 mm si esta
+          inventado, y la holgura de 2 mm tambien: no hay ni material elegido
+          ni analisis estructural. Como la magnitud es una sola, el bloque
+          entero va como supuesto, que es lo honesto.
+          ESTA COTA NO SE MANTIENE A MANO. El generador la recalcula desde la
+          zona y ABORTA si lo que hay escrito aqui no coincide, diciendo el
+          numero que toca; y el chequeo 'bandeja_en_su_zona' lo vuelve a
+          comprobar sobre el layout ya generado. Hizo falta el 2026-09-21: al
+          pasar el telescopio de 200 a 227 mm la bandeja se estrecho 27 mm y la
+          placa, con sus 102.4 mm escritos a mano, se salia del 6U por 11.5 mm
+          por cada lado. Una cota derivada que se escribe a mano deja de estar
+          derivada en cuanto cambia el reparto.
         falta: >-
           Material, espesor y patron de taladros de la placa, del analisis
           estructural y termico
         pedir_a: Equipo de estructura de ACSAR
-        nota: >-
-          Al cambiar el reparto (por ejemplo cuando llegue la longitud real del
-          telescopio) esta cota deja de cuadrar con su zona. El chequeo
-          'bandeja_en_su_zona' lo detecta.
     nota: >-
       Necesita control termico propio: la extincion garantizada del modulador de
       intensidad solo cubre 0 a +70 C. Reservar espacio para sensores y calefactores.
@@ -2651,6 +2790,19 @@ componentes:
       resolver pulso a pulso, o secuencias de calibracion de patron conocido
       intercaladas en la transmision. Es una decision de PCB-2 y del lazo de
       control, no de mecanica, pero decide el fotodiodo y con el esta reserva.
+      HASTA DONDE LLEGA EL VIGIA DE TROYA, y esto corrige lo que se dijo el
+      2026-09-21 al declararlo. Este acoplador esta DETRAS DEL VOA visto desde
+      el canal, asi que la luz de sondeo que un atacante meta por la apertura
+      llega aqui despues de atravesar el codificador y el VOA, y VUELVE a
+      atravesar el VOA con la senal de vuelta. Un VOA que lleva la senal a
+      fracciones de foton atenua decenas de dB, y el sondeo se los come DOS
+      VECES: lo que este fotodiodo ve de un ataque sobre el MPZ esta atenuado
+      en esa misma cantidad, o sea que es un vigia de ultimo recurso, no la
+      defensa. No es un argumento para moverlo -- delante del VOA no veria la
+      luz que entra por el canal --, es un argumento para que la defensa de
+      verdad este en ESPACIO LIBRE, entre el colimador y el telescopio, donde
+      el sondeo todavia no se ha atenuado. Eso es
+      'integracion.optica.defensa_troya_espacio_libre', que es TBD.
     masa:
       valor: null
       unidad: g
@@ -2996,6 +3148,25 @@ integracion:
         'fibra_post_codificacion'.
       falta: Protector de empalme elegido y su tramo recto real
       pedir_a: Equipo de payload de ACSAR
+    recubrimiento_empalme_post_codificacion:
+      valor: null
+      estado: TBD
+      falta: >-
+        SI EL EMPALME POST-CODIFICACION SE PUEDE RECUBRIR (recoating) EN VEZ DE
+        PROTEGER CON FERULA, y cuanto tramo rigido deja si se hace. Un empalme
+        recubierto -- se repone el acrilato sobre la fusion, sin varilla
+        metalica ni termorretractil -- devuelve a la fibra su diametro y su
+        flexibilidad originales, asi que el tramo inmovilizado baja de los
+        60 mm de 'longitud_protector_empalme' a unos pocos milimetros. En la
+        fila del tramo recto eso son del orden de +22 mm de margen, que es mas
+        de lo que hoy sobra entero.
+        NO SE APLICA, se anota: cambia la fiabilidad mecanica del unico empalme
+        que queda en un tramo que ademas tiene prohibido curvarse, y eso es una
+        decision de payload con un ensayo de vibracion detras, no una cota que
+        este repositorio pueda suponer. Si se decide, se sustituye
+        'longitud_protector_empalme' por el tramo rigido del recoating y el
+        chequeo 'fibra_post_codificacion' lo recalcula solo.
+      pedir_a: Equipo de payload de ACSAR
     sensibilidad_termica_fase_pm:
       valor: null
       unidad: rad/(m*K)
@@ -3048,6 +3219,23 @@ integracion:
         acordado; no sale de ninguna ficha porque no hay conector elegido.
       falta: Tipo de conector o protector y su tramo recto de salida
       pedir_a: Equipo de payload de ACSAR
+  bandeja:
+    holgura_montaje:
+      valor: 2.0
+      unidad: mm
+      estado: supuesto
+      fuente: >-
+        SUPUESTO. Lo que se deja por lado entre el borde de la placa de la
+        bandeja y la pared de su zona, para tornilleria de fijacion y
+        tolerancia de montaje. NO sale de ningun plano: no hay ni patron de
+        taladros ni chasis real. Se declara aqui y no dentro de
+        'bandeja_optica.forma.dimensiones' porque es lo que convierte la zona
+        en el contorno de la placa, y el generador lo usa para DERIVAR ese
+        contorno en vez de leerlo escrito.
+      falta: >-
+        Holgura de montaje real de la placa contra el chasis, del patron de
+        taladros
+      pedir_a: Equipo de estructura de ACSAR
   coaxial:
     radio_curvatura_modelado:
       valor: 25.0
@@ -3063,19 +3251,61 @@ integracion:
       pedir_a: Equipo de electronica de ACSAR
   optica:
     diametro_haz_modelado:
-      valor: 10.0
+      valor: 7.0
       unidad: mm
       estado: supuesto
       fuente: >-
-        SUPUESTO. Diametro del tubo que se reserva libre para los haces en
-        espacio libre del banco. No sale de ningun calculo optico: el diametro
-        de haz colimado es TBD en cada tramo de data/connections.yaml. Se toma
-        un valor unico y generoso para que el keep-out se vea y estorbe si algo
-        se mete en el camino; el de verdad saldra del diseno optico.
+        SUPUESTO, y ahora es una COTA SUPERIOR con un motivo detras, no un
+        valor generoso elegido a ojo. Decision de ACSAR (Adri), 2026-09-21,
+        estudio de redistribucion del banco y la franja: BAJADO DE 10 A 7 mm.
+        El motivo es el brazo de los beacons. Con celdas dimensionadas para
+        opticas de Ø25.4 el brazo compartido no cabe de ninguna manera, y la
+        unica familia de opticas que lo hace caber es la de Ø12.7, cuya
+        apertura libre util es 'apertura_libre_optica_banco' (11.4 mm). Un haz
+        de d mm a 45 grados deja una huella de d x d*raiz(2), asi que
+        d <= 11.4 / raiz(2) = 8.06 mm; 7 mm deja margen de alineacion. O sea:
+        este numero no dice cuanto mide el haz, dice CUANTO COMO MAXIMO puede
+        medir para que la arquitectura del banco que se ha dibujado exista.
+        LO QUE CUESTA, y hay que decirlo: con 7 mm el espejo de 5 mm del MEMS
+        del FSM NO VALE (solo admite 3.54 mm) y haria falta el piezo. Este
+        modelo NO elige FSM: ver el chequeo 'haz_vs_fsm' y CLAUDE.md 3.11.
       falta: >-
         Diametro de haz de cada tramo (e01 a e05 en data/connections.yaml) y el
-        semiangulo del cono de la apertura
+        semiangulo del cono de la apertura. SIGUE SIENDO TBD: lo de aqui es un
+        techo geometrico, no una medida del diseno optico.
       pedir_a: Equipo de optica de ACSAR
+      nota: >-
+        Es el mismo numero con el que se deriva la magnificacion del
+        telescopio, y por eso bajarlo alarga el tubo: M = apertura / haz, y la
+        separacion entre vertices de un Mersenne es f1 (1 - 1/M). Con 10 mm
+        pedia 177.8 mm y con 7 mm pide 184.4. Ver el chequeo
+        'longitud_telescopio', que ademas informa del PEOR CASO: el haz maximo
+        que admitiria el espejo del FSM MEMS.
+    apertura_libre_optica_banco:
+      valor: 11.4
+      unidad: mm
+      estado: supuesto
+      fuente: >-
+        SUPUESTO. Apertura libre util de un sustrato de Ø12.7 mm (media
+        pulgada) montado en su celda: el diametro menos el anillo de sujecion,
+        que se lleva del orden de medio milimetro por lado en una montura de
+        banco. Ø12.7 es la familia de opticas con la que el brazo de los
+        beacons cabe -- ver 'geometria_del_brazo_de_beacons' y CLAUDE.md
+        3.11 --, y con ella se dimensionan las celdas de D1, D2 y del espejo de
+        plegado. NO sale de ninguna ficha: no hay montura elegida. Los
+        candidatos que se estan mirando son de esa familia (hoja de Drive
+        'CAD_payload_B - componentes payload optico v2': Thorlabs DMLP1180T
+        para D1, Thorlabs PFE05-P01 para el espejo de plegado).
+      falta: >-
+        Apertura libre real de la montura elegida para D1, D2 y el espejo de
+        plegado
+      pedir_a: Equipo de optica de ACSAR
+      nota: >-
+        Es la mitad del chequeo 'haz_vs_optica_banco': la otra mitad es
+        'diametro_haz_modelado', y la condicion es haz * raiz(2) <= esto,
+        porque a 45 grados la huella del haz se alarga por raiz(2). Es el mismo
+        razonamiento que decide si el espejo del FSM vale, aplicado a las tres
+        piezas planas del banco.
     punto_de_adelanto:
       valor: 50.7
       unidad: urad
@@ -3170,11 +3400,13 @@ integracion:
       unidad: nm
       estado: supuesto
       fuente: >-
-        SUPUESTO. Borde de un paso corto que tiene que transmitir 976 nm y
-        reflejar 1064: la ventana es de 88 nm y 1020 nm es su centro. Es una
+        SUPUESTO. Borde de un PASO LARGO que tiene que reflejar 976 nm y
+        transmitir 1064: la ventana es de 88 nm y 1020 nm es su centro. Es una
         transicion ESTRECHA, y esa estrechez es el precio de meter los dos
-        beacons en el mismo brazo. NO sale de ninguna ficha: D2 no esta
-        elegido.
+        beacons en el mismo brazo. El VALOR no cambia al invertir D2 de paso
+        corto a paso largo el 2026-09-21 -- la ventana entre los dos colores es
+        la misma --; lo que cambia es que ahora el 976 esta en reflexion y el
+        1064 en transmision. NO sale de ninguna ficha: D2 no esta elegido.
       falta: >-
         Longitud de onda de corte, anchura de la transicion y curvas de
         transmision y reflexion del divisor elegido
@@ -3201,29 +3433,67 @@ integracion:
         apagar el beacon durante la lectura de la camara, o volver a dos brazos
         separados -- y esta ultima ya se sabe que no cabe en el banco.
     geometria_del_brazo_de_beacons:
+      valor: camara_en_reflexion_y_beacon_fiberizado
+      estado: decision
+      fuente: >-
+        Decision de ACSAR (Adri), 2026-09-21, estudio de redistribucion del
+        banco y la franja. RESUELVE el hueco que estaba abierto desde el
+        2026-09-20, cuando la fila D1/2 + D2 + camara pedia 54.5 mm desde el
+        centro de D1 y solo habia 47.7: faltaban 6.8 mm desnudos y 16.8
+        colocando, y 'camara_beacon' no se colocaba.
+        La salida NO es ninguna de las dos que estaban escritas -- plegar el
+        brazo hacia -Z con un espejo mas, o alargar el banco a costa de la
+        bandeja --, sino tres cambios que no anaden ninguna superficie al
+        camino del beacon y ninguno al del canal cuantico:
+        (1) OPTICAS DE Ø12.7 para D1, D2 y el espejo de plegado, con celdas de
+        16 mm en vez de 23 y 20. Es lo que obliga a bajar el haz comprimido a
+        7 mm ('diametro_haz_modelado'), y por tanto lo que decide que el MEMS
+        del FSM no vale.
+        (2) INVERTIR D2 a paso largo: la camara pasa de la rama +Y, donde iba
+        en fila detras de D2 y no cabia, a la rama -X, que tiene unos 71 mm
+        libres. La fuga del beacon sigue yendo al fotodiodo en las dos
+        configuraciones, porque los pares de reflexion de un divisor a 45
+        grados son fijos; lo unico que cuesta invertir es una cara mas de
+        sustrato para el beacon.
+        (3) PARTIR EL LASER DE BAJADA: el modulo fiberizado se va a la bandeja
+        con su disipador y en el brazo solo queda 'colimador_beacon_bajada',
+        un cilindro de 12 mm, que es lo que ocupa el sitio que deja la camara.
+        RESULTADO: la rama +Y pide 36 mm de los 47.7, o sea 11.7 mm de margen
+        desnudo y 1.7 colocando con holguras. El brazo entero esta colocado.
+      nota: >-
+        Era lo que hacia que 'clau3d informe' devolviera codigo 1 junto con el
+        tramo post-codificacion. Ver el chequeo 'brazo_beacon' y CLAUDE.md
+        3.11. Lo que sigue sin estar medido es
+        'aislamiento_camara_a_1064', que es lo que sostiene la eleccion de
+        colores, y eso no lo arregla la geometria.
+    defensa_troya_espacio_libre:
       valor: null
       estado: TBD
       falta: >-
-        DECIDIR COMO CABE EL BRAZO. Con los dos beacons compartiendo brazo, la
-        fila D1/2 + D2 + camara pide 54.5 mm desde el centro de D1 y solo hay
-        47.7 mm hasta la pared del banco: FALTAN 6.8 mm con las envolventes
-        desnudas y 16.8 mm con holguras de montaje, y por eso 'camara_beacon'
-        no esta colocada en data/layout.yaml. Ya esta aplicada la unica salida
-        que no le cuesta volumen a nadie (bajar la reserva de la camara de 30 a
-        20 mm). Quedan dos, y las dos se pagan:
-        (1) PLEGAR EL BRAZO HACIA -Z con un espejo de doblado. Da unos 27.5 mm
-        mas -- la mitad de los 55 mm de banco en Z -- a costa de una superficie
-        reflectante adicional en el camino del beacon y de una pieza mas que
-        alinear.
-        (2) ALARGAR EL BANCO, que hoy mide 55 mm en Z. Se paga con la bandeja de
-        fibra o con 'telescopio_cassegrain.longitud_reservada', exactamente
-        igual que la salida de la linea en X (CLAUDE.md 3.7).
-        Lo que NO es una salida es seguir bajando reservas hasta que el chequeo
-        pase: las del brazo ya son todas cotas superiores.
-      pedir_a: ACSAR (mecanica y optica)
+        QUE DEFENSA CONTRA CABALLO DE TROYA VA EN ESPACIO LIBRE, entre el
+        colimador y el telescopio. Es una pregunta de SEGURIDAD, no de
+        mecanica, y sale de corregir lo que se dijo del vigia del acoplador: el
+        fotodiodo de vigilancia esta detras del VOA visto desde el canal, asi
+        que la luz de sondeo que un atacante meta por la apertura le llega
+        atenuada por el VOA en el camino de ida Y en el de vuelta. Con un VOA
+        que lleva la senal a fracciones de foton eso son decenas de dB dos
+        veces: el vigia sirve de ultimo recurso, no de defensa.
+        La defensa tiene que estar donde el sondeo todavia no se ha atenuado, o
+        sea en el camino libre. Las opciones habituales son un aislador o
+        circulador de espacio libre, un filtro de banda estrecha a 1550 que
+        cierre la ventana espectral por la que se puede sondear, un tap con
+        fotodiodo mirando la luz que ENTRA por la apertura, o una combinacion.
+        Cada una cuesta una superficie mas en el camino cuantico y hay que
+        pesarla contra lo que se gana.
+      pedir_a: Equipo de payload / de seguridad de ACSAR
       nota: >-
-        Es lo unico que hoy hace que 'clau3d informe' devuelva codigo 1. Ver el
-        chequeo 'brazo_beacon' y CLAUDE.md 3.9.
+        NO SE DIBUJA NI SE COLOCA, por el mismo motivo que
+        'lamina_cuarto_onda_fija': lo que esta en duda es SI LA PIEZA EXISTE y
+        cual es. Reservar sitio hoy seria reservarlo para algo sin decidir. Si
+        se decide, va entre el colimador y el espejo de plegado (tramo e01) o
+        entre el espejo y D1 (e02), y se da de alta como componente con su
+        id_drive, su envolvente y sus dos tramos -- y entonces vuelve a apretar
+        la linea en X del banco, que es lo que mide 'banco_optico'.
     lamina_cuarto_onda_fija:
       valor: null
       estado: TBD

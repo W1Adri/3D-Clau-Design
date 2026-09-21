@@ -5,41 +5,42 @@ No editar a mano: los numeros salen de `data/components.yaml`.
 
 - Mision: CLAU - CubeSat Laser per a Aplicacions Ultrasegures
 - Norma: CubeSat Design Specification Rev. 14.1, The CubeSat Program, Cal Poly SLO
-- Estado del layout: **confirmada** (28 piezas colocadas)
+- Estado del layout: **confirmada** (31 piezas colocadas)
 
-Resumen: **17** no comprobable, **23** ok
+Resumen: **16** no comprobable, **26** ok
 
 | id | familia | desde | hasta | tipo | estado | recorrido mm | detalle |
 |---|---|---|---|---|---|---|---|
-| f01 | opticas_fibra | laser_dfb_1550 | aislador | fibra_pm | ok | 49 | Extremos colocados y holgura declarada, recorrido 49 mm |
+| f01 | opticas_fibra | laser_dfb_1550 | aislador | fibra_pm | ok | 32 | Extremos colocados y holgura declarada, recorrido 32 mm |
 | f02 | opticas_fibra | aislador | filtro_espectral | fibra_pm | ok | 72 | Extremos colocados y holgura declarada, recorrido 72 mm |
-| f03 | opticas_fibra | filtro_espectral | mod_intensidad_mxer_ln_10 | fibra_pm | ok | 167 | Extremos colocados y holgura declarada, recorrido 167 mm |
+| f03 | opticas_fibra | filtro_espectral | mod_intensidad_mxer_ln_10 | fibra_pm | ok | 141 | Extremos colocados y holgura declarada, recorrido 141 mm |
 | f04 | opticas_fibra | mod_intensidad_mxer_ln_10 | acoplador_monitor | fibra_pm | ok | 73 | Extremos colocados y holgura declarada, recorrido 73 mm |
 | f05 | opticas_fibra | acoplador_monitor | voa | fibra_pm | ok | 56 | Extremos colocados y holgura declarada, recorrido 56 mm |
-| f06 | opticas_fibra | voa | mod_fase_mpz_ln_10 | fibra_pm | no comprobable | - | Sin colocar: mod_fase_mpz_ln_10. No se puede medir el recorrido ni comprobar la holgura. |
-| f07 | opticas_fibra | mod_fase_mpz_ln_10 | colimador | fibra_pm | no comprobable | - | Sin colocar: mod_fase_mpz_ln_10. No se puede medir el recorrido ni comprobar la holgura. |
+| f06 | opticas_fibra | voa | mod_fase_mpz_ln_10 | fibra_pm | ok | 71 | Extremos colocados y holgura declarada, recorrido 71 mm |
+| f07 | opticas_fibra | mod_fase_mpz_ln_10 | colimador | fibra_pm | ok | 139 | Extremos colocados y holgura declarada, recorrido 139 mm |
+| f08 | opticas_fibra | laser_beacon_bajada | colimador_beacon_bajada | fibra_sm | ok | 113 | Extremos colocados y holgura declarada, recorrido 113 mm |
 | e01 | opticas_espacio_libre | colimador | espejo_plegado_cuantico | haz_libre | no comprobable | 42 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
-| e02 | opticas_espacio_libre | espejo_plegado_cuantico | dicroico_d1 | haz_libre | no comprobable | 26 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
-| e03 | opticas_espacio_libre | dicroico_d1 | fsm | haz_libre | no comprobable | 28 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
-| e04 | opticas_espacio_libre | fsm | telescopio_cassegrain | haz_libre | no comprobable | 127 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
+| e02 | opticas_espacio_libre | espejo_plegado_cuantico | dicroico_d1 | haz_libre | no comprobable | 34 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
+| e03 | opticas_espacio_libre | dicroico_d1 | fsm | haz_libre | no comprobable | 25 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
+| e04 | opticas_espacio_libre | fsm | telescopio_cassegrain | haz_libre | no comprobable | 141 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
 | e05 | opticas_espacio_libre | telescopio_cassegrain | EXTERIOR | apertura | ok | - | Extremos colocados y holgura declarada |
-| e06 | opticas_espacio_libre | dicroico_d1 | dicroico_d2 | haz_libre | no comprobable | 28 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
-| e07 | opticas_espacio_libre | dicroico_d2 | camara_beacon | haz_libre | no comprobable | - | Sin colocar: camara_beacon. No se puede medir el recorrido ni comprobar la holgura. |
-| e08 | opticas_espacio_libre | laser_beacon_bajada | dicroico_d2 | haz_libre | no comprobable | 32 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
-| e09 | opticas_espacio_libre | dicroico_d2 | dicroico_d1 | haz_libre | no comprobable | 28 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
-| e10 | opticas_espacio_libre | dicroico_d1 | trampa_luz_d1 | haz_libre | no comprobable | 24 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
-| e11 | opticas_espacio_libre | dicroico_d2 | fotodiodo_monitor_beacon | haz_libre | no comprobable | 22 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
-| r01 | rf_coaxial | pcb2_drivers_opticos | laser_dfb_1550 | coaxial | no comprobable | 174 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
-| r02 | rf_coaxial | pcb2_drivers_opticos | mod_intensidad_mxer_ln_10 | coaxial | no comprobable | 176 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
-| r03 | rf_coaxial | pcb2_drivers_opticos | mod_fase_mpz_ln_10 | coaxial | no comprobable | - | Sin colocar: mod_fase_mpz_ln_10. No se puede medir el recorrido ni comprobar la holgura. |
+| e06 | opticas_espacio_libre | dicroico_d1 | dicroico_d2 | haz_libre | no comprobable | 21 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
+| e07 | opticas_espacio_libre | dicroico_d2 | camara_beacon | haz_libre | no comprobable | 28 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
+| e08 | opticas_espacio_libre | colimador_beacon_bajada | dicroico_d2 | haz_libre | no comprobable | 19 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
+| e09 | opticas_espacio_libre | dicroico_d2 | dicroico_d1 | haz_libre | no comprobable | 21 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
+| e10 | opticas_espacio_libre | dicroico_d1 | trampa_luz_d1 | haz_libre | no comprobable | 20 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
+| e11 | opticas_espacio_libre | dicroico_d2 | fotodiodo_monitor_beacon | haz_libre | no comprobable | 19 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
+| r01 | rf_coaxial | pcb2_drivers_opticos | laser_dfb_1550 | coaxial | no comprobable | 154 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
+| r02 | rf_coaxial | pcb2_drivers_opticos | mod_intensidad_mxer_ln_10 | coaxial | no comprobable | 167 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
+| r03 | rf_coaxial | pcb2_drivers_opticos | mod_fase_mpz_ln_10 | coaxial | no comprobable | 205 | Extremos colocados, pero sin holgura de conector declarada: no se puede afirmar que quepa. |
 | d01 | datos | obc_kryten_m3_plus | pcb1_control_qkd | bus_datos | ok | 99 | Extremos colocados y holgura declarada, recorrido 99 mm |
 | d02 | datos | obc_kryten_m3_plus | radio_banda_s_quasar_strx | bus_datos | ok | 61 | Extremos colocados y holgura declarada, recorrido 61 mm |
 | d03 | datos | obc_kryten_m3_plus | pcb1_control_qkd | pps | ok | 99 | Extremos colocados y holgura declarada, recorrido 99 mm |
 | d04 | datos | pcb1_control_qkd | pcb2_drivers_opticos | bus_datos | ok | 15 | Extremos colocados y holgura declarada, recorrido 15 mm |
 | d05 | datos | pcb1_control_qkd | pcb3_pat | bus_datos | ok | 15 | Extremos colocados y holgura declarada, recorrido 15 mm |
 | d06 | datos | adcs_iadcs400 | pcb3_pat | bus_datos | ok | 137 | Extremos colocados y holgura declarada, recorrido 137 mm |
-| m01 | datos | acoplador_monitor | pcb2_drivers_opticos | senal_fotodiodo | ok | 166 | Extremos colocados y holgura declarada, recorrido 166 mm |
-| m02 | datos | acoplador_monitor | pcb2_drivers_opticos | senal_fotodiodo | ok | 166 | Extremos colocados y holgura declarada, recorrido 166 mm |
+| m01 | datos | acoplador_monitor | pcb2_drivers_opticos | senal_fotodiodo | ok | 163 | Extremos colocados y holgura declarada, recorrido 163 mm |
+| m02 | datos | acoplador_monitor | pcb2_drivers_opticos | senal_fotodiodo | ok | 163 | Extremos colocados y holgura declarada, recorrido 163 mm |
 | p01 | potencia | bateria_optimus_30 | eps_starbuck_nano_plus | potencia | ok | 114 | Extremos colocados y holgura declarada, recorrido 114 mm |
 | p02 | potencia | paneles_photon_side | eps_starbuck_nano_plus | potencia | ok | 99 | Extremos colocados y holgura declarada, recorrido 99 mm |
 | p03 | potencia | eps_starbuck_nano_plus | obc_kryten_m3_plus | potencia | ok | 30 | Extremos colocados y holgura declarada, recorrido 30 mm |
@@ -48,7 +49,8 @@ Resumen: **17** no comprobable, **23** ok
 | p06 | potencia | eps_starbuck_nano_plus | pcb1_control_qkd | potencia | ok | 69 | Extremos colocados y holgura declarada, recorrido 69 mm |
 | p07 | potencia | eps_starbuck_nano_plus | pcb2_drivers_opticos | potencia | ok | 84 | Extremos colocados y holgura declarada, recorrido 84 mm |
 | p08 | potencia | eps_starbuck_nano_plus | pcb3_pat | potencia | ok | 53 | Extremos colocados y holgura declarada, recorrido 53 mm |
-| p09 | potencia | eps_starbuck_nano_plus | laser_dfb_1550 | potencia | ok | 243 | Extremos colocados y holgura declarada, recorrido 243 mm |
+| p09 | potencia | eps_starbuck_nano_plus | laser_dfb_1550 | potencia | ok | 228 | Extremos colocados y holgura declarada, recorrido 228 mm |
 | t01 | termico | bandeja_optica | pcb2_drivers_opticos | termico | no comprobable | - | Zona termica declarada pero sin ubicacion de sensores ni calefactores. |
+| t03 | termico | franja_lateral | pcb2_drivers_opticos | termico | no comprobable | - | Zona termica declarada pero sin ubicacion de sensores ni calefactores. |
 | t02 | termico | baterias | eps_starbuck_nano_plus | termico | no comprobable | - | Zona termica declarada pero sin ubicacion de sensores ni calefactores. |
 

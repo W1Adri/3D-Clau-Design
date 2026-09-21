@@ -56,8 +56,15 @@ ORDEN_PILA = [
 # pre-codificacion y por tanto puede curvarse. Con el orden anterior la cadena
 # iba y volvia entre bandeja y franja, y ademas ponia el aislador y el filtro
 # DETRAS del codificador de polarizacion, que los borra. Ver CLAUDE.md 3.10.
+#
+# DESDE EL 2026-09-21 EL MODULO DEL BEACON DE BAJADA VA AQUI TAMBIEN, en la
+# fila del DFB. No es de la cadena cuantica -- llega por su propia fibra al
+# colimador del banco (f08) -- pero es lo otro que disipa del payload, y lo que
+# le hace falta es lo mismo que al DFB: placa que le haga de disipador y
+# distancia al barrilete. En el banco, donde estaba, su disipador calentaba
+# justo lo que tiene que estar estable. Ver CLAUDE.md 3.11.
 FILAS_BANDEJA = [
-    ("laser_dfb_1550",),
+    ("laser_dfb_1550", "laser_beacon_bajada"),
     ("aislador", "filtro_espectral"),
 ]
 # Holgura entre filas y contra los bordes de la zona. No es una cota de nada:
@@ -91,9 +98,9 @@ MARGEN_BANDEJA = 6.0
 # brazo los separa D2. Cada rama es una fila de piezas que sale de una pieza
 # "estacion" por un eje, y se coloca hacia fuera desde ella:
 #
-#          camara            <- +Y, transmision de D2 (976 nm)
+#    colimador_beacon        <- +Y, le inyecta a D2 el 1064 en transmision
 #            |
-#   laser - D2 - fotodiodo   <- +-X, reflexion (1064) y fuga en transmision
+#  camara - D2 - fotodiodo   <- -X reflexion del 976, +X fuga del 1064
 #            |
 #           D1 --- FSM       <- el 1550 sigue recto por X
 #            |
@@ -102,11 +109,13 @@ MARGEN_BANDEJA = 6.0
 # El orden de las ramas importa: una rama no se puede colocar hasta que su
 # estacion esta colocada, y D2 es estacion de dos de ellas.
 #
-# ESTO NO CABE, y el chequeo 'brazo_beacon' lo dice con numeros: la camara se
-# sale por 16.8 mm con estas holguras. La pieza que no cabe NO SE COLOCA y se
-# avisa por stderr. Las otras dos opciones eran apretarla, que esconde el
-# resultado, o dibujarla saliendose del satelite, que ademas choca con el panel
-# solar. Ver CLAUDE.md 3.9.
+# ESTO YA CABE, desde el 2026-09-21: la rama +Y pide 36 mm de los 47.7 y sobran
+# 1.7 mm colocando con holguras. Antes no cabia por 6.8 mm desnudos y 16.8
+# colocando, con la camara en +Y. Lo que lo arregla son tres cambios -- celdas
+# de 16 mm para Ø12.7, D2 invertido a paso largo con la camara en reflexion, y
+# el laser de bajada partido en modulo (bandeja) y colimador (banco) -- y estan
+# en CLAUDE.md 3.11. El criterio de siempre sigue en pie: una pieza que no
+# quepa NO SE COLOCA y se avisa por stderr.
 CADENA_BANCO = ("espejo_plegado_cuantico", "dicroico_d1")  # de +X hacia el FSM
 # El colimador ya no esta en esta linea: esta encima del espejo, apuntando -Z.
 # Su giro lleva su eje local X (fibra por -X, haz por +X) al -Z del satelite,
@@ -114,14 +123,11 @@ CADENA_BANCO = ("espejo_plegado_cuantico", "dicroico_d1")  # de +X hacia el FSM
 GIRO_COLIMADOR = [0, 90, 0]
 # Y los moduladores van tumbados con el eje de fibra segun Z, igual que antes.
 GIRO_MODULADOR = [0, 90, 0]
-RAMAS_BRAZO = (
-    ("dicroico_d1", "+Y", ("dicroico_d2", "camara_beacon")),
-    ("dicroico_d1", "-Y", ("trampa_luz_d1",)),
-    # El laser es la pieza grande del brazo y va hacia -X, que es el lado con
-    # sitio: hacia +X solo hay 46 mm hasta la pared de la columna.
-    ("dicroico_d2", "-X", ("laser_beacon_bajada",)),
-    ("dicroico_d2", "+X", ("fotodiodo_monitor_beacon",)),
-)
+# LA TOPOLOGIA DEL BRAZO YA NO ESTA AQUI. Estaba, como RAMAS_BRAZO, y a la vez
+# escrita a mano dentro de 'chequeo_brazo_beacon': dos copias del mismo dato.
+# Al invertir D2 el 2026-09-21 y mover la camara de +Y a -X, las dos dejaron de
+# decir lo mismo. Ahora vive una sola vez, en 'meta.topologia_brazo_beacons' de
+# data/connections.yaml, con el motivo de cada rama al lado, y la leen los dos.
 HOLGURA_BANCO = 5.0
 MARGEN_BANCO = 2.0
 
@@ -485,7 +491,12 @@ def generar_keep_outs(catalogo, colocaciones, zonas_por_id) -> list[dict]:
                 )
             )
         for lado in sorted(lados):
-            signo = 1 if lado == "salida" else -1
+            # 'sentido' dice hacia donde viaja la senal por el eje declarado.
+            # Casi siempre es +1 -- entra por la cara negativa y sale por la
+            # positiva --, pero el colimador del beacon emite hacia -Y, asi que
+            # su fibra entra por +Y. Sin esto, su keep-out de entrada salia por
+            # la cara del haz y atravesaba medio banco.
+            signo = (1 if lado == "salida" else -1) * componente.montaje.sentido
             direccion = _gira_vector(
                 tuple(signo * k for k in _VECTOR_CARA[eje_local]), rotacion
             )
@@ -725,7 +736,19 @@ def _ramas_del_brazo(catalogo, colocaciones, recinto):
     sin_sitio: list[tuple[str, str, float]] = []
     puestas = {c["componente"]: c for c in colocaciones}
 
-    for estacion_id, cara, fila in RAMAS_BRAZO:
+    ramas = catalogo.topologia_brazo_beacons
+    if not ramas:
+        raise SystemExit(
+            "data/connections.yaml no declara 'meta.topologia_brazo_beacons'. "
+            "Sin ella no se sabe que cuelga de cada cara de D1 y de D2, y "
+            "escribirla otra vez aqui es lo que hizo que el generador y el "
+            "chequeo dejaran de decir lo mismo."
+        )
+
+    for rama in ramas:
+        estacion_id = rama["estacion"]
+        cara = rama["cara"]
+        fila = tuple(rama.get("piezas") or ())
         estacion = puestas.get(estacion_id)
         if estacion is None:
             # La estacion no se pudo colocar (su envolvente es TBD): la rama
@@ -1011,7 +1034,35 @@ def generar() -> str:
     z_bandeja = (-Z + z_banco_min) / 2
     y_placa = -Y
     if bandeja.modelable:
-        _, espesor_placa, _ = bandeja.dimensiones.como_vector()
+        ancho_placa, espesor_placa, fondo_placa = bandeja.dimensiones.como_vector()
+        # EL CONTORNO DE LA PLACA NO SE ESCRIBE, SE DERIVA: es su zona menos la
+        # holgura de montaje por lado. Aqui se recalcula y se compara con lo
+        # que el catalogo trae, porque una cota derivada escrita a mano deja de
+        # estar derivada en cuanto cambia el reparto. Paso el 2026-09-21: al
+        # subir el telescopio de 200 a 227 mm la bandeja se estrecho 27 mm y la
+        # placa, con sus 102.4 mm de antes, se salia del 6U por 11.5 mm por
+        # cada lado -- o sea rompiendo la invariante de "nada fuera de la
+        # envolvente", que es de las dos que este repositorio defiende con
+        # tests. Se aborta en vez de dibujarla mal, y se dice el numero.
+        holgura_placa = catalogo.integracion["bandeja.holgura_montaje"].escalar()
+        assert holgura_placa is not None
+        derivado = (
+            round(ancho_payload - 2 * holgura_placa, 3),
+            round((z_banco_min - (-Z)) - 2 * holgura_placa, 3),
+        )
+        if (
+            abs(ancho_placa - derivado[0]) > 1e-6
+            or abs(fondo_placa - derivado[1]) > 1e-6
+        ):
+            raise SystemExit(
+                f"bandeja_optica: la placa mide {ancho_placa} x {fondo_placa} mm "
+                f"en X y Z y su zona pide {derivado[0]} x {derivado[1]} "
+                f"(z_payload_bandeja menos {holgura_placa:.0f} mm por lado). "
+                f"El contorno de la placa se DERIVA de la zona, no se elige: "
+                f"escribe [{derivado[0]}, {espesor_placa}, {derivado[1]}] en "
+                f"forma.dimensiones y vuelve a generar. El espesor si es una "
+                f"decision y no se toca."
+            )
         colocaciones.append(
             {
                 "componente": "bandeja_optica",
@@ -1031,6 +1082,7 @@ def generar() -> str:
     # de fibra de todas ellas.
     ancho_util = ancho_payload - 2 * MARGEN_BANDEJA
     cursor_z = -Z + MARGEN_BANDEJA
+    sin_sitio_bandeja: list[tuple[str, float]] = []
     for fila in FILAS_BANDEJA:
         piezas = []
         for cid in fila:
@@ -1041,17 +1093,24 @@ def generar() -> str:
             piezas.append((componente, rotacion, dims_en_mundo(catalogo, componente, rotacion)))
         if not piezas:
             continue
+        # UNA PIEZA QUE NO CABE NO SE COLOCA, y no se aprieta la fila para que
+        # entre: apretando saldrian solapes de decimas de milimetro que el
+        # informe marcaria sin que se entendiera por que. Se van soltando
+        # piezas por el final -- la fila esta en el orden de la cadena, asi que
+        # la ultima es la que menos ata -- y se avisa por stderr, que es el
+        # mismo criterio que el brazo de los beacons y que la franja. Antes
+        # esto tumbaba el generador entero; con el modulo del beacon metido en
+        # la fila del DFB eso habria escondido todo el resto del modelo por una
+        # pieza.
+        while piezas and sum(dims[0] for _, _, dims in piezas) > ancho_util:
+            fuera, _, dims_fuera = piezas.pop()
+            sin_sitio_bandeja.append(
+                (fuera.id, sum(d[2][0] for d in piezas) + dims_fuera[0] - ancho_util)
+            )
+        if not piezas:
+            continue
         fondo = max(dims[2] for _, _, dims in piezas)
         ancho_total = sum(dims[0] for _, _, dims in piezas)
-        if ancho_total > ancho_util:
-            # Antes un error que un layout que se apana. Apretando las piezas
-            # hasta que entren saldrian solapes de decimas de milimetro, que el
-            # informe de interferencias marcaria sin que se entendiera por que.
-            raise SystemExit(
-                f"la fila {fila} de la bandeja suma {ancho_total:.1f} mm y solo "
-                f"hay {ancho_util:.1f} mm utiles. Parte la fila en dos en "
-                f"FILAS_BANDEJA, o baja MARGEN_BANDEJA."
-            )
         hueco = (
             (ancho_util - ancho_total) / (len(piezas) - 1) if len(piezas) > 1 else 0.0
         )
@@ -1075,6 +1134,13 @@ def generar() -> str:
             )
             cursor_x += dx + hueco
         cursor_z += fondo + HOLGURA_BANDEJA
+    for cid, falta in sin_sitio_bandeja:
+        print(
+            f"AVISO: {cid} no cabe en su fila de la bandeja por {falta:.1f} mm "
+            f"y NO se coloca. Parte la fila en dos en FILAS_BANDEJA o revisa "
+            f"su envolvente.",
+            file=sys.stderr,
+        )
     z_libre_bandeja = z_banco_min - (cursor_z - HOLGURA_BANDEJA)
 
     # ----------------------------------------------------------------- banco
@@ -1103,6 +1169,23 @@ def generar() -> str:
         # plegado, apuntando -Z, y se coloca con la franja.
         cursor_x = x_eje_telescopio + dims_en_mundo(catalogo, fsm, GIRO_FSM)[0] / 2
         x_d1 = None
+        # EL ESPEJO DE PLEGADO NO SE COMPACTA CONTRA D1: va ANCLADO bajo la
+        # franja. Encima de el, apuntando -Z, esta el colimador, y el colimador
+        # tiene que caer entero dentro de la franja -- si se sale hacia -X
+        # entra en la zona del telescopio, donde esta el barrilete, y choca.
+        # Mientras las piezas del banco eran gordas la linea compactada ya
+        # dejaba al espejo bastante hacia +X y no se veia; al bajar las celdas
+        # de 23 y 20 a 16 mm la linea se encoge 11 mm hacia el FSM y el
+        # colimador se mete en el barrilete. Asi que el espejo tiene un minimo:
+        # que el colimador quepa en la franja con su holgura. El chequeo
+        # 'espejo_bajo_la_franja' lo vuelve a comprobar sobre el layout.
+        x_minimo_espejo = None
+        if catalogo.existe("colimador") and catalogo["colimador"].modelable:
+            radio_colimador = (
+                caja_en_mundo(catalogo, catalogo["colimador"], GIRO_COLIMADOR).dims[0]
+                / 2
+            )
+            x_minimo_espejo = x_franja_min + radio_colimador + HOLGURA_BANCO
         for cid in reversed(CADENA_BANCO):
             componente = catalogo[cid]
             if not componente.modelable:
@@ -1111,6 +1194,9 @@ def generar() -> str:
             dx, dy, dz = dims_en_mundo(catalogo, componente, rotacion)
             cursor_x += HOLGURA_BANCO
             centro_x = cursor_x + dx / 2
+            if cid == "espejo_plegado_cuantico" and x_minimo_espejo is not None:
+                centro_x = max(centro_x, x_minimo_espejo)
+                cursor_x = centro_x - dx / 2
             colocaciones.append(
                 {
                     "componente": cid,
