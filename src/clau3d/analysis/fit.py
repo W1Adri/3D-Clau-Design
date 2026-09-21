@@ -896,11 +896,18 @@ def chequeo_banco_optico(catalogo: Catalogo, layout=None) -> Chequeo:
     """Cabe la cadena de espacio libre entre el eje del telescopio y la pared.
 
     El FSM dobla el haz de X a Z, asi que tiene que estar SOBRE el eje optico
-    del telescopio: no se puede mover. Eso deja al colimador y a D1 en
+    del telescopio: no se puede mover. Eso deja a D1 y al ESPEJO DE PLEGADO en
     linea con el, hacia +X, y el sitio que tienen es el que va del eje a la
     pared de la columna de payload. Es el punto mas apretado del payload y el
     que no se ve mirando volumenes: sobra hueco en el banco, pero no EN ESA
     LINEA.
+
+    Desde el 2026-09-21 el tercero de la fila es el espejo de plegado y NO el
+    colimador: el colimador se ha ido encima del espejo, apuntando -Z, porque
+    el codificador de polarizacion tiene que alimentarlo en linea recta. Eso
+    MEJORA esta linea -- el espejo ocupa menos que el colimador -- y crea a
+    cambio una segunda linea apretada, la del tramo recto en Z, que mide
+    'fibra_post_codificacion'.
 
     Si el margen sale negativo la salida no es apretar las piezas: es alargar
     el banco a costa de la bandeja o de la longitud reservada al telescopio.
@@ -927,7 +934,7 @@ def chequeo_banco_optico(catalogo: Catalogo, layout=None) -> Chequeo:
     eje_x = telescopio.caja.centro[0]
     disponible = banco.caja.xmax - eje_x
 
-    piezas = ("fsm", "dicroico_d1", "colimador")
+    piezas = ("fsm", "dicroico_d1", "espejo_plegado_cuantico")
     necesario = 0.0
     sin_envolvente: list[str] = []
     detalle: dict[str, float] = {}
@@ -967,7 +974,7 @@ def chequeo_banco_optico(catalogo: Catalogo, layout=None) -> Chequeo:
         f"El FSM va sobre el eje optico del telescopio (X = {eje_x:+.2f} mm) "
         f"porque es el que dobla el haz de X a Z. Del eje a la pared +X de la "
         f"columna hay {disponible:.1f} mm, y la media anchura del FSM mas el "
-        f"D1 mas el colimador suman {necesario:.1f} mm, sin contar "
+        f"D1 mas el espejo de plegado suman {necesario:.1f} mm, sin contar "
         f"holguras de montaje."
     )
 
@@ -1251,6 +1258,444 @@ def chequeo_brazo_beacon(catalogo: Catalogo, layout=None) -> Chequeo:
     )
 
 
+# ---------------------------------------------------------------------
+# LA CADENA DE FIBRA Y LA FRONTERA DE LA CODIFICACION
+# ---------------------------------------------------------------------
+# Los tres chequeos de aqui abajo existen por un error que estuvo en el modelo
+# hasta el 2026-09-21: la cadena declarada ponia el aislador, el filtro, el VOA
+# y el acoplador DETRAS del codificador de polarizacion. Eso no es una cadena
+# peor, es una cadena que no funciona -- un aislador PM proyecta los cuatro
+# estados BB84 sobre un solo eje --, y nada lo cazaba porque los tests miraban
+# que la cadena estuviera ENCADENADA, no que estuviera en el orden correcto.
+# Ver CLAUDE.md 3.10.
+
+
+def _codificador(catalogo: Catalogo):
+    """La pieza que declara 'funcion: codificador_polarizacion', o None.
+
+    Se busca por el PAPEL y no por el id, para que el dia que el codificador
+    sea otra pieza -- o dos, si el esquema ICFO resulta ser en lazo -- los
+    chequeos sigan diciendo lo mismo sin tocar una linea.
+    """
+    for c in catalogo.componentes:
+        if c.funcion == "codificador_polarizacion" and c.cuenta_en_presupuesto:
+            return c
+    return None
+
+
+def _resuelve_extremo(catalogo: Catalogo, nombre: str) -> str | None:
+    """Un id, o 'funcion:<papel>' resuelto a la pieza que lo declara."""
+    if not nombre.startswith("funcion:"):
+        return nombre
+    papel = nombre.split(":", 1)[1]
+    for c in catalogo.componentes:
+        if c.funcion == papel and c.cuenta_en_presupuesto:
+            return c.id
+    return None
+
+
+def chequeo_orden_cadena_fibra(catalogo: Catalogo) -> Chequeo:
+    """El orden de la cadena de fibra contra las restricciones declaradas.
+
+    Las restricciones NO estan aqui: estan en 'meta.restricciones_orden' de
+    data/connections.yaml, cada una con su motivo escrito al lado. Este chequeo
+    solo las aplica. Asi anadir una restriccion nueva -- porque aparezca un
+    componente nuevo, o porque el esquema del codificador cambie -- es editar
+    datos, no codigo, que es la regla de la casa.
+
+    ES CRITICO, y con razon: una cadena en el orden equivocado no degrada el
+    enlace, lo anula. Un aislador PM detras del codificador borra la
+    codificacion entera, y el modelo no tiene forma de verlo en la geometria
+    porque la pieza cabe igual de bien en los dos sitios.
+    """
+    titulo = "Orden de la cadena de fibra frente a las restricciones declaradas"
+    tramos = catalogo.conexiones.get("opticas_fibra") or []
+    restricciones = catalogo.restricciones_orden
+    if not tramos:
+        return Chequeo(
+            id="orden_cadena_fibra", titulo=titulo, estado=NO_COMPROBABLE,
+            mensaje="data/connections.yaml no declara ninguna cadena de fibra.",
+            falta="Cadena 'opticas_fibra'",
+        )
+    if not restricciones:
+        return Chequeo(
+            id="orden_cadena_fibra", titulo=titulo, estado=NO_COMPROBABLE,
+            mensaje=(
+                "No hay restricciones de orden declaradas en "
+                "'meta.restricciones_orden'. Sin ellas este chequeo no compara "
+                "con nada: no es que la cadena este bien, es que nadie ha dicho "
+                "que tiene que cumplir."
+            ),
+            falta="meta.restricciones_orden en data/connections.yaml",
+        )
+
+    cadena = [tramos[0].get("desde")] + [t.get("hasta") for t in tramos]
+    posicion = {cid: i for i, cid in enumerate(cadena)}
+
+    rotos: list[str] = []
+    sin_resolver: list[str] = []
+    for r in restricciones:
+        antes = _resuelve_extremo(catalogo, r.get("antes", ""))
+        despues = _resuelve_extremo(catalogo, r.get("despues", ""))
+        if antes is None or despues is None:
+            sin_resolver.append(f"{r.get('antes')} -> {r.get('despues')}")
+            continue
+        if antes not in posicion or despues not in posicion:
+            rotos.append(
+                f"{antes} -> {despues}: alguno de los dos no esta en la cadena"
+            )
+            continue
+        i, j = posicion[antes], posicion[despues]
+        if i >= j:
+            rotos.append(
+                f"{antes} tiene que ir ANTES que {despues} y va despues. "
+                f"{' '.join(str(r.get('motivo', '')).split())}"
+            )
+        elif r.get("directamente") and j != i + 1:
+            entre = ", ".join(cadena[i + 1:j])
+            rotos.append(
+                f"{despues} tiene que ir JUSTO detras de {antes} y entre los "
+                f"dos hay {entre}. "
+                f"{' '.join(str(r.get('motivo', '')).split())}"
+            )
+
+    numeros = {
+        "restricciones": float(len(restricciones)),
+        "piezas_en_la_cadena": float(len(cadena)),
+        "violaciones": float(len(rotos)),
+    }
+    if sin_resolver:
+        return Chequeo(
+            id="orden_cadena_fibra", titulo=titulo, estado=NO_COMPROBABLE,
+            mensaje=(
+                f"No se puede resolver a que pieza se refieren: "
+                f"{'; '.join(sin_resolver)}. Una restriccion que nombra un "
+                f"papel que nadie declara no comprueba nada."
+            ),
+            numeros=numeros,
+            falta="Una pieza con la 'funcion' que la restriccion nombra",
+        )
+    if rotos:
+        return Chequeo(
+            id="orden_cadena_fibra", titulo=titulo, estado=FALLA,
+            mensaje=(
+                f"La cadena declarada es: {' -> '.join(str(c) for c in cadena)}. "
+                f"Viola {len(rotos)} de las {len(restricciones)} restricciones "
+                f"de 'meta.restricciones_orden'. " + " | ".join(rotos)
+            ),
+            numeros=numeros,
+        )
+    return Chequeo(
+        id="orden_cadena_fibra", titulo=titulo, estado=OK,
+        mensaje=(
+            f"La cadena {' -> '.join(str(c) for c in cadena)} cumple las "
+            f"{len(restricciones)} restricciones declaradas. Todo componente de "
+            f"fibra va antes del codificador de polarizacion, y detras de el "
+            f"solo esta el colimador."
+        ),
+        numeros=numeros,
+    )
+
+
+def chequeo_fibra_post_codificacion(catalogo: Catalogo, layout=None) -> Chequeo:
+    """El tramo que sale del codificador: adonde va, si es recto y si cabe.
+
+    Son DOS preguntas distintas y conviene no mezclarlas:
+
+    1. **Cabe el tramo recto.** Es geometria y se responde hoy: el codificador,
+       el protector del empalme y el colimador van EN FILA segun Z y tienen que
+       caber en la franja. Ninguna de las tres cotas se puede apretar sin
+       cambiar una decision, asi que si no caben, eso es el resultado.
+    2. **Es aceptable esa longitud de fibra.** Es fisica y NO se puede
+       responder: falta 'integracion.fibra.sensibilidad_termica_fase_pm', que es
+       TBD. Aunque el tramo cupiera holgadamente, este chequeo no diria que
+       esta bien: diria que cabe y que nadie sabe si vale.
+
+    Lo que no se suma: el boot del colimador. En un tramo recto no hay codo que
+    iniciar, asi que el tramo recto de salida no aplica; y si el colimador real
+    necesitara su propio tramo rigido de strain relief, el deficit sube en esa
+    cantidad. Queda dicho para que nadie lo descubra despues.
+    """
+    titulo = "Tramo de fibra posterior al codificador de polarizacion"
+    codificador = _codificador(catalogo)
+    if codificador is None:
+        return Chequeo(
+            id="fibra_post_codificacion", titulo=titulo, estado=NO_COMPROBABLE,
+            mensaje=(
+                "Ninguna pieza declara 'funcion: codificador_polarizacion', asi "
+                "que no hay frontera de la codificacion que comprobar."
+            ),
+            falta="Una pieza con funcion 'codificador_polarizacion'",
+        )
+
+    tramos = catalogo.conexiones.get("opticas_fibra") or []
+    salientes = [t for t in tramos if t.get("desde") == codificador.id]
+    if len(salientes) != 1:
+        return Chequeo(
+            id="fibra_post_codificacion", titulo=titulo, estado=FALLA,
+            mensaje=(
+                f"{codificador.id} tiene {len(salientes)} tramos de salida en "
+                f"data/connections.yaml y tiene que tener exactamente uno. "
+                f"Detras del codificador solo puede haber un camino, y lleva al "
+                f"colimador."
+            ),
+            numeros={"tramos_de_salida": float(len(salientes))},
+        )
+    tramo = salientes[0]
+
+    problemas: list[str] = []
+    if tramo.get("hasta") != "colimador":
+        problemas.append(
+            f"el tramo {tramo.get('id')} va a '{tramo.get('hasta')}' y tiene "
+            f"que ir al colimador: cualquier otro componente de fibra proyecta "
+            f"o deforma los cuatro estados BB84"
+        )
+    if not tramo.get("recto"):
+        problemas.append(
+            f"el tramo {tramo.get('id')} no esta marcado 'recto: true'"
+        )
+    if tramo.get("keep_out"):
+        problemas.append(
+            f"el tramo {tramo.get('id')} declara keep-out de curvatura, y un "
+            f"tramo que no se puede curvar no tiene codo que reservar"
+        )
+
+    # --- lo que el tramo recto necesita, todo del catalogo -----------------
+    from .. import parts
+
+    protector = catalogo.integracion.get("fibra.longitud_protector_empalme")
+    empalme = protector.escalar() if protector is not None else None
+    caja_cod = parts.caja_local(codificador) if codificador.modelable else None
+    colimador = catalogo["colimador"] if catalogo.existe("colimador") else None
+    caja_col = (
+        parts.caja_local(colimador)
+        if colimador is not None and colimador.modelable else None
+    )
+    faltan_cotas = [
+        nombre for nombre, valor in (
+            ("integracion.fibra.longitud_protector_empalme", empalme),
+            (f"envolvente de {codificador.id}", caja_cod),
+            ("envolvente del colimador", caja_col),
+        ) if valor is None
+    ]
+    if faltan_cotas:
+        return Chequeo(
+            id="fibra_post_codificacion", titulo=titulo, estado=NO_COMPROBABLE,
+            mensaje=(
+                f"Sin {', '.join(faltan_cotas)} no se puede sumar el tramo "
+                f"recto."
+            ),
+            falta=", ".join(faltan_cotas),
+        )
+    # El eje de fibra recorre el lado LARGO de cada pieza: es su mayor cota.
+    l_cod = max(caja_cod.dims)
+    l_col = max(caja_col.dims)
+    necesario = l_cod + empalme + l_col
+
+    numeros = {
+        "codificador_mm": l_cod,
+        "protector_empalme_mm": empalme,
+        "colimador_mm": l_col,
+        "necesario_mm": necesario,
+    }
+    desglose = (
+        f"El tramo va en fila segun Z y suma {necesario:.1f} mm: "
+        f"{l_cod:.0f} mm del codificador (protectores de fibra incluidos), "
+        f"{empalme:.0f} mm de protector de empalme y {l_col:.0f} mm de "
+        f"colimador."
+    )
+
+    disponible = None
+    if layout is not None:
+        zonas = {z.id: z for z in layout.zonas}
+        franja = zonas.get("z_payload_franja")
+        if franja is not None:
+            disponible = franja.caja.zmax - franja.caja.zmin
+            numeros["disponible_mm"] = disponible
+            numeros["margen_mm"] = disponible - necesario
+
+    if problemas:
+        return Chequeo(
+            id="fibra_post_codificacion", titulo=titulo, estado=FALLA,
+            mensaje=(
+                "La topologia del tramo posterior al codificador esta mal: "
+                + "; ".join(problemas) + ". " + desglose
+            ),
+            numeros=numeros,
+        )
+
+    if disponible is None:
+        return Chequeo(
+            id="fibra_post_codificacion", titulo=titulo, estado=NO_COMPROBABLE,
+            mensaje=(
+                desglose + " Sin la zona de la franja en el layout no se sabe "
+                "contra que compararlo."
+            ),
+            numeros=numeros,
+            falta="Zona z_payload_franja (data/layout.yaml)",
+        )
+
+    margen = disponible - necesario
+    colocadas = {c.componente_id for c in layout.colocaciones}
+    sin_colocar = (
+        f" Por eso data/layout.yaml NO coloca {codificador.id}: una pieza sin "
+        f"sitio no se dibuja en uno inventado."
+        if codificador.id not in colocadas else ""
+    )
+    if margen < 0:
+        return Chequeo(
+            id="fibra_post_codificacion", titulo=titulo, estado=FALLA,
+            mensaje=(
+                desglose
+                + f" La franja mide {disponible:.1f} mm en Z, asi que NO CABE "
+                f"por {abs(margen):.1f} mm." + sin_colocar
+                + " La longitud de la franja es la reservada al telescopio, "
+                "asi que alargar el banco NO ayuda: el banco no entra en esta "
+                "cuenta. Las salidas son subir "
+                "'telescopio_cassegrain.longitud_reservada' (los \"~2U\" de "
+                "verdad del brief son 227 mm, no 200) o que Exail sirva el "
+                "codificador con salida colimada, que quitaria el empalme "
+                "entero -- ver el TBD 'pigtail_salida_minimo'. Las dos son "
+                "decisiones que no toma este modelo. Lo que NO es una salida es "
+                "bajar el protector de empalme hasta que esto pase."
+            ),
+            numeros=numeros,
+            falta=(
+                "Decision de ACSAR: alargar la franja (longitud reservada al "
+                "telescopio) o codificador con salida colimada"
+            ),
+        )
+
+    # Cabe. Pero que quepa no dice nada de si la fibra que queda es tolerable.
+    return Chequeo(
+        id="fibra_post_codificacion", titulo=titulo, estado=NO_COMPROBABLE,
+        mensaje=(
+            desglose + f" Cabe en los {disponible:.1f} mm de la franja, con "
+            f"{margen:.1f} mm de margen. PERO SI ESA LONGITUD DE FIBRA ES "
+            f"ACEPTABLE NO SE PUEDE DECIR: los estados diagonales no son "
+            f"autoestados de la fibra PM y acumulan una fase que deriva con la "
+            f"temperatura, y cuanta es esa fase depende de "
+            f"'integracion.fibra.sensibilidad_termica_fase_pm', que es TBD."
+        ),
+        numeros=numeros,
+        falta="integracion.fibra.sensibilidad_termica_fase_pm (medida)",
+    )
+
+
+def chequeo_altura_eje_codificador(catalogo: Catalogo, layout=None) -> Chequeo:
+    """El eje de fibra del codificador contra el plano optico del banco.
+
+    Los dos tienen que estar a la misma altura Y, y no por elegancia: el tramo
+    que los une NO SE PUEDE CURVAR, asi que cualquier desfase en Y obligaria a
+    una curva en S justo donde esta prohibida. Un plegado en el plano X-Z
+    conserva Y; uno que cambie de altura, no.
+
+    El plano optico del banco es Y = 0 por construccion -- es el eje del
+    telescopio --, pero no se escribe aqui: se lee del centro de la zona del
+    telescopio, que es de donde sale.
+    """
+    titulo = "Eje de fibra del codificador frente al plano optico del banco"
+    codificador = _codificador(catalogo)
+    if codificador is None:
+        return Chequeo(
+            id="altura_eje_codificador", titulo=titulo, estado=NO_COMPROBABLE,
+            mensaje="Ninguna pieza declara 'funcion: codificador_polarizacion'.",
+            falta="Una pieza con funcion 'codificador_polarizacion'",
+        )
+    if layout is None:
+        return Chequeo(
+            id="altura_eje_codificador", titulo=titulo, estado=NO_COMPROBABLE,
+            mensaje="Sin layout no se sabe ni donde esta el eje ni donde el plano.",
+            falta="Distribucion (data/layout.yaml)",
+        )
+    zonas = {z.id: z for z in layout.zonas}
+    telescopio = zonas.get("z_payload_telescopio")
+    if telescopio is None:
+        return Chequeo(
+            id="altura_eje_codificador", titulo=titulo, estado=NO_COMPROBABLE,
+            mensaje="El layout no declara la zona del telescopio.",
+            falta="Zona z_payload_telescopio",
+        )
+    y_plano = telescopio.caja.centro[1]
+
+    colocacion = next(
+        (c for c in layout.colocaciones if c.componente_id == codificador.id),
+        None,
+    )
+    if colocacion is None:
+        return Chequeo(
+            id="altura_eje_codificador", titulo=titulo, estado=NO_COMPROBABLE,
+            mensaje=(
+                f"{codificador.id} NO ESTA COLOCADO en data/layout.yaml, asi "
+                f"que no hay eje que medir. No esta colocado porque el tramo "
+                f"recto que tiene que alimentar no cabe: ver el chequeo "
+                f"'fibra_post_codificacion'. Decir que la altura esta bien "
+                f"cuando la pieza no esta seria inventarse el resultado."
+            ),
+            numeros={"plano_optico_Y_mm": y_plano},
+            falta="Colocacion del codificador, que hoy no cabe en la franja",
+        )
+
+    from .. import parts
+
+    desplazamiento = parts.eje_de_fibra_en_mundo(
+        codificador, list(colocacion.rotacion)
+    )
+    if desplazamiento is None:
+        return Chequeo(
+            id="altura_eje_codificador", titulo=titulo, estado=NO_COMPROBABLE,
+            mensaje=(
+                f"{codificador.id} no declara 'altura_eje_fibra', asi que no se "
+                f"sabe por donde de la pieza pasa el eje."
+            ),
+            numeros={"plano_optico_Y_mm": y_plano},
+            falta=f"{codificador.id}.altura_eje_fibra",
+        )
+    y_eje = colocacion.centro[1] + desplazamiento[1]
+    desvio = abs(y_eje - y_plano)
+    tolerancia_m = catalogo.integracion.get("fibra.tolerancia_coaxialidad")
+    tolerancia = tolerancia_m.escalar() if tolerancia_m is not None else None
+    numeros = {
+        "eje_codificador_Y_mm": y_eje,
+        "plano_optico_Y_mm": y_plano,
+        "desvio_mm": desvio,
+    }
+    if tolerancia is None:
+        return Chequeo(
+            id="altura_eje_codificador", titulo=titulo, estado=NO_COMPROBABLE,
+            mensaje=(
+                f"El eje de fibra del codificador cae en Y = {y_eje:+.2f} mm y "
+                f"el plano optico del banco esta en Y = {y_plano:+.2f} mm "
+                f"({desvio:.2f} mm de desvio), pero no hay tolerancia declarada "
+                f"contra la que compararlo."
+            ),
+            numeros=numeros,
+            falta="integracion.fibra.tolerancia_coaxialidad",
+        )
+    numeros["tolerancia_mm"] = tolerancia
+    comun = (
+        f"El eje de fibra del codificador cae en Y = {y_eje:+.2f} mm y el plano "
+        f"optico del banco -- el del colimador, D1, el FSM y el telescopio -- "
+        f"esta en Y = {y_plano:+.2f} mm. Desvio: {desvio:.2f} mm, contra una "
+        f"tolerancia SUPUESTA de {tolerancia:.2f} mm."
+    )
+    if desvio > tolerancia:
+        return Chequeo(
+            id="altura_eje_codificador", titulo=titulo, estado=FALLA,
+            mensaje=(
+                comun + " NO CUADRAN. Cualquier desfase en Y entre el "
+                "codificador y el colimador obliga a una curva en S en el tramo "
+                "que tiene prohibido curvarse."
+            ),
+            numeros=numeros,
+        )
+    return Chequeo(
+        id="altura_eje_codificador", titulo=titulo, estado=OK,
+        mensaje=comun + " El tramo puede ser recto sin cambiar de altura.",
+        numeros=numeros,
+    )
+
+
 def chequeo_step_de_fabricante(catalogo: Catalogo) -> Chequeo:
     """Los STEP de fabricante presentes frente a cad/vendor/MANIFEST.yaml.
 
@@ -1423,6 +1868,9 @@ def todos(catalogo: Catalogo, layout=None) -> list[Chequeo]:
         chequeo_pila_pc104(catalogo),
         chequeo_banco_optico(catalogo, layout),
         chequeo_brazo_beacon(catalogo, layout),
+        chequeo_orden_cadena_fibra(catalogo),
+        chequeo_fibra_post_codificacion(catalogo, layout),
+        chequeo_altura_eje_codificador(catalogo, layout),
         chequeo_configuracion_telescopio(catalogo),
         chequeo_longitud_telescopio(catalogo),
         chequeo_haz_vs_fsm(catalogo),

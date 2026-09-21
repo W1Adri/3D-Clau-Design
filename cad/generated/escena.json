@@ -1,5 +1,5 @@
 {
- "generado": "2026-09-20T21:53:58+02:00",
+ "generado": "2026-09-21T14:49:34+02:00",
  "glb": "clau_6u.glb",
  "proyecto": "CLAU",
  "layout": {
@@ -55,11 +55,11 @@
  "resumen": {
   "volumen_exterior_l": 8.28258,
   "volumen_interior_l": 7.643675052000001,
-  "volumen_ocupado_l": 4.7603652523657125,
-  "volumen_libre_l": 2.883309799634289,
+  "volumen_ocupado_l": 4.750635252365712,
+  "volumen_libre_l": 2.893039799634289,
   "fiable": false,
-  "piezas_colocadas": 26,
-  "componentes": 31,
+  "piezas_colocadas": 28,
+  "componentes": 35,
   "sin_envolvente": [
    "radio_uhf_pulsar_vutrx",
    "propulsion",
@@ -68,10 +68,11 @@
   "no_colocados": [
    "radio_uhf_pulsar_vutrx",
    "propulsion",
+   "camara_beacon",
    "cables_rf_moduladores"
   ],
-  "pendientes_tbd": 45,
-  "pendientes_supuestos": 61,
+  "pendientes_tbd": 51,
+  "pendientes_supuestos": 68,
   "discrepancias": 10
  },
  "zonas": [
@@ -168,7 +169,7 @@
   {
    "id": "z_payload_banco",
    "nombre": "Banco optico de espacio libre",
-   "nota": "Camino: colimador -> dicroico -> FSM -> telescopio, y del dicroico sale el brazo del beacon hacia +-Y (camara arriba, laser de beacon de bajada abajo). El FSM esta sobre el eje optico del telescopio (X = +36.85) porque es el que dobla el haz de X a Z, y eso deja el colimador y el dicroico en linea hacia +X. Margen contra la pared +X: -0.5 mm. Los haces NO estan dibujados: sin diametro de haz, un keep-out optico seria una medida inventada.",
+   "nota": "Canal cuantico: colimador -> D1 -> FSM -> telescopio. De D1 sale hacia +Y UN SOLO brazo para los dos beacons, y dentro de el D2 los separa: la camara en transmision (976 nm) y el laser de bajada inyectando lateralmente en reflexion (1064 nm). Los dos cuartos puertos llevan su trampa y su fotodiodo. El FSM esta sobre el eje optico del telescopio (X = +36.85) porque es el que dobla el haz de X a Z, y eso deja el colimador y D1 en linea hacia +X. Margen contra la pared +X: -0.5 mm. EL BRAZO NO CABE: camara_beacon se sale por la rama +Y en 16.8 mm y NO esta colocado. Apretarlo hasta que entrara, o dibujarlo saliendose del satelite, seria esconder el resultado. Ver el chequeo 'brazo_beacon' y CLAUDE.md 3.9.",
    "caja": {
     "min": [
      -10.85,
@@ -192,8 +193,8 @@
     ]
    },
    "volumen_l": 0.6385599000000001,
-   "libre_l": 0.56855749922,
-   "fraccion_ocupada": 0.10962542555522198
+   "libre_l": 0.57828749922,
+   "fraccion_ocupada": 0.09438801399837352
   },
   {
    "id": "z_payload_bandeja",
@@ -608,7 +609,7 @@
   {
    "id": "haz_e01",
    "tipo": "haz_libre",
-   "nota": "Camino optico colimador -> dicroico (e01).",
+   "nota": "Camino optico colimador -> dicroico_d1 (e01).",
    "caja": {
     "min": [
      76.397,
@@ -635,7 +636,7 @@
   {
    "id": "haz_e02",
    "tipo": "haz_libre",
-   "nota": "Camino optico dicroico -> fsm (e02).",
+   "nota": "Camino optico dicroico_d1 -> fsm (e02).",
    "caja": {
     "min": [
      48.397,
@@ -689,7 +690,7 @@
   {
    "id": "haz_e04",
    "tipo": "haz_libre",
-   "nota": "Camino optico dicroico -> camara_beacon (e04).",
+   "nota": "Camino optico dicroico_d1 -> dicroico_d2 (e04). TRAMO COMPARTIDO: lo recorren tambien e08 (dicroico_d2 -> dicroico_d1, 1064 nm). Es el mismo tubo, asi que el volumen se declara una sola vez: duplicarlo no reservaria nada nuevo y si generaria una invasion de keep-out que no significa nada.",
    "caja": {
     "min": [
      59.897,
@@ -709,6 +710,87 @@
     "dims": [
      10.000000000000007,
      5.0,
+     10.0
+    ]
+   }
+  },
+  {
+   "id": "haz_e07",
+   "tipo": "haz_libre",
+   "nota": "Camino optico laser_beacon_bajada -> dicroico_d2 (e07).",
+   "caja": {
+    "min": [
+     48.397,
+     23.0,
+     -51.8
+    ],
+    "max": [
+     53.397,
+     33.0,
+     -41.8
+    ],
+    "centro": [
+     50.897,
+     28.0,
+     -46.8
+    ],
+    "dims": [
+     5.0,
+     10.0,
+     10.0
+    ]
+   }
+  },
+  {
+   "id": "haz_e09",
+   "tipo": "haz_libre",
+   "nota": "Camino optico dicroico_d1 -> trampa_luz_d1 (e09).",
+   "caja": {
+    "min": [
+     59.897,
+     -16.5,
+     -51.8
+    ],
+    "max": [
+     69.897,
+     -11.5,
+     -41.8
+    ],
+    "centro": [
+     64.897,
+     -14.0,
+     -46.8
+    ],
+    "dims": [
+     10.000000000000007,
+     5.0,
+     10.0
+    ]
+   }
+  },
+  {
+   "id": "haz_e10",
+   "tipo": "haz_libre",
+   "nota": "Camino optico dicroico_d2 -> fotodiodo_monitor_beacon (e10).",
+   "caja": {
+    "min": [
+     76.397,
+     23.0,
+     -51.8
+    ],
+    "max": [
+     81.397,
+     33.0,
+     -41.8
+    ],
+    "centro": [
+     78.897,
+     28.0,
+     -46.8
+    ],
+    "dims": [
+     5.0,
+     10.0,
      10.0
     ]
    }
@@ -3088,9 +3170,9 @@
    }
   },
   {
-   "nodo": "dicroico",
-   "componente": "dicroico",
-   "nombre": "Espejo dicroico (separacion beacon / canal cuantico)",
+   "nodo": "dicroico_d1",
+   "componente": "dicroico_d1",
+   "nombre": "Dicroico D1 (separacion canal cuantico / beacons)",
    "categoria": "payload_optico",
    "subsistema": "terminal_optico",
    "zona": "z_payload_banco",
@@ -3107,7 +3189,7 @@
     "cara": "-Y",
     "eje": "X",
     "tipo_eje": "optico",
-    "nota": "El sustrato va a 45 grados dentro del soporte; lo que se declara aqui es el soporte, que es lo que ocupa. El eje X es el del canal cuantico, que lo ATRAVIESA; el beacon se refleja hacia +-Y."
+    "nota": "El sustrato va a 45 grados dentro del soporte; lo que se declara aqui es el soporte, que es lo que ocupa. El eje X es el del canal cuantico, que lo ATRAVIESA; los DOS beacons se reflejan hacia un unico brazo lateral segun +Y."
    },
    "conectores": [],
    "centro": [
@@ -3144,7 +3226,7 @@
    },
    "volumen_cm3": 12.167,
    "requiere_vista_exterior": false,
-   "nota": "El canal cuantico lo atraviesa; el beacon de subida se refleja hacia la camara. SIN CANDIDATO: lo que se dibuja es una reserva, no una pieza.",
+   "nota": "El canal cuantico lo atraviesa; los DOS beacons se reflejan hacia el mismo brazo lateral, y dentro de ese brazo los separa 'dicroico_d2'. SIN CANDIDATO: lo que se dibuja es una reserva, no una pieza.",
    "color": [
     0.6200000002918433,
     0.6200000002918433,
@@ -3159,7 +3241,7 @@
      ],
      "unidad": "mm",
      "estado": "supuesto",
-     "fuente": "SUPUESTO. Reserva cubica para el SOPORTE del dicroico, con el sustrato a 45 grados por dentro. La envolvente va alineada con los ejes porque lo que ocupa es la celda, no el sustrato. Un lado de 23 mm admite un sustrato de unos 12-15 mm a 45 grados, que para un haz colimado de pocos milimetros sobra; si el haz sale mas gordo, el soporte crece. NO es ningun producto: no hay candidato elegido. ACOTADA POR ARRIBA POR EL BANCO, ademas: el FSM tiene que estar sobre el eje optico del telescopio, y entre ese eje y la pared +X de la columna de payload quedan unos 56 mm para el colimador y el dicroico juntos, gaps incluidos. Si las piezas reales son mayores no es que el modelo este mal: es que el banco no da, y habra que alargarlo a costa de la bandeja o de la longitud reservada al telescopio. El chequeo 'banco_optico' recalcula ese margen desde el catalogo.",
+     "fuente": "SUPUESTO. Reserva cubica para el SOPORTE de D1, con el sustrato a 45 grados por dentro. La envolvente va alineada con los ejes porque lo que ocupa es la celda, no el sustrato. Un lado de 23 mm admite un sustrato de unos 12-15 mm a 45 grados, que para un haz colimado de pocos milimetros sobra; si el haz sale mas gordo, el soporte crece. NO es ningun producto: no hay candidato elegido. ACOTADA POR ARRIBA POR EL BANCO, ademas: el FSM tiene que estar sobre el eje optico del telescopio, y entre ese eje y la pared +X de la columna de payload quedan unos 56 mm para el colimador y D1 juntos, gaps incluidos. Si las piezas reales son mayores no es que el modelo este mal: es que el banco no da, y habra que alargarlo a costa de la bandeja o de la longitud reservada al telescopio. El chequeo 'banco_optico' recalcula ese margen desde el catalogo.",
      "nota": null,
      "falta": "Diametro del haz colimado (del que sale el tamano del sustrato), longitudes de onda de corte y envolvente del soporte",
      "pedir_a": "Equipo de optica de ACSAR",
@@ -3171,7 +3253,7 @@
      "estado": "TBD",
      "fuente": null,
      "nota": null,
-     "falta": "Masa del dicroico y su soporte",
+     "falta": "Masa del divisor y su soporte",
      "pedir_a": "Equipo de optica de ACSAR",
      "discrepancia": []
     },
@@ -3269,7 +3351,7 @@
      ],
      "unidad": "mm",
      "estado": "supuesto",
-     "fuente": "SUPUESTO. Reserva para un colimador de fibra de banco: barrilete cilindrico de unos 12 mm de diametro. NO es ningun producto. El diametro del barrilete lo fija el del haz colimado, que es TBD, asi que esta cifra se movera con el. ACOTADA POR ARRIBA POR EL BANCO, ademas: el FSM tiene que estar sobre el eje optico del telescopio, y entre ese eje y la pared +X de la columna de payload quedan unos 56 mm para el colimador y el dicroico juntos, gaps incluidos. Si las piezas reales son mayores no es que el modelo este mal: es que el banco no da, y habra que alargarlo a costa de la bandeja o de la longitud reservada al telescopio. El chequeo 'banco_optico' recalcula ese margen desde el catalogo.",
+     "fuente": "SUPUESTO. Reserva para un colimador de fibra de banco: barrilete cilindrico de unos 12 mm de diametro. NO es ningun producto. El diametro del barrilete lo fija el del haz colimado, que es TBD, asi que esta cifra se movera con el. ACOTADA POR ARRIBA POR EL BANCO, ademas: el FSM tiene que estar sobre el eje optico del telescopio, y entre ese eje y la pared +X de la columna de payload quedan unos 56 mm para el colimador y D1 juntos, gaps incluidos. Si las piezas reales son mayores no es que el modelo este mal: es que el banco no da, y habra que alargarlo a costa de la bandeja o de la longitud reservada al telescopio. El chequeo 'banco_optico' recalcula ese margen desde el catalogo.",
      "nota": null,
      "falta": "Diametro del haz colimado y modelo de colimador. Es el mismo dato que bloquea los keep-outs del camino optico.",
      "pedir_a": "Equipo de optica de ACSAR",
@@ -3308,13 +3390,13 @@
    }
   },
   {
-   "nodo": "camara_beacon",
-   "componente": "camara_beacon",
-   "nombre": "Camara / sensor de beacon (medida del error de apuntado)",
+   "nodo": "dicroico_d2",
+   "componente": "dicroico_d2",
+   "nombre": "Dicroico D2 (separacion beacon de subida / beacon de bajada)",
    "categoria": "payload_optico",
    "subsistema": "terminal_optico",
    "zona": "z_payload_banco",
-   "id_drive": "OPT-11",
+   "id_drive": "OPT-15",
    "referencia_comercial": null,
    "estado_dato": "supuesto",
    "desde_step": false,
@@ -3327,12 +3409,12 @@
     "cara": "-Y",
     "eje": "Y",
     "tipo_eje": "optico",
-    "nota": "Mira hacia el dicroico por -Y, que es de donde le llega el beacon reflejado. Se atornilla por su cara trasera al soporte del banco."
+    "nota": "Va dentro del brazo que refleja D1, asi que su eje en linea es Y: por el le llega el beacon de subida desde D1 y por el sigue hasta la camara. El de bajada entra LATERALMENTE segun X y sale reflejado hacia -Y, de vuelta a D1. El sustrato va a 45 grados dentro del soporte, igual que en D1."
    },
    "conectores": [],
    "centro": [
     64.897,
-    31.5,
+    28.0,
     -46.8
    ],
    "rotacion": [
@@ -3342,29 +3424,29 @@
    ],
    "caja": {
     "min": [
-     49.897000000000006,
+     53.397000000000006,
      16.5,
-     -61.8
+     -58.3
     ],
     "max": [
-     79.897,
-     46.5,
-     -31.799999999999997
+     76.397,
+     39.5,
+     -35.3
     ],
     "centro": [
      64.897,
-     31.5,
+     28.0,
      -46.8
     ],
     "dims": [
-     30.0,
-     30.0,
-     30.0
+     23.0,
+     23.0,
+     23.0
     ]
    },
-   "volumen_cm3": 27.0,
+   "volumen_cm3": 12.167,
    "requiere_vista_exterior": false,
-   "nota": "SIN CANDIDATO: lo que se dibuja es una reserva, no una pieza.",
+   "nota": "Dentro del brazo que refleja D1. SIN CANDIDATO: lo que se dibuja es una reserva, no una pieza.",
    "color": [
     0.6200000002918433,
     0.6200000002918433,
@@ -3373,16 +3455,16 @@
    "magnitudes": {
     "dimensiones": {
      "valor": [
-      30.0,
-      30.0,
-      30.0
+      23.0,
+      23.0,
+      23.0
      ],
      "unidad": "mm",
      "estado": "supuesto",
-     "fuente": "SUPUESTO. Reserva para una camara de placa unica con su objetivo: un cubo de 30 mm es el orden de magnitud de un sensor pequeno mas la optica de imagen. NO es ningun producto: no hay sensor elegido. El volumen real depende sobre todo de la distancia focal que pida el campo de vision del PAT, que esta sin definir.",
+     "fuente": "SUPUESTO. Misma reserva cubica que 'dicroico_d1' y por el mismo motivo: lo que ocupa es la celda con el sustrato a 45 grados por dentro, no el sustrato. NO es ningun producto. ACOTADA POR ARRIBA POR EL BRAZO: entre D1 y la pared del banco hay 47.7 mm para D1/2, D2 y la camara en fila, y hoy NO CABEN. El chequeo 'brazo_beacon' recalcula ese margen desde el catalogo y falla mientras no quepa.",
      "nota": null,
-     "falta": "Modelo de sensor, distancia focal del objetivo y campo de vision exigido por el lazo de apuntado",
-     "pedir_a": "Equipo de PAT de ACSAR",
+     "falta": "Diametro de los dos haces de beacon, longitud de onda de corte y envolvente del soporte",
+     "pedir_a": "Equipo de optica de ACSAR",
      "discrepancia": []
     },
     "masa": {
@@ -3391,8 +3473,118 @@
      "estado": "TBD",
      "fuente": null,
      "nota": null,
-     "falta": "Masa del sensor elegido",
-     "pedir_a": "Equipo de PAT de ACSAR",
+     "falta": "Masa del divisor y su soporte",
+     "pedir_a": "Equipo de optica de ACSAR",
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  },
+  {
+   "nodo": "trampa_luz_d1",
+   "componente": "trampa_luz_d1",
+   "nombre": "Trampa de luz del cuarto puerto de D1",
+   "categoria": "payload_optico",
+   "subsistema": "terminal_optico",
+   "zona": "z_payload_banco",
+   "id_drive": "OPT-17",
+   "referencia_comercial": null,
+   "estado_dato": "supuesto",
+   "desde_step": false,
+   "step": null,
+   "step_estado": null,
+   "step_nota": null,
+   "step_esperado": null,
+   "forma": "caja",
+   "montaje": {
+    "cara": "-Y",
+    "eje": "Y",
+    "tipo_eje": "optico",
+    "nota": "En el puerto de D1 opuesto al brazo de los beacons. Le llega la fuga en reflexion del 1550 del canal cuantico."
+   },
+   "conectores": [],
+   "centro": [
+    64.897,
+    -24.0,
+    -46.8
+   ],
+   "rotacion": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     57.397000000000006,
+     -31.5,
+     -54.3
+    ],
+    "max": [
+     72.397,
+     -16.5,
+     -39.3
+    ],
+    "centro": [
+     64.897,
+     -24.0,
+     -46.8
+    ],
+    "dims": [
+     15.0,
+     15.0,
+     15.0
+    ]
+   },
+   "volumen_cm3": 3.375,
+   "requiere_vista_exterior": false,
+   "nota": "OBLIGATORIA, no opcional. Ningun divisor transmite el 100 %: lo que D1 no transmite del 1550 sale por este puerto, y sin trampa se queda rebotando dentro del banco hasta llegar a la camara de seguimiento o de vuelta al canal. SIN CANDIDATO: lo que se dibuja es una reserva.",
+   "color": [
+    0.6200000002918433,
+    0.6200000002918433,
+    0.6599999923026542
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      15.0,
+      15.0,
+      15.0
+     ],
+     "unidad": "mm",
+     "estado": "supuesto",
+     "fuente": "SUPUESTO. Reserva para un absorbedor de haz de banco: cavidad o cono negro con su soporte. Un cubo de 15 mm es el orden de magnitud de una trampa para un haz colimado de pocos milimetros y potencias de microvatios; NO es ningun producto. La cota real depende del angulo de aceptacion que haga falta para que nada vuelva al banco.",
+     "nota": null,
+     "falta": "Tipo de absorbedor, su envolvente y el rechazo exigido",
+     "pedir_a": "Equipo de optica de ACSAR",
+     "discrepancia": []
+    },
+    "masa": {
+     "valor": null,
+     "unidad": "g",
+     "estado": "TBD",
+     "fuente": null,
+     "nota": null,
+     "falta": "Masa de la trampa elegida",
+     "pedir_a": "Equipo de optica de ACSAR",
      "discrepancia": []
     },
     "potencia_nominal": {
@@ -3420,7 +3612,7 @@
   {
    "nodo": "laser_beacon_bajada",
    "componente": "laser_beacon_bajada",
-   "nombre": "Laser de beacon de bajada",
+   "nombre": "Laser de beacon de bajada (1064 nm)",
    "categoria": "payload_optico",
    "subsistema": "terminal_optico",
    "zona": "z_payload_banco",
@@ -3435,14 +3627,14 @@
    "forma": "caja",
    "montaje": {
     "cara": "-Y",
-    "eje": "Y",
+    "eje": "X",
     "tipo_eje": "optico",
-    "nota": "Emite hacia +Y, contra el dicroico, por el lado opuesto a la camara."
+    "nota": "Inyecta LATERALMENTE en D2 segun X. D2 lo refleja hacia -Y, de vuelta a D1, que lo refleja otra vez hacia el FSM y el telescopio. Antes emitia segun Y contra la cara trasera de D1, que no llevaba a ninguna parte."
    },
    "conectores": [],
    "centro": [
-    64.897,
-    -31.5,
+    33.397,
+    28.0,
     -46.8
    ],
    "rotacion": [
@@ -3452,29 +3644,29 @@
    ],
    "caja": {
     "min": [
-     52.397000000000006,
-     -46.5,
+     18.397,
+     15.5,
      -59.3
     ],
     "max": [
-     77.397,
-     -16.5,
+     48.397,
+     40.5,
      -34.3
     ],
     "centro": [
-     64.897,
-     -31.5,
+     33.397,
+     28.0,
      -46.8
     ],
     "dims": [
-     25.0,
      30.0,
+     25.0,
      25.0
     ]
    },
    "volumen_cm3": 18.75,
    "requiere_vista_exterior": false,
-   "nota": "Longitud de onda distinta de 1550 nm para que la estacion siga al satelite. SIN CANDIDATO: lo que se dibuja es una reserva.",
+   "nota": "1064 nm: ver 'integracion.optica.longitud_onda_beacon_bajada' para el argumento del silicio. SIN CANDIDATO: lo que se dibuja es una reserva.",
    "color": [
     0.6200000002918433,
     0.6200000002918433,
@@ -3483,15 +3675,15 @@
    "magnitudes": {
     "dimensiones": {
      "valor": [
-      25.0,
       30.0,
+      25.0,
       25.0
      ],
      "unidad": "mm",
      "estado": "supuesto",
-     "fuente": "SUPUESTO. Reserva para un diodo laser con su optica de colimacion y su disipador. NO es ningun producto: ni la longitud de onda ni la potencia estan decididas, y las dos cambian la envolvente (la potencia, por el disipador).",
+     "fuente": "SUPUESTO. Reserva para un diodo laser con su optica de colimacion y su disipador. La cota larga va ahora por X, que es el eje por el que inyecta en D2; antes iba por Y, cuando emitia contra D1. NO es ningun producto: con la longitud de onda ya decidida (1064 nm) sigue sin haber modelo elegido, y la potencia -- 100 mW supuestos -- manda sobre el disipador, que es lo que fija la envolvente.",
      "nota": null,
-     "falta": "Longitud de onda, potencia optica y envolvente del modulo elegido",
+     "falta": "Modelo del laser elegido, potencia optica real y su disipador",
      "pedir_a": "Equipo de PAT de ACSAR",
      "discrepancia": []
     },
@@ -3502,6 +3694,116 @@
      "fuente": null,
      "nota": null,
      "falta": "Masa del laser de beacon elegido",
+     "pedir_a": "Equipo de PAT de ACSAR",
+     "discrepancia": []
+    },
+    "potencia_nominal": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    },
+    "potencia_pico": {
+     "valor": null,
+     "unidad": null,
+     "estado": "ausente",
+     "fuente": null,
+     "nota": null,
+     "falta": null,
+     "pedir_a": null,
+     "discrepancia": []
+    }
+   }
+  },
+  {
+   "nodo": "fotodiodo_monitor_beacon",
+   "componente": "fotodiodo_monitor_beacon",
+   "nombre": "Fotodiodo de monitorizacion de potencia del beacon de bajada",
+   "categoria": "payload_optico",
+   "subsistema": "terminal_optico",
+   "zona": "z_payload_banco",
+   "id_drive": "OPT-16",
+   "referencia_comercial": null,
+   "estado_dato": "supuesto",
+   "desde_step": false,
+   "step": null,
+   "step_estado": null,
+   "step_nota": null,
+   "step_esperado": null,
+   "forma": "caja",
+   "montaje": {
+    "cara": "-Y",
+    "eje": "X",
+    "tipo_eje": "optico",
+    "nota": "Va en el puerto de D2 OPUESTO al laser: le llega la fuga en transmision del beacon de bajada, que es proporcional a lo que sale por la apertura. Da telemetria de salud del beacon SIN tocar el haz util."
+   },
+   "conectores": [],
+   "centro": [
+    87.397,
+    28.0,
+    -46.8
+   ],
+   "rotacion": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "caja": {
+    "min": [
+     81.397,
+     22.0,
+     -52.8
+    ],
+    "max": [
+     93.397,
+     34.0,
+     -40.8
+    ],
+    "centro": [
+     87.397,
+     28.0,
+     -46.8
+    ],
+    "dims": [
+     12.0,
+     12.0,
+     12.0
+    ]
+   },
+   "volumen_cm3": 1.728,
+   "requiere_vista_exterior": false,
+   "nota": "Instrumenta el cuarto puerto de D2. Si no se instrumenta, ese puerto necesita igualmente una trampa de luz: ver 'trampa_luz_d2', que esta declarada como alternativa EXCLUYENTE de esta pieza, no como pieza adicional. SIN CANDIDATO: lo que se dibuja es una reserva.",
+   "color": [
+    0.6200000002918433,
+    0.6200000002918433,
+    0.6599999923026542
+   ],
+   "magnitudes": {
+    "dimensiones": {
+     "valor": [
+      12.0,
+      12.0,
+      12.0
+     ],
+     "unidad": "mm",
+     "estado": "supuesto",
+     "fuente": "SUPUESTO. Reserva para un fotodiodo en encapsulado TO con su soporte y una lente de concentracion. Un cubo de 12 mm es el orden de magnitud; NO es ningun producto. Al ir en un puerto de fuga no le hacen falta ni apertura grande ni alineacion fina, asi que es la pieza del brazo cuya cota menos puede crecer.",
+     "nota": null,
+     "falta": "Modelo de fotodiodo, encapsulado y electronica de acondicionamiento",
+     "pedir_a": "Equipo de PAT de ACSAR",
+     "discrepancia": []
+    },
+    "masa": {
+     "valor": null,
+     "unidad": "g",
+     "estado": "TBD",
+     "fuente": null,
+     "nota": null,
+     "falta": "Masa del fotodiodo con su soporte y su acondicionamiento",
      "pedir_a": "Equipo de PAT de ACSAR",
      "discrepancia": []
     },
@@ -3994,7 +4296,8 @@
    "diametro_secundario_mm": 14.0,
    "diametro_agujero_primario_mm": 18.0,
    "obstruccion_lineal": 0.15555555555555556,
-   "perdida_obstruccion_dB_amplitud": 0.21276174598156072,
+   "perdida_potencia_recogida_dB": 0.10638087299078036,
+   "perdida_intensidad_en_eje_dB": 0.21276174598156072,
    "radio_curvatura_primario_mm": 400.0,
    "radio_curvatura_secundario_mm": 44.44444444444444,
    "longitud_necesaria_mm": 198.77777777777777,
@@ -5205,6 +5508,30 @@
    "pedir_a": "Equipo de PAT / de mision de ACSAR"
   },
   {
+   "componente": "integracion",
+   "magnitud": "integracion.optica.potencia_beacon_bajada",
+   "estado": "supuesto",
+   "valor_modelado": 100.0,
+   "falta": "Potencia optica de bajada del presupuesto de enlace (divergencia, distancia, sensibilidad del receptor de la estacion)",
+   "pedir_a": "Equipo de PAT / de mision de ACSAR"
+  },
+  {
+   "componente": "integracion",
+   "magnitud": "integracion.optica.borde_dicroico_d1",
+   "estado": "supuesto",
+   "valor_modelado": 1300.0,
+   "falta": "Longitud de onda de corte, anchura de la transicion y curvas de transmision y reflexion del divisor elegido",
+   "pedir_a": "Equipo de optica de ACSAR"
+  },
+  {
+   "componente": "integracion",
+   "magnitud": "integracion.optica.borde_dicroico_d2",
+   "estado": "supuesto",
+   "valor_modelado": 1020.0,
+   "falta": "Longitud de onda de corte, anchura de la transicion y curvas de transmision y reflexion del divisor elegido",
+   "pedir_a": "Equipo de optica de ACSAR"
+  },
+  {
    "componente": "antena_quasar_wsant",
    "magnitud": "antena_quasar_wsant.dimensiones",
    "estado": "supuesto",
@@ -5518,8 +5845,8 @@
    "pedir_a": "Physik Instrumente"
   },
   {
-   "componente": "dicroico",
-   "magnitud": "dicroico.dimensiones",
+   "componente": "dicroico_d1",
+   "magnitud": "dicroico_d1.dimensiones",
    "estado": "supuesto",
    "valor_modelado": [
     23.0,
@@ -5530,15 +5857,27 @@
    "pedir_a": "Equipo de optica de ACSAR"
   },
   {
+   "componente": "dicroico_d2",
+   "magnitud": "dicroico_d2.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    23.0,
+    23.0,
+    23.0
+   ],
+   "falta": "Diametro de los dos haces de beacon, longitud de onda de corte y envolvente del soporte",
+   "pedir_a": "Equipo de optica de ACSAR"
+  },
+  {
    "componente": "camara_beacon",
    "magnitud": "camara_beacon.dimensiones",
    "estado": "supuesto",
    "valor_modelado": [
-    30.0,
-    30.0,
-    30.0
+    20.0,
+    20.0,
+    20.0
    ],
-   "falta": "Modelo de sensor, distancia focal del objetivo y campo de vision exigido por el lazo de apuntado",
+   "falta": "Modelo de sensor, distancia focal del objetivo, campo de vision exigido por el lazo de apuntado y espesor del filtro de banda estrecha de 976 nm",
    "pedir_a": "Equipo de PAT de ACSAR"
   },
   {
@@ -5546,12 +5885,48 @@
    "magnitud": "laser_beacon_bajada.dimensiones",
    "estado": "supuesto",
    "valor_modelado": [
-    25.0,
     30.0,
+    25.0,
     25.0
    ],
-   "falta": "Longitud de onda, potencia optica y envolvente del modulo elegido",
+   "falta": "Modelo del laser elegido, potencia optica real y su disipador",
    "pedir_a": "Equipo de PAT de ACSAR"
+  },
+  {
+   "componente": "fotodiodo_monitor_beacon",
+   "magnitud": "fotodiodo_monitor_beacon.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    12.0,
+    12.0,
+    12.0
+   ],
+   "falta": "Modelo de fotodiodo, encapsulado y electronica de acondicionamiento",
+   "pedir_a": "Equipo de PAT de ACSAR"
+  },
+  {
+   "componente": "trampa_luz_d1",
+   "magnitud": "trampa_luz_d1.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    15.0,
+    15.0,
+    15.0
+   ],
+   "falta": "Tipo de absorbedor, su envolvente y el rechazo exigido",
+   "pedir_a": "Equipo de optica de ACSAR"
+  },
+  {
+   "componente": "trampa_luz_d2",
+   "magnitud": "trampa_luz_d2.dimensiones",
+   "estado": "supuesto",
+   "valor_modelado": [
+    15.0,
+    15.0,
+    15.0
+   ],
+   "falta": "Tipo de absorbedor, su envolvente y el rechazo exigido",
+   "pedir_a": "Equipo de optica de ACSAR"
   },
   {
    "componente": "colimador",
@@ -5763,7 +6138,7 @@
    "id": "volumen_total",
    "titulo": "Volumen total frente a la zona util",
    "estado": "atencion",
-   "mensaje": "Los 24 componentes con envolvente conocida ocupan 4302 cm3 de los 7644 cm3 interiores (56%). Quedan 3 componentes sin envolvente: el dato real sera mayor.",
+   "mensaje": "Los 27 componentes con envolvente conocida ocupan 4301 cm3 de los 7644 cm3 interiores (56%). Quedan 3 componentes sin envolvente: el dato real sera mayor.",
    "falta": "Envolvente de: radio_uhf_pulsar_vutrx, propulsion, cables_rf_moduladores"
   },
   {
@@ -5812,14 +6187,21 @@
    "id": "banco_optico",
    "titulo": "Cadena de espacio libre entre el eje del telescopio y la pared",
    "estado": "ok",
-   "mensaje": "El FSM va sobre el eje optico del telescopio (X = +36.85 mm) porque es el que dobla el haz de X a Z. Del eje a la pared +X de la columna hay 74.0 mm, y la media anchura del FSM mas el dicroico mas el colimador suman 66.3 mm, sin contar holguras de montaje. Quedan 7.7 mm de margen.",
+   "mensaje": "El FSM va sobre el eje optico del telescopio (X = +36.85 mm) porque es el que dobla el haz de X a Z. Del eje a la pared +X de la columna hay 74.0 mm, y la media anchura del FSM mas el D1 mas el colimador suman 66.3 mm, sin contar holguras de montaje. Quedan 7.7 mm de margen.",
    "falta": null
+  },
+  {
+   "id": "brazo_beacon",
+   "titulo": "Brazo compartido de los dos beacons, de D1 a la pared del banco",
+   "estado": "falla",
+   "mensaje": "Los dos beacons comparten el brazo que refleja D1, y dentro de el D2 los separa. La rama mas apretada es +Y: pide 54.5 mm desde el centro de su divisor y tiene 47.7 mm, sin contar holguras de montaje. NO CABE por 6.8 mm. Y ya esta contada la reserva de la camara bajada de 30 a 20 mm. Las salidas son plegar el brazo hacia -Z con un espejo de doblado (da unos 27.5 mm mas, a costa de una superficie reflectante mas en el camino del beacon) o alargar el banco, que se paga con la bandeja o con la longitud reservada al telescopio. Las dos son decisiones de ACSAR; bajar otra reserva hasta que esto pase, no. Con las holguras de montaje el deficit es mayor todavia, asi que data/layout.yaml NO coloca camara_beacon: una pieza sin sitio no se dibuja en uno inventado ni saliendose del satelite.",
+   "falta": "Decision de ACSAR: plegar el brazo hacia -Z o alargar el banco"
   },
   {
    "id": "configuracion_telescopio",
    "titulo": "Configuracion optica del telescopio",
    "estado": "ok",
-   "mensaje": "Afocal tipo Mersenne: dos parabolas confocales, M = 9.00. Entra colimado y sale colimado, asi que NO hay foco real dentro del satelite y no hace falta ninguna lente de enfoque en el banco. El foco comun de las dos conicas es VIRTUAL y por eso el modelo no dibuja ningun marcador ahi: no hay nada. Obstruccion lineal 0.156 (secundario de 14.0 mm sobre 90 mm), o sea 0.21 dB en amplitud de campo (0.11 dB en potencia).",
+   "mensaje": "Afocal tipo Mersenne: dos parabolas confocales, M = 9.00. Entra colimado y sale colimado, asi que NO hay foco real dentro del satelite y no hace falta ninguna lente de enfoque en el banco. El foco comun de las dos conicas es VIRTUAL y por eso el modelo no dibuja ningun marcador ahi: no hay nada. Obstruccion lineal 0.156 (secundario de 14.0 mm sobre 90 mm). Cuesta 0.11 dB de potencia recogida y 0.21 dB de intensidad en el eje en campo lejano. Son DOS magnitudes distintas, las dos en potencia, y para un enlace optico manda la segunda: lo que llega al receptor es la intensidad en el eje.",
    "falta": null
   },
   {
@@ -5847,8 +6229,8 @@
    "id": "masa",
    "titulo": "Presupuesto de masa",
    "estado": "atencion",
-   "mensaje": "Masa conocida 846 g de un limite de 12000 g (CDS 14.1). Faltan 25 componentes por pesar, incluido el chasis y el telescopio, que son de los mas pesados.",
-   "falta": "Masa de: estructura_6u, adcs_iadcs400, antena_quasar_wsant, radio_uhf_pulsar_vutrx, paneles_photon_side, propulsion, telescopio_cassegrain, fsm, dicroico, camara_beacon, laser_beacon_bajada, colimador, bandeja_optica, laser_dfb_1550, mod_intensidad_mxer_ln_10, mod_fase_mpz_ln_10, voa, aislador, filtro_espectral, acoplador_monitor, pcb1_control_qkd, pcb2_drivers_opticos, pcb3_pat, cables_rf_moduladores, qrng_idq20mc1_s3"
+   "mensaje": "Masa conocida 846 g de un limite de 12000 g (CDS 14.1). Faltan 28 componentes por pesar, incluido el chasis y el telescopio, que son de los mas pesados.",
+   "falta": "Masa de: estructura_6u, adcs_iadcs400, antena_quasar_wsant, radio_uhf_pulsar_vutrx, paneles_photon_side, propulsion, telescopio_cassegrain, fsm, dicroico_d1, dicroico_d2, camara_beacon, laser_beacon_bajada, fotodiodo_monitor_beacon, trampa_luz_d1, colimador, bandeja_optica, laser_dfb_1550, mod_intensidad_mxer_ln_10, mod_fase_mpz_ln_10, voa, aislador, filtro_espectral, acoplador_monitor, pcb1_control_qkd, pcb2_drivers_opticos, pcb3_pat, cables_rf_moduladores, qrng_idq20mc1_s3"
   },
   {
    "id": "step_de_fabricante",
@@ -5945,17 +6327,24 @@
   },
   {
    "tipo": "keep_out",
-   "a": "dicroico",
+   "a": "dicroico_d1",
    "b": "keepout_fibra_colimador_entrada",
    "volumen_cm3": 6.0835,
-   "detalle": "dicroico invade el keep-out 'fibra_colimador_entrada' (fibra) en 6.08 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
+   "detalle": "dicroico_d1 invade el keep-out 'fibra_colimador_entrada' (fibra) en 6.08 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
   },
   {
    "tipo": "keep_out",
-   "a": "camara_beacon",
+   "a": "dicroico_d2",
    "b": "keepout_fibra_colimador_entrada",
-   "volumen_cm3": 27.0,
-   "detalle": "camara_beacon invade el keep-out 'fibra_colimador_entrada' (fibra) en 27.00 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
+   "volumen_cm3": 12.167,
+   "detalle": "dicroico_d2 invade el keep-out 'fibra_colimador_entrada' (fibra) en 12.17 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
+  },
+  {
+   "tipo": "keep_out",
+   "a": "laser_beacon_bajada",
+   "b": "keepout_fibra_colimador_entrada",
+   "volumen_cm3": 10.625,
+   "detalle": "laser_beacon_bajada invade el keep-out 'fibra_colimador_entrada' (fibra) en 10.62 cm3, con el keep-out dibujado a partir de un valor SUPUESTO"
   }
  ],
  "colores": {
@@ -6011,7 +6400,9 @@
  },
  "no_colocados_con_geometria": [
   "adcs_iadcs420",
+  "camara_beacon",
   "fsm_piezo_pi_s331",
-  "qrng_idq20mc1_s3"
+  "qrng_idq20mc1_s3",
+  "trampa_luz_d2"
  ]
 }
