@@ -1033,7 +1033,8 @@ Dos parábolas confocales, primario cóncavo y secundario convexo: entra colimad
 y sale colimado. El motivo no es óptico, es **el banco**. Un Cassegrain focal
 clásico (f/12, EFL 1080 mm) deja el foco real ~40 mm detrás del vértice del
 primario, o sea **dentro de `z_payload_banco`**, y obliga a meter una lente de
-enfoque en la línea que solo tiene 7.7 mm de margen (§3.7). El afocal no
+enfoque en la línea apretada de §3.7 (15.7 mm de margen desde que el colimador
+salió de ella, y eran 7.7). El afocal no
 necesita ningún elemento adicional, y en particular **ninguna superficie
 transmisiva en el camino del canal cuántico**, donde un refractivo mete
 birrefringencia por tensión y se come justo lo que el enlace mide.
