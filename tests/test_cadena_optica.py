@@ -374,7 +374,12 @@ def test_la_cadena_cruza_una_sola_vez_entre_bandeja_y_franja(catalogo, layout):
     """
     zona = {c.componente_id: c.zona for c in layout.colocaciones}
     cruces = []
-    for tramo in catalogo.conexiones["opticas_fibra"]:
+    # La cadena del TRANSMISOR. La del beacon de bajada cruza tambien -- su
+    # modulo esta en la bandeja y su colimador en el banco -- y eso esta bien:
+    # su fibra no lleva informacion en la polarizacion, asi que puede cruzar,
+    # curvarse y ser larga. Lo que tiene que cruzar una sola vez es la cadena
+    # cuyos tramos post-codificacion no se pueden ni curvar.
+    for tramo in catalogo.tramos_de_fibra():
         a, b = zona.get(tramo["desde"]), zona.get(tramo["hasta"])
         if a is None or b is None:
             continue   # alguna punta sin colocar: no se cuenta lo que no esta

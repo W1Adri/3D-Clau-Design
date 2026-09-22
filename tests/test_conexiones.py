@@ -20,11 +20,32 @@ def test_la_cadena_de_fibra_esta_encadenada(catalogo):
     lista decia que el aislador iba detras del codificador de polarizacion, que
     es donde borra la codificacion entera, y el test pasaba.
     """
-    tramos = catalogo.conexiones["opticas_fibra"]
+    tramos = catalogo.tramos_de_fibra()
     for anterior, siguiente in zip(tramos, tramos[1:]):
         assert anterior["hasta"] == siguiente["desde"], (anterior, siguiente)
     assert tramos[0]["desde"] == "laser_dfb_1550"
     assert tramos[-1]["hasta"] == "colimador"
+
+
+def test_la_fibra_del_beacon_es_una_cadena_aparte(catalogo):
+    """Y tiene que estarlo declarada, no deducida de que no encaje.
+
+    El beacon de bajada tiene fibra desde el 2026-09-21 -- su modulo esta en la
+    bandeja y su colimador en el banco -- y esa fibra esta en 'opticas_fibra'
+    como todo lo demas. Si no llevara 'cadena', los chequeos de orden la
+    pegarian al final de la cadena del transmisor y diriamos que detras del
+    colimador hay un modulo de beacon, que no es que sea falso: es que seria la
+    clase de error que 3.10 existe para no repetir.
+    """
+    beacon = catalogo.tramos_de_fibra("beacon_bajada")
+    assert [t["id"] for t in beacon] == ["f08"]
+    assert beacon[0]["desde"] == "laser_beacon_bajada"
+    assert beacon[0]["hasta"] == "colimador_beacon_bajada"
+    # Y no se cuela en la del transmisor.
+    assert "f08" not in {t["id"] for t in catalogo.tramos_de_fibra()}
+    # Las dos juntas son todo lo que hay: ninguna cadena se queda sin declarar.
+    todas = catalogo.conexiones["opticas_fibra"]
+    assert len(catalogo.tramos_de_fibra()) + len(beacon) == len(todas)
 
 
 def test_la_cadena_de_fibra_cumple_las_restricciones_declaradas(catalogo):

@@ -42,6 +42,11 @@ TBD = "TBD"
 AUSENTE = "ausente"
 ESTADOS = (CONFIRMADO, REFERENCIA, DECISION, SUPUESTO, TBD)
 
+# La cadena de fibra por defecto: la del transmisor. Un tramo de
+# 'opticas_fibra' sin 'cadena' declarada es de esta, que es lo que eran todos
+# hasta que el beacon de bajada tuvo la suya (2026-09-21).
+CADENA_CUANTICA = "cuantica" 
+
 # Magnitudes que TODO componente debe declarar, aunque sea como TBD.
 MAGNITUDES_OBLIGATORIAS = ("dimensiones", "masa")
 
@@ -201,14 +206,25 @@ class Montaje:
     * ``cara``: con que cara se atornilla la pieza. Fija su orientacion.
     * ``eje``: por donde entra y sale la senal -- el eje de fibra en la bandeja,
       el eje optico en el banco. Es lo que hay que alinear con el vecino.
+    * ``sentido``: hacia donde VIAJA la senal por ese eje, +1 o -1. Por defecto
+      +1, que es lo que valia para todas las piezas hasta el 2026-09-21: entra
+      por la cara negativa del eje y sale por la positiva.
 
-    Ninguna de las dos es geometria: son la declaracion contra la que se
+    ``sentido`` hizo falta con ``colimador_beacon_bajada``, que es la primera
+    pieza que emite hacia el lado NEGATIVO de su eje -- esta encima de D2 y le
+    apunta hacia abajo --. Sin el, el keep-out de su fibra de entrada se
+    dibujaba saliendo por la cara del haz y atravesaba D2, D1, el FSM y la
+    camara: ocho invasiones que no significaban nada, que es justo lo que este
+    repositorio no quiere en el informe.
+
+    Ninguna de las tres es geometria: son la declaracion contra la que se
     comprueba el ``forma.step.orientacion`` de un STEP nuevo. Un STEP que llegue
     con otros ejes se gira hasta estos, y si no se puede, se ve.
     """
 
     cara: str | None = None
     eje: str | None = None
+    sentido: int = 1               # +1 o -1 sobre 'eje'
     tipo_eje: str | None = None    # fibra | optico
     nota: str | None = None
 
@@ -337,8 +353,18 @@ def _montaje(id_componente: str, bruto: Any) -> Montaje | None:
         raise ErrorDeDatos(
             f"{id_componente}.montaje: eje '{eje}' no valido (admitidos: {EJES})"
         )
+    sentido = bruto.get("sentido", 1)
+    if sentido not in (1, -1):
+        raise ErrorDeDatos(
+            f"{id_componente}.montaje: sentido '{sentido}' no valido. Es +1 o "
+            f"-1: hacia donde viaja la senal por 'eje'."
+        )
     return Montaje(
-        cara=cara, eje=eje, tipo_eje=bruto.get("tipo_eje"), nota=bruto.get("nota")
+        cara=cara,
+        eje=eje,
+        sentido=int(sentido),
+        tipo_eje=bruto.get("tipo_eje"),
+        nota=bruto.get("nota"),
     )
 
 
@@ -692,6 +718,36 @@ class Catalogo:
         """
         meta = self.conexiones.get("meta") or {}
         return meta.get("restricciones_orden") or []
+
+    def tramos_de_fibra(self, cadena: str = CADENA_CUANTICA) -> list[dict]:
+        """Los tramos de 'opticas_fibra' de una cadena, en orden.
+
+        Hay mas de una cadena de fibra en el payload desde el 2026-09-21: la
+        del transmisor -- la que va del DFB al colimador y a la que se le
+        aplican las restricciones de orden -- y la del beacon de bajada, que
+        une su modulo en la bandeja con su colimador en el banco. La segunda no
+        comparte NI UNA restriccion con la primera: no lleva informacion en la
+        polarizacion, asi que puede ser larga, curvarse y no necesita eje
+        lento. Un tramo sin 'cadena' declarada es de la cuantica, que es lo que
+        eran todos hasta entonces.
+        """
+        tramos = self.conexiones.get("opticas_fibra") or []
+        return [t for t in tramos if t.get("cadena", CADENA_CUANTICA) == cadena]
+
+    @property
+    def topologia_brazo_beacons(self) -> list[dict]:
+        """Las ramas del brazo de los beacons, o lista vacia.
+
+        Cada entrada es {estacion, cara, piezas, motivo}: de que pieza sale la
+        rama, por que cara crece y que hay en fila. Vive en 'meta' de
+        data/connections.yaml porque LA LEEN DOS SITIOS -- el generador, para
+        colocar, y 'chequeo_brazo_beacon', para medir --, y hasta el
+        2026-09-21 estaba escrita a mano en los dos. Al invertir D2 y mover la
+        camara de +Y a -X las dos copias dejaron de decir lo mismo y el
+        chequeo habria seguido midiendo una geometria que ya no existia.
+        """
+        meta = self.conexiones.get("meta") or {}
+        return meta.get("topologia_brazo_beacons") or []
 
     # ---- geometria de la envolvente --------------------------------
     @property

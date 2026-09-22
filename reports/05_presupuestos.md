@@ -5,7 +5,7 @@ No editar a mano: los numeros salen de `data/components.yaml`.
 
 - Mision: CLAU - CubeSat Laser per a Aplicacions Ultrasegures
 - Norma: CubeSat Design Specification Rev. 14.1, The CubeSat Program, Cal Poly SLO
-- Estado del layout: **confirmada** (28 piezas colocadas)
+- Estado del layout: **confirmada** (31 piezas colocadas)
 
 ## Masa (g)
 
@@ -17,7 +17,7 @@ No editar a mano: los numeros salen de `data/components.yaml`.
 
 Limite de la norma: **12000 g**. Margen sobre lo contabilizado: **11154 g**.
 
-> **Incompleto.** Sin dato (29): `estructura_6u`, `adcs_iadcs400`, `antena_quasar_wsant`, `radio_uhf_pulsar_vutrx`, `paneles_photon_side`, `propulsion`, `telescopio_cassegrain`, `fsm`, `dicroico_d1`, `dicroico_d2`, `camara_beacon`, `laser_beacon_bajada`, `fotodiodo_monitor_beacon`, `trampa_luz_d1`, `espejo_plegado_cuantico`, `colimador`, `bandeja_optica`, `laser_dfb_1550`, `mod_intensidad_mxer_ln_10`, `mod_fase_mpz_ln_10`, `voa`, `aislador`, `filtro_espectral`, `acoplador_monitor`, `pcb1_control_qkd`, `pcb2_drivers_opticos`, `pcb3_pat`, `cables_rf_moduladores`, `qrng_idq20mc1_s3`. El total real sera mayor; no se rellena ningun hueco.
+> **Incompleto.** Sin dato (30): `estructura_6u`, `adcs_iadcs400`, `antena_quasar_wsant`, `radio_uhf_pulsar_vutrx`, `paneles_photon_side`, `propulsion`, `telescopio_cassegrain`, `fsm`, `dicroico_d1`, `dicroico_d2`, `camara_beacon`, `laser_beacon_bajada`, `colimador_beacon_bajada`, `fotodiodo_monitor_beacon`, `trampa_luz_d1`, `espejo_plegado_cuantico`, `colimador`, `bandeja_optica`, `laser_dfb_1550`, `mod_intensidad_mxer_ln_10`, `mod_fase_mpz_ln_10`, `voa`, `aislador`, `filtro_espectral`, `acoplador_monitor`, `pcb1_control_qkd`, `pcb2_drivers_opticos`, `pcb3_pat`, `cables_rf_moduladores`, `qrng_idq20mc1_s3`. El total real sera mayor; no se rellena ningun hueco.
 
 | id | componente | subsistema | uds | unitario g | total g | estado | fuente |
 |---|---|---|---|---|---|---|---|
@@ -33,7 +33,7 @@ Limite de la norma: **12000 g**. Margen sobre lo contabilizado: **11154 g**.
 | confirmado | 6.83 |
 | **contabilizado** | **6.83** |
 
-> **Incompleto.** Sin dato (21): `telescopio_cassegrain`, `fsm`, `dicroico_d1`, `dicroico_d2`, `camara_beacon`, `laser_beacon_bajada`, `fotodiodo_monitor_beacon`, `trampa_luz_d1`, `espejo_plegado_cuantico`, `colimador`, `bandeja_optica`, `mod_intensidad_mxer_ln_10`, `mod_fase_mpz_ln_10`, `voa`, `aislador`, `filtro_espectral`, `acoplador_monitor`, `pcb1_control_qkd`, `pcb2_drivers_opticos`, `pcb3_pat`, `cables_rf_moduladores`. El total real sera mayor; no se rellena ningun hueco.
+> **Incompleto.** Sin dato (22): `telescopio_cassegrain`, `fsm`, `dicroico_d1`, `dicroico_d2`, `camara_beacon`, `laser_beacon_bajada`, `colimador_beacon_bajada`, `fotodiodo_monitor_beacon`, `trampa_luz_d1`, `espejo_plegado_cuantico`, `colimador`, `bandeja_optica`, `mod_intensidad_mxer_ln_10`, `mod_fase_mpz_ln_10`, `voa`, `aislador`, `filtro_espectral`, `acoplador_monitor`, `pcb1_control_qkd`, `pcb2_drivers_opticos`, `pcb3_pat`, `cables_rf_moduladores`. El total real sera mayor; no se rellena ningun hueco.
 
 | id | componente | subsistema | uds | unitario W | total W | estado | fuente |
 |---|---|---|---|---|---|---|---|
@@ -50,7 +50,7 @@ Limite de la norma: **12000 g**. Margen sobre lo contabilizado: **11154 g**.
 | referencia | 5.00 |
 | **contabilizado** | **10.00** |
 
-> **Incompleto.** Sin dato (23): `telescopio_cassegrain`, `fsm`, `dicroico_d1`, `dicroico_d2`, `camara_beacon`, `laser_beacon_bajada`, `fotodiodo_monitor_beacon`, `trampa_luz_d1`, `espejo_plegado_cuantico`, `colimador`, `bandeja_optica`, `laser_dfb_1550`, `mod_intensidad_mxer_ln_10`, `mod_fase_mpz_ln_10`, `voa`, `aislador`, `filtro_espectral`, `acoplador_monitor`, `pcb1_control_qkd`, `pcb2_drivers_opticos`, `pcb3_pat`, `cables_rf_moduladores`, `qrng_idq20mc1_s3`. El total real sera mayor; no se rellena ningun hueco.
+> **Incompleto.** Sin dato (24): `telescopio_cassegrain`, `fsm`, `dicroico_d1`, `dicroico_d2`, `camara_beacon`, `laser_beacon_bajada`, `colimador_beacon_bajada`, `fotodiodo_monitor_beacon`, `trampa_luz_d1`, `espejo_plegado_cuantico`, `colimador`, `bandeja_optica`, `laser_dfb_1550`, `mod_intensidad_mxer_ln_10`, `mod_fase_mpz_ln_10`, `voa`, `aislador`, `filtro_espectral`, `acoplador_monitor`, `pcb1_control_qkd`, `pcb2_drivers_opticos`, `pcb3_pat`, `cables_rf_moduladores`, `qrng_idq20mc1_s3`. El total real sera mayor; no se rellena ningun hueco.
 
 | id | componente | subsistema | uds | unitario W | total W | estado | fuente |
 |---|---|---|---|---|---|---|---|
